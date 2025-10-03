@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "fitchoice",
-    "slug": "fitchoice",
+    "slug": "fit-choice",
     "version": "1.0.0",
     "scheme": "fitchoice",
     "platforms": [
@@ -32,7 +32,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dmitriykovaltsov.expotest",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.fitchoice.client",
@@ -47,9 +51,8 @@
         "origin": false
       },
       "eas": {
-        "projectId": "30bba292-2bf6-48b1-95db-214e0b8b5556"
+        "projectId": "6df5c32a-570e-4d4c-84c9-87c8172413ae"
       }
-    },
-    "owner": "rnd332"
+    }
   }
 }
