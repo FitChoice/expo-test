@@ -1,59 +1,33 @@
 {
-  "expo": {
-    "name": "fitchoice",
-    "slug": "fit-choice",
-    "version": "1.0.0",
-    "scheme": "fitchoice",
-    "platforms": [
-      "ios",
-      "android"
-    ],
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/favicon.png"
-    },
-    "plugins": [
-      "expo-router",
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "tsconfigPaths": true
-    },
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.dmitriykovaltsov.expotest",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
-    },
-    "android": {
-      "package": "com.fitchoice.client",
-      "versionCode": 1,
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "permissions": ["CAMERA", "ACCESS_FINE_LOCATION"]
-    },
-    "extra": {
-      "router": {
-        "origin": false
-      },
-      "eas": {
-        "projectId": "6df5c32a-570e-4d4c-84c9-87c8172413ae"
-      }
-    }
-  }
+	"scheme": "acme",
+	"userInterfaceStyle": "automatic",
+	"orientation": "default",
+	"web": {
+		"output": "static"
+	},
+	"plugins": [
+		[
+			"expo-router",
+			{
+				"origin": "https://n"
+			}
+		]
+	],
+	"name": "Fitchoice",
+	"slug": "Fitchoice",
+	"ios": {
+		"bundleIdentifier": "com.yzned.Fitchoice",
+		"infoPlist": {
+			"NSCameraUsageDescription": "Нужно для сканирования QR-кодов и загрузки фото"
+		}
+	},
+	"android": {
+		"package": "com.yzned.Fitchoice",
+		"permissions": [
+			"CAMERA",
+			"READ_EXTERNAL_STORAGE",
+			"WRITE_EXTERNAL_STORAGE",
+			"RECORD_AUDIO"
+		]
+	}
 }
