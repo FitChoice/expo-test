@@ -7,7 +7,13 @@
 		"android": "expo run:android",
 		"ios": "expo run:ios",
 		"web": "expo start --web",
-		"deploy": "npx expo export -p web && npx eas-cli@latest deploy"
+		"deploy": "npx expo export -p web && npx eas-cli@latest deploy",
+		"type-check": "tsc --noEmit",
+		"lint": "eslint src --ext .ts,.tsx --max-warnings 0",
+		"lint:fix": "eslint src --ext .ts,.tsx --fix",
+		"format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\" \"*.{md,json}\"",
+		"format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx}\" \"*.{md,json}\"",
+		"check": "pnpm format && pnpm lint && pnpm type-check"
 	},
 	"dependencies": {
 		"@thinksys/react-native-mediapipe": "^0.0.16",
@@ -28,8 +34,17 @@
 		"tailwindcss": "^3.4.0"
 	},
 	"devDependencies": {
+		"@eslint/js": "^9.37.0",
 		"@types/react": "~19.1.10",
-		"typescript": "~5.9.2"
+		"eslint": "^9.37.0",
+		"eslint-plugin-react-hooks": "^5.2.0",
+		"eslint-plugin-security": "^3.0.1",
+		"globals": "^16.4.0",
+		"prettier": "^3.6.2",
+		"prettier-plugin-tailwindcss": "^0.6.14",
+		"typescript": "~5.9.2",
+		"typescript-eslint": "^8.46.0"
 	},
-	"private": true
+	"private": true,
+	"packageManager": "pnpm@10.14.0+sha512.ad27a79641b49c3e481a16a805baa71817a04bbe06a38d17e60e2eaee83f6a146c6a688125f5792e48dd5ba30e7da52a5cda4c3992b9ccf333f9ce223af84748"
 }
