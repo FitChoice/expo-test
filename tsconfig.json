@@ -2,7 +2,12 @@
 	"compilerOptions": {
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@/shared/*": ["./src/shared/*"],
+			"@/entities/*": ["./src/entities/*"],
+			"@/widgets/*": ["./src/widgets/*"],
+			"@/screens/*": ["./src/screens/*"],
+			"@/app/*": ["./src/app/*"]
 		}
 	},
 	"extends": "expo/tsconfig.base",

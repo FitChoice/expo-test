@@ -1,33 +1,34 @@
 {
-	"scheme": "acme",
-	"userInterfaceStyle": "automatic",
-	"orientation": "default",
-	"web": {
-		"output": "static"
-	},
-	"plugins": [
-		[
-			"expo-router",
-			{
-				"origin": "https://n"
-			}
-		]
-	],
-	"name": "Fitchoice",
-	"slug": "Fitchoice",
-	"ios": {
-		"bundleIdentifier": "com.yzned.Fitchoice",
-		"infoPlist": {
-			"NSCameraUsageDescription": "Нужно для сканирования QR-кодов и загрузки фото"
-		}
-	},
-	"android": {
-		"package": "com.yzned.Fitchoice",
-		"permissions": [
-			"CAMERA",
-			"READ_EXTERNAL_STORAGE",
-			"WRITE_EXTERNAL_STORAGE",
-			"RECORD_AUDIO"
-		]
-	}
+  "scheme": "acme",
+  "userInterfaceStyle": "automatic",
+  "orientation": "default",
+  "web": {
+    "output": "static"
+  },
+  "plugins": [
+    [
+      "expo-router",
+      {
+        "origin": "https://n"
+      }
+    ],
+    "expo-font"
+  ],
+  "name": "Fitchoice",
+  "slug": "Fitchoice",
+  "ios": {
+    "bundleIdentifier": "com.yzned.Fitchoice",
+    "infoPlist": {
+      "NSCameraUsageDescription": "Нужно для сканирования QR-кодов и загрузки фото"
+    }
+  },
+  "android": {
+    "package": "com.yzned.Fitchoice",
+    "permissions": [
+      "CAMERA",
+      "READ_EXTERNAL_STORAGE",
+      "WRITE_EXTERNAL_STORAGE",
+      "RECORD_AUDIO"
+    ]
+  }
 }

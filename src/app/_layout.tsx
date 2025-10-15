@@ -1,6 +1,11 @@
 import '../global.css'
 import { Slot } from 'expo-router'
+import { AppProvider } from './_providers/AppProvider'
 
 export default function Layout() {
-	return <Slot />
+	return (
+		<AppProvider>
+			<Slot />
+		</AppProvider>
+	)
 }
