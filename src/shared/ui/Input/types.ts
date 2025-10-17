@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { TextInputProps, ViewStyle } from 'react-native';
+import { TextInputProps, ViewStyle, ImageSourcePropType } from 'react-native';
 import { IconName } from '../Icon/types';
 
 // Типы: text, password, dropdown, textarea
@@ -20,6 +20,7 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
   helperText?: string;
   leftIcon?: ReactNode | IconName;
   rightIcon?: ReactNode | IconName;
+  leftImage?: ImageSourcePropType;
   forgotPassword?: boolean;
   onForgotPassword?: () => void;
   showTooltip?: boolean;

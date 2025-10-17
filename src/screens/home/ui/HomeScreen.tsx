@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Platform } from 'react-native'
 import { useState } from 'react'
-import { router } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { Header } from '@/widgets/header'
 import { Footer } from '@/widgets/footer'
 import { Icon, Button, Input, AuthGuard } from '@/shared/ui'
@@ -33,6 +33,8 @@ const MobileContent = () => {
  * Web version content (camera not available in browser)
  */
 const WebContent = () => {
+	const router = useRouter()
+	
 	return (
 		<View className="flex-1 bg-gray-900 items-center justify-center">
 			<View className="items-center p-8">

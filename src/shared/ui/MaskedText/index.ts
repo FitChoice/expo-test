@@ -1,0 +1,2 @@
+export { MaskedText } from './MaskedText'
+

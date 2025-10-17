@@ -1,7 +1,6 @@
 export { AppProvider } from './AppProvider'
 export { QueryProvider } from './QueryProvider'
 
-// Default exports for Expo Router
-export { default as AppProviderDefault } from './AppProvider'
-export { default as QueryProviderDefault } from './QueryProvider'
+// Экспорт по умолчанию для AppProvider
+export { AppProvider as default } from './AppProvider'
 

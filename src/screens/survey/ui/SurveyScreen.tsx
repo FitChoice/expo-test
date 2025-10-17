@@ -1,16 +1,22 @@
 import React, { useState } from 'react'
 import { View, Text, ScrollView } from 'react-native'
+import * as ScreenOrientation from 'expo-screen-orientation'
 import { Button, Icon } from '@/shared/ui'
-import { router } from 'expo-router'
+import { useOrientation } from '@/shared/lib'
+import { useRouter } from 'expo-router'
 
 /**
  * Страница опроса
  */
 export const SurveyScreen = () => {
+  const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
   const [answers, setAnswers] = useState<Record<string, any>>({})
 
   const totalSteps = 3
+
+  // Блокируем поворот экрана в портретную ориентацию
+  useOrientation(ScreenOrientation.OrientationLock.PORTRAIT_UP)
 
   const handleNext = () => {
     if (currentStep < totalSteps) {

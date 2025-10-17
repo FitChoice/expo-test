@@ -1,12 +1,9 @@
-import React, { forwardRef, useState } from 'react';
-import { View, TextInput, Text, TouchableOpacity, Pressable, StyleSheet, Image } from 'react-native';
-import { InputProps, InputVariant, InputSize } from './types';
-import { SimpleIcon } from '../Icon/SimpleIcon';
-import { Icon } from '../Icon/Icon';
+import React, { forwardRef, useState, useRef, useEffect } from 'react';
+import { View, TextInput, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { InputProps } from './types';
 
-// Универсальный Input компонент
-// Варианты: text, password, dropdown, textarea
-export const Input = forwardRef<TextInput, InputProps>(
+// Упрощенный Input компонент без NativeWind и сложных зависимостей
+export const FixedInput = forwardRef<TextInput, InputProps>(
   (
     {
       variant = 'text',
@@ -16,7 +13,6 @@ export const Input = forwardRef<TextInput, InputProps>(
       helperText,
       leftIcon,
       rightIcon,
-      leftImage,
       forgotPassword = false,
       onForgotPassword,
       showTooltip = false,
@@ -38,9 +34,57 @@ export const Input = forwardRef<TextInput, InputProps>(
     const [isFocused, setIsFocused] = useState(false);
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const focusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const filled = !!value;
     const hasError = !!error;
+
+    // Очистка таймаута при размонтировании
+    useEffect(() => {
+      return () => {
+        if (focusTimeoutRef.current) {
+          clearTimeout(focusTimeoutRef.current);
+        }
+      };
+    }, []);
+
+    const handleFocus = (e: any) => {
+      console.log('FixedInput: Focus event triggered');
+      
+      // Очищаем предыдущий таймаут если есть
+      if (focusTimeoutRef.current) {
+        clearTimeout(focusTimeoutRef.current);
+        focusTimeoutRef.current = null;
+      }
+      
+      setIsFocused(true);
+      onFocus?.(e);
+    };
+
+    const handleBlur = (e: any) => {
+      console.log('FixedInput: Blur event triggered');
+      
+      // Добавляем небольшую задержку перед blur чтобы избежать конфликтов
+      focusTimeoutRef.current = setTimeout(() => {
+        setIsFocused(false);
+        onBlur?.(e);
+      }, 100);
+    };
+
+    const handleTogglePassword = () => {
+      setPasswordVisible(!passwordVisible);
+    };
+
+    const handleDropdownToggle = () => {
+      if (!disabled) {
+        setDropdownOpen(!dropdownOpen);
+      }
+    };
+
+    const handleChangeText = (text: string) => {
+      console.log('FixedInput: Text changed to:', text);
+      rest.onChangeText?.(text);
+    };
 
     // Стили для разных состояний
     const getInputStyles = () => {
@@ -62,7 +106,11 @@ export const Input = forwardRef<TextInput, InputProps>(
           ...baseStyle, 
           borderWidth: 1, 
           borderColor: '#BA9BF7',
-          // Убираем shadow и elevation - они могут вызывать проблемы с клавиатурой
+          shadowColor: '#BA9BF7',
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.8,
+          shadowRadius: 5,
+          elevation: 5,
         };
       } else {
         return baseStyle;
@@ -80,30 +128,6 @@ export const Input = forwardRef<TextInput, InputProps>(
       return '#FFFFFF';
     };
 
-    const handleFocus = (e: any) => {
-      setIsFocused(true);
-      onFocus?.(e);
-    };
-
-    const handleBlur = (e: any) => {
-      setIsFocused(false);
-      onBlur?.(e);
-    };
-
-    const handleTogglePassword = () => {
-      setPasswordVisible(!passwordVisible);
-    };
-
-    const handleChangeText = (text: string) => {
-      rest.onChangeText?.(text);
-    };
-
-    const handleDropdownToggle = () => {
-      if (!disabled) {
-        setDropdownOpen(!dropdownOpen);
-      }
-    };
-
     const renderIcon = (icon: any) => {
       if (!icon) return null;
       
@@ -111,7 +135,10 @@ export const Input = forwardRef<TextInput, InputProps>(
         return React.cloneElement(icon, { size: 16, color: getIconColor() } as any);
       }
       
-      return <SimpleIcon name={icon} size={16} color={getIconColor()} />;
+      // Простая заглушка для иконок
+      return (
+        <View style={{ width: 16, height: 16, backgroundColor: getIconColor(), borderRadius: 2 }} />
+      );
     };
 
     const renderInput = () => {
@@ -129,7 +156,7 @@ export const Input = forwardRef<TextInput, InputProps>(
               editable={!disabled}
               onFocus={handleFocus}
               onBlur={handleBlur}
-              onChangeText={rest.onChangeText}
+              onChangeText={handleChangeText}
               autoCapitalize="sentences"
               autoCorrect={true}
               returnKeyType="default"
@@ -142,6 +169,9 @@ export const Input = forwardRef<TextInput, InputProps>(
                 fontFamily: 'Onest',
                 minHeight: 80,
               }}
+              // Отключаем внешние обработчики событий чтобы избежать конфликтов
+              onFocusCapture={undefined}
+              onBlurCapture={undefined}
             />
             <Text style={{ fontSize: 12, color: '#BEBEC0', alignSelf: 'flex-end', marginTop: 8 }}>
               {value?.length || 0} / 500 символов
@@ -159,44 +189,24 @@ export const Input = forwardRef<TextInput, InputProps>(
             disabled={disabled}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              {leftImage && (
-                <Image 
-                  source={leftImage} 
-                  style={{ width: 20, height: 20 }} 
-                  resizeMode="contain"
-                />
-              )}
-              {leftIcon && !leftImage && renderIcon(leftIcon)}
+              {leftIcon && renderIcon(leftIcon)}
               <Text style={{ color: filled ? '#FFFFFF' : '#C1C1C1', fontSize: 14 }}>
                 {value || placeholder}
               </Text>
             </View>
-            <SimpleIcon 
-              name={dropdownOpen ? "chevron-up" : "chevron-down"} 
-              size={16} 
-              color={getIconColor()} 
-            />
+            <View style={{ width: 16, height: 16, backgroundColor: getIconColor(), borderRadius: 2 }} />
           </TouchableOpacity>
         );
       }
 
       // Text and Password variants
       const isPassword = variant === 'password';
-      const showPasswordToggle = isPassword; // Включаем для пароля
+      const showPasswordToggle = isPassword;
       const shouldHidePassword = isPassword && !passwordVisible;
 
       return (
         <View style={getInputStyles()}>
-          {leftImage && (
-            <View style={{ marginRight: 8 }}>
-              <Image 
-                source={leftImage} 
-                style={{ width: 20, height: 20 }} 
-                resizeMode="contain"
-              />
-            </View>
-          )}
-          {leftIcon && !leftImage && <View style={{ marginRight: 8 }}>{renderIcon(leftIcon)}</View>}
+          {leftIcon && <View style={{ marginRight: 8 }}>{renderIcon(leftIcon)}</View>}
           
           <TextInput
             ref={ref}
@@ -206,37 +216,36 @@ export const Input = forwardRef<TextInput, InputProps>(
             editable={!disabled}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            onChangeText={rest.onChangeText || handleChangeText}
+            onChangeText={handleChangeText}
+            autoCapitalize="none"
+            autoCorrect={false}
             keyboardType={rest.keyboardType || 'default'}
+            returnKeyType={rest.returnKeyType || 'done'}
             secureTextEntry={shouldHidePassword}
+            blurOnSubmit={true}
+            textContentType={rest.textContentType}
+            autoComplete={rest.autoComplete}
             style={{ 
               color: getTextColor(), 
               flex: 1,
               fontSize: 14,
               fontFamily: 'Onest',
+              minHeight: 20,
             }}
+            // Отключаем внешние обработчики событий чтобы избежать конфликтов
+            onFocusCapture={undefined}
+            onBlurCapture={undefined}
           />
 
           {showPasswordToggle && (
-            <Pressable 
+            <TouchableOpacity 
               onPress={handleTogglePassword} 
-              style={{ 
-                marginLeft: 8, 
-                padding: 8,
-                backgroundColor: 'transparent',
-                borderRadius: 4,
-                minWidth: 32,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
+              style={{ marginLeft: 8 }}
+              activeOpacity={0.7}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Icon 
-                name={passwordVisible ? "eye" : "eye-slash"} 
-                size={16} 
-                color="#FFFFFF" 
-              />
-            </Pressable>
+              <View style={{ width: 16, height: 16, backgroundColor: getIconColor(), borderRadius: 2 }} />
+            </TouchableOpacity>
           )}
 
           {rightIcon && !showPasswordToggle && (
@@ -248,14 +257,14 @@ export const Input = forwardRef<TextInput, InputProps>(
 
     return (
       <View style={[{ flexDirection: 'column' }, containerStyle]}>
-        {/* Label with optional tooltip */}
+        {/* Label */}
         {label && (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 }}>
             <Text style={{ fontSize: 14, color: '#FFFFFF', fontFamily: 'Onest' }}>
               {label}
             </Text>
             {showTooltip && (
-              <SimpleIcon name="info" size={16} color="#FFFFFF" />
+              <View style={{ width: 16, height: 16, backgroundColor: '#FFFFFF', borderRadius: 2 }} />
             )}
           </View>
         )}
@@ -288,7 +297,7 @@ export const Input = forwardRef<TextInput, InputProps>(
         {variant === 'dropdown' && dropdownOpen && dropdownOptions && (
           <View style={{ marginTop: 8, backgroundColor: '#2B2B2B', borderRadius: 8, overflow: 'hidden' }}>
             {dropdownOptions.map((option) => (
-              <Pressable
+              <TouchableOpacity
                 key={option.value}
                 style={{ paddingHorizontal: 16, paddingVertical: 12 }}
                 onPress={() => {
@@ -299,7 +308,7 @@ export const Input = forwardRef<TextInput, InputProps>(
                 <Text style={{ fontSize: 14, color: '#FFFFFF' }}>
                   {option.label}
                 </Text>
-              </Pressable>
+              </TouchableOpacity>
             ))}
           </View>
         )}
@@ -308,5 +317,4 @@ export const Input = forwardRef<TextInput, InputProps>(
   },
 );
 
-Input.displayName = 'Input';
-
+FixedInput.displayName = 'FixedInput';

@@ -62,31 +62,31 @@ export const buttonSizeStyles: Record<ButtonSize, {
   paddingIconOnly: string;
 }> = {
   xs: {
-    container: 'h-[40px] rounded-2xl',
+    container: 'h-10 min-h-[36px] rounded-2xl sm:h-[40px]',
     text: 'text-sm font-medium',        // Text/t3
-    icon: 24,
-    padding: 'px-6 py-2',
-    paddingIconLeft: 'pl-4 pr-6 py-2',
-    paddingIconRight: 'pl-6 pr-4 py-2',
-    paddingIconOnly: 'p-2',
+    icon: 20,
+    padding: 'px-4 py-2 sm:px-6',
+    paddingIconLeft: 'pl-3 pr-4 py-2 sm:pl-4 sm:pr-6',
+    paddingIconRight: 'pl-4 pr-3 py-2 sm:pl-6 sm:pr-4',
+    paddingIconOnly: 'p-1.5 sm:p-2',
   },
   s: {
-    container: 'h-[48px] rounded-2xl',
+    container: 'h-12 min-h-[44px] rounded-2xl sm:h-[48px]',
     text: 'text-base font-semibold',    // Text/t2 bold
     icon: 24,
-    padding: 'px-6 py-2',
-    paddingIconLeft: 'pl-4 pr-6 py-2',
-    paddingIconRight: 'pl-6 pr-4 py-2',
-    paddingIconOnly: 'p-2',
+    padding: 'px-4 py-2 sm:px-6',
+    paddingIconLeft: 'pl-3 pr-4 py-2 sm:pl-4 sm:pr-6',
+    paddingIconRight: 'pl-4 pr-3 py-2 sm:pl-6 sm:pr-4',
+    paddingIconOnly: 'p-1.5 sm:p-2',
   },
   l: {
-    container: 'h-[56px] rounded-2xl',
+    container: 'h-14 min-h-[52px] rounded-2xl sm:h-[56px]',
     text: 'text-base font-semibold',    // Text/t2 bold
-    icon: 32,
-    padding: 'px-6 py-2',
-    paddingIconLeft: 'pl-4 pr-6 py-2',
-    paddingIconRight: 'pl-6 pr-4 py-2',
-    paddingIconOnly: 'p-2',
+    icon: 28,
+    padding: 'px-4 py-2 sm:px-6',
+    paddingIconLeft: 'pl-3 pr-4 py-2 sm:pl-4 sm:pr-6',
+    paddingIconRight: 'pl-4 pr-3 py-2 sm:pl-6 sm:pr-4',
+    paddingIconOnly: 'p-1.5 sm:p-2',
   },
 };
 

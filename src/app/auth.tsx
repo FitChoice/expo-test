@@ -1,3 +1,5 @@
 import { AuthScreen } from '@/screens/auth'
 
-export default AuthScreen
+export default function Page() {
+  return <AuthScreen />
+}

@@ -21,6 +21,7 @@ export type IconName =
   | 'info'
   | 'warning'
   | 'eye'
+  | 'eye-slash'
   // Пользователь
   | 'user'
   | 'user-circle'

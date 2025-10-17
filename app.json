@@ -6,13 +6,12 @@
     "output": "static"
   },
   "plugins": [
-    [
-      "expo-router",
-      {
-        "origin": "https://n"
-      }
-    ],
-    "expo-font"
+    "expo-router",
+    "expo-font",
+    "expo-screen-orientation"
+  ],
+  "assetBundlePatterns": [
+    "assets/fonts/*"
   ],
   "name": "Fitchoice",
   "slug": "Fitchoice",
@@ -29,6 +28,12 @@
       "READ_EXTERNAL_STORAGE",
       "WRITE_EXTERNAL_STORAGE",
       "RECORD_AUDIO"
+    ],
+    "adaptiveIcon": {
+      "backgroundColor": "#ffffff"
+    },
+    "fonts": [
+      "./assets/fonts/Rimma_sans.ttf"
     ]
   }
 }

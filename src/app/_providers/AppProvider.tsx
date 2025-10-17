@@ -1,7 +1,7 @@
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import * as Font from 'expo-font'
 import { QueryProvider } from './QueryProvider'
+import { FontLoader } from '@/shared/ui'
 
 interface AppProviderProps {
 	children: ReactNode
@@ -14,34 +14,13 @@ interface AppProviderProps {
  * - QueryProvider for TanStack Query (server state)
  */
 export const AppProvider = ({ children }: AppProviderProps) => {
-	const [fontsLoaded, setFontsLoaded] = useState(false)
-
-	useEffect(() => {
-		const loadFonts = async () => {
-			try {
-				await Font.loadAsync({
-					'Rimma_sans': require('../../../assets/fonts/Rimma_sans.ttf'),
-					'Rimma_sans-Bold': require('../../../assets/fonts/Rimma_sans.ttf'),
-				})
-				setFontsLoaded(true)
-			} catch (error) {
-				console.warn('Font loading error:', error)
-				setFontsLoaded(true) // Continue even if font fails to load
-			}
-		}
-
-		loadFonts()
-	}, [])
-
-	if (!fontsLoaded) {
-		return null // Or a loading screen
-	}
-
 	return (
 		<SafeAreaProvider>
-			<QueryProvider>
-				{children}
-			</QueryProvider>
+			<FontLoader>
+				<QueryProvider>
+					{children}
+				</QueryProvider>
+			</FontLoader>
 		</SafeAreaProvider>
 	)
 }
