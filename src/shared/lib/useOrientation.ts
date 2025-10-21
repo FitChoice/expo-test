@@ -11,14 +11,11 @@ export const useOrientation = (
   unlockOnUnmount: boolean = true
 ) => {
   useEffect(() => {
-    console.log(`🔒 Locking screen orientation to: ${lockType}`)
-    
     ScreenOrientation.lockAsync(lockType)
     
     // Возвращаем ориентацию при размонтировании компонента
     if (unlockOnUnmount) {
       return () => {
-        console.log('🔓 Unlocking screen orientation')
         ScreenOrientation.unlockAsync()
       }
     }

@@ -13,41 +13,23 @@ export const useFonts = () => {
   useEffect(() => {
     const loadFonts = async () => {
       try {
-        console.log('🔄 Loading fonts...')
-        console.log('📱 Platform:', Platform.OS)
-        
         // Универсальный подход для всех платформ
         const fontMap = {
           'Rimma_sans': require('../../../assets/fonts/Rimma_sans.ttf'),
           'Rimma_sans-Bold': require('../../../assets/fonts/Rimma_sans.ttf'),
         }
         
-        console.log('📋 Font map:', fontMap)
-        console.log('📱 Platform:', Platform.OS)
-        
         await Font.loadAsync(fontMap)
         
         // Проверяем, что шрифты действительно загружены
         const isFontLoaded = await Font.isLoaded('Rimma_sans')
-        console.log('🔍 Font isLoaded check:', isFontLoaded)
-        
-        if (!isFontLoaded) {
-          console.warn('⚠️ Font loaded but not available, using fallback')
-        }
-        
-        console.log('✅ Fonts loaded successfully')
         
         // Проверяем доступность шрифтов
         try {
           const availableFonts = await Font.getAvailableFontsAsync()
           const rimmaFonts = availableFonts.filter(f => f.includes('Rimma'))
-          console.log('📝 Available Rimma fonts:', rimmaFonts)
-          
-          if (rimmaFonts.length === 0) {
-            console.warn('⚠️ Rimma fonts not found in available fonts list')
-          }
         } catch (fontCheckError) {
-          console.warn('⚠️ Font check failed:', fontCheckError)
+          // Игнорируем ошибки проверки шрифтов
         }
         
         setFontsLoaded(true)
@@ -72,21 +54,16 @@ export const useFonts = () => {
    * @param fallback - fallback шрифт (по умолчанию 'system')
    */
   const getFontName = (fontName: string, fallback: string = 'system') => {
-    console.log(`🔍 getFontName called: ${fontName}, platform: ${Platform.OS}, loaded: ${fontsLoaded}, error: ${fontError}`)
-    
     // На Android используем системные шрифты
     if (Platform.OS === 'android') {
       const androidFont = fallback === 'system' ? 'Roboto' : fallback
-      console.log(`🤖 Android: Using system font ${androidFont} for ${fontName}`)
       return androidFont
     }
     
     if (fontsLoaded && !fontError) {
-      console.log(`✅ Using custom font: ${fontName}`)
       return fontName
     }
     
-    console.log(`⚠️ Using fallback font: ${fallback}`)
     return fallback
   }
 

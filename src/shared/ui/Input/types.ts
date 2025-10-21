@@ -18,6 +18,7 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
   label?: string;
   error?: string;
   helperText?: string;
+  forceHelperText?: boolean;
   leftIcon?: ReactNode | IconName;
   rightIcon?: ReactNode | IconName;
   leftImage?: ImageSourcePropType;

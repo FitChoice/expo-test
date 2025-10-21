@@ -14,6 +14,7 @@ export const Input = forwardRef<TextInput, InputProps>(
       label,
       error,
       helperText,
+      forceHelperText = false,
       leftIcon,
       rightIcon,
       leftImage,
@@ -268,8 +269,8 @@ export const Input = forwardRef<TextInput, InputProps>(
           <Text style={{ fontSize: 12, marginTop: 8, color: '#FF514F' }}>{error}</Text>
         )}
         
-        {helperText && !error && (
-          <Text style={{ fontSize: 12, marginTop: 8, color: '#BEBEC0' }}>{helperText}</Text>
+        {helperText && (!error || forceHelperText) && (
+          <Text style={{ fontSize: 12, marginTop: 8, color: '#FFFFFF' }}>{helperText}</Text>
         )}
 
         {/* Forgot password link */}

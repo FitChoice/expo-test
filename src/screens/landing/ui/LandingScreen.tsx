@@ -26,7 +26,7 @@ export const LandingScreen = () => {
   const circleOffset = circleSize * 0.22 // ~16px на стандартном экране
   
   const handleRegister = () => {
-    router.push('/auth')
+    router.push('/register')
   }
 
   const handleLogin = () => {
@@ -191,7 +191,7 @@ export const LandingScreen = () => {
                 fullWidth
                 onPress={handleRegister}
               >
-                Зарегистрироваться
+                Регистрация
               </Button>
               <Button
                 variant="secondary"
@@ -199,7 +199,7 @@ export const LandingScreen = () => {
                 fullWidth
                 onPress={handleLogin}
               >
-                Войти
+                Вход
               </Button>
             </View>
           </View>
