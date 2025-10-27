@@ -61,11 +61,36 @@ class ApiClient {
 				return { success: false, error: 'Unauthorized' }
 			}
 
-			const responseData = await response.json()
+			// Check if response has content
+			const contentType = response.headers.get('content-type')
+			const hasJsonContent = contentType?.includes('application/json')
+			
+			let responseData: unknown = null
+			
+			if (hasJsonContent) {
+				try {
+					responseData = await response.json()
+				} catch (jsonError) {
+					console.error('Failed to parse JSON response:', jsonError)
+					const text = await response.text()
+					return {
+						success: false,
+						error: `Ошибка сервера: ${response.status}`,
+					}
+				}
+			} else {
+				// Try to get text response for debugging
+				const text = await response.text()
+				console.error('Non-JSON response:', text)
+			}
 
 			if (!response.ok) {
 				// Handle error response
-				const errorMessage = responseData.error || 'Произошла ошибка'
+				const errorMessage = 
+					(responseData && typeof responseData === 'object' && 'error' in responseData)
+						? String(responseData.error)
+						: `Ошибка сервера: ${response.status}`
+				
 				return {
 					success: false,
 					error: errorMessage,
@@ -74,11 +99,12 @@ class ApiClient {
 
 			return {
 				success: true,
-				data: responseData,
+				data: responseData as TResponse,
 			}
 		} catch (err) {
 			// Handle network errors
 			const errorMessage = err instanceof Error ? err.message : 'Ошибка сети'
+			console.error('API request failed:', err)
 
 			return {
 				success: false,
@@ -108,10 +134,35 @@ class ApiClient {
 				return { success: false, error: 'Unauthorized' }
 			}
 
-			const responseData = await response.json()
+			// Check if response has content
+			const contentType = response.headers.get('content-type')
+			const hasJsonContent = contentType?.includes('application/json')
+			
+			let responseData: unknown = null
+			
+			if (hasJsonContent) {
+				try {
+					responseData = await response.json()
+				} catch (jsonError) {
+					console.error('Failed to parse JSON response:', jsonError)
+					const text = await response.text()
+					return {
+						success: false,
+						error: `Ошибка сервера: ${response.status}`,
+					}
+				}
+			} else {
+				// Try to get text response for debugging
+				const text = await response.text()
+				console.error('Non-JSON response:', text)
+			}
 
 			if (!response.ok) {
-				const errorMessage = responseData.error || 'Произошла ошибка'
+				const errorMessage = 
+					(responseData && typeof responseData === 'object' && 'error' in responseData)
+						? String(responseData.error)
+						: `Ошибка сервера: ${response.status}`
+				
 				return {
 					success: false,
 					error: errorMessage,
@@ -120,10 +171,11 @@ class ApiClient {
 
 			return {
 				success: true,
-				data: responseData,
+				data: responseData as TResponse,
 			}
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Ошибка сети'
+			console.error('API request failed:', err)
 
 			return {
 				success: false,

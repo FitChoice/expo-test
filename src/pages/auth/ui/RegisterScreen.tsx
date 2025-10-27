@@ -168,11 +168,13 @@ export const RegisterScreen = () => {
 					params: { email, password },
 				})
 			} else {
-				// Показываем ошибку пользователю
-				Alert.alert('Ошибка', 'Не удалось отправить код')
+				// Показываем конкретную ошибку пользователю
+				Alert.alert('Ошибка', result.error || 'Не удалось отправить код')
 			}
-		} catch {
-			Alert.alert('Ошибка', 'Не удалось отправить код')
+		} catch (error) {
+			// Показываем ошибку сети
+			const errorMessage = error instanceof Error ? error.message : 'Не удалось отправить код'
+			Alert.alert('Ошибка', errorMessage)
 		} finally {
 			setIsLoading(false)
 		}
