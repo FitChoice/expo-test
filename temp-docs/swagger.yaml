@@ -133,6 +133,34 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
                 
+ 
+          get:
+            tags:
+              - user
+            summary: Получение текущей тренировочной программы пользователя
+            operationId: getTrainingProgram
+            parameters:
+              - name: userId
+                in: path
+                required: true
+                schema:
+                  type: string
+            responses:
+              "200":
+                description: Тренировочная программа пользователя
+                content:
+                  application/json:
+                    schema:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/TrainingResponse"
+              "500":
+                description: Ошибка сервера
+                content:
+                  application/json:
+                    schema:
+                      $ref: "#/components/schemas/ErrorResponse"
+  
   /user/update/{id}:
     post:
       tags:
@@ -143,17 +171,51 @@ paths:
         - name: id
           in: path
           required: true
+          description: ID пользователя
           schema:
-            type: string
+            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              example:
-                age: 25
-                height: 180
+              properties:
+                name:
+                  type: string
+                  example: "Иван"
+                promocode:
+                  type: string
+                  example: "FIT2025"
+                gender:
+                  type: string
+                  example: "male"
+                age:
+                  type: integer
+                  example: 25
+                height:
+                  type: number
+                  format: float
+                  example: 180
+                weight:
+                  type: number
+                  format: float
+                  example: 75.5
+                train_days:
+                  type: integer
+                  example: 21
+                train_goals:
+                  type: integer
+                  example: 0
+                train_frequency:
+                  type: integer
+                  example: 4
+                main_direction:
+                  type: integer
+                  example: 0
+                secondary_direction:
+                  type: integer
+                  example: 0
       responses:
         "200":
           description: Данные пользователя успешно обновлены
@@ -161,25 +223,28 @@ paths:
             application/json:
               schema:
                 type: object
-                example:
-                  status: updated
+                properties:
+                  status:
+                    type: string
+                    example: "updated"
         "400":
-          description: Некорректный запрос
+          description: Ошибка запроса (пустой или неверный JSON)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "500":
-          description: Ошибка сервера
+          description: Ошибка на стороне сервера при обновлении данных
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /user/build-plan/{id}:
+
+  /trainings/plan/{id}:
     post:
       tags:
-        - user
+        - trainings
       summary: Построение тренировочного плана для пользователя
       operationId: buildTrainingPlan
       parameters:
@@ -210,10 +275,69 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /user/train/{trainingId}/{index}:
+  /trainings/plan/{userId}:
     get:
       tags:
-        - user
+        - trainings
+      summary: Получение плана тренировок пользователя
+      operationId: getTrainingProgram
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Список тренировочных дней с упражнениями
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    periodId:
+                      type: integer
+                    date:
+                      type: string
+                      format: date
+                    dayActivities:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          duration:
+                            type: integer
+                          experience:
+                            type: string
+                          progress:
+                            type: array
+                            items:
+                              type: integer
+        "404":
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /trainings/train/{trainingId}:
+    get:
+      tags:
+        - trainings
       summary: Получение информации по тренировке
       operationId: getTrainInformation
       parameters:
@@ -222,11 +346,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: index
-          in: path
-          required: true
-          schema:
-            type: integer
       responses:
         "200":
           description: Информация о тренировке
@@ -234,18 +353,239 @@ paths:
             application/json:
               schema:
                 type: object
-                example:
-                  trainingId: "1"
-                  title: "Upper Body Strength"
-                  description: "Workout focusing on upper body muscles"
-                  difficulty: "Intermediate"
-                  experience: "3 months"
+                properties:
+                  trainingId:
+                    type: string
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  difficulty:
+                    type: string
+                  experience:
+                    type: string
+                  inventory:
+                    type: array
+                    items:
+                      type: string
                   exercises:
-                    - name: "Push-ups"
-                      duration: 10
-                      progress: 5
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        duration:
+                          type: integer
+                        progress:
+                          type: integer
+                        sets:
+                          type: integer
+                        reps:
+                          type: integer
+                        isAi:
+                          type: boolean
+                        videoUrl:
+                          type: string
+        "404":
+          description: Тренировка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
-          description: Некорректный индекс
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /trainings/report:
+    post:
+      tags:
+        - trainings
+      summary: Создание или обновление отчёта по тренировке
+      operationId: createReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                training_id: 1
+                report_duration: 45
+                report_active_time: 40
+                report_cals: 300
+                report_technique_quality: 8
+      responses:
+        "200":
+          description: Отчёт обновлён
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  status: report updated
+        "400":
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /trainings/report/{trainingId}:
+    get:
+      tags:
+        - trainings
+      summary: Получение отчёта по тренировке
+      operationId: getReport
+      parameters:
+        - name: trainingId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Информация об отчёте
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  report_duration:
+                    type: integer
+                  report_active_time:
+                    type: integer
+                  report_cals:
+                    type: integer
+                  report_technique_quality:
+                    type: integer
+        "404":
+          description: Отчёт не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /trainings/diary:
+    post:
+      tags:
+        - trainings
+      summary: Создание или обновление дневника пользователя
+      operationId: createDiary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                schedule_id: 1
+                diary_mood: 5
+                diary_wellbeing: 8
+                diary_energy_level: 7
+                diary_sleep_quality: 9
+                diary_sleep_time: "22:30"
+                diary_wake_time: "06:30"
+                diary_note: "Хорошее самочувствие"
+      responses:
+        "200":
+          description: Дневник обновлён
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  status: diary updated
+        "400":
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /trainings/diary/{dayId}:
+    get:
+      tags:
+        - trainings
+      summary: Получение дневника пользователя по дню
+      operationId: getDiary
+      parameters:
+        - name: dayId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Информация о дневнике
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  diary_mood:
+                    type: integer
+                  diary_wellbeing:
+                    type: integer
+                  diary_energy_level:
+                    type: integer
+                  diary_sleep_quality:
+                    type: integer
+                  diary_sleep_time:
+                    type: string
+                  diary_wake_time:
+                    type: string
+                  diary_note:
+                    type: string
+        "404":
+          description: Дневник не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /trainings/exercise:
+    post:
+      tags:
+        - trainings
+      summary: Обновление прогресса упражнения
+      operationId: executeTraining
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                training_id: 1
+                index: 0
+                reps: 10
+      responses:
+        "200":
+          description: Прогресс обновлён
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  status: progress updated
+        "400":
+          description: Некорректный запрос
           content:
             application/json:
               schema:
@@ -256,35 +596,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
-  /user/train-program/{userId}:
-          get:
-            tags:
-              - user
-            summary: Получение текущей тренировочной программы пользователя
-            operationId: getTrainingProgram
-            parameters:
-              - name: userId
-                in: path
-                required: true
-                schema:
-                  type: string
-            responses:
-              "200":
-                description: Тренировочная программа пользователя
-                content:
-                  application/json:
-                    schema:
-                      type: array
-                      items:
-                        $ref: "#/components/schemas/TrainingResponse"
-              "500":
-                description: Ошибка сервера
-                content:
-                  application/json:
-                    schema:
-                      $ref: "#/components/schemas/ErrorResponse"
-
 components:
   schemas:
     SendCodeInput:
@@ -349,10 +660,7 @@ components:
         refresh_token:
           type: string
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        expires_at:
-          type: string
-          format: date-time
-          example: "2025-10-10T12:00:00Z"
+
 
     ErrorResponse:
       type: object
@@ -360,28 +668,44 @@ components:
         error:
           type: string
           example: invalid email
+        
     TrainingResponse:
       type: object
       properties:
         id:
           type: integer
+          example: 1
         user_id:
           type: integer
+          example: 10
         period_id:
           type: integer
+          example: 3
         date:
           type: string
           format: date-time
-        activities:
+          example: "2025-10-20T12:00:00Z"
+        dayActivities:
           type: array
           items:
             type: object
             properties:
+              id:
+                type: integer
+                example: 1
               type:
                 type: string
+                example: "strength"
+              duration:
+                type: integer
+                example: 45
+              experience:
+                type: string
+                example: "3 months"
               progress:
                 type: array
                 items:
                   type: integer
+                  example: 5
 
 
