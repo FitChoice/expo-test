@@ -1,39 +1,54 @@
 {
-  "scheme": "acme",
-  "userInterfaceStyle": "automatic",
-  "orientation": "default",
-  "web": {
-    "output": "static"
-  },
-  "plugins": [
-    "expo-router",
-    "expo-font",
-    "expo-screen-orientation"
-  ],
-  "assetBundlePatterns": [
-    "assets/fonts/*"
-  ],
-  "name": "Fitchoice",
-  "slug": "Fitchoice",
-  "ios": {
-    "bundleIdentifier": "com.yzned.Fitchoice",
-    "infoPlist": {
-      "NSCameraUsageDescription": "Нужно для сканирования QR-кодов и загрузки фото"
-    }
-  },
-  "android": {
-    "package": "com.yzned.Fitchoice",
-    "permissions": [
-      "CAMERA",
-      "READ_EXTERNAL_STORAGE",
-      "WRITE_EXTERNAL_STORAGE",
-      "RECORD_AUDIO"
-    ],
-    "adaptiveIcon": {
-      "backgroundColor": "#ffffff"
-    },
-    "fonts": [
-      "./assets/fonts/Rimma_sans.ttf"
-    ]
-  }
+	"scheme": "acme",
+	"userInterfaceStyle": "automatic",
+	"orientation": "default",
+	"web": {
+		"output": "static"
+	},
+	"plugins": [
+		"expo-router",
+		"expo-screen-orientation",
+		[
+			"expo-build-properties",
+			{
+				"android": {
+					"compileSdkVersion": 35,
+					"targetSdkVersion": 35,
+					"buildToolsVersion": "35.0.0",
+					"minSdkVersion": 24,
+					"enableProguardInReleaseBuilds": true,
+					"enableShrinkResourcesInReleaseBuilds": true
+				},
+				"ios": {
+					"deploymentTarget": "15.1",
+					"useFrameworks": "static"
+				}
+			}
+		]
+	],
+	"assetBundlePatterns": ["assets/fonts/*"],
+	"name": "Fitchoice",
+	"slug": "Fitchoice",
+	"ios": {
+		"bundleIdentifier": "com.yzned.Fitchoice",
+		"infoPlist": {
+			"NSCameraUsageDescription": "Нужно для сканирования QR-кодов и загрузки фото"
+		},
+		"supportsTablet": true
+	},
+	"android": {
+		"package": "com.yzned.Fitchoice",
+		"permissions": [
+			"CAMERA",
+			"READ_EXTERNAL_STORAGE",
+			"WRITE_EXTERNAL_STORAGE",
+			"RECORD_AUDIO"
+		],
+		"adaptiveIcon": {
+			"backgroundColor": "#ffffff"
+		}
+	},
+	"experiments": {
+		"tsconfigPaths": true
+	}
 }

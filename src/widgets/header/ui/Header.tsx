@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export const Header = () => {
 	const { top } = useSafeAreaInsets()
-	
+
 	return (
 		<View style={{ paddingTop: top }}>
 			<View className="flex h-14 flex-row items-center justify-between px-4 lg:px-6">
@@ -35,4 +35,3 @@ export const Header = () => {
 		</View>
 	)
 }
-

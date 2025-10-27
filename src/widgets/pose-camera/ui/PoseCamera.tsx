@@ -10,7 +10,7 @@ export const PoseCamera = () => {
 		if (Array.isArray(event)) {
 			// Cast landmarks to PoseLandmark type
 			const landmarks = event as PoseLandmark[]
-			
+
 			// Use the analyzer function from entities
 			logLandmarks(landmarks)
 		}
@@ -34,4 +34,3 @@ const styles = StyleSheet.create({
 		backgroundColor: 'black',
 	},
 })
-

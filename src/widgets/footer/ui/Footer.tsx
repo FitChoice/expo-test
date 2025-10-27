@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export const Footer = () => {
 	const { bottom } = useSafeAreaInsets()
-	
+
 	return (
 		<View
 			className="native:hidden flex shrink-0 bg-gray-100"
@@ -17,4 +17,3 @@ export const Footer = () => {
 		</View>
 	)
 }
-

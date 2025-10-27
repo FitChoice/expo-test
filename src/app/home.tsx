@@ -1,8 +1,13 @@
-import { HomeScreen } from '@/screens/home'
+import { AuthGuard } from '@/shared/ui'
+import { HomeScreen } from '@/pages/home'
 
 /**
- * Home page route
+ * Home page route (protected)
  */
 export default function HomePage() {
-	return <HomeScreen />
+	return (
+		<AuthGuard>
+			<HomeScreen />
+		</AuthGuard>
+	)
 }

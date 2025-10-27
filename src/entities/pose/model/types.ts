@@ -73,4 +73,3 @@ export interface PoseAnalysis {
 	confidence: number
 	message?: string
 }
-

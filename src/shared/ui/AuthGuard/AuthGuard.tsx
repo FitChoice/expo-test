@@ -11,6 +11,6 @@ interface AuthGuardProps {
 export const AuthGuard = ({ children }: AuthGuardProps) => {
 	// Временно отключаем проверку авторизации
 	// В реальном приложении здесь будет логика проверки токена
-	
+
 	return <>{children}</>
 }

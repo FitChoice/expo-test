@@ -17,13 +17,10 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 	return (
 		<SafeAreaProvider>
 			<FontLoader>
-				<QueryProvider>
-					{children}
-				</QueryProvider>
+				<QueryProvider>{children}</QueryProvider>
 			</FontLoader>
 		</SafeAreaProvider>
 	)
 }
 
 export default AppProvider
-

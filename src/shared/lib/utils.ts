@@ -39,4 +39,3 @@ export const clamp = (value: number, min: number, max: number): number => {
 export const formatNumber = (value: number, decimals: number = 2): string => {
 	return value.toFixed(decimals)
 }
-

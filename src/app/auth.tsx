@@ -1,5 +1,5 @@
-import { AuthScreen } from '@/screens/auth'
+import { AuthScreen } from '@/pages/auth'
 
 export default function Page() {
-  return <AuthScreen />
+	return <AuthScreen />
 }

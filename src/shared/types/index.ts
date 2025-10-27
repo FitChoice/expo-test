@@ -22,3 +22,5 @@ export type Optional<T> = T | undefined
 // ID types
 export type ID = string | number
 
+// UI types
+export type { SelectOption } from './ui'

@@ -1,0 +1,387 @@
+openapi: 3.0.0
+info:
+  title: Fitchoice API
+  version: "1.0.0"
+servers:
+  # Added by API Auto Mocking Plugin
+  - url: http://158.160.145.40:8080/api/v1
+tags:
+  - name: auth
+    description: Методы аутентификации и регистрации пользователей
+paths:
+  /auth/sendCode:
+    post:
+      tags:
+        - auth
+      summary: Отправка кода подтверждения на email
+      operationId: sendCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendCodeInput"
+      responses:
+        "200":
+          description: Код успешно отправлен
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: "Verification code sent"
+        "400":
+          description: Неверный email или ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/registration:
+    post:
+      tags:
+        - auth
+      summary: Регистрация нового пользователя
+      operationId: registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationInput"
+      responses:
+        "200":
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: Ошибка валидации или неверный код подтверждения
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Ошибка на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/refresh:
+    post:
+      tags:
+        - auth
+      summary: Обновление токенов доступа
+      operationId: refresh
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshInput"
+      responses:
+        "200":
+          description: Токены успешно обновлены
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: Неверный запрос (отсутствует refresh_token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Неверный или просроченный refresh-токен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Авторизация пользователя
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Успешный вход, возвращаются токены
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: Неверные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Неверный email или пароль
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+                
+  /user/update/{id}:
+    post:
+      tags:
+        - user
+      summary: Обновление данных пользователя
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                age: 25
+                height: 180
+      responses:
+        "200":
+          description: Данные пользователя успешно обновлены
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  status: updated
+        "400":
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /user/build-plan/{id}:
+    post:
+      tags:
+        - user
+      summary: Построение тренировочного плана для пользователя
+      operationId: buildTrainingPlan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: План успешно построен
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: "Training plan built successfully"
+        "404":
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /user/train/{trainingId}/{index}:
+    get:
+      tags:
+        - user
+      summary: Получение информации по тренировке
+      operationId: getTrainInformation
+      parameters:
+        - name: trainingId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: index
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Информация о тренировке
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  trainingId: "1"
+                  title: "Upper Body Strength"
+                  description: "Workout focusing on upper body muscles"
+                  difficulty: "Intermediate"
+                  experience: "3 months"
+                  exercises:
+                    - name: "Push-ups"
+                      duration: 10
+                      progress: 5
+        "400":
+          description: Некорректный индекс
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Тренировка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /user/train-program/{userId}:
+          get:
+            tags:
+              - user
+            summary: Получение текущей тренировочной программы пользователя
+            operationId: getTrainingProgram
+            parameters:
+              - name: userId
+                in: path
+                required: true
+                schema:
+                  type: string
+            responses:
+              "200":
+                description: Тренировочная программа пользователя
+                content:
+                  application/json:
+                    schema:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/TrainingResponse"
+              "500":
+                description: Ошибка сервера
+                content:
+                  application/json:
+                    schema:
+                      $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    SendCodeInput:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+
+    RegistrationInput:
+      type: object
+      required:
+        - code
+        - email
+        - password
+      properties:
+        code:
+          type: integer
+          example: 123456
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: StrongPassword123!
+
+    RefreshInput:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: StrongPassword123!
+
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        expires_at:
+          type: string
+          format: date-time
+          example: "2025-10-10T12:00:00Z"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: invalid email
+    TrainingResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        period_id:
+          type: integer
+        date:
+          type: string
+          format: date-time
+        activities:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              progress:
+                type: array
+                items:
+                  type: integer
+
+

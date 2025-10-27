@@ -21,10 +21,7 @@ export const isLandmarkValid = (landmark: PoseLandmark): boolean => {
  * @param point2 - Second landmark
  * @returns Distance between points
  */
-export const calculateDistance = (
-	point1: PoseLandmark,
-	point2: PoseLandmark
-): number => {
+export const calculateDistance = (point1: PoseLandmark, point2: PoseLandmark): number => {
 	const dx = point2.x - point1.x
 	const dy = point2.y - point1.y
 	const dz = point2.z - point1.z
@@ -94,11 +91,9 @@ export const validatePose = (poseData: PoseData): PoseAnalysis => {
 export const logLandmarks = (landmarks: PoseLandmark[]): void => {
 	if (__DEV__) {
 		landmarks.forEach((point, idx) => {
-			// eslint-disable-next-line no-console
-			console.log(
+			console.warn(
 				`Точка ${idx}: x=${point.x.toFixed(3)}, y=${point.y.toFixed(3)}, z=${point.z.toFixed(3)}, vis=${point.visibility.toFixed(3)}`
 			)
 		})
 	}
 }
-

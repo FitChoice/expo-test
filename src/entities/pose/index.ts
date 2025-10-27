@@ -3,11 +3,7 @@
  */
 
 // Types
-export type {
-	PoseLandmark,
-	PoseData,
-	PoseAnalysis,
-} from './model/types'
+export type { PoseLandmark, PoseData, PoseAnalysis } from './model/types'
 
 export { PoseLandmarkIndex } from './model/types'
 
@@ -19,4 +15,3 @@ export {
 	validatePose,
 	logLandmarks,
 } from './lib/analyzer'
-

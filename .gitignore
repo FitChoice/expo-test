@@ -8,6 +8,7 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
+
 # Native
 *.orig.*
 *.jks
@@ -15,6 +16,7 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+
 # Metro
 .metro-health-check*
 
@@ -33,4 +35,24 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# backup files
+*.bak
+*.backup
+*~
+
+# iOS
+ios/build/
+ios/Pods/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+
+# Android
+android/app/build/
+android/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+
+# Example app (if exists)
 app-example
+.cursor/

@@ -1,4 +1,4 @@
-import { LandingScreen } from '@/screens/landing'
+import { LandingScreen } from '@/pages/landing'
 
 /**
  * Main entry point - Landing page

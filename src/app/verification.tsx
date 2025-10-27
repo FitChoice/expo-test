@@ -1,4 +1,4 @@
-import { VerificationScreen } from '@/screens/verification'
+import { VerificationScreen } from '@/pages/verification'
 
 /**
  * Verification page route

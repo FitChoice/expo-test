@@ -1,8 +1,13 @@
-import { SurveyScreen } from '@/screens/survey'
+import { AuthGuard } from '@/shared/ui'
+import { SurveyScreen } from '@/pages/survey'
 
 /**
- * Survey page route
+ * Survey page route (protected)
  */
 export default function SurveyPage() {
-	return <SurveyScreen />
+	return (
+		<AuthGuard>
+			<SurveyScreen />
+		</AuthGuard>
+	)
 }

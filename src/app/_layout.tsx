@@ -1,11 +1,14 @@
 import '../global.css'
 import { Slot } from 'expo-router'
 import { AppProvider } from './_providers/AppProvider'
+import { ErrorBoundary } from '@/shared/ui'
 
 export default function Layout() {
 	return (
-		<AppProvider>
-			<Slot />
-		</AppProvider>
+		<ErrorBoundary>
+			<AppProvider>
+				<Slot />
+			</AppProvider>
+		</ErrorBoundary>
 	)
 }
