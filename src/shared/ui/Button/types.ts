@@ -17,7 +17,7 @@ export type ButtonSize =
 
 // Пропсы компонента Button
 export interface ButtonProps extends Omit<TouchableOpacityProps, 'children'> {
-	children?: string
+	children?: ReactNode
 	variant?: ButtonVariant
 	size?: ButtonSize
 	iconLeft?: ReactNode

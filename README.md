@@ -198,7 +198,7 @@ Strict mode включен (`tsconfig.json`):
 ```bash
 # Проверки кода
 pnpm run type-check     # TypeScript
-pnpm run lint           # ESLint (max-warnings: 0)
+pnpm run lint           # ESLint (max-warnings: 10)
 pnpm run format         # Prettier
 pnpm run check          # Полная проверка
 

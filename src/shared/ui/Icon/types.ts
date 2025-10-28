@@ -41,6 +41,12 @@ export type IconName =
 	| 'calendar-dots'
 	| 'ruler'
 	| 'barbell'
+	| 'clock'
+	| 'star'
+	| 'pause'
+	| 'activity'
+	| 'repeat'
+	| 'target'
 	// Здоровье
 	| 'health-knees'
 	| 'health-neck-shoulders'
