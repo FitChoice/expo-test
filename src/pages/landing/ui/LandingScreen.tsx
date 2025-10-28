@@ -45,6 +45,16 @@ export const LandingScreen = () => {
 		router.push('/survey')
 	}
 
+	// ВРЕМЕННАЯ КНОПКА ДЛЯ ТЕСТИРОВАНИЯ ТРЕНИРОВОК
+	// TODO: Удалить в проде - это только для быстрого доступа к тренировкам при разработке
+	const handleTestTraining = () => {
+		// Переходим к экрану тренировки с тестовым ID
+		router.push({
+			pathname: '/(training)',
+			params: { trainingId: '1' },
+		})
+	}
+
 	return (
 		<View className="flex-1 bg-[#151515]">
 			{/* Верхний контейнер Frame 48097890 */}
@@ -163,19 +173,33 @@ export const LandingScreen = () => {
 				</View>
 			</View>
 
-			{/* ВРЕМЕННАЯ КНОПКА ДЛЯ ТЕСТИРОВАНИЯ - УДАЛИТЬ В ПРОДЕ */}
-			<TouchableOpacity
-				onPress={handleTestSurvey}
-				className="absolute left-[14px] z-[1000] h-10 w-10 items-center justify-center rounded-lg bg-[#A172FF] opacity-70"
-				style={{
-					top: insets.top + 14,
-				}}
-				activeOpacity={0.6}
-				accessibilityRole="button"
-				accessibilityLabel="Тестовый опрос"
+			{/* ВРЕМЕННЫЕ КНОПКИ ДЛЯ ТЕСТИРОВАНИЯ - УДАЛИТЬ В ПРОДЕ */}
+			<View
+				className="absolute left-[14px] z-[1000] flex-col gap-2"
+				style={{ top: insets.top + 14 }}
 			>
-				<Text className="text-xl text-white">?</Text>
-			</TouchableOpacity>
+				{/* Survey Test Button */}
+				<TouchableOpacity
+					onPress={handleTestSurvey}
+					className="h-10 w-10 items-center justify-center rounded-lg bg-[#A172FF] opacity-70"
+					activeOpacity={0.6}
+					accessibilityRole="button"
+					accessibilityLabel="Тестовый опрос"
+				>
+					<Text className="text-xl text-white">?</Text>
+				</TouchableOpacity>
+
+				{/* Training Test Button */}
+				<TouchableOpacity
+					onPress={handleTestTraining}
+					className="h-10 w-10 items-center justify-center rounded-lg bg-[#C5F680] opacity-70"
+					activeOpacity={0.6}
+					accessibilityRole="button"
+					accessibilityLabel="Тестовая тренировка"
+				>
+					<Text className="text-xl text-black">💪</Text>
+				</TouchableOpacity>
+			</View>
 		</View>
 	)
 }

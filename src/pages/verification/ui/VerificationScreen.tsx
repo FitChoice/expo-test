@@ -90,7 +90,8 @@ export const VerificationScreen = () => {
 				}
 			} catch (error) {
 				// Показываем ошибку сети
-				const errorMessage = error instanceof Error ? error.message : 'Не удалось отправить код'
+				const errorMessage =
+					error instanceof Error ? error.message : 'Не удалось отправить код'
 				Alert.alert('Ошибка', errorMessage)
 			} finally {
 				setIsResending(false)

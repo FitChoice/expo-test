@@ -64,9 +64,9 @@ class ApiClient {
 			// Check if response has content
 			const contentType = response.headers.get('content-type')
 			const hasJsonContent = contentType?.includes('application/json')
-			
+
 			let responseData: unknown = null
-			
+
 			if (hasJsonContent) {
 				try {
 					responseData = await response.json()
@@ -86,11 +86,11 @@ class ApiClient {
 
 			if (!response.ok) {
 				// Handle error response
-				const errorMessage = 
-					(responseData && typeof responseData === 'object' && 'error' in responseData)
+				const errorMessage =
+					responseData && typeof responseData === 'object' && 'error' in responseData
 						? String(responseData.error)
 						: `Ошибка сервера: ${response.status}`
-				
+
 				return {
 					success: false,
 					error: errorMessage,
@@ -137,9 +137,9 @@ class ApiClient {
 			// Check if response has content
 			const contentType = response.headers.get('content-type')
 			const hasJsonContent = contentType?.includes('application/json')
-			
+
 			let responseData: unknown = null
-			
+
 			if (hasJsonContent) {
 				try {
 					responseData = await response.json()
@@ -158,11 +158,11 @@ class ApiClient {
 			}
 
 			if (!response.ok) {
-				const errorMessage = 
-					(responseData && typeof responseData === 'object' && 'error' in responseData)
+				const errorMessage =
+					responseData && typeof responseData === 'object' && 'error' in responseData
 						? String(responseData.error)
 						: `Ошибка сервера: ${response.status}`
-				
+
 				return {
 					success: false,
 					error: errorMessage,
