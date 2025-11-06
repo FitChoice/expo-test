@@ -9,6 +9,7 @@ import { useLocalSearchParams, router } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as SecureStore from 'expo-secure-store'
 import { trainingApi } from '@/entities/training'
 import { useTrainingStore } from '@/entities/training'
 import { BackButton, Button, InfoTag, Container, Icon } from '@/shared/ui'
@@ -20,13 +21,30 @@ const landingPhoto1 = require('../../../assets/images/landing-photo-1.png')
 
 export default function TrainingEntryScreen() {
 	const { trainingId } = useLocalSearchParams<{ trainingId: string }>()
+	console.log('✅ TrainingEntryScreen opened with ID:', trainingId)
 	const [showTutorial, setShowTutorial] = useState(true)
 	const [savedSession, setSavedSession] = useState<SavedWorkoutState | null>(null)
 	const [isCheckingSession, setIsCheckingSession] = useState(true)
+	const [isDemoMode, setIsDemoMode] = useState(false)
 	const startTraining = useTrainingStore((state) => state.startTraining)
 	const resumeTraining = useTrainingStore((state) => state.resumeTraining)
 
-	// Fetch training data
+	// Check if user is authenticated before making API call
+	const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+
+	useEffect(() => {
+		const checkAuth = async () => {
+			try {
+				const token = await SecureStore.getItemAsync('auth_token')
+				setIsAuthenticated(!!token)
+			} catch (error) {
+				setIsAuthenticated(false)
+			}
+		}
+		checkAuth()
+	}, [])
+
+	// Fetch training data - only if authenticated
 	const {
     data: training,
     isLoading,
@@ -34,12 +52,45 @@ export default function TrainingEntryScreen() {
     refetch,
   } = useQuery({
 		queryKey: ['training', trainingId],
-		queryFn: () => {
+		queryFn: async () => {
 			if (!trainingId) throw new Error('Training ID is required')
-			return trainingApi.getTraining(trainingId)
+			return await trainingApi.getTraining(trainingId)
 		},
-		enabled: !!trainingId,
+		enabled: !!trainingId && isAuthenticated === true,
+		retry: false,
 	})
+
+	// If not authenticated, automatically show demo
+	useEffect(() => {
+		if (isAuthenticated === false && trainingId) {
+			setIsDemoMode(true)
+			const demo: Training = {
+				trainingId: trainingId,
+				title: 'Демо тренировка',
+				description: 'Локальная демо-тренировка для теста без сети',
+				category: 'mobility',
+				experiencePoints: 50,
+				inventory: [],
+				exercises: [
+					{
+						id: 'ex_demo_1',
+						name: 'Приседания',
+						type: 'ai',
+						sets: 2,
+						reps: 10,
+						duration: null,
+						restTime: 30,
+						videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+						thumbnailUrl: '',
+						progress: 0,
+					},
+				],
+			}
+
+			startTraining(demo)
+			router.replace({ pathname: '/(training)/session', params: { trainingId: demo.trainingId } })
+		}
+	}, [isAuthenticated, trainingId, startTraining])
 
 	// Check for saved session on mount
 	useEffect(() => {
@@ -98,7 +149,7 @@ export default function TrainingEntryScreen() {
 		})
 	}
 
-	if (isLoading || isCheckingSession) {
+	if (isLoading || isCheckingSession || isAuthenticated === null) {
 		return (
 			<View className="bg-background-primary flex-1 items-center justify-center">
 				<ActivityIndicator size="large" color="#9333EA" />
@@ -135,6 +186,7 @@ export default function TrainingEntryScreen() {
       startTraining(demo)
       router.push({ pathname: '/(training)/session', params: { trainingId: demo.trainingId } })
     }
+
     return (
       <View className="bg-background-primary flex-1 items-center justify-center px-4">
         <Text className="text-h3-medium text-text-primary mb-2">Ошибка загрузки</Text>
