@@ -7,6 +7,7 @@ import Svg, {
 	Stop,
 	Rect,
 } from 'react-native-svg'
+import { Checkbox } from '../Checkbox/Checkbox'
 import type { GlowButtonProps } from './types'
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
@@ -119,6 +120,18 @@ export const GlowButton: React.FC<GlowButtonProps> = ({
 			{/* Зелёная линия для выбранного состояния */}
 			{isSelected && <View style={styles.checkLine} />}
 
+			{/* Чекбокс в верхнем правом углу для выбранного состояния */}
+			{isSelected && (
+				<View style={styles.checkboxContainer}>
+					<Checkbox
+						checked={true}
+						onChange={() => {}} // Чекбокс только для отображения
+						size="sm"
+						disabled={true}
+					/>
+				</View>
+			)}
+
 			{/* Контент на переднем плане */}
 			<View style={[styles.contentContainer, contentStyle]}>{children}</View>
 		</TouchableOpacity>
@@ -152,6 +165,12 @@ const styles = StyleSheet.create({
 		bottom: 0,
 		alignSelf: 'center',
 		zIndex: 1,
+	},
+	checkboxContainer: {
+		position: 'absolute',
+		top: 8,
+		right: 8,
+		zIndex: 3,
 	},
 	contentContainer: {
 		zIndex: 2,

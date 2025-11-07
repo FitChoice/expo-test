@@ -4,10 +4,14 @@
  */
 
 import { View, Text } from 'react-native'
-import { Camera } from 'expo-camera'
 import { useState } from 'react'
 import { Button, Icon } from '@/shared/ui'
 import { DotsProgress } from '@/shared/ui/DotsProgress'
+import Svg, { Defs, LinearGradient, RadialGradient, Stop, Rect } from 'react-native-svg'
+import CameraIcon from '@/assets/icons/large/camera.svg'
+import { Camera } from 'expo-camera'
+import { GradientBg } from '@/shared/ui/GradientBG'
+
 
 interface CameraPermissionScreenProps {
 	onNext: () => void
@@ -31,7 +35,11 @@ export function CameraPermissionScreen({ onNext }: CameraPermissionScreenProps) 
 	}
 
 	return (
-		<View className="bg-background-primary flex-1">
+		<View className="flex-1 bg-black">
+		{/* Gradient Background */}
+
+			<GradientBg />
+
 			{/* Close Button */}
 			<View className="absolute right-4 top-12 z-10">
 				<Button variant="ghost" onPress={() => {}} className="h-12 w-12 rounded-2xl">
@@ -39,43 +47,35 @@ export function CameraPermissionScreen({ onNext }: CameraPermissionScreenProps) 
 				</Button>
 			</View>
 
-			{/* Progress Dots */}
-			<View className="absolute left-1/2 top-12 z-10 -translate-x-1/2">
-				<DotsProgress total={4} current={1} />
-			</View>
+		{/* Progress Dots */}
 
-			{/* Content */}
-			<View className="flex-1 items-center justify-center px-6">
-				{/* Icon */}
-				<View className="mb-12">
-					<View className="h-32 w-32 items-center justify-center rounded-3xl bg-brand-purple-500/10">
-						<Icon name="camera" size={64} color="#BA9BF7" />
-					</View>
-				</View>
+        <View className="absolute left-1/2 -translate-x-1/2 top-20 z-10">
+		<DotsProgress total={4} current={1} variant="onboarding" />
+      </View>
 
-				{/* Title */}
-				<Text className="text-h2-medium text-text-primary mb-4 text-center">
-					Конфиденциальность
+
+		{/* Icon Section */}
+		<View className="flex-1 justify-center items-center ">
+			<CameraIcon width={194} height={186} />
+		</View>
+
+		{/* Text and Button Section */}
+		<View className="px-6 pb-6">
+			{/* Title */}
+			<Text className="text-h2 font-bold text-light-text-100 mb-3 text-left">
+			Конфедициальность
+			</Text>
+
+			{/* Description */}
+			<Text className="text-t2 text-light-text-500 text-left leading-6 mb-20">
+			Камера используется только для анализа движений. Видео не сохраняется и не передаётся	
 				</Text>
-
-				{/* Description */}
-				<Text className="text-body-regular text-text-secondary mb-12 text-center">
-					Камера используется только для анализа движения. Видео не сохраняется и не
-					передается
-				</Text>
-			</View>
 
 			{/* Button */}
-			<View className="p-6">
-				<Button
-					variant="primary"
-					onPress={handleRequestPermission}
-					disabled={isRequesting}
-					className="w-full"
-				>
-					{isRequesting ? 'Запрос разрешения...' : 'Далее'}
-				</Button>
-			</View>
+			<Button variant="primary" onPress={onNext} className="w-full">
+				Далее
+			</Button>
+		</View>
 		</View>
 	)
 }

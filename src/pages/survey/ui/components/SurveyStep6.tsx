@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text } from 'react-native'
+import { Text, View } from 'react-native'
 import type { BMICategory } from '@/entities/survey'
 import { sharedStyles } from './shared-styles'
 
@@ -18,9 +18,14 @@ export const SurveyStep6: React.FC<SurveyStep6Props> = ({ bmiCategory }) => {
 	return (
 		<>
 			<Text style={sharedStyles.title}>ваша отправная точка</Text>
-			<Text className="font-inter text-left text-lg font-normal leading-[21.6px] text-white">
-				Индекс Массы Тела - {bmiCategory.bmi}
-			</Text>
+			<View className="flex-row items-baseline gap-2">
+				<Text className="text-white">
+					Индекс Массы Тела -
+				</Text>
+				<Text style={sharedStyles.title}>
+					{bmiCategory.bmi}
+				</Text>
+			</View>
 			<Text className="font-inter text-left text-base font-normal leading-[19.2px] text-white">
 				{bmiCategory.description}
 			</Text>

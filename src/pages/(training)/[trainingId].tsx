@@ -198,6 +198,16 @@ export default function TrainingEntryScreen() {
           <Button onPress={() =>handleOpenDemo()} variant="secondary" className="w-full">
             Открыть демо-тренировку
           </Button>
+		  			{/* Survey Button */}
+					  <Button
+					onPress={() => router.push('/survey')}
+					variant="secondary"
+					className="mb-3 w-full"
+				>
+					📋 Пройти опрос
+				</Button>
+
+				{/* Training Buttons */}
           <Button onPress={() => router.back()} variant="secondary" className="w-full">
             Назад
           </Button>
@@ -330,7 +340,7 @@ export default function TrainingEntryScreen() {
 				</Container>
 			</ScrollView>
 
-			{/* Start Button */}
+			{/* Action Buttons */}
 			<View className="border-brand-dark-300 bg-background-primary border-t p-4">
 				{savedSession ? (
 					<>

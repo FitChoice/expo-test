@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, ScrollView } from 'react-native'
 import { CheckboxSelect } from '@/shared/ui'
 import type { Goal } from '@/entities/survey'
 import { sharedStyles } from './shared-styles'
@@ -27,6 +27,7 @@ export const SurveyStep10: React.FC<SurveyStep10Props> = ({
 				</Text>
 			</View>
 			<View className="bg-transparent">
+				<ScrollView className="h-full">
 				<CheckboxSelect
 					options={[
 						{ value: 'posture', label: 'Улучшить осанку' },
@@ -43,6 +44,7 @@ export const SurveyStep10: React.FC<SurveyStep10Props> = ({
 					size="full"
 					maxSelected={maxGoals}
 				/>
+				</ScrollView>
 			</View>
 		</>
 	)

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Alert, Image as RNImage, Animated } from 'react-native'
+import { View, Alert, Image as RNImage, Animated, Keyboard } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import { Button, BackButton, MaskedText, BackgroundLayout, Input } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation } from '@/shared/lib'
@@ -156,6 +156,10 @@ export const RegisterScreen = () => {
 	}
 
 	const handleSubmit = async () => {
+		// Dismiss keyboard to prevent system password save dialog from interfering
+		Keyboard.dismiss()
+
+		console.log('handleSubmit')
 		setIsLoading(true)
 
 		try {
@@ -180,6 +184,8 @@ export const RegisterScreen = () => {
 			setIsLoading(false)
 		}
 	}
+
+
 
 	return (
 		<View className="bg-bg-dark-700 flex-1">
@@ -279,6 +285,9 @@ export const RegisterScreen = () => {
 								error={passwordError}
 								helperText={passwordHelperText}
 								forceHelperText={showPasswordHelper}
+								autoComplete="off"
+								textContentType="none"
+								importantForAutofill="no"
 							/>
 
 							<Input
@@ -291,6 +300,9 @@ export const RegisterScreen = () => {
 								variant="password"
 								size="default"
 								error={password && confirmPassword ? confirmPasswordError : ''}
+								autoComplete="off"
+								textContentType="none"
+								importantForAutofill="no"
 							/>
 						</Animated.View>
 					</View>

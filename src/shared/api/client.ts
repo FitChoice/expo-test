@@ -79,9 +79,12 @@ class ApiClient {
 					}
 				}
 			} else {
-				// Try to get text response for debugging
-				const text = await response.text()
-				console.error('Non-JSON response:', text)
+				// For successful responses, non-JSON content is acceptable (e.g., 204 No Content, plain text success)
+				// Only log as error for non-successful responses
+				if (!response.ok) {
+					const text = await response.text()
+					console.error('Non-JSON response for error status:', text)
+				}
 			}
 
 			if (!response.ok) {
@@ -152,9 +155,12 @@ class ApiClient {
 					}
 				}
 			} else {
-				// Try to get text response for debugging
-				const text = await response.text()
-				console.error('Non-JSON response:', text)
+				// For successful responses, non-JSON content is acceptable (e.g., 204 No Content, plain text success)
+				// Only log as error for non-successful responses
+				if (!response.ok) {
+					const text = await response.text()
+					console.error('Non-JSON response for error status:', text)
+				}
 			}
 
 			if (!response.ok) {
