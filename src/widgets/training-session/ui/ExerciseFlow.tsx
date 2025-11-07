@@ -4,7 +4,7 @@
  * Включает countdown, body position check, exercise execution, rest, transitions
  */
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { View } from 'react-native'
 import { router } from 'expo-router'
 import { ExerciseCountdownScreen } from './exercise/ExerciseCountdownScreen'
@@ -45,20 +45,20 @@ export function ExerciseFlow() {
 	// Check if exercise has sides
 	const hasSides = currentExercise.side === 'both'
 
-	const handleCountdownComplete = () => {
+	const handleCountdownComplete = useCallback(() => {
 		// Skip body position for timer exercises
 		if (currentExercise.type === 'timer') {
 			setCurrentStep('execution')
 		} else {
 			setCurrentStep('position')
 		}
-	}
+	}, [currentExercise.type])
 
-	const handlePositionComplete = () => {
+	const handlePositionComplete = useCallback(() => {
 		setCurrentStep('execution')
-	}
+	}, [])
 
-	const handleExecutionComplete = () => {
+	const handleExecutionComplete = useCallback(() => {
 		// Mark set as complete
 		completeSet({
 			exerciseIndex: currentExerciseIndex,
@@ -69,9 +69,9 @@ export function ExerciseFlow() {
 			errors: [], // Will be populated during execution
 		})
 		setCurrentStep('success')
-	}
+	}, [completeSet, currentExerciseIndex, currentSet])
 
-	const handleSuccessComplete = () => {
+	const handleSuccessComplete = useCallback(() => {
 		// Check if need to switch sides
 		if (hasSides && currentSideState === null) {
 			// First side done, switch to right
@@ -105,31 +105,31 @@ export function ExerciseFlow() {
 			// Rest before next set
 			setCurrentStep('rest')
 		}
-	}
+	}, [hasSides, currentSideState, currentSet, currentExercise.sets, currentExerciseIndex, training.exercises.length, training.trainingId, stop, nextExercise])
 
-	const handleSideSwitchComplete = () => {
+	const handleSideSwitchComplete = useCallback(() => {
 		// Start position check for second side
 		setCurrentStep('position')
-	}
+	}, [])
 
-	const handleRestComplete = () => {
+	const handleRestComplete = useCallback(() => {
 		// Start next set (countdown)
 		setCurrentStep('countdown')
-	}
+	}, [])
 
-	const handleTransitionComplete = () => {
+	const handleTransitionComplete = useCallback(() => {
 		// Start next exercise (countdown)
 		setCurrentStep('countdown')
-	}
+	}, [])
 
-	const handlePause = () => {
+	const handlePause = useCallback(() => {
 		pause()
-	}
+	}, [pause])
 
-	const handleStop = () => {
+	const handleStop = useCallback(() => {
 		stop()
 		router.back()
-	}
+	}, [stop])
 
 	const nextExerciseData = training.exercises[currentExerciseIndex + 1]
 

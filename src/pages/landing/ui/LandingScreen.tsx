@@ -49,10 +49,6 @@ export const LandingScreen = () => {
 	// TODO: Удалить в проде - это только для быстрого доступа к тренировкам при разработке
 	const handleTestTraining = () => {
 		// Переходим к экрану тренировки с тестовым ID
-		// router.push({
-		// 	pathname: '/(training)/[trainingId]',
-		// 	params: { trainingId: '1' },
-		// });
 		router.push('/(training)/1')
 	}
 

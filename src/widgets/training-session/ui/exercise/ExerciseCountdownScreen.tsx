@@ -37,7 +37,8 @@ export function ExerciseCountdownScreen({
 			setCountdown((prev) => {
 				if (prev <= 1) {
 					clearInterval(timer)
-					onComplete()
+					// Use setTimeout to make the callback async and avoid setState during render
+					setTimeout(() => onComplete(), 0)
 					return 0
 				}
 				return prev - 1

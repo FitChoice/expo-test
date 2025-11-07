@@ -47,10 +47,10 @@ export default function TrainingSessionScreen() {
 	}
 
 	// Render based on current status
-	switch (status) {
+	switch (status) {	
 		case 'onboarding':
 			return <OnboardingFlow />
-
+			
 		case 'running':
 			return (
 				<>

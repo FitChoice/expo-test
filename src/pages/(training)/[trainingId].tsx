@@ -21,7 +21,7 @@ const landingPhoto1 = require('../../../assets/images/landing-photo-1.png')
 
 export default function TrainingEntryScreen() {
 	const { trainingId } = useLocalSearchParams<{ trainingId: string }>()
-	console.log('✅ TrainingEntryScreen opened with ID:', trainingId)
+
 	const [showTutorial, setShowTutorial] = useState(true)
 	const [savedSession, setSavedSession] = useState<SavedWorkoutState | null>(null)
 	const [isCheckingSession, setIsCheckingSession] = useState(true)
@@ -86,7 +86,7 @@ export default function TrainingEntryScreen() {
 			}
 
 			startTraining(demo)
-			router.replace({ pathname: '/(training)/session', params: { trainingId: demo.trainingId } })
+			//router.replace({ pathname: '/(training)/session', params: { trainingId: demo.trainingId } })
 		}
 	}, [isAuthenticated, trainingId, startTraining])
 
@@ -195,7 +195,7 @@ export default function TrainingEntryScreen() {
           <Button onPress={() => refetch()} variant="primary" className="w-full">
             Повторить
           </Button>
-          <Button onPress={handleOpenDemo} variant="secondary" className="w-full">
+          <Button onPress={() =>handleOpenDemo()} variant="secondary" className="w-full">
             Открыть демо-тренировку
           </Button>
           <Button onPress={() => router.back()} variant="secondary" className="w-full">
