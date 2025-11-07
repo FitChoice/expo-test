@@ -5,12 +5,14 @@
 
 import { View, Text } from 'react-native'
 import { useAudioPlayer } from 'expo-audio'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Button, Icon } from '@/shared/ui'
 import { DotsProgress } from '@/shared/ui/DotsProgress'
-import Svg, { Defs, LinearGradient, RadialGradient, Stop, Rect } from 'react-native-svg'
+import { Audio } from 'expo-av'
 import SoundIcon from '@/assets/icons/large/sound.svg'
 import { GradientBg } from '@/shared/ui/GradientBG'
+import { CloseBtn } from '@/shared/ui/CloseBtn'
+import { router } from 'expo-router'
 
 interface SoundCheckScreenProps {
 	onNext: () => void
@@ -18,7 +20,7 @@ interface SoundCheckScreenProps {
 
 export function SoundCheckScreen({ onNext }: SoundCheckScreenProps) {
 	// Placeholder for audio player - will be used when adding test sound
-	const _player = useAudioPlayer('')
+	//const _player = useAudioPlayer('')
 
 	// useEffect(() => {
 	// 	// TODO: Add actual test sound asset and play it
@@ -39,6 +41,18 @@ export function SoundCheckScreen({ onNext }: SoundCheckScreenProps) {
 	// 	}
 	// }, [])
 
+
+	const getMicrophonePermission = async () => {
+		const { status } = await Audio.requestPermissionsAsync()
+		if (status === 'granted') {
+			onNext()
+		}
+	}
+
+	const handleStop = useCallback(() => {
+		router.back()
+	}, [])
+
 	return (
 		<View className="flex-1 bg-black">
 		{/* Gradient Background */}
@@ -46,9 +60,7 @@ export function SoundCheckScreen({ onNext }: SoundCheckScreenProps) {
 
 			{/* Close Button */}
 			<View className="absolute right-4 top-12 z-10">
-				<Button variant="ghost" onPress={() => {}} className="h-12 w-12 rounded-2xl">
-					<Icon name="close" size={24} color="#FFFFFF" />
-				</Button>
+				<CloseBtn handlePress={handleStop} classNames={"h-12 w-12 rounded-2xl"} />
 			</View>
 
 		{/* Progress Dots */}
@@ -76,7 +88,7 @@ export function SoundCheckScreen({ onNext }: SoundCheckScreenProps) {
 			</Text>
 
 			{/* Button */}
-			<Button variant="primary" onPress={onNext} className="w-full">
+			<Button variant="primary" onPress={getMicrophonePermission} className="w-full">
 				Далее
 			</Button>
 		</View>

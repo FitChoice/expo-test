@@ -4,13 +4,13 @@
  */
 
 import { View, Text } from 'react-native'
-import { useState } from 'react'
-import { Button, Icon } from '@/shared/ui'
+import { Button } from '@/shared/ui'
 import { DotsProgress } from '@/shared/ui/DotsProgress'
-import Svg, { Defs, LinearGradient, RadialGradient, Stop, Rect } from 'react-native-svg'
 import CameraIcon from '@/assets/icons/large/camera.svg'
-import { Camera } from 'expo-camera'
+import { Camera } from 'expo-camera';
 import { GradientBg } from '@/shared/ui/GradientBG'
+import { CloseBtn } from '@/shared/ui/CloseBtn'
+import { router } from 'expo-router'
 
 
 interface CameraPermissionScreenProps {
@@ -18,21 +18,18 @@ interface CameraPermissionScreenProps {
 }
 
 export function CameraPermissionScreen({ onNext }: CameraPermissionScreenProps) {
-	const [isRequesting, setIsRequesting] = useState(false)
 
-	const handleRequestPermission = async () => {
-		setIsRequesting(true)
-		try {
-			const { status } = await Camera.requestCameraPermissionsAsync()
-			if (status === 'granted') {
-				onNext()
-			}
-		} catch (error) {
-			console.error('Failed to request camera permission:', error)
-		} finally {
-			setIsRequesting(false)
+	const getCameraPermission = async () => {
+		const { status } = await Camera.requestCameraPermissionsAsync()
+		if (status === 'granted') {
+			onNext()
 		}
+	};
+
+	const handleStop =() => {
+		router.back()
 	}
+
 
 	return (
 		<View className="flex-1 bg-black">
@@ -42,9 +39,9 @@ export function CameraPermissionScreen({ onNext }: CameraPermissionScreenProps) 
 
 			{/* Close Button */}
 			<View className="absolute right-4 top-12 z-10">
-				<Button variant="ghost" onPress={() => {}} className="h-12 w-12 rounded-2xl">
-					<Icon name="close" size={24} color="#FFFFFF" />
-				</Button>
+				<View className="absolute right-4 top-12 z-10">
+					<CloseBtn handlePress={handleStop} classNames={"h-12 w-12 rounded-2xl"} />
+				</View>
 			</View>
 
 		{/* Progress Dots */}
@@ -72,7 +69,11 @@ export function CameraPermissionScreen({ onNext }: CameraPermissionScreenProps) 
 				</Text>
 
 			{/* Button */}
-			<Button variant="primary" onPress={onNext} className="w-full">
+			<Button
+				variant="primary"
+				onPress={getCameraPermission}
+				className="w-full"
+			>
 				Далее
 			</Button>
 		</View>

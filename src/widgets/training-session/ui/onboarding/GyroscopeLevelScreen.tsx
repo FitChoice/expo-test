@@ -10,6 +10,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useIsFocused } from '@react-navigation/native'
 import { Button, Icon } from '@/shared/ui'
 import { DotsProgress } from '@/shared/ui/DotsProgress'
+import { CloseBtn } from '@/shared/ui/CloseBtn'
+import { router } from 'expo-router'
 
 interface GyroscopeLevelScreenProps {
 	onNext: () => void
@@ -70,13 +72,15 @@ useEffect(() => {
 		}
 	}, [isFocused])
 
+	const handleStop =() => {
+		router.back()
+	}
+
 	return (
 		<View className="bg-background-primary flex-1">
 			{/* Close Button */}
 			<View className="absolute right-4 top-12 z-10">
-				<Button variant="ghost" onPress={() => {}} className="h-12 w-12 rounded-2xl">
-					<Icon name="close" size={24} color="#FFFFFF" />
-				</Button>
+				<CloseBtn handlePress={handleStop} classNames={"h-12 w-12 rounded-2xl"} />
 			</View>
 
 			{/* Progress Dots */}
