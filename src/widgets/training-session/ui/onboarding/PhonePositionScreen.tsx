@@ -36,7 +36,23 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
 
 
 	if (!permission?.granted) {
-		return <View className="bg-background-primary flex-1 " />
+		return (
+			<View className="flex-1 justify-center items-center bg-background-primary px-6">
+				<Text className="text-h2 font-bold text-light-text-100 mb-4 text-center">
+					Требуется доступ к камере
+				</Text>
+				<Text className="text-t2 text-light-text-500 text-center mb-6">
+					Чтобы продолжить, разрешите доступ к камере
+				</Text>
+				<Button
+					variant="primary"
+					onPress={permission?.request}
+					className="w-full"
+				>
+					Разрешить доступ
+				</Button>
+			</View>
+		)
 	}
 
 	return (
@@ -57,8 +73,12 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
 			{/* Content */}
 			<View className="flex-1 items-center justify-center px-6">
 				{/* Camera Preview */}
-				<View className="mb-20 h-96 w-full overflow-hidden rounded-3xl">
-					<CameraView  facing="front" />
+				<View className="mb-20 h-96 w-full overflow-hidden rounded-3xl bg-black">
+					<CameraView
+						facing="front"
+						className="flex-1"
+						style={{ width: '100%', height: '100%' }}
+					/>
 				</View>
 
 				{/* Title */}

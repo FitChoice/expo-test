@@ -25,6 +25,18 @@
 				}
 			}
 		],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/logo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#C5F680",
+          "dark": {
+            "backgroundColor": "#BA9BF7"
+          }
+        }
+      ],
 		"expo-audio",
 		"expo-video"
 	],
@@ -41,14 +53,17 @@
 	"android": {
 		"package": "com.yzned.Fitchoice",
 		"permissions": [
-			"CAMERA",
 			"READ_EXTERNAL_STORAGE",
 			"WRITE_EXTERNAL_STORAGE",
 			"RECORD_AUDIO"
 		],
-		"adaptiveIcon": {
-			"backgroundColor": "#ffffff"
-		}
+      "adaptiveIcon": {
+        "backgroundColor": "#C5F680",
+        "foregroundImage": "./assets/images/logo.png",
+        "monochromeImage": "./assets/images/logo.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
 	},
 	"experiments": {
 		"tsconfigPaths": true

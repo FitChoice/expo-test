@@ -4,11 +4,9 @@
  */
 
 import { View, Text } from 'react-native'
-import { useAudioPlayer } from 'expo-audio'
-import { useCallback, useEffect } from 'react'
-import { Button, Icon } from '@/shared/ui'
+import { useCallback } from 'react'
+import { Button } from '@/shared/ui'
 import { DotsProgress } from '@/shared/ui/DotsProgress'
-import { Audio } from 'expo-av'
 import SoundIcon from '@/assets/icons/large/sound.svg'
 import { GradientBg } from '@/shared/ui/GradientBG'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
@@ -19,35 +17,6 @@ interface SoundCheckScreenProps {
 }
 
 export function SoundCheckScreen({ onNext }: SoundCheckScreenProps) {
-	// Placeholder for audio player - will be used when adding test sound
-	//const _player = useAudioPlayer('')
-
-	// useEffect(() => {
-	// 	// TODO: Add actual test sound asset and play it
-	// 	// For now, just simulate sound check
-	// 	// Example:
-	// 	// const playTestSound = async () => {
-	// 	// 	try {
-	// 	// 		player.replace(require('@/assets/sounds/test.mp3'))
-	// 	// 		player.play()
-	// 	// 	} catch (error) {
-	// 	// 		console.error('Failed to play test sound:', error)
-	// 	// 	}
-	// 	// }
-	// 	// playTestSound()
-
-	// 	return () => {
-	// 		// Cleanup if needed
-	// 	}
-	// }, [])
-
-
-	const getMicrophonePermission = async () => {
-		const { status } = await Audio.requestPermissionsAsync()
-		if (status === 'granted') {
-			onNext()
-		}
-	}
 
 	const handleStop = useCallback(() => {
 		router.back()
@@ -88,7 +57,7 @@ export function SoundCheckScreen({ onNext }: SoundCheckScreenProps) {
 			</Text>
 
 			{/* Button */}
-			<Button variant="primary" onPress={getMicrophonePermission} className="w-full">
+			<Button variant="primary" onPress={onNext} className="w-full">
 				Далее
 			</Button>
 		</View>
