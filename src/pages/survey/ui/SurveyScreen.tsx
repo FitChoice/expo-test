@@ -242,42 +242,44 @@ export const SurveyScreen = () => {
 	return (
 		<View className="flex-1 bg-[#151515] ">
 			<LayoutComponent>
-				<View className={'flex-1 bg-transparent pt-[14px]'}>
-					{/* Header section with back button */}
-					{
-						!notShowProgress &&
-						<View className="mb-2" style={sectionPadding}>
-						<BackButton
-							onPress={handleBack}
-							color="#989898"
-							variant="transparent"
-							position="relative"
-						/>
-						</View>
-					}
-
-					{/* Content section with progress bar and main content */}
-					<View className="mb-6 bg-transparent" style={sectionPadding} >
-						{/* Индикатор прогресса */}
-					{
-						!notShowProgress && <View className="mb-6 h-2 w-full rounded-lg bg-fill-800">
-							<View
-							
-								className="h-2 rounded-lg bg-[#A172FF]"
-								style={{ width: getProgressWidth() }}
-							
+				<View className={'flex-1 bg-transparent pt-[14px]'} style={{ justifyContent: 'space-between' }}>
+					{/* Верхний контент */}
+					<View className="flex-shrink">
+						{/* Header section with back button */}
+						{
+							!notShowProgress &&
+							<View className="mb-2" style={sectionPadding}>
+							<BackButton
+								onPress={handleBack}
+								color="#989898"
+								variant="transparent"
+								position="relative"
 							/>
-						</View>
-					}
+							</View>
+						}
 
-				
+						{/* Content section with progress bar and main content */}
+						<View className="mb-6 bg-transparent" style={sectionPadding} >
+							{/* Индикатор прогресса */}
+						{
+							!notShowProgress && <View className="mb-6 h-2 w-full rounded-lg bg-fill-800">
+								<View
+								
+									className="h-2 rounded-lg bg-[#A172FF]"
+									style={{ width: getProgressWidth() }}
+								
+								/>
+							</View>
+						}
+
+					
+						</View>
+
+							{/* Основной контент */}
+							<View className="w-full gap-6 bg-transparent">{renderCurrentStep()}</View>
 					</View>
 
-						{/* Основной контент */}
-						<View className="w-full gap-6 bg-transparent">{renderCurrentStep()}</View>
-
 					{/* Кнопки внизу экрана с анимацией */}
-
 					<Animated.View
 						className="gap-2 pb-[50px] pt-8"
 						style={[{ transform: [{ translateY }] }, sectionPadding]}
