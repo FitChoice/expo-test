@@ -29,6 +29,7 @@ export const SurveyStep10: React.FC<SurveyStep10Props> = ({
 			<View className="bg-transparent">
 				<ScrollView className="h-full">
 				<CheckboxSelect
+					isNeedCheckbox={true}
 					options={[
 						{ value: 'posture', label: 'Улучшить осанку' },
 						{ value: 'pain_relief', label: 'Избавиться от боли' },

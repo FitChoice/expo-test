@@ -14,6 +14,7 @@ export const RadioSelect: React.FC<RadioSelectProps> = ({
 	value,
 	onChange,
 	disabled = false,
+																													isNeedCheckbox
 }) => {
 	const handlePress = (optionValue: string) => {
 		if (disabled) return
@@ -27,6 +28,7 @@ export const RadioSelect: React.FC<RadioSelectProps> = ({
 
 				return (
 					<RadioSelectOption
+						isNeedCheckbox={isNeedCheckbox}
 						key={option.value}
 						option={option}
 						isSelected={isSelected}

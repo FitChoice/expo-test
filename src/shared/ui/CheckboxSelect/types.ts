@@ -16,4 +16,5 @@ export interface CheckboxSelectProps {
 	minSelected?: number
 	disabled?: boolean
 	className?: string
+	isNeedCheckbox?: boolean
 }

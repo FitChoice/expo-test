@@ -13,6 +13,7 @@ interface CheckboxSelectOptionProps {
 	onPress: () => void
 	onPressIn: () => void
 	onPressOut: () => void
+	isNeedCheckbox?: boolean
 }
 
 /**
@@ -25,9 +26,11 @@ export const CheckboxSelectOption: React.FC<CheckboxSelectOptionProps> = ({
 	iconSize,
 	textStyle,
 	onPress,
+																																						isNeedCheckbox
 }) => {
 	return (
 		<GlowButton
+			isNeedCheckbox={isNeedCheckbox}
 			isSelected={isSelected}
 			onPress={onPress}
 			disabled={disabled}

@@ -31,4 +31,6 @@ export interface GlowButtonProps {
 	 * Дополнительные стили для контента
 	 */
 	contentStyle?: ViewStyle
+
+	isNeedCheckbox?: boolean
 }

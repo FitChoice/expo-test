@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react'
 import { View, Animated } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
-import { Button, BackButton, BackgroundLayout, Icon } from '@/shared/ui'
+import { Button, BackButton, BackgroundLayout, BackgroundLayoutNoSidePadding, Icon } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { useSurveyFlow } from '@/features/survey-flow'
@@ -233,43 +233,53 @@ export const SurveyScreen = () => {
 
 
 	const notShowProgress = useMemo(() => currentStep == 13 || currentStep == 14, [currentStep])
+	
+	// Выбираем компонент Layout в зависимости от шага
+	const isNoPaddingLayout = currentStep === 6
+	const LayoutComponent = isNoPaddingLayout ? BackgroundLayoutNoSidePadding : BackgroundLayout
+	const sectionPadding = isNoPaddingLayout ? { paddingHorizontal: '4%' as const } : {}
+	
 	return (
 		<View className="flex-1 bg-[#151515]">
-			<BackgroundLayout>
-				<View className="flex-1 bg-transparent px-[14px] pt-[14px]">
+			<LayoutComponent>
+				<View className={'flex-1 bg-transparent pt-[14px]'}>
 					{/* Header section with back button */}
 					{
 						!notShowProgress &&
-						<View className="mb-2">
+						<View className="mb-2" style={sectionPadding}>
 						<BackButton
 							onPress={handleBack}
 							color="#989898"
 							variant="transparent"
 							position="relative"
 						/>
-					</View>
+						</View>
 					}
 
 					{/* Content section with progress bar and main content */}
-					<View className="flex-1 bg-transparent">
+					<View className="mb-6 bg-transparent" style={sectionPadding} >
 						{/* Индикатор прогресса */}
 					{
 						!notShowProgress && <View className="mb-6 h-2 w-full rounded-lg bg-fill-800">
 							<View
+							
 								className="h-2 rounded-lg bg-[#A172FF]"
 								style={{ width: getProgressWidth() }}
+							
 							/>
 						</View>
 					}
 
+				
+					</View>
+
 						{/* Основной контент */}
 						<View className="w-full gap-6 bg-transparent">{renderCurrentStep()}</View>
-					</View>
 
 					{/* Кнопки внизу экрана с анимацией */}
 					<Animated.View
 						className="gap-2 pb-[50px] pt-8"
-						style={{ transform: [{ translateY }] }}
+						style={[{ transform: [{ translateY }] }, sectionPadding]}
 					>
 						{canProceed() && (
 							<Button
@@ -300,7 +310,7 @@ export const SurveyScreen = () => {
 						}
 					</Animated.View>
 				</View>
-			</BackgroundLayout>
+			</LayoutComponent>
 		</View>
 	)
 }

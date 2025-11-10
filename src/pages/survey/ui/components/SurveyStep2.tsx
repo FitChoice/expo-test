@@ -18,6 +18,7 @@ export const SurveyStep2: React.FC<SurveyStep2Props> = ({ gender, onGenderChange
 			<Text style={sharedStyles.title}>ваш пол</Text>
 			<View className="bg-transparent">
 				<RadioSelect
+					isNeedCheckbox={false}
 					options={[
 						{
 							value: 'male',

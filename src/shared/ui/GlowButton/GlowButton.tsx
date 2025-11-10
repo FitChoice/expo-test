@@ -23,6 +23,7 @@ const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
 export const GlowButton: React.FC<GlowButtonProps> = ({
 	children,
 	isSelected,
+	isNeedCheckbox,
 	onPress,
 	disabled = false,
 	style,
@@ -121,7 +122,7 @@ export const GlowButton: React.FC<GlowButtonProps> = ({
 			{isSelected && <View style={styles.checkLine} />}
 
 			{/* Чекбокс в верхнем правом углу для выбранного состояния */}
-			{isSelected && (
+			{isSelected && isNeedCheckbox && (
 				<View style={styles.checkboxContainer}>
 					<Checkbox
 						checked={true}

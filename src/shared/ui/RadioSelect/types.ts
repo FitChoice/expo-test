@@ -14,4 +14,5 @@ export interface RadioSelectProps {
 	size?: RadioSelectSize
 	disabled?: boolean
 	className?: string
+	isNeedCheckbox?: boolean
 }

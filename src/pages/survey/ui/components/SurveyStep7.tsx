@@ -34,6 +34,7 @@ export const SurveyStep7: React.FC<SurveyStep7Props> = ({
 
 	const renderDayButton = (day: DayOfWeek, label: string, isLastSingle = false) => (
 		<GlowButton
+			isNeedCheckbox={true}
 			key={day}
 			isSelected={selectedDays.includes(day)}
 			onPress={() => handleDayToggle(day)}
