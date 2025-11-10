@@ -17,13 +17,13 @@ export const SurveyStep8: React.FC = () => {
 	return (
 		<>
 			<Text style={sharedStyles.title}>Супер!</Text>
-			<Text className="font-inter text-left text-base font-normal leading-[19.2px] text-white">
+			<Text className="font-inter text-left text-t2 font-normal leading-[19.2px] text-white">
 				Вот чего вы сможете достичь, занимаясь в таком темпе
 			</Text>
 			<View className="gap-4 bg-transparent">
 				{benefits.map((benefit, index) => (
 					<View key={index} className="bg-transparent">
-						<Text className="font-inter text-left text-base font-normal leading-[19.2px] text-white">
+						<Text className="font-inter text-left text-t2 font-normal leading-[19.2px] text-light-text-100">
 							• {benefit}
 						</Text>
 					</View>

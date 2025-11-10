@@ -240,7 +240,7 @@ export const SurveyScreen = () => {
 	const sectionPadding = isNoPaddingLayout ? { paddingHorizontal: '4%' as const } : {}
 	
 	return (
-		<View className="flex-1 bg-[#151515]">
+		<View className="flex-1 bg-[#151515] ">
 			<LayoutComponent>
 				<View className={'flex-1 bg-transparent pt-[14px]'}>
 					{/* Header section with back button */}
@@ -277,6 +277,7 @@ export const SurveyScreen = () => {
 						<View className="w-full gap-6 bg-transparent">{renderCurrentStep()}</View>
 
 					{/* Кнопки внизу экрана с анимацией */}
+
 					<Animated.View
 						className="gap-2 pb-[50px] pt-8"
 						style={[{ transform: [{ translateY }] }, sectionPadding]}
