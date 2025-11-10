@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { View, Animated } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
-import { Button, BackButton, BackgroundLayout } from '@/shared/ui'
+import { Button, BackButton, BackgroundLayout, Icon } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { useSurveyFlow } from '@/features/survey-flow'
@@ -223,20 +223,24 @@ export const SurveyScreen = () => {
 			case 12:
 				return true // Опциональный вопрос
 			case 13:
-				return true // Уведомления - опциональный
+				return true // Уведомления - свои кнопки внутри компонента
 			case 14:
-				return true // Финальный экран
+				return false // Финальный экран
 			default:
 				return false
 		}
 	}
 
+
+	const notShowProgress = useMemo(() => currentStep == 13 || currentStep == 14, [currentStep])
 	return (
 		<View className="flex-1 bg-[#151515]">
 			<BackgroundLayout>
 				<View className="flex-1 bg-transparent px-[14px] pt-[14px]">
 					{/* Header section with back button */}
-					<View className="mb-2">
+					{
+						!notShowProgress &&
+						<View className="mb-2">
 						<BackButton
 							onPress={handleBack}
 							color="#989898"
@@ -244,16 +248,19 @@ export const SurveyScreen = () => {
 							position="relative"
 						/>
 					</View>
+					}
 
 					{/* Content section with progress bar and main content */}
 					<View className="flex-1 bg-transparent">
 						{/* Индикатор прогресса */}
-						<View className="mb-6 h-2 w-full rounded-lg bg-fill-800">
+					{
+						!notShowProgress && <View className="mb-6 h-2 w-full rounded-lg bg-fill-800">
 							<View
 								className="h-2 rounded-lg bg-[#A172FF]"
 								style={{ width: getProgressWidth() }}
 							/>
 						</View>
+					}
 
 						{/* Основной контент */}
 						<View className="w-full gap-6 bg-transparent">{renderCurrentStep()}</View>
@@ -272,9 +279,25 @@ export const SurveyScreen = () => {
 								onPress={handleNext}
 								className="h-[56px]"
 							>
-								Далее
+								{currentStep == 13 ? 'Включить' : 'Далее'}
 							</Button>
 						)}
+
+						{currentStep == 13 || currentStep == 12 ? (
+							<Button
+								variant="tertiary"
+								size="l"
+								fullWidth
+								onPress={handleNext}
+								className="h-[56px]"
+							>
+							Не сейчас
+							</Button>
+						): null}
+
+						{
+							currentStep == 14 && <Button  iconLeft={<Icon name="dumbbell" />} variant={'secondary'} >Перейти к тренировкам</Button>
+						}
 					</Animated.View>
 				</View>
 			</BackgroundLayout>

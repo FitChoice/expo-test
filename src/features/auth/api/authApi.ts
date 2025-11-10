@@ -74,15 +74,12 @@ export const authApi = {
 		}
 
 		if (MOCK_MODE) {
-			console.log('🔧 [MOCK] sendCode called with email:', email)
 			return mockSendCode(email)
 		}
-
-		console.log('📤 sendCode request:', email)
 		const payload: SendCodeInput = { email }
-		const result = await apiClient.post('/auth/sendCode', payload)
-		console.log('📥 sendCode response:', result.success ? 'OK' : result.error)
-		return result
+	  return await apiClient.post('/auth/sendCode', payload)
+
+
 	},
 
 	/**

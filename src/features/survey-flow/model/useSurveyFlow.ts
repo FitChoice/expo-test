@@ -10,6 +10,7 @@ import {
 	getBMICategory,
 	type BMICategory,
 } from '@/entities/survey'
+import { surveyApi } from '../api'
 
 interface SurveyFlowStore {
 	// UI state
@@ -46,7 +47,7 @@ interface SurveyFlowStore {
 	resetSurvey: () => void
 
 	// Submit survey
-	submitSurvey: () => Promise<void>
+	submitSurvey: (userId: number) => Promise<{ success: boolean; error?: string }>
 }
 
 const initialSurveyData: SurveyData = {
@@ -172,9 +173,15 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 		})),
 
 	// Submit survey
-	submitSurvey: async () => {
-		// TODO: Implement API call to submit survey
+	submitSurvey: async (userId: number) => {
 		const surveyData = get().surveyData
-		console.warn('Submitting survey:', surveyData)
+
+		const result = await surveyApi.submitSurvey(userId, surveyData)
+
+		if (!result.success) {
+			return { success: false, error: result.error }
+		}
+
+		return { success: true }
 	},
 }))

@@ -47,6 +47,7 @@ export type IconName =
 	| 'activity'
 	| 'repeat'
 	| 'target'
+	| 'dumbbell'
 	// Здоровье
 	| 'health-knees'
 	| 'health-neck-shoulders'

@@ -67,6 +67,7 @@ import Main from './assets/main.svg'
 import Additional from './assets/additional.svg'
 import Diary from './assets/diary.svg'
 import Back from './assets/back.svg'
+import Dumbbell from './assets/dumbbell.svg'
 
 interface IconProps {
 	name: IconName
@@ -150,6 +151,7 @@ const iconMap: Record<
 	additional: Additional,
 	diary: Diary,
 	back: Back,
+	dumbbell:Dumbbell,
 }
 
 // Компонент иконок
