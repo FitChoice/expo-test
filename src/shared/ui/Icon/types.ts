@@ -4,6 +4,7 @@ export type IconName =
 	| 'chevron-down'
 	| 'chevron-left'
 	| 'chevron-right'
+	| 'chevrons-right'
 	| 'chevron-up'
 	| 'arrow-forward'
 	| 'arrow-back'

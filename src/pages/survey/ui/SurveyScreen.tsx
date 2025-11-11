@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { View, Animated } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
+import * as Notifications from 'expo-notifications'
 import { Button, BackButton, BackgroundLayout, BackgroundLayoutNoSidePadding, Icon } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation, getUserId } from '@/shared/lib'
 import { useRouter } from 'expo-router'
@@ -61,6 +62,9 @@ export const SurveyScreen = () => {
 		setSubmitError,
 	} = useSurveyFlow()
 
+
+	const [hasRequested, setHasRequested] = useState(false)
+	
 	// Используем хук для анимации клавиатуры
 	const { translateY } = useKeyboardAnimation({
 		offsetMultiplier: 0.92, // Кнопка поднимается на полную высоту клавиатуры
@@ -85,44 +89,44 @@ export const SurveyScreen = () => {
 	}, [currentStep, calculateBMI, nextStep])
 
 	// Отправка данных опроса при переходе на шаг 14
-	useEffect(() => {
-		if (currentStep === 14 && !isSubmitting && !submitError) {
-			const submitData = async () => {
-				setIsSubmitting(true)
-				setSubmitError(null)
-				
-				try {
-					let userId = await getUserId()
-
-					console.log('User ID:', userId)
-					
-					// Fallback для режима разработки/тестирования
-					if (!userId && __DEV__) {
-						console.warn('Using mock user_id for development')
-						userId = 1 // Mock user ID для тестирования
-					}
-					
-					if (!userId) {
-						setSubmitError('Не удалось получить идентификатор пользователя')
-						setIsSubmitting(false)
-						return
-					}
-
-					const result = await submitSurvey(userId)
-					
-					if (!result.success) {
-						setSubmitError(result.error || 'Ошибка отправки данных')
-					}
-				} catch (error) {
-					setSubmitError('Произошла непредвиденная ошибка')
-				} finally {
-					setIsSubmitting(false)
-				}
-			}
-			
-			submitData()
-		}
-	}, [currentStep, isSubmitting, submitError, submitSurvey, setIsSubmitting, setSubmitError])
+	// useEffect(() => {
+	// 	if (currentStep === 14 && !isSubmitting && !submitError) {
+	// 		const submitData = async () => {
+	// 			setIsSubmitting(true)
+	// 			setSubmitError(null)
+	//
+	// 			try {
+	// 				let userId = await getUserId()
+	//
+	// 				console.log('User ID:', userId)
+	//
+	// 				// Fallback для режима разработки/тестирования
+	// 				if (!userId && __DEV__) {
+	// 					console.warn('Using mock user_id for development')
+	// 					userId = 1 // Mock user ID для тестирования
+	// 				}
+	//
+	// 				if (!userId) {
+	// 					setSubmitError('Не удалось получить идентификатор пользователя')
+	// 					setIsSubmitting(false)
+	// 					return
+	// 				}
+	//
+	// 				const result = await submitSurvey(userId)
+	//
+	// 				if (!result.success) {
+	// 					setSubmitError(result.error || 'Ошибка отправки данных')
+	// 				}
+	// 			} catch (error) {
+	// 				setSubmitError('Произошла непредвиденная ошибка')
+	// 			} finally {
+	// 				setIsSubmitting(false)
+	// 			}
+	// 		}
+	//
+	// 		submitData()
+	// 	}
+	// }, [currentStep, isSubmitting, submitError, submitSurvey, setIsSubmitting, setSubmitError])
 
 	const handleBack = () => {
 		if (currentStep === 1) {
@@ -132,9 +136,34 @@ export const SurveyScreen = () => {
 		}
 	}
 
-	const handleNext = () => {
-		if (currentStep === 4) {
-			// Переход на экран загрузки
+	const handleNext = async () => {
+		if (currentStep === 13) {
+
+			if (!hasRequested) {
+				try {
+					const { status: existingStatus } = await Notifications.getPermissionsAsync()
+					let finalStatus = existingStatus
+
+					if (existingStatus !== 'granted') {
+						const { status } = await Notifications.requestPermissionsAsync()
+						finalStatus = status
+					}
+
+					if (finalStatus === 'granted') {
+						// Получаем push token
+						const token = await Notifications.getExpoPushTokenAsync()
+						console.log('Push token:', token.data)
+
+						// Здесь можно отправить token на сервер если нужно
+						// await sendPushTokenToServer(token.data)
+					}
+
+					setHasRequested(true)
+				} catch (error) {
+					console.error('Error requesting notifications:', error)
+				}
+			}
+			
 			nextStep()
 		} else if (currentStep === 14) {
 			// Финальный экран - переход на home
@@ -157,7 +186,8 @@ export const SurveyScreen = () => {
 	const renderCurrentStep = () => {
 		switch (currentStep) {
 			case 1:
-				return <SurveyStep1 name={surveyData.name} onNameChange={updateName} />
+				return <SurveyStep14 userName={'hello'} />
+				//<SurveyStep1 name={surveyData.name} onNameChange={updateName} />
 
 			case 2:
 				return (
@@ -365,7 +395,7 @@ export const SurveyScreen = () => {
 								variant="tertiary"
 								size="l"
 								fullWidth
-								onPress={handleNext}
+								onPress={nextStep}
 								className="h-[56px]"
 							>
 							Не сейчас

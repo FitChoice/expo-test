@@ -10,32 +10,32 @@ import * as Notifications from 'expo-notifications'
  * Шаг 13: Предложение включить уведомления
  */
 export const SurveyStep13: React.FC = () => {
-	const [hasRequested, setHasRequested] = useState(false)
-
-	useEffect(() => {
-		const handleNotificationPermission = async () => {
-			if (hasRequested) return
-
-			const { status: existingStatus } = await Notifications.getPermissionsAsync()
-			
-			// Если разрешение уже есть - просто показываем экран
-			if (existingStatus === 'granted') {
-				setHasRequested(true)
-				return
-			}
-
-			// Если разрешения нет - запрашиваем
-			setHasRequested(true)
-			await Notifications.requestPermissionsAsync()
-		}
-
-		// Небольшая задержка чтобы пользователь увидел экран
-		const timer = setTimeout(() => {
-			handleNotificationPermission()
-		}, 500)
-
-		return () => clearTimeout(timer)
-	}, [hasRequested])
+	// const [hasRequested, setHasRequested] = useState(false)
+	//
+	// useEffect(() => {
+	// 	const handleNotificationPermission = async () => {
+	// 		if (hasRequested) return
+	//
+	// 		const { status: existingStatus } = await Notifications.getPermissionsAsync()
+	//
+	// 		// Если разрешение уже есть - просто показываем экран
+	// 		if (existingStatus === 'granted') {
+	// 			setHasRequested(true)
+	// 			return
+	// 		}
+	//
+	// 		// Если разрешения нет - запрашиваем
+	// 		setHasRequested(true)
+	// 		await Notifications.requestPermissionsAsync()
+	// 	}
+	//
+	// 	// Небольшая задержка чтобы пользователь увидел экран
+	// 	const timer = setTimeout(() => {
+	// 		handleNotificationPermission()
+	// 	}, 500)
+	//
+	// 	return () => clearTimeout(timer)
+	// }, [hasRequested])
 
 	return (
 		

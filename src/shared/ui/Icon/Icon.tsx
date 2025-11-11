@@ -8,6 +8,7 @@ import EyeSlash from './assets/eye-slashed.svg'
 import ChevronDown from './assets/chevron-down.svg'
 import ChevronLeft from './assets/chevron-left.svg'
 import ChevronRight from './assets/chevron-right.svg'
+import ChevronsRight from './assets/chevrons-right.svg'
 import ChevronUp from './assets/chevron-up.svg'
 import ArrowForward from './assets/arrow-forward.svg'
 import ArrowBack from './assets/arrow-back.svg'
@@ -89,6 +90,7 @@ const iconMap: Record<
 	'chevron-down': ChevronDown,
 	'chevron-left': ChevronLeft,
 	'chevron-right': ChevronRight,
+	'chevrons-right': ChevronsRight,
 	'chevron-up': ChevronUp,
 	'arrow-forward': ArrowForward,
 	'arrow-back': ArrowBack,
