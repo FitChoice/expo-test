@@ -39,15 +39,16 @@ export const CheckboxSelectOption: React.FC<CheckboxSelectOptionProps> = ({
 		>
 			{/* Иконка если есть */}
 			{option.icon && (
-				<View style={[styles.iconContainer, { width: iconSize, height: iconSize }]}>
+				<View style={[styles.iconContainer, { width: iconSize, height: iconSize }]} >
 					{option.icon}
 				</View>
 			)}
 
 			{/* Текст */}
 			<Text
-				className={textStyle}
+				className={`${textStyle} text-t3`}
 				style={[styles.optionText, { color: disabled ? '#C1C1C1' : '#FFFFFF' }]}
+
 			>
 				{option.label}
 			</Text>
@@ -64,13 +65,14 @@ const styles = StyleSheet.create({
 	contentContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 8,
+		gap: 18	,
 	},
 	iconContainer: {
-		borderRadius: 99,
-		backgroundColor: '#1E1E1E',
+	//	borderRadius: 99,
+	//	backgroundColor: '#1E1E1E',
 		alignItems: 'center',
 		justifyContent: 'center',
+	//	marginRight: 8,
 	},
 	optionText: {
 		flex: 1,
