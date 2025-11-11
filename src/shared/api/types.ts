@@ -34,6 +34,7 @@ export interface TokenResponse {
 	access_token: string
 	refresh_token: string
 	expires_at: string // ISO 8601 date-time
+	user_id: number
 }
 
 // Training

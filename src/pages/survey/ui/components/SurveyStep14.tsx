@@ -10,6 +10,9 @@ interface SurveyStep14Props {
  * Шаг 14: Финальный экран приветствия
  */
 export const SurveyStep14: React.FC<SurveyStep14Props> = ({ userName }) => {
+
+
+	
 	return (
 		<View className="items-center gap-8 bg-transparent pt-20 ">
 			<View className="h-[72px] w-[72px] rounded-full bg-brand-purple-500" />

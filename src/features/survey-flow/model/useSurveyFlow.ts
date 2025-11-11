@@ -20,6 +20,10 @@ interface SurveyFlowStore {
 	// Data
 	surveyData: SurveyData
 
+	// Submit state
+	isSubmitting: boolean
+	submitError: string | null
+
 	// Методы обновления данных
 	updateName: (name: string) => void
 	updateGender: (gender: SurveyData['gender']) => void
@@ -33,6 +37,10 @@ interface SurveyFlowStore {
 	updateWeight: (weight: number | null) => void
 	updateBMI: (bmi: number | null) => void
 	updateNotificationsEnabled: (enabled: boolean) => void
+
+	// Submit methods
+	setIsSubmitting: (isSubmitting: boolean) => void
+	setSubmitError: (error: string | null) => void
 
 	// BMI methods (using business logic from entities)
 	calculateBMI: () => void
@@ -69,6 +77,8 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 	surveyData: initialSurveyData,
 	currentStep: 1,
 	totalSteps: 14,
+	isSubmitting: false,
+	submitError: null,
 
 	// Методы обновления данных
 	updateName: (name) =>
@@ -130,6 +140,10 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 		set((state) => ({
 			surveyData: { ...state.surveyData, notificationsEnabled },
 		})),
+
+	// Submit state methods
+	setIsSubmitting: (isSubmitting) => set({ isSubmitting }),
+	setSubmitError: (submitError) => set({ submitError }),
 
 	// BMI calculation using business logic from entities
 	calculateBMI: () =>

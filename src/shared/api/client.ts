@@ -209,6 +209,7 @@ class ApiClient {
 				body: JSON.stringify(data),
 			})
 
+			console.log('PATCH response:', response)
 			// Handle 401 - unauthorized
 			if (response.status === 401) {
 				await this.handleUnauthorized()

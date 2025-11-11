@@ -2,6 +2,7 @@
  * Authentication API methods
  */
 
+import * as SecureStore from 'expo-secure-store'
 import { apiClient } from '@/shared/api'
 import type {
 	SendCodeInput,
@@ -40,6 +41,7 @@ async function mockRegistration(
 			access_token: 'mock_access_token',
 			refresh_token: 'mock_refresh_token',
 			expires_at: new Date(Date.now() + 3600000).toISOString(),
+			user_id: 1, // Mock user ID
 		},
 	}
 }
@@ -55,6 +57,7 @@ async function mockLogin(_data: LoginRequest): Promise<ApiResult<TokenResponse>>
 			access_token: 'mock_access_token',
 			refresh_token: 'mock_refresh_token',
 			expires_at: new Date(Date.now() + 3600000).toISOString(),
+			user_id: 1, // Mock user ID
 		},
 	}
 }
@@ -86,22 +89,40 @@ export const authApi = {
 	 * Register new user
 	 */
 	async registration(data: RegistrationInput): Promise<ApiResult<TokenResponse>> {
+		let result: ApiResult<TokenResponse>
+		
 		if (MOCK_MODE) {
-			return mockRegistration(data)
+			result = await mockRegistration(data)
+		} else {
+			result = await apiClient.post<TokenResponse>('/auth/registration', data)
 		}
-
-		return apiClient.post('/auth/registration', data)
+		
+		// Save user_id to SecureStore on successful registration
+		if (result.success && result.data.user_id) {
+			await SecureStore.setItemAsync('user_id', result.data.user_id.toString())
+		}
+		
+		return result
 	},
 
 	/**
 	 * Login user
 	 */
 	async login(data: LoginRequest): Promise<ApiResult<TokenResponse>> {
+		let result: ApiResult<TokenResponse>
+		
 		if (MOCK_MODE) {
-			return mockLogin(data)
+			result = await mockLogin(data)
+		} else {
+			result = await apiClient.post<TokenResponse>('/auth/login', data)
 		}
-
-		return apiClient.post('/auth/login', data)
+		
+		// Save user_id to SecureStore on successful login
+		if (result.success && result.data.user_id) {
+			await SecureStore.setItemAsync('user_id', result.data.user_id.toString())
+		}
+		
+		return result
 	},
 
 	/**

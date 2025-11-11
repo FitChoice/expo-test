@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react'
 import { View, Animated } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import { Button, BackButton, BackgroundLayout, BackgroundLayoutNoSidePadding, Icon } from '@/shared/ui'
-import { useOrientation, useKeyboardAnimation } from '@/shared/lib'
+import { useOrientation, useKeyboardAnimation, getUserId } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { useSurveyFlow } from '@/features/survey-flow'
 import {
@@ -20,6 +20,8 @@ import {
 	SurveyStep12,
 	SurveyStep13,
 	SurveyStep14,
+	SurveyStepLoading,
+	SurveyStepError,
 } from './components'
 import type {
 	Gender,
@@ -38,6 +40,8 @@ export const SurveyScreen = () => {
 	const {
 		surveyData,
 		currentStep,
+		isSubmitting,
+		submitError,
 		updateName,
 		updateGender,
 		updateAgeGroup,
@@ -52,6 +56,9 @@ export const SurveyScreen = () => {
 		getBMICategory,
 		nextStep,
 		prevStep,
+		submitSurvey,
+		setIsSubmitting,
+		setSubmitError,
 	} = useSurveyFlow()
 
 	// Используем хук для анимации клавиатуры
@@ -77,6 +84,46 @@ export const SurveyScreen = () => {
 		return undefined
 	}, [currentStep, calculateBMI, nextStep])
 
+	// Отправка данных опроса при переходе на шаг 14
+	useEffect(() => {
+		if (currentStep === 14 && !isSubmitting && !submitError) {
+			const submitData = async () => {
+				setIsSubmitting(true)
+				setSubmitError(null)
+				
+				try {
+					let userId = await getUserId()
+
+					console.log('User ID:', userId)
+					
+					// Fallback для режима разработки/тестирования
+					if (!userId && __DEV__) {
+						console.warn('Using mock user_id for development')
+						userId = 1 // Mock user ID для тестирования
+					}
+					
+					if (!userId) {
+						setSubmitError('Не удалось получить идентификатор пользователя')
+						setIsSubmitting(false)
+						return
+					}
+
+					const result = await submitSurvey(userId)
+					
+					if (!result.success) {
+						setSubmitError(result.error || 'Ошибка отправки данных')
+					}
+				} catch (error) {
+					setSubmitError('Произошла непредвиденная ошибка')
+				} finally {
+					setIsSubmitting(false)
+				}
+			}
+			
+			submitData()
+		}
+	}, [currentStep, isSubmitting, submitError, submitSurvey, setIsSubmitting, setSubmitError])
+
 	const handleBack = () => {
 		if (currentStep === 1) {
 			router.back()
@@ -95,6 +142,11 @@ export const SurveyScreen = () => {
 		} else {
 			nextStep()
 		}
+	}
+
+	const handleRetry = () => {
+		setSubmitError(null)
+		setIsSubmitting(false)
 	}
 
 	const getProgressWidth = () => {
@@ -189,6 +241,15 @@ export const SurveyScreen = () => {
 				return <SurveyStep13 />
 
 			case 14:
+				// Показываем экран загрузки, ошибки или финальный экран
+				if (isSubmitting) {
+					return <SurveyStepLoading />
+				}
+				
+				if (submitError) {
+					return <SurveyStepError error={submitError} onRetry={handleRetry} onBack={prevStep} />
+				}
+				
 				return <SurveyStep14 userName={surveyData.name} />
 
 			default:
@@ -225,7 +286,7 @@ export const SurveyScreen = () => {
 			case 13:
 				return true // Уведомления - свои кнопки внутри компонента
 			case 14:
-				return false // Финальный экран
+				return false // На финальном экране кнопка отдельная
 			default:
 				return false
 		}
@@ -239,12 +300,15 @@ export const SurveyScreen = () => {
 	const LayoutComponent = isNoPaddingLayout ? BackgroundLayoutNoSidePadding : BackgroundLayout
 	const sectionPadding = isNoPaddingLayout ? { paddingHorizontal: '4%' as const } : {}
 	
+	// Для экрана загрузки и ошибки используем flex-1 для центрирования
+	const isFullHeightContent = currentStep === 14 && (isSubmitting || submitError)
+	
 	return (
 		<View className="flex-1 bg-[#151515] ">
 			<LayoutComponent>
 				<View className={'flex-1 bg-transparent pt-[14px]'} style={{ justifyContent: 'space-between' }}>
 					{/* Верхний контент */}
-					<View className="flex-shrink">
+					<View className={isFullHeightContent ? "flex-1" : "flex-shrink"}>
 						{/* Header section with back button */}
 						{
 							!notShowProgress &&
@@ -276,7 +340,7 @@ export const SurveyScreen = () => {
 						</View>
 
 							{/* Основной контент */}
-							<View className="w-full gap-6 bg-transparent">{renderCurrentStep()}</View>
+							<View className={isFullHeightContent ? "w-full flex-1 bg-transparent" : "w-full gap-6 bg-transparent"}>{renderCurrentStep()}</View>
 					</View>
 
 					{/* Кнопки внизу экрана с анимацией */}
@@ -309,7 +373,7 @@ export const SurveyScreen = () => {
 						): null}
 
 						{
-							currentStep == 14 && <Button  iconLeft={<Icon name="dumbbell" />} variant={'secondary'} >Перейти к тренировкам</Button>
+							currentStep == 14 && !isSubmitting && !submitError && <Button  iconLeft={<Icon name="dumbbell" />} variant={'secondary'} >Перейти к тренировкам</Button>
 						}
 					</Animated.View>
 				</View>

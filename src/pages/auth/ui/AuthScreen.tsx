@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
-import { View, Image as RNImage, Animated } from 'react-native'
+import { View, Alert, Image as RNImage, Animated, Keyboard } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
+import * as SecureStore from 'expo-secure-store'
 import { Button, BackButton, MaskedText, BackgroundLayout, Input } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation } from '@/shared/lib'
 import { useRouter } from 'expo-router'
+import { authApi } from '@/features/auth'
 // Импорт изображения браслета
 import braceletImage from '../../../../assets/images/ultra-realistic-silicone.png'
 
@@ -33,6 +35,8 @@ export const AuthScreen = () => {
 	const router = useRouter()
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	const [emailError, setEmailError] = useState('')
+	const [isLoading, setIsLoading] = useState(false)
 
 	// Используем хук для анимации клавиатуры
 	const { translateY, opacity: braceletOpacity } = useKeyboardAnimation({
@@ -43,9 +47,51 @@ export const AuthScreen = () => {
 	// Блокируем поворот экрана в портретную ориентацию
 	useOrientation(ScreenOrientation.OrientationLock.PORTRAIT_UP)
 
-	const handleSubmit = () => {
-		// Перенаправляем на главную страницу
-		router.push('/home')
+	// Валидация email
+	const validateEmail = () => {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+		if (email && !emailRegex.test(email)) {
+			setEmailError('Введите корректный email')
+		} else {
+			setEmailError('')
+		}
+	}
+
+	// Обработчик фокуса на поле email
+	const handleEmailFocus = () => {
+		// Empty by design
+	}
+
+	// Обработчик потери фокуса на поле email
+	const handleEmailBlur = () => {
+		validateEmail()
+	}
+
+	const handleSubmit = async () => {
+		// Dismiss keyboard
+		Keyboard.dismiss()
+
+		setIsLoading(true)
+
+		try {
+			const result = await authApi.login({ email, password })
+
+			if (result.success) {
+				// Save tokens to secure storage (user_id already saved in authApi)
+				await SecureStore.setItemAsync('auth_token', result.data.access_token)
+				await SecureStore.setItemAsync('refresh_token', result.data.refresh_token)
+				
+				// Navigate to home
+				router.push('/home')
+			} else {
+				Alert.alert('Ошибка', result.error || 'Не удалось войти')
+			}
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Не удалось войти'
+			Alert.alert('Ошибка', errorMessage)
+		} finally {
+			setIsLoading(false)
+		}
 	}
 
 	return (
@@ -126,9 +172,12 @@ export const AuthScreen = () => {
 								placeholder="example@provider.com"
 								value={email}
 								onChangeText={setEmail}
+								onFocus={handleEmailFocus}
+								onBlur={handleEmailBlur}
 								keyboardType="email-address"
 								variant="text"
 								size="default"
+								error={emailError}
 							/>
 
 							<Input
@@ -151,10 +200,10 @@ export const AuthScreen = () => {
 								size="l"
 								fullWidth
 								onPress={handleSubmit}
-								disabled={!email || !password}
+								disabled={!email || !password || !!emailError || isLoading}
 								className="h-14"
 							>
-								Войти
+								{isLoading ? 'Вход...' : 'Войти'}
 							</Button>
 						</Animated.View>
 					</View>
