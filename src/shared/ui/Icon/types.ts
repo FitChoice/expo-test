@@ -68,6 +68,11 @@ export type IconName =
 	| 'goal-posture'
 	| 'goal-strengthen'
 	| 'goal-energy'
+	| 'goal-dumbbell'
+	| 'goal-habit'
+	| 'goal-pleasure'
+	| 'goal-technique'
+	| 'goal-stamina'
 	// Типы тренировок
 	| 'workout-therapeutic'
 	| 'workout-rehabilitation'

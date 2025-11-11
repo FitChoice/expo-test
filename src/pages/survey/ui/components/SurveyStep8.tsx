@@ -5,11 +5,11 @@ import { FeatureCard } from '@/shared/ui'
 import { IconName } from '@/shared/ui/Icon/types'
 
 const benefits: Array<{ icon: IconName; text: string }> = [
-	{ icon: 'dumbbell', text: 'Сформировать привычку заниматься регулярно' },
-	{ icon: 'goal-strengthen', text: 'Улучшить технику упражнений' },
-	{ icon: 'goal-energy', text: 'Повысить выносливость' },
+	{ icon: 'goal-habit', text: 'Сформировать привычку заниматься регулярно' },
+	{ icon: 'goal-technique', text: 'Улучшить технику упражнений' },
+	{ icon: 'goal-stamina', text: 'Повысить выносливость' },
 	{ icon: 'goal-reduce-stress', text: 'Снизить уровень стресса' },
-	{ icon: 'fire', text: 'Получить удовольствие' },
+	{ icon: 'goal-pleasure', text: 'Получить удовольствие' },
 ]
 
 /**

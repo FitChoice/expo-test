@@ -68,6 +68,11 @@ import Additional from './assets/additional.svg'
 import Diary from './assets/diary.svg'
 import Back from './assets/back.svg'
 import Dumbbell from './assets/dumbbell.svg'
+import GoalDumbbell from './assets/goal-dumbbel.svg'
+import GoalHabit from './assets/goal-habit.svg'
+import GoalPleasure from './assets/goal-pleasure.svg'
+import GoalTechnique from './assets/goal-technique.svg'
+import GoalStamina from './assets/goal-stamina.svg'
 
 interface IconProps {
 	name: IconName
@@ -152,6 +157,11 @@ const iconMap: Record<
 	diary: Diary,
 	back: Back,
 	dumbbell:Dumbbell,
+	'goal-dumbbell': GoalDumbbell,
+	'goal-habit' : GoalHabit,
+	'goal-pleasure' : GoalPleasure,
+	 'goal-technique': GoalTechnique,
+	'goal-stamina' : GoalStamina,
 }
 
 // Компонент иконок
