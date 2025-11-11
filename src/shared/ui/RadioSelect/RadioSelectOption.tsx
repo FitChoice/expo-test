@@ -46,14 +46,15 @@ export const RadioSelectOption: React.FC<RadioSelectOptionProps> = ({
 
 const styles = StyleSheet.create({
 	optionContainer: {
-		paddingHorizontal: 53,
+		paddingHorizontal: 20,
 		paddingVertical: 18,
 		minHeight: 56,
 	},
 	contentContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		justifyContent: 'center',
+		gap: 8,
+		//justifyContent: 'center',
 	},
 	iconContainer: {
 		marginRight: 8,
