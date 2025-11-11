@@ -14,6 +14,7 @@ import { NavigationBar } from '@/widgets/navigation-bar'
 import { userApi } from '@/features/user'
 import { getUserId } from '@/shared/lib'
 import type { TrainingResponse } from '@/shared/api/types'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 /**
  * Список тренировок пользователя
@@ -73,6 +74,7 @@ export default function TrainingListScreen() {
 
 	if (error) {
 		return (
+
 			<BackgroundLayout>
 				<View className="flex-1 items-center justify-center px-6">
 					<Icon name="alert-circle" size={48} color="#FF4444" />
@@ -96,9 +98,9 @@ export default function TrainingListScreen() {
 	return (
 		<View className="flex-1 bg-[#151515]">
 			<BackgroundLayout>
-				<View className="flex-1" style={{ paddingTop: insets.top + 14 }}>
+				<View className="flex-1" >
 					{/* Header */}
-					<View className="mb-4">
+					<View >
 						<BackButton
 							onPress={handleBack}
 							color="#989898"
