@@ -27,11 +27,11 @@ export const CircleIconButton: React.FC<CircleIconButtonProps> = ({
 			disabled={disabled}
 			activeOpacity={0.8}
 		>
-			<View className={`${sizeClasses[size]} items-center justify-center rounded-full bg-brand-purple-500`}>
+			<View className={`${sizeClasses[size]} items-center justify-center rounded-full bg-brand-purple-900`}>
 				<Icon name={icon} size={iconSizes[size]} color="#FFFFFF" />
 				{/* Двойной chevron эффект */}
 				<View className="absolute" style={{ marginLeft: 6 }}>
-					<Icon name={icon} size={iconSizes[size]} color="#FFFFFF" opacity={0.5} />
+					<Icon name={icon} size={iconSizes[size]} color="#FFFFFF" />
 				</View>
 			</View>
 		</TouchableOpacity>

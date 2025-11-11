@@ -1,7 +1,8 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons'
+
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 
 export interface ChipProps {
-	icon?: keyof typeof MaterialIcons.glyphMap;
+	icon?: keyof typeof MaterialCommunityIcons.glyphMap;
 	text: string
 	variant?: 'default' | 'accent'
 }

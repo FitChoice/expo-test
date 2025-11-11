@@ -186,8 +186,7 @@ export const SurveyScreen = () => {
 	const renderCurrentStep = () => {
 		switch (currentStep) {
 			case 1:
-				return <SurveyStep14 userName={'hello'} />
-				//<SurveyStep1 name={surveyData.name} onNameChange={updateName} />
+				return <SurveyStep1 name={surveyData.name} onNameChange={updateName} />
 
 			case 2:
 				return (
@@ -276,11 +275,11 @@ export const SurveyScreen = () => {
 					return <SurveyStepLoading />
 				}
 				
-				if (submitError) {
-					return <SurveyStepError error={submitError} onRetry={handleRetry} onBack={prevStep} />
-				}
-				
-				return <SurveyStep14 userName={surveyData.name} />
+			if (submitError) {
+				return <SurveyStepError error={submitError} onRetry={handleRetry} onBack={prevStep} />
+			}
+			
+			return <SurveyStep14 userName={surveyData.name} gender={surveyData.gender} />
 
 			default:
 				return <SurveyStep1 name={surveyData.name} onNameChange={updateName} />
@@ -402,9 +401,17 @@ export const SurveyScreen = () => {
 							</Button>
 						): null}
 
-						{
-							currentStep == 14 && !isSubmitting && !submitError && <Button  iconLeft={<Icon name="dumbbell" />} variant={'secondary'} >Перейти к тренировкам</Button>
-						}
+					{
+						currentStep == 14 && !isSubmitting && !submitError && (
+							<Button
+								iconLeft={<Icon name="dumbbell" />}
+								variant={'secondary'}
+								onPress={() => router.push('/(training)')}
+							>
+								Перейти к тренировкам
+							</Button>
+						)
+					}
 					</Animated.View>
 				</View>
 			</LayoutComponent>

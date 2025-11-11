@@ -52,9 +52,9 @@ module.exports = {
           900: '#689F38',
         },
         'brand-purple': {
-          300: '#D1C4E9',
+          300: '#DDCDFB',
           500: '#BA9BF7',
-          900: '#BBA2FE',
+          900: '#A172FF',
         },
         // Fill colors (backgrounds, borders)
         'fill': {

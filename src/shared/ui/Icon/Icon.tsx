@@ -124,11 +124,13 @@ const iconMap: Record<
 	ruler: Ruler,
 	barbell: Barbell,
 	clock: Timer, // Using timer as clock placeholder
+	'clock-time-eight': Timer, // Using timer as clock-time-eight placeholder
 	star: Lightning, // Using lightning as star placeholder temporarily
 	pause: Timer, // Using timer as pause placeholder temporarily
 	activity: Lightning, // Using lightning as activity placeholder
 	repeat: Timer, // Using timer as repeat placeholder
 	target: Lightning, // Using lightning as target placeholder
+	'bow-arrow': Lightning, // Using lightning as bow-arrow placeholder
 	'health-knees': HealthKnees,
 	'health-neck-shoulders': HealthNeckShoulders,
 	'health-back-pain': HealthBackPain,

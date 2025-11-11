@@ -23,7 +23,7 @@ import { authApi } from '@/features/auth'
 export const VerificationScreen = () => {
 	const router = useRouter()
 	const insets = useSafeAreaInsets()
-	const { email } = useLocalSearchParams<{ email: string; password?: string }>()
+	const { email, password } = useLocalSearchParams<{ email: string; password: string }>()
 	const [code, setCode] = useState('')
 	const [timer, setTimer] = useState(59) // Таймер для повторной отправки
 	const [isTimerActive, setIsTimerActive] = useState(true) // Активен ли таймер
@@ -62,10 +62,26 @@ export const VerificationScreen = () => {
 		}
 	}, [isTimerActive, timer])
 
-	const handleSubmit = () => {
-		// Здесь будет логика проверки кода
-		if (code.length === 6) {
-			router.push('/survey')
+	const handleSubmit = async () => {
+		if (code.length !== 6 || !email || !password) return
+		
+		try {
+			const result = await authApi.registration({
+				code: Number(code),
+				email,
+				password,
+			})
+
+			if (result.success) {
+				// Успешная регистрация, переходим на survey
+				router.push('/survey')
+			} else {
+				// Показываем ошибку
+				Alert.alert('Ошибка', result.error || 'Неверный код')
+			}
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Не удалось подтвердить код'
+			Alert.alert('Ошибка', errorMessage)
 		}
 	}
 

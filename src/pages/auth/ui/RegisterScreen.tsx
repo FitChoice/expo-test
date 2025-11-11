@@ -157,7 +157,7 @@ export const RegisterScreen = () => {
 
 	const handleSubmit = async () => {
 		// Dismiss keyboard to prevent system password save dialog from interfering
-		Keyboard.dismiss()
+		//Keyboard.dismiss()
 
 		setIsLoading(true)
 
