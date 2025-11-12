@@ -6,7 +6,7 @@ import Constants from 'expo-constants'
 
 // Environment variables
 export const env = {
-	API_URL: Constants.expoConfig?.extra?.apiUrl || 'http://158.160.145.40:8080/api/v1',
+	API_URL: Constants.expoConfig?.extra?.apiUrl || 'https://fitchoice.tech/api/v1',
 	isDevelopment: __DEV__,
 	isProduction: !__DEV__,
 }

@@ -5,13 +5,27 @@
  */
 
 import { View, ActivityIndicator } from 'react-native'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { router } from 'expo-router'
 import { useTrainingStore } from '@/entities/training'
 import { OnboardingFlow, ExerciseFlow } from '@/widgets/training-session'
 import { PauseModal, StopModal } from '@/widgets/training-session/ui/modals'
+import { getUserId } from '@/shared/lib/auth'
 
 export default function TrainingSessionScreen() {
+
+	const [userId, setUserId] = useState<number | null>(null)
+
+			console.log('userId  OUTSIDE:', userId)
+	useEffect(() => {
+		const loadUserId = async () => {
+			const id = await getUserId()
+			setUserId(id)
+			console.log('TrainingSessionScreen')
+			console.log('userId:', id)
+		}
+		loadUserId()
+	}, [])
 	const training = useTrainingStore((state) => state.training)
 	const status = useTrainingStore((state) => state.status)
 	const resume = useTrainingStore((state) => state.resume)

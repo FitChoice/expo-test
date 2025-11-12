@@ -2,8 +2,8 @@
  * Authentication API methods
  */
 
-import * as SecureStore from 'expo-secure-store'
 import { apiClient } from '@/shared/api'
+import { saveUserId } from '@/shared/lib/auth'
 import type {
 	SendCodeInput,
 	SendCodeResponse,
@@ -80,9 +80,7 @@ export const authApi = {
 			return mockSendCode(email)
 		}
 		const payload: SendCodeInput = { email }
-	  return await apiClient.post('/auth/sendCode', payload)
-
-
+		return await apiClient.post<SendCodeInput, SendCodeResponse>('/auth/sendCode', payload)
 	},
 
 	/**
@@ -94,12 +92,12 @@ export const authApi = {
 		if (MOCK_MODE) {
 			result = await mockRegistration(data)
 		} else {
-			result = await apiClient.post<TokenResponse>('/auth/registration', data)
+			result = await apiClient.post<RegistrationInput, TokenResponse>('/auth/registration', data)
 		}
 		
 		// Save user_id to SecureStore on successful registration
-		if (result.success && result.data.user_id) {
-			await SecureStore.setItemAsync('user_id', result.data.user_id.toString())
+		if (result.success && result.data.id) {
+			await saveUserId(result.data.id)
 		}
 		
 		return result
@@ -111,15 +109,19 @@ export const authApi = {
 	async login(data: LoginRequest): Promise<ApiResult<TokenResponse>> {
 		let result: ApiResult<TokenResponse>
 		
+
+		
 		if (MOCK_MODE) {
 			result = await mockLogin(data)
 		} else {
-			result = await apiClient.post<TokenResponse>('/auth/login', data)
+		
+			result = await apiClient.post<LoginRequest, TokenResponse>('/auth/login', data)
+	
 		}
 		
 		// Save user_id to SecureStore on successful login
-		if (result.success && result.data.user_id) {
-			await SecureStore.setItemAsync('user_id', result.data.user_id.toString())
+		if (result.success && result.data.id) {
+			await saveUserId(result.data.id)
 		}
 		
 		return result
@@ -130,6 +132,6 @@ export const authApi = {
 	 */
 	async refresh(refreshToken: string): Promise<ApiResult<TokenResponse>> {
 		const payload: RefreshInput = { refresh_token: refreshToken }
-		return apiClient.post('/auth/refresh', payload)
+		return apiClient.post<RefreshInput, TokenResponse>('/auth/refresh', payload)
 	},
 }
