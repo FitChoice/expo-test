@@ -5,6 +5,27 @@ export type ExerciseSide = 'left' | 'right' | 'both'
 export type WorkoutCategory = 'strength' | 'cardio' | 'flexibility' | 'mobility'
 export type TrainingStatus = 'idle' | 'onboarding' | 'running' | 'paused' | 'finished'
 
+
+
+export interface Activity {
+	duration: number;
+	experience: number;
+	id: number;
+	progress: number[];
+	type: string;
+  }
+  
+export interface ActivitiesResponseItem {
+	activities: Activity[];
+	date: string;
+	id: number;
+	period_id: number;
+	user_id: number;
+  }
+  
+export type ActivitiesResponse = ActivitiesResponseItem[];
+
+
 /**
  * Основная структура тренировки
  */

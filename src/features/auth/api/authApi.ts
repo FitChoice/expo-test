@@ -41,7 +41,7 @@ async function mockRegistration(
 			access_token: 'mock_access_token',
 			refresh_token: 'mock_refresh_token',
 			expires_at: new Date(Date.now() + 3600000).toISOString(),
-			user_id: 1, // Mock user ID
+			id: 1, // Mock user ID
 		},
 	}
 }
@@ -57,7 +57,7 @@ async function mockLogin(_data: LoginRequest): Promise<ApiResult<TokenResponse>>
 			access_token: 'mock_access_token',
 			refresh_token: 'mock_refresh_token',
 			expires_at: new Date(Date.now() + 3600000).toISOString(),
-			user_id: 1, // Mock user ID
+			id: 1, // Mock user ID
 		},
 	}
 }
@@ -80,7 +80,11 @@ export const authApi = {
 			return mockSendCode(email)
 		}
 		const payload: SendCodeInput = { email }
-		return await apiClient.post<SendCodeInput, SendCodeResponse>('/auth/sendCode', payload)
+		return await apiClient.post<SendCodeInput, SendCodeResponse>(
+			'/auth/sendCode', 
+			payload,
+			{ skipAuthHandler: true }
+		)
 	},
 
 	/**
@@ -92,7 +96,11 @@ export const authApi = {
 		if (MOCK_MODE) {
 			result = await mockRegistration(data)
 		} else {
-			result = await apiClient.post<RegistrationInput, TokenResponse>('/auth/registration', data)
+			result = await apiClient.post<RegistrationInput, TokenResponse>(
+				'/auth/registration', 
+				data,
+				{ skipAuthHandler: true }
+			)
 		}
 		
 		// Save user_id to SecureStore on successful registration
@@ -114,9 +122,11 @@ export const authApi = {
 		if (MOCK_MODE) {
 			result = await mockLogin(data)
 		} else {
-		
-			result = await apiClient.post<LoginRequest, TokenResponse>('/auth/login', data)
-	
+			result = await apiClient.post<LoginRequest, TokenResponse>(
+				'/auth/login', 
+				data,
+				{ skipAuthHandler: true }
+			)
 		}
 		
 		// Save user_id to SecureStore on successful login
@@ -132,6 +142,10 @@ export const authApi = {
 	 */
 	async refresh(refreshToken: string): Promise<ApiResult<TokenResponse>> {
 		const payload: RefreshInput = { refresh_token: refreshToken }
-		return apiClient.post<RefreshInput, TokenResponse>('/auth/refresh', payload)
+		return apiClient.post<RefreshInput, TokenResponse>(
+			'/auth/refresh', 
+			payload,
+			{ skipAuthHandler: true }
+		)
 	},
 }
