@@ -87,6 +87,7 @@ module.exports = {
         },
         // BG colors
         'bg': {
+          'dark-400': '#2E322D',
           'dark-500': '#1E1E1E',
           'light': '#FFFFFF',
         },

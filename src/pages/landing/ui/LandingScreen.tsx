@@ -13,7 +13,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Button, CircularText } from '@/shared/ui'
 import { useOrientation } from '@/shared/lib'
 import landingPhoto1 from '../../../../assets/images/landing-photo-1.png'
-import landingPhoto2 from '../../../../assets/images/landing-photo-2.png'
+import landingPhoto2 from '../../../../assets/images/dumbbell_purple_background.png'
+import LandingIcon from '../../../../assets/images/landing_icon.svg'
 
 /**
  * Landing page - посадочная страница с декоративными элементами
@@ -29,7 +30,7 @@ export const LandingScreen = () => {
 
 	// Адаптивные размеры круга (сохраняем пропорции от оригинального макета)
 	const circleSize = Math.min(screenWidth * 0.18, screenHeight * 0.085) // ~72px на стандартном экране
-	const circleOffset = circleSize * 0.22 // ~16px на стандартном экране
+	const circleOffset = circleSize * 0.4 // ~16px на стандартном экране
 
 	const handleRegister = () => {
 		router.push('/register')
@@ -56,17 +57,19 @@ export const LandingScreen = () => {
 		<View className="flex-1 bg-[#151515]">
 			{/* Верхний контейнер Frame 48097890 */}
 			<View className="relative mx-[3.6%] mt-[3.6%] h-[58.1%] w-[92.8%] overflow-hidden rounded-[40px] bg-bg-dark-500">
-				{/* Фиолетовый круг Frame 313 */}
-				<View
-					className="absolute bg-brand-purple-500"
-					style={{
-						width: circleSize,
-						height: circleSize,
-						borderRadius: circleSize / 2,
-						top: circleOffset,
-						left: circleOffset,
-					}}
-				/>
+			
+			<View
+				className="absolute bg-bg-dark-400 items-center justify-center"
+				style={{
+					width: circleSize,
+					height: circleSize,
+					borderRadius: circleSize / 2,
+					top: circleOffset,
+					left: circleOffset,
+				}}
+			>
+				<LandingIcon />
+			</View>
 
 				{/* Group 314 с фотокарточкой и декоративными элементами */}
 				<View className="absolute left-[60%] top-0 h-[90%] w-[40%]">
@@ -153,7 +156,7 @@ export const LandingScreen = () => {
 							accessibilityLabel="Зарегистрироваться"
 							accessibilityHint="Создать новый аккаунт в приложении"
 						>
-							Регистрация
+							Зарегистрироваться
 						</Button>
 						<Button
 							variant="secondary"
@@ -164,29 +167,19 @@ export const LandingScreen = () => {
 							accessibilityLabel="Войти в аккаунт"
 							accessibilityHint="Войти в существующий аккаунт"
 						>
-							Вход
+							Войти
 						</Button>
 					</View>
 				</View>
 			</View>
 
 			{/* ВРЕМЕННЫЕ КНОПКИ ДЛЯ ТЕСТИРОВАНИЯ - УДАЛИТЬ В ПРОДЕ */}
-			<View
+			{/* <View
 				className="absolute left-[14px] z-[1000] flex-col gap-2"
 				style={{ top: insets.top + 14 }}
 			>
-				{/* Survey Test Button */}
-				<TouchableOpacity
-					onPress={handleTestSurvey}
-					className="h-10 w-10 items-center justify-center rounded-lg bg-[#A172FF] opacity-70"
-					activeOpacity={0.6}
-					accessibilityRole="button"
-					accessibilityLabel="Тестовый опрос"
-				>
-					<Text className="text-xl text-white">?</Text>
-				</TouchableOpacity>
-
-				{/* Training Test Button */}
+		
+	
 				<TouchableOpacity
 					onPress={handleTestTraining}
 					className="h-10 w-10 items-center justify-center rounded-lg bg-[#C5F680] opacity-70"
@@ -196,7 +189,7 @@ export const LandingScreen = () => {
 				>
 					<Text className="text-xl text-black">💪</Text>
 				</TouchableOpacity>
-			</View>
+			</View> */}
 		</View>
 	)
 }

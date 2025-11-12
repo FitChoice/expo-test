@@ -69,7 +69,7 @@ export const AuthScreen = () => {
 
 	const handleSubmit = async () => {
 		// Dismiss keyboard
-		Keyboard.dismiss()
+		//Keyboard.dismiss()
 
 		setIsLoading(true)
 

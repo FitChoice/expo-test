@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { View, Alert, Image as RNImage, Animated, Keyboard } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { View, Alert, Image as RNImage, Animated, Keyboard, Text } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import { Button, BackButton, MaskedText, BackgroundLayout, Input } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation } from '@/shared/lib'
@@ -42,6 +42,22 @@ export const RegisterScreen = () => {
 	const [passwordHelperText, setPasswordHelperText] = useState('')
 	const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
+
+	// Очистка формы при размонтировании компонента
+	useEffect(() => {
+		return () => {
+			setEmail('')
+			setPassword('')
+			setConfirmPassword('')
+			setPasswordError('')
+			setConfirmPasswordError('')
+			setEmailError('')
+			setShowPasswordHelper(false)
+			setPasswordHelperText('')
+			setConfirmPasswordTouched(false)
+			setIsLoading(false)
+		}
+	}, [])
 
 	// Используем хук для анимации клавиатуры
 	const { translateY, opacity: braceletOpacity } = useKeyboardAnimation({
@@ -306,31 +322,36 @@ export const RegisterScreen = () => {
 						</Animated.View>
 					</View>
 
-					{/* Кнопки внизу экрана */}
-					<View className="gap-2 pb-[50px] pt-8">
-						{/* Кнопка регистрации */}
-						<Animated.View className="w-full" style={{ transform: [{ translateY }] }}>
-							<Button
-								variant="primary"
-								size="l"
-								fullWidth
-								onPress={handleSubmit}
-								disabled={
-									!email ||
-									!password ||
-									!confirmPassword ||
-									!!passwordError ||
-									!!emailError ||
-									showPasswordHelper ||
-									(password && confirmPassword && !!confirmPasswordError) ||
-									isLoading
-								}
-								className="h-14"
-							>
-								{isLoading ? 'Отправка...' : 'Зарегистрироваться'}
-							</Button>
-						</Animated.View>
-					</View>
+				{/* Кнопки внизу экрана */}
+				<View className="gap-2 pb-[50px] pt-8">
+					{/* Кнопка регистрации */}
+					<Animated.View className="w-full" style={{ transform: [{ translateY }] }}>
+						<Button
+							variant="primary"
+							size="l"
+							fullWidth
+							onPress={handleSubmit}
+							disabled={
+								!email ||
+								!password ||
+								!confirmPassword ||
+								!!passwordError ||
+								!!emailError ||
+								showPasswordHelper ||
+								(password && confirmPassword && !!confirmPasswordError) ||
+								isLoading
+							}
+							className="h-14"
+						>
+							{isLoading ? 'Отправка...' : 'Зарегистрироваться'}
+						</Button>
+					</Animated.View>
+
+					{/* Текст с соглашениями */}
+					<Text className="text-center text-xs text-light-text-500 px-4 leading-4">
+						Продолжая регистрацию, вы соглашаетесь с Пользовательским соглашением, Политикой конфиденциальности, Политикой возвратов и даёте Согласие на обработку персональных данных
+					</Text>
+				</View>
 				</View>
 			</BackgroundLayout>
 		</View>

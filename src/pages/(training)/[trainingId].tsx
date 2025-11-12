@@ -60,35 +60,35 @@ export default function TrainingEntryScreen() {
 	})
 
 	// If not authenticated, automatically show demo
-	useEffect(() => {
-		if (isAuthenticated === false && trainingId) {
-			const demo: Training = {
-				trainingId: trainingId,
-				title: 'Демо тренировка',
-				description: 'Локальная демо-тренировка для теста без сети',
-				category: 'mobility',
-				experiencePoints: 50,
-				inventory: [],
-				exercises: [
-					{
-						id: 'ex_demo_1',
-						name: 'Приседания',
-						type: 'ai',
-						sets: 2,
-						reps: 10,
-						duration: null,
-						restTime: 30,
-						videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
-						thumbnailUrl: '',
-						progress: 0,
-					},
-				],
-			}
-
-			startTraining(demo)
-			//router.replace({ pathname: '/(training)/session', params: { trainingId: demo.trainingId } })
-		}
-	}, [isAuthenticated, trainingId, startTraining])
+	// useEffect(() => {
+	// 	if (isAuthenticated === false && trainingId) {
+	// 		const demo: Training = {
+	// 			trainingId: trainingId,
+	// 			title: 'Демо тренировка',
+	// 			description: 'Локальная демо-тренировка для теста без сети',
+	// 			category: 'mobility',
+	// 			experiencePoints: 50,
+	// 			inventory: [],
+	// 			exercises: [
+	// 				{
+	// 					id: 'ex_demo_1',
+	// 					name: 'Приседания',
+	// 					type: 'ai',
+	// 					sets: 2,
+	// 					reps: 10,
+	// 					duration: null,
+	// 					restTime: 30,
+	// 					videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+	// 					thumbnailUrl: '',
+	// 					progress: 0,
+	// 				},
+	// 			],
+	// 		}
+	//
+	// 		startTraining(demo)
+	// 		//router.replace({ pathname: '/(training)/session', params: { trainingId: demo.trainingId } })
+	// 	}
+	// }, [isAuthenticated, trainingId, startTraining])
 
 	// Check for saved session on mount
 	useEffect(() => {
