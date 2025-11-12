@@ -141,16 +141,16 @@ export function GyroscopeLevelScreen({ onNext }: GyroscopeLevelScreenProps) {
 			/>
 				</View>
 
-				{/* Угол или fallback для веба */}
-				{isAvailable === false && Platform.OS === 'web' ? (
-					<Text className="text-body-regular text-text-secondary mb-12 text-center">
-						Датчик акселерометра недоступен в веб. Нажмите «Далее», чтобы продолжить.
-					</Text>
-				) : (
-					<Text className="text-h1-medium text-text-primary mb-12 text-center">
-						{angle}°
-					</Text>
-				)}
+			{/* Угол или fallback для веба */}
+			{isAvailable === false && Platform.OS === 'web' ? (
+				<Text className="text-body-regular text-text-secondary mt-4 mb-12 text-center">
+					Датчик акселерометра недоступен в веб. Нажмите «Далее», чтобы продолжить.
+				</Text>
+			) : (
+				<Text className={`text-h1 mt-4 mb-12 text-center ${isAvailable !== false && !isCalibrated ? 'text-light-text-100' : 'text-brand-green-500'}`}>
+					{angle}°
+				</Text>
+			)}
 			</View>
 
 			{/* Text and Button Section */}
@@ -162,7 +162,7 @@ export function GyroscopeLevelScreen({ onNext }: GyroscopeLevelScreenProps) {
 
 				{/* Description */}
 				<Text className="text-t2 text-light-text-500 text-left leading-6 mb-20">
-					Поставьте телефон так, чтобы он стоял ровно и градус наклона был равен 0				</Text>
+					Поставьте телефон так, чтобы он стоял ровно и градус наклона был равен 0</Text>
 
 				{/* Button */}
 				<Button
