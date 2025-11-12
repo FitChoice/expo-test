@@ -59,32 +59,32 @@ export function GyroscopeLevelScreen({ onNext }: GyroscopeLevelScreenProps) {
 
 				Accelerometer.setUpdateInterval(100);
 
-				subscription = Accelerometer.addListener(({ x, y, z }) => {
-					// Угол между вертикалью телефона и гравитацией
-					const gravity = Math.sqrt(x * x + y * y + z * z);
-					const angleRad = Math.acos(z / gravity);
-					const angleDeg = Math.round((angleRad * 180) / Math.PI);
-				  
-					setAngle(angleDeg);
-				  
-					// Анимация полоски — теперь отображает вертикальный угол
-					Animated.timing(barRotation, {
-					  toValue: angleDeg,
-					  duration: 100,
-					  useNativeDriver: true,
-					}).start();
-				  
-			
-					const isAligned = Math.abs(angleDeg) <= 5;
-					setIsCalibrated(isAligned);
-				  
-					setBarStyle({
-					  width: 200,
-					  height: 4,
-					  backgroundColor: isAligned ? '#C5F680' : '#FFFFFF',
-					  borderRadius: 2,
-					});
-				  });
+			subscription = Accelerometer.addListener(({ x, y, z }) => {
+				// Угол наклона вперед-назад, когда телефон стоит вертикально
+				// y ≈ -1 когда телефон вертикален, z показывает наклон вперед/назад
+				const angleRad = Math.atan2(z, Math.abs(y));
+				const angleDeg = Math.round((angleRad * 180) / Math.PI);
+			  
+				setAngle(angleDeg);
+			  
+				// Анимация полоски — линия горизонтальна при angleDeg=0 (вертикальный телефон)
+				Animated.timing(barRotation, {
+				  toValue: angleDeg,
+				  duration: 100,
+				  useNativeDriver: true,
+				}).start();
+			  
+				// Телефон вертикален, когда angleDeg близок к 0
+				const isAligned = Math.abs(angleDeg) <= 5;
+				setIsCalibrated(isAligned);
+			  
+				setBarStyle({
+				  width: 200,
+				  height: 4,
+				  backgroundColor: isAligned ? '#C5F680' : '#FFFFFF',
+				  borderRadius: 2,
+				});
+			  });
 				  
 			} catch (error) {
 				setIsAvailable(false);
@@ -124,23 +124,21 @@ export function GyroscopeLevelScreen({ onNext }: GyroscopeLevelScreenProps) {
 			<View className="flex-1 items-center justify-center px-6">
 				{/* Gyroscope Visualizer */}
 				<View className="w-full items-center justify-center">
-					<Animated.View
-						style={[
+			<Animated.View
+				style={[
+					{
+						transform: [
 							{
-								transform: [
-									{
-						
-										rotate: barRotation?.interpolate({
-											inputRange: [0, 90], // 0 — вертикально, 90 — горизонтально
-											outputRange: ['0deg', '90deg'],
-										  }),
-										  
-									},
-								],
+								rotate: barRotation.interpolate({
+									inputRange: [-45, 0, 45], // отклонения влево и вправо
+									outputRange: ['-45deg', '0deg', '45deg'],
+								}),
 							},
-							barStyle,
-						]}
-					/>
+						],
+					},
+					barStyle,
+				]}
+			/>
 				</View>
 
 				{/* Угол или fallback для веба */}
