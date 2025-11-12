@@ -174,7 +174,7 @@ export const LandingScreen = () => {
 			</View>
 
 			{/* ВРЕМЕННЫЕ КНОПКИ ДЛЯ ТЕСТИРОВАНИЯ - УДАЛИТЬ В ПРОДЕ */}
-			{/* <View
+			<View
 				className="absolute left-[14px] z-[1000] flex-col gap-2"
 				style={{ top: insets.top + 14 }}
 			>
@@ -189,7 +189,7 @@ export const LandingScreen = () => {
 				>
 					<Text className="text-xl text-black">💪</Text>
 				</TouchableOpacity>
-			</View> */}
+			</View>
 		</View>
 	)
 }

@@ -138,7 +138,6 @@ export const SurveyScreen = () => {
 
 	const handleNext = async () => {
 		if (currentStep === 13) {
-
 			if (!hasRequested) {
 				try {
 					const { status: existingStatus } = await Notifications.getPermissionsAsync()
@@ -150,17 +149,14 @@ export const SurveyScreen = () => {
 					}
 
 					if (finalStatus === 'granted') {
-						// Получаем push token
 						const token = await Notifications.getExpoPushTokenAsync()
 						console.log('Push token:', token.data)
-
-						// Здесь можно отправить token на сервер если нужно
-						// await sendPushTokenToServer(token.data)
 					}
 
 					setHasRequested(true)
 				} catch (error) {
-					console.error('Error requesting notifications:', error)
+					// Игнорируем ошибку в Expo Go
+					console.log('Notifications unavailable:', error)
 				}
 			}
 			

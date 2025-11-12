@@ -20,6 +20,7 @@ import { DotsProgress } from '@/shared/ui/DotsProgress';
 import { CloseBtn } from '@/shared/ui/CloseBtn';
 import { router } from 'expo-router';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
+import { GradientBg } from '@/shared/ui/GradientBG'
 
 interface GyroscopeLevelScreenProps {
 	onNext: () => void;
@@ -49,7 +50,6 @@ export function GyroscopeLevelScreen({ onNext }: GyroscopeLevelScreenProps) {
 
 		const init = async () => {
 			try {
-				// Блокируем переход экрана в спящий режим
 				await activateKeepAwakeAsync();
 				keepAwakeActivated = true;
 
@@ -59,33 +59,33 @@ export function GyroscopeLevelScreen({ onNext }: GyroscopeLevelScreenProps) {
 
 				Accelerometer.setUpdateInterval(100);
 
-				subscription = Accelerometer.addListener((data) => {
-					const { x, y, z } = data;
-
-					// Рассчитываем угол наклона вперёд-назад (pitch)
-					const angleRad = Math.atan2(x, Math.hypot(y, z));
+				subscription = Accelerometer.addListener(({ x, y, z }) => {
+					// Угол между вертикалью телефона и гравитацией
+					const gravity = Math.sqrt(x * x + y * y + z * z);
+					const angleRad = Math.acos(z / gravity);
 					const angleDeg = Math.round((angleRad * 180) / Math.PI);
-
+				  
 					setAngle(angleDeg);
-
-					// Анимация поворота полоски
+				  
+					// Анимация полоски — теперь отображает вертикальный угол
 					Animated.timing(barRotation, {
-						toValue: angleDeg,
-						duration: 100,
-						useNativeDriver: true,
+					  toValue: angleDeg,
+					  duration: 100,
+					  useNativeDriver: true,
 					}).start();
-
-					// Проверка на "ровность"
+				  
+			
 					const isAligned = Math.abs(angleDeg) <= 5;
 					setIsCalibrated(isAligned);
-
+				  
 					setBarStyle({
-						width: 200,
-						height: 4,
-						backgroundColor: isAligned ? '#C5F680' : '#FFFFFF',
-						borderRadius: 2,
+					  width: 200,
+					  height: 4,
+					  backgroundColor: isAligned ? '#C5F680' : '#FFFFFF',
+					  borderRadius: 2,
 					});
-				});
+				  });
+				  
 			} catch (error) {
 				setIsAvailable(false);
 				console.error('Accelerometer setup error:', error);
@@ -107,30 +107,34 @@ export function GyroscopeLevelScreen({ onNext }: GyroscopeLevelScreenProps) {
 	};
 
 	return (
-		<View className="bg-background-primary flex-1">
+		<View className="bg-background-primary flex-1  ">
+
+			{/* Gradient Background */}
+			<GradientBg  />
 			{/* Close Button */}
 			<View className="absolute right-4 top-12 z-10">
-				<CloseBtn handlePress={handleStop} classNames="h-12 w-12 rounded-2xl" />
+				<CloseBtn handlePress={handleStop} classNames={"h-12 w-12 rounded-2xl"} />
 			</View>
 
 			{/* Progress Dots */}
-			<View className="absolute left-1/2 top-12 z-10 -translate-x-1/2">
-				<DotsProgress total={4} current={3} />
+			<View className="absolute left-1/2 -translate-x-1/2 top-20 z-10">
+				<DotsProgress total={4} current={3} variant="onboarding" />
 			</View>
-
 			{/* Content */}
 			<View className="flex-1 items-center justify-center px-6">
 				{/* Gyroscope Visualizer */}
-				<View className="mb-12 h-64 w-full items-center justify-center">
+				<View className="w-full items-center justify-center">
 					<Animated.View
 						style={[
 							{
 								transform: [
 									{
+						
 										rotate: barRotation?.interpolate({
-											inputRange: [-90, 90],
-											outputRange: ['-90deg', '90deg'],
-										}),
+											inputRange: [0, 90], // 0 — вертикально, 90 — горизонтально
+											outputRange: ['0deg', '90deg'],
+										  }),
+										  
 									},
 								],
 							},
@@ -149,20 +153,20 @@ export function GyroscopeLevelScreen({ onNext }: GyroscopeLevelScreenProps) {
 						{angle}°
 					</Text>
 				)}
+			</View>
 
-				{/* Заголовок */}
-				<Text className="text-h2-medium text-text-primary mb-4 text-center">
+			{/* Text and Button Section */}
+			<View className="px-6 pb-6">
+				{/* Title */}
+				<Text className="text-h2 font-bold text-light-text-100 mb-3 text-left">
 					Проверьте уровень
 				</Text>
 
-				{/* Подсказка */}
-				<Text className="text-body-regular text-text-secondary mb-12 text-center">
-					Поставьте телефон так, чтобы он стоял ровно или наклон был равен 0
-				</Text>
-			</View>
+				{/* Description */}
+				<Text className="text-t2 text-light-text-500 text-left leading-6 mb-20">
+					Поставьте телефон так, чтобы он стоял ровно и градус наклона был равен 0				</Text>
 
-			{/* Кнопка */}
-			<View className="p-6">
+				{/* Button */}
 				<Button
 					variant="primary"
 					onPress={onNext}
@@ -172,6 +176,7 @@ export function GyroscopeLevelScreen({ onNext }: GyroscopeLevelScreenProps) {
 					Далее
 				</Button>
 			</View>
+
 		</View>
 	);
 }
