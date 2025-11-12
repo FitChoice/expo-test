@@ -15,6 +15,7 @@ import { ExerciseSuccessScreen } from './exercise/ExerciseSuccessScreen'
 import { SideSwitchScreen } from './exercise/SideSwitchScreen'
 import { RestScreen } from './exercise/RestScreen'
 import { ExerciseTransitionScreen } from './exercise/ExerciseTransitionScreen'
+import { StopModal } from './modals/StopModal'
 import { useTrainingStore } from '@/entities/training'
 
 type ExerciseStep =
@@ -29,6 +30,7 @@ type ExerciseStep =
 export function ExerciseFlow() {
 	const [currentStep, setCurrentStep] = useState<ExerciseStep>('countdown')
 	const [currentSideState, setCurrentSideState] = useState<'left' | 'right' | null>(null)
+	const [showStopModal, setShowStopModal] = useState(false)
 	const training = useTrainingStore((state) => state.training)
 	const currentExerciseIndex = useTrainingStore((state) => state.currentExerciseIndex)
 	const currentSet = useTrainingStore((state) => state.currentSet)
@@ -127,9 +129,18 @@ export function ExerciseFlow() {
 	}, [pause])
 
 	const handleStop = useCallback(() => {
+		setShowStopModal(true)
+	}, [])
+
+	const handleStopConfirm = useCallback(() => {
 		stop()
+		setShowStopModal(false)
 		router.back()
 	}, [stop])
+
+	const handleStopCancel = useCallback(() => {
+		setShowStopModal(false)
+	}, [])
 
 	const nextExerciseData = training.exercises[currentExerciseIndex + 1]
 
@@ -183,6 +194,11 @@ export function ExerciseFlow() {
 					onComplete={handleTransitionComplete}
 				/>
 			)}
+			<StopModal
+				visible={showStopModal}
+				onConfirm={handleStopConfirm}
+				onCancel={handleStopCancel}
+			/>
 		</View>
 	)
 }
