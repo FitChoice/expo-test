@@ -5,16 +5,13 @@ import {
 	Platform,
 	StyleSheet,
 	TouchableOpacity,
-	ActivityIndicator,
 } from 'react-native'
-import { router, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Icon, Button, AuthGuard, BackgroundLayout } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
-import { trainingApi } from '@/entities/training'
-import { useQuery } from '@tanstack/react-query'
-import { useState, useEffect } from 'react'
-import { getUserId } from '@/shared/lib/auth'
+import type { Training } from '@/entities/training'
+import { useTrainingStore } from '@/entities/training'
 
 /**
  * Home screen - main page according to Figma design
@@ -36,194 +33,151 @@ export const HomeScreen = () => {
  */
 const MobileContent = () => {
 	const insets = useSafeAreaInsets()
+
+
 	const router = useRouter()
-	const [userId, setUserId] = useState<number | null>(null)
+	const startTraining = useTrainingStore((state) => state.startTraining)
 
-	useEffect(() => {
-		const loadUserId = async () => {
-			const id = await getUserId()
-			setUserId(id)
+	const handleOpenDemo = () => {
+		const demo: Training = {
+			trainingId: 'demo',
+			title: 'Демо тренировка',
+			description: 'Локальная демо-тренировка для теста без сети',
+			category: 'mobility',
+			experiencePoints: 50,
+			inventory: [],
+			exercises: [
+				{
+					id: 'ex_demo_1',
+					name: 'Приседания',
+					type: 'ai',
+					sets: 2,
+					reps: 10,
+					duration: null,
+					restTime: 30,
+					videoUrl: 'https://media.istockphoto.com/id/848169704/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D0%BC%D0%BE%D0%BB%D0%BE%D0%B4%D0%B0%D1%8F-%D0%BA%D1%80%D0%B0%D1%81%D0%B8%D0%B2%D0%B0%D1%8F-%D0%BA%D0%B0%D0%B2%D0%BA%D0%B0%D0%B7%D1%81%D0%BA%D0%B0%D1%8F-%D0%B6%D0%B5%D0%BD%D1%89%D0%B8%D0%BD%D0%B0-%D0%B4%D0%B5%D0%BB%D0%B0%D0%B5%D1%82-%D0%B9%D0%BE%D0%B3%D1%83-%D0%B0%D1%81%D0%B0%D0%BD%D1%83-%D0%B2-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B5-%D0%BB%D0%B5%D1%82%D0%BD%D0%B5%D0%B5-%D1%83%D1%82%D1%80%D0%BE-%D0%B4%D0%B5%D0%B2%D1%83%D1%88%D0%BA%D0%B0-%D0%B2-%D1%81%D0%B8%D0%BD%D0%B8%D1%85.mp4?s=mp4-640x640-is&k=20&c=Z8_0tveZ1dlHRSHZ_RFf7v7sCttXCAzBkZQv0qYjhgY=',
+					thumbnailUrl: '',
+					progress: 0,
+				},
+			],
 		}
-		loadUserId()
-	}, [])
 
-	// Загружаем программу тренировок
-	const { data: program, isLoading, error } = useQuery({
-		queryKey: ['training-program', userId ],
-		queryFn: () => trainingApi.getTrainingProgram(2),
-		enabled: !!userId,
-	})
-	
-
-//	const todayTraining = program?.[0]
-
-	// const handleOpenTraining = () => {
-	// 	if (todayTraining) {
-	// 		router.push({ pathname: `/(training)/${todayTraining?.trainingId}` })
-	// 	}
-	// }
-
-	if (!error && (isLoading || !program)) {
-		return (
-			<View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-				<ActivityIndicator size="large" color="#9333EA" />
-			</View>
-		)
+		startTraining(demo)
+		router.push({ pathname: '/(training)/session', params: { trainingId: demo.trainingId } })
 	}
 
-	if (error) {
-		return (
-			<View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-				<Text
-						className="text-[34px] leading-[35px] text-white"
-						style={{
-							fontFamily: Platform.select({
-								android: 'Rimma_sans_android',
-								ios: 'Rimma_sans',
-							}),
-						}}
-					>
-						Error: 
-					</Text>
+	return (
+		<View style={styles.container}>
+			<ScrollView
+				style={styles.scrollView}
+				showsVerticalScrollIndicator={false}
+				contentContainerStyle={{ paddingBottom: 120 }}
+			>
+				{/* Header with progress */}
+				<View style={[styles.header, { paddingTop: insets.top + 14 }]}>
+					<View style={styles.progressSection}>
+						<View style={styles.progressItem}>
+							<Icon name="barbell" size={56} color="rgba(255, 255, 255, 0.1)" />
+							<Text style={styles.progressText}>1 / 12</Text>
+						</View>
+						<Text style={styles.monthText}>Месяц 1</Text>
+						<View style={styles.progressItem}>
+							<Icon name="fire" size={56} color="rgba(255, 255, 255, 0.1)" />
+							<Text style={styles.progressText}>40</Text>
+						</View>
+					</View>
+				</View>
 
-					<Text className='text-white' >{error.message}</Text>
-				
-			</View>
-		)
-	}
+				{/* Mini Calendar */}
+				<View style={styles.calendarSection}>
+					<View style={styles.calendarContainer}>
+						{/* Calendar days */}
+						<View style={styles.calendarDays}>
+							{['8', '10', '11', '12', '13', '14'].map((day, index) => (
+								<View key={index} style={styles.calendarDay}>
+									<View style={styles.dayCard}>
+										<Icon name="barbell" size={16} color="#FFFFFF" />
+										<View style={styles.dayInfo}>
+											<Text style={styles.dayNumber}>{day}</Text>
+											<Text style={styles.dayName}>
+												{['пн', 'ср', 'чт', 'пт', 'сб', 'вс'][index]}
+											</Text>
+										</View>
+									</View>
+									<View style={styles.dayDot} />
+								</View>
+							))}
+						</View>
+					</View>
+				</View>
 
+				{/* Main Content Card */}
+				<View style={styles.mainCard}>
+					{/* Progress Tag - moved to top */}
+					<View style={styles.progressTag}>
+						<Icon name="check-circle" size={16} color="#FFFFFF" />
+						<Text style={styles.progressTagText}>0/2</Text>
+					</View>
 
-	// const totalTrainings = program.trainings.length
-	// const completedTrainings = program.trainings.filter(t => 
-	// 	t.exercises.every(e => e.progress >= 100)
-	// ).length
+					<View style={styles.cardHeader}>
+						<Text style={styles.dayTitle}>День 1</Text>
+						<Text style={styles.dayDescription}>
+							Самое время начать{'\n'}Первая тренировка уже ждёт тебя
+						</Text>
+					</View>
 
-	// // Вычисляем длительность тренировки
-	// const duration = todayTraining ? Math.round(
-	// 	todayTraining.exercises.reduce((sum, ex) => {
-	// 		const exerciseTime = ex.duration || (ex.reps || 0) * 3
-	// 		const restTotal = ex.restTime * (ex.sets - 1)
-	// 		return sum + exerciseTime * ex.sets + restTotal
-	// 	}, 0) / 60
-	// ) : 0
+					{/* Action Buttons */}
+					<View style={styles.actionButtons}>
+						<TouchableOpacity style={styles.actionButton}
+															onPress={handleOpenDemo}
+						>
+							<View style={styles.buttonContent}>
+								<View style={styles.buttonInfo}>
+									<Text style={styles.buttonTitle}>Тренировка</Text>
+									<View style={styles.buttonTags}>
+										<View style={styles.tag}>
+											<Icon name="timer" size={16} color="#FFFFFF" />
+											<Text style={styles.tagText}>40 минут</Text>
+										</View>
+										<View style={styles.tag}>
+											<Icon name="fire" size={16} color="#FFFFFF" />
+											<Text style={styles.tagText}>+20 опыта</Text>
+										</View>
+									</View>
+								</View>
+								<View style={styles.buttonIcon}>
+									<Icon name="barbell" size={32} color="#A172FF" />
+								</View>
+							</View>
+						</TouchableOpacity>
 
+						<TouchableOpacity style={styles.actionButton}>
+							<View style={styles.buttonContent}>
+								<View style={styles.buttonInfo}>
+									<Text style={styles.buttonTitle}>Дневник</Text>
+									<View style={styles.buttonTags}>
+										<View style={styles.tag}>
+											<Icon name="timer" size={16} color="#FFFFFF" />
+											<Text style={styles.tagText}>40 минут</Text>
+										</View>
+										<View style={styles.tag}>
+											<Icon name="fire" size={16} color="#FFFFFF" />
+											<Text style={styles.tagText}>+20 опыта</Text>
+										</View>
+									</View>
+								</View>
+								<View style={styles.buttonIcon}>
+									<Icon name="diary" size={32} color="#A172FF" />
+								</View>
+							</View>
+						</TouchableOpacity>
+					</View>
+				</View>
+			</ScrollView>
 
-	return ( <View>hello</View>
-		// <View style={styles.container}>
-		// 	<ScrollView
-		// 		style={styles.scrollView}
-		// 		showsVerticalScrollIndicator={false}
-		// 		contentContainerStyle={{ paddingBottom: 120 }}
-		// 	>
-		// 		{/* Header with progress */}
-		// 		<View style={[styles.header, { paddingTop: insets.top + 14 }]}>
-		// 			<View style={styles.progressSection}>
-		// 				<View style={styles.progressItem}>
-		// 					<Icon name="barbell" size={56} color="rgba(255, 255, 255, 0.1)" />
-		// 					<Text style={styles.progressText}>{completedTrainings} / {totalTrainings}</Text>
-		// 				</View>
-		// 				<Text style={styles.monthText}>Месяц {program.period_id}</Text>
-		// 				<View style={styles.progressItem}>
-		// 					<Icon name="fire" size={56} color="rgba(255, 255, 255, 0.1)" />
-		// 					<Text style={styles.progressText}>{completedTrainings * 20}</Text>
-		// 				</View>
-		// 			</View>
-		// 		</View>
-
-		// 		{/* Mini Calendar */}
-		// 		<View style={styles.calendarSection}>
-		// 			<View style={styles.calendarContainer}>
-		// 				{/* Calendar days */}
-		// 				<View style={styles.calendarDays}>
-		// 					{['8', '10', '11', '12', '13', '14'].map((day, index) => (
-		// 						<View key={index} style={styles.calendarDay}>
-		// 							<View style={styles.dayCard}>
-		// 								<Icon name="barbell" size={16} color="#FFFFFF" />
-		// 								<View style={styles.dayInfo}>
-		// 									<Text style={styles.dayNumber}>{day}</Text>
-		// 									<Text style={styles.dayName}>
-		// 										{['пн', 'ср', 'чт', 'пт', 'сб', 'вс'][index]}
-		// 									</Text>
-		// 								</View>
-		// 							</View>
-		// 							<View style={styles.dayDot} />
-		// 						</View>
-		// 					))}
-		// 				</View>
-		// 			</View>
-		// 		</View>
-
-		// 		{/* Main Content Card */}
-		// 		<View style={styles.mainCard}>
-		// 			{/* Progress Tag - moved to top */}
-		// 			<View style={styles.progressTag}>
-		// 				<Icon name="check-circle" size={16} color="#FFFFFF" />
-		// 				<Text style={styles.progressTagText}>{completedTrainings}/{totalTrainings}</Text>
-		// 			</View>
-
-		// 			<View style={styles.cardHeader}>
-		// 				<Text style={styles.dayTitle}>День {completedTrainings + 1}</Text>
-		// 				<Text style={styles.dayDescription}>
-		// 					{todayTraining ? todayTraining.description : 'Все тренировки завершены!'}
-		// 				</Text>
-		// 			</View>
-
-		// 		{/* Action Buttons */}
-		// 		<View style={styles.actionButtons}>
-		// 			<TouchableOpacity 
-		// 				style={styles.actionButton}
-		// 				onPress={handleOpenTraining}
-		// 				disabled={!todayTraining}
-		// 			>
-		// 				<View style={styles.buttonContent}>
-		// 						<View style={styles.buttonInfo}>
-		// 							<Text style={styles.buttonTitle}>
-		// 								{todayTraining?.title || 'Тренировка'}
-		// 							</Text>
-		// 							<View style={styles.buttonTags}>
-		// 								<View style={styles.tag}>
-		// 									<Icon name="timer" size={16} color="#FFFFFF" />
-		// 									<Text style={styles.tagText}>{duration} минут</Text>
-		// 								</View>
-		// 								<View style={styles.tag}>
-		// 									<Icon name="fire" size={16} color="#FFFFFF" />
-		// 									<Text style={styles.tagText}>+{todayTraining?.experiencePoints || 0} опыта</Text>
-		// 								</View>
-		// 							</View>
-		// 						</View>
-		// 						<View style={styles.buttonIcon}>
-		// 							<Icon name="barbell" size={32} color="#A172FF" />
-		// 						</View>
-		// 					</View>
-		// 				</TouchableOpacity>
-
-		// 				<TouchableOpacity style={styles.actionButton}>
-		// 					<View style={styles.buttonContent}>
-		// 						<View style={styles.buttonInfo}>
-		// 							<Text style={styles.buttonTitle}>Дневник</Text>
-		// 							<View style={styles.buttonTags}>
-		// 								<View style={styles.tag}>
-		// 									<Icon name="timer" size={16} color="#FFFFFF" />
-		// 									<Text style={styles.tagText}>40 минут</Text>
-		// 								</View>
-		// 								<View style={styles.tag}>
-		// 									<Icon name="fire" size={16} color="#FFFFFF" />
-		// 									<Text style={styles.tagText}>+20 опыта</Text>
-		// 								</View>
-		// 							</View>
-		// 						</View>
-		// 						<View style={styles.buttonIcon}>
-		// 							<Icon name="diary" size={32} color="#A172FF" />
-		// 						</View>
-		// 					</View>
-		// 				</TouchableOpacity>
-		// 			</View>
-		// 		</View>
-		// 	</ScrollView>
-
-		// 	{/* Navigation Bar */}
-		// 	<NavigationBar />
-		// </View>
+			{/* Navigation Bar */}
+			<NavigationBar />
+		</View>
 	)
 }
 

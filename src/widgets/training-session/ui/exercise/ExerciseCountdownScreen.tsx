@@ -32,21 +32,21 @@ export function ExerciseCountdownScreen({
 		player.play()
 	})
 
-	useEffect(() => {
-		const timer = setInterval(() => {
-			setCountdown((prev) => {
-				if (prev <= 1) {
-					clearInterval(timer)
-					// Use setTimeout to make the callback async and avoid setState during render
-					setTimeout(() => onComplete(), 0)
-					return 0
-				}
-				return prev - 1
-			})
-		}, 1000)
+	// useEffect(() => {
+	// 	const timer = setInterval(() => {
+	// 		setCountdown((prev) => {
+	// 			if (prev <= 1) {
+	// 				clearInterval(timer)
+	// 				// Use setTimeout to make the callback async and avoid setState during render
+	// 				setTimeout(() => onComplete(), 0)
+	// 				return 0
+	// 			}
+	// 			return prev - 1
+	// 		})
+	// 	}, 1000)
 
-		return () => clearInterval(timer)
-	}, [onComplete])
+	// 	return () => clearInterval(timer)
+	// }, [onComplete])
 
 	return (
 		<View className="bg-background-primary flex-1">
@@ -60,19 +60,19 @@ export function ExerciseCountdownScreen({
 				</Button>
 			</View>
 
-			{/* Video */}
-			<View className="flex-1">
-				{exercise.videoUrl ? (
-					<VideoView
-						player={player}
-						style={{ flex: 1 }}
-						contentFit="cover"
-						nativeControls={false}
-					/>
-				) : (
-					<View className="bg-brand-dark-300 flex-1" />
-				)}
-			</View>
+		{/* Video */}
+		<View className="h-2/3">
+			{exercise.videoUrl ? (
+				<VideoView
+					player={player}
+					style={{ flex: 1 }}
+					contentFit="cover"
+					nativeControls={false}
+				/>
+			) : (
+				<View className="bg-brand-dark-300 flex-1" />
+			)}
+		</View>
 
 			{/* Exercise Info Overlay */}
 			<View className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 p-6">
@@ -82,7 +82,7 @@ export function ExerciseCountdownScreen({
 				{/* Countdown */}
 				<View className="mb-6 items-center">
 					<LargeNumberDisplay
-						value={`00:${countdown.toString().padStart(2, '0')}`}
+						value={`00:${countdown.toString().padStart(5, '0')}`}
 						size="large"
 					/>
 				</View>

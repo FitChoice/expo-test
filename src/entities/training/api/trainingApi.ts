@@ -16,6 +16,22 @@ export const trainingApi = {
 	 */
 	async getTrainingProgram(userId: number): Promise<ActivitiesResponse> {
 		const result = await apiClient.get<ActivitiesResponse>(`/trainings/plan/${userId}`);
+
+		console.log('result', result)
+	
+		if (!result.success || !result.data) {
+			const errorMessage = !result.success ? result.error : 'No data received';
+			throw new Error(errorMessage || 'Failed to fetch training program');
+		}
+	
+		return result.data
+	},
+
+
+	async getCurrentTrainingProgram(trainingId: number): Promise<ActivitiesResponse> {
+		const result = await apiClient.get<ActivitiesResponse>(`/trainings/train/${trainingId}`);
+
+		console.log('result', result)
 	
 		if (!result.success || !result.data) {
 			const errorMessage = !result.success ? result.error : 'No data received';

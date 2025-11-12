@@ -2,6 +2,7 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { Icon } from '@/shared/ui'
+import Entypo from '@expo/vector-icons/Entypo';
 
 /**
  * Bottom navigation bar widget
@@ -28,7 +29,7 @@ export const NavigationBar = () => {
 					accessibilityLabel="Главная"
 				>
 					<View style={styles.activeButton}>
-						<Icon name="house" size={32} color="#1E1E1E" />
+						<Icon name="house" size={32} />
 					</View>
 				</TouchableOpacity>
 

@@ -6,6 +6,21 @@ export type WorkoutCategory = 'strength' | 'cardio' | 'flexibility' | 'mobility'
 export type TrainingStatus = 'idle' | 'onboarding' | 'running' | 'paused' | 'finished'
 
 
+export const equipment = {
+	1: '/src/assets/images/equipment/1.png',
+	2: '/src/assets/images/equipment/2.png',
+	3: '/src/assets/images/equipment/3.png',
+	4: '/src/assets/images/equipment/4.png',
+	5: '/src/assets/images/equipment/5.png',
+	6: '/src/assets/images/equipment/6.png',
+	7: '/src/assets/images/equipment/7.png',
+	8: '/src/assets/images/equipment/8.png',
+	9: '/src/assets/images/equipment/9.png',
+	10: '/src/assets/images/equipment/10.png',
+	11: '/src/assets/images/equipment/11.png',
+}
+
+
 
 export interface Activity {
 	duration: number;
@@ -26,45 +41,32 @@ export interface ActivitiesResponseItem {
 export type ActivitiesResponse = ActivitiesResponseItem[];
 
 
-/**
- * Основная структура тренировки
- */
-export interface Training {
-	trainingId: string
-	title: string
-	description: string
-	category: WorkoutCategory
-	experiencePoints: number
-	inventory: Equipment[]
-	exercises: Exercise[]
-}
-
-/**
- * Инвентарь для тренировки
- */
-export interface Equipment {
-	id: string
-	name: string
-	imageUrl: string
-	isRequired?: boolean
-}
-
-/**
- * Упражнение в тренировке
- */
 export interface Exercise {
-	id: string
-	name: string
-	type: ExerciseType
-	sets: number
-	reps: number | null
-	duration: number | null
-	restTime: number
-	videoUrl: string
-	thumbnailUrl: string
-	progress: number
-	side?: ExerciseSide
-}
+	id: number;
+	name: string;
+	rest_time: number;
+	duration: number;
+	progress: number;
+	sets: number;
+	reps: number;
+	isAi: boolean;
+	videoUrl: string;
+  }
+  
+  export interface Training {
+	id: number;
+	trainingType: string;
+	title: string;
+	description: string;
+	difficulty: number;
+	experience: number;
+	inventory: number[];
+	exercises: Exercise[];
+  }
+  
+
+
+
 
 /**
  * Отчет о выполненной тренировке

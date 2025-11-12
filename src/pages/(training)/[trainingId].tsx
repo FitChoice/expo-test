@@ -22,6 +22,8 @@ const landingPhoto1 = require('../../../assets/images/landing-photo-1.png')
 export default function TrainingEntryScreen() {
 	const { trainingId } = useLocalSearchParams<{ trainingId: string }>()
 
+
+
 	const [showTutorial, setShowTutorial] = useState(true)
 	const [savedSession, setSavedSession] = useState<SavedWorkoutState | null>(null)
 	const [isCheckingSession, setIsCheckingSession] = useState(true)
@@ -158,31 +160,57 @@ export default function TrainingEntryScreen() {
   if (error || !training) {
     const handleOpenDemo = () => {
       const demo: Training = {
-        trainingId: (trainingId as string) || 'demo',
-        title: 'Демо тренировка',
-        description: 'Локальная демо-тренировка для теста без сети',
-        category: 'mobility',
-        experiencePoints: 50,
-        inventory: [],
-        exercises: [
-          {
-            id: 'ex_demo_1',
-            name: 'Приседания',
-            type: 'ai',
-            sets: 2,
-            reps: 10,
-            duration: null,
-            restTime: 30,
-            // Public sample video to avoid web player errors
-            videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
-            thumbnailUrl: '',
-            progress: 0,
-          },
-        ],
-      }
+			"id": 295,
+			"trainingType": "t7",
+			"title": "Интенсивное кардио",
+			"description": "Серьёзная нагрузка для опытных. Максимум пота — максимум результата.",
+			"difficulty": 2,
+			"experience": 60,
+			"inventory": [
+			  1,
+			  2,
+			  3
+			],
+			"exercises": [
+			  {
+				"id": 0,
+				"name": "Бёрпи",
+				"rest_time": 40,
+				"duration": 300,
+				"progress": 15,
+				"sets": 3,
+				"reps": 12,
+				"isAi": false,
+				"videoUrl": "https://media.istockphoto.com/id/848169704/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D0%BC%D0%BE%D0%BB%D0%BE%D0%B4%D0%B0%D1%8F-%D0%BA%D1%80%D0%B0%D1%81%D0%B8%D0%B2%D0%B0%D1%8F-%D0%BA%D0%B0%D0%B2%D0%BA%D0%B0%D0%B7%D1%81%D0%BA%D0%B0%D1%8F-%D0%B6%D0%B5%D0%BD%D1%89%D0%B8%D0%BD%D0%B0-%D0%B4%D0%B5%D0%BB%D0%B0%D0%B5%D1%82-%D0%B9%D0%BE%D0%B3%D1%83-%D0%B0%D1%81%D0%B0%D0%BD%D1%83-%D0%B2-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B5-%D0%BB%D0%B5%D1%82%D0%BD%D0%B5%D0%B5-%D1%83%D1%82%D1%80%D0%BE-%D0%B4%D0%B5%D0%B2%D1%83%D1%88%D0%BA%D0%B0-%D0%B2-%D1%81%D0%B8%D0%BD%D0%B8%D1%85.mp4?s=mp4-640x640-is&k=20&c=Z8_0tveZ1dlHRSHZ_RFf7v7sCttXCAzBkZQv0qYjhgY="
+			  },
+			  {
+				"id": 1,
+				"name": "Прыжки из приседа",
+				"rest_time": 40,
+				"duration": 300,
+				"progress": 15,
+				"sets": 3,
+				"reps": 15,
+				"isAi": true,
+				"videoUrl": "https://media.istockphoto.com/id/848169704/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D0%BC%D0%BE%D0%BB%D0%BE%D0%B4%D0%B0%D1%8F-%D0%BA%D1%80%D0%B0%D1%81%D0%B8%D0%B2%D0%B0%D1%8F-%D0%BA%D0%B0%D0%B2%D0%BA%D0%B0%D0%B7%D1%81%D0%BA%D0%B0%D1%8F-%D0%B6%D0%B5%D0%BD%D1%89%D0%B8%D0%BD%D0%B0-%D0%B4%D0%B5%D0%BB%D0%B0%D0%B5%D1%82-%D0%B9%D0%BE%D0%B3%D1%83-%D0%B0%D1%81%D0%B0%D0%BD%D1%83-%D0%B2-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B5-%D0%BB%D0%B5%D1%82%D0%BD%D0%B5%D0%B5-%D1%83%D1%82%D1%80%D0%BE-%D0%B4%D0%B5%D0%B2%D1%83%D1%88%D0%BA%D0%B0-%D0%B2-%D1%81%D0%B8%D0%BD%D0%B8%D1%85.mp4?s=mp4-640x640-is&k=20&c=Z8_0tveZ1dlHRSHZ_RFf7v7sCttXCAzBkZQv0qYjhgY="
+			  },
+			  {
+				"id": 2,
+				"name": "Mountain climbers",
+				"rest_time": 40,
+				"duration": 300,
+				"progress": 15,
+				"sets": 3,
+				"reps": 20,
+				"isAi": false,
+				"videoUrl": "https://media.istockphoto.com/id/848169704/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D0%BC%D0%BE%D0%BB%D0%BE%D0%B4%D0%B0%D1%8F-%D0%BA%D1%80%D0%B0%D1%81%D0%B8%D0%B2%D0%B0%D1%8F-%D0%BA%D0%B0%D0%B2%D0%BA%D0%B0%D0%B7%D1%81%D0%BA%D0%B0%D1%8F-%D0%B6%D0%B5%D0%BD%D1%89%D0%B8%D0%BD%D0%B0-%D0%B4%D0%B5%D0%BB%D0%B0%D0%B5%D1%82-%D0%B9%D0%BE%D0%B3%D1%83-%D0%B0%D1%81%D0%B0%D0%BD%D1%83-%D0%B2-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B5-%D0%BB%D0%B5%D1%82%D0%BD%D0%B5%D0%B5-%D1%83%D1%82%D1%80%D0%BE-%D0%B4%D0%B5%D0%B2%D1%83%D1%88%D0%BA%D0%B0-%D0%B2-%D1%81%D0%B8%D0%BD%D0%B8%D1%85.mp4?s=mp4-640x640-is&k=20&c=Z8_0tveZ1dlHRSHZ_RFf7v7sCttXCAzBkZQv0qYjhgY="
+			  }
+			]
+		  }
+      
 
       startTraining(demo)
-      router.push({ pathname: '/(training)/session', params: { trainingId: demo.trainingId } })
+      router.push({ pathname: '/(training)/session', params: { trainingId: 1} })
     }
 
     return (
