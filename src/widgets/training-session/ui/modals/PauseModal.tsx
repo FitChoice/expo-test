@@ -4,8 +4,12 @@
  * Показывается при нажатии на кнопку паузы
  */
 
-import { View, Text, Modal as RNModal } from 'react-native'
+import { View, Text, Modal as RNModal, StyleSheet, Platform } from 'react-native'
+import { BlurView } from 'expo-blur'
+import BigPauseIcon from 'assets/images/big_pause.svg'
+import AntDesign from '@expo/vector-icons/AntDesign'
 import { Button } from '@/shared/ui'
+import { sharedStyles } from '@/pages/survey/ui/components/shared-styles'
 
 interface PauseModalProps {
 	visible: boolean
@@ -16,29 +20,39 @@ interface PauseModalProps {
 export function PauseModal({ visible, onResume, onStop }: PauseModalProps) {
 	return (
 		<RNModal visible={visible} transparent animationType="fade">
-			<View className="flex-1 items-center justify-center bg-black/80 px-6">
+			<View className="flex-1">
+				{/* Blurred gradient background */}
+				<BlurView
+					intensity={80}
+					tint="light"
+					style={StyleSheet.absoluteFill}
+					experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
+					blurReductionFactor={Platform.OS === 'android' ? 4 : undefined}
+				>
+					
+				</BlurView>
+
 				{/* Content */}
-				<View className="bg-brand-dark-400 w-full max-w-md rounded-3xl p-6">
-					{/* Title */}
-					<Text className="text-h3-medium text-text-primary mb-3 text-center">
-						Примите исходное положение
-					</Text>
-
-					{/* Description */}
-					<Text className="text-body-regular text-text-secondary mb-6 text-center">
-						Встаньте так, чтобы ваше тело полностью помещалось в видоискатель, и нажмите
-						кнопку "Продолжить".
-					</Text>
-
-					{/* Actions */}
-					<View className="gap-3">
-						<Button onPress={onResume} variant="primary" className="w-full">
-							Продолжить
-						</Button>
-						<Button onPress={onStop} variant="secondary" className="w-full">
-							Завершить тренировку
-						</Button>
+				<View className="flex-1 justify-center items-center px-6">
+					{/* Pause icon */}
+					<BigPauseIcon />
+					
+					{/* Text */}
+					<View className="mt-6 items-center">
+						<Text style={sharedStyles.title}>
+							Тренировка
+						</Text>
+						<Text style={sharedStyles.title}>
+							на паузе
+						</Text>
 					</View>
+				</View>
+
+				{/* Button at bottom */}
+				<View className="absolute bottom-0 left-0 right-0 px-6 pb-safe-bottom pb-6">
+					<Button onPress={onResume} variant="primary" className="w-full">
+						Продолжить тренировку
+					</Button>
 				</View>
 			</View>
 		</RNModal>

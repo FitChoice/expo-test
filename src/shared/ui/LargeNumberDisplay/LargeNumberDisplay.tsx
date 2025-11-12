@@ -49,7 +49,7 @@ export function LargeNumberDisplay({
 	}
 
 	const colorStyles = {
-		default: 'text-text-primary',
+		default: 'text-light-text-200',
 		accent: 'text-brand-purple-500',
 		success: 'text-brand-green-500',
 	}
@@ -57,7 +57,7 @@ export function LargeNumberDisplay({
 	return (
 		<View {...props} className={`items-center ${className || ''}`}>
 			<Animated.View style={animatedStyle}>
-				<Text className={`font-rimma-sans ${sizeStyles[size]} ${colorStyles[variant]}`}>
+				<Text className={`font-inter font-weight-bold ${sizeStyles[size]} ${colorStyles[variant]}`}>
 					{value}
 				</Text>
 			</Animated.View>

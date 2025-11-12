@@ -7,9 +7,13 @@
 import { View, Text } from 'react-native'
 import { VideoView, useVideoPlayer } from 'expo-video'
 import { useState, useEffect } from 'react'
-import { Button, Icon } from '@/shared/ui'
+import { ControlButton, StepProgress } from '@/shared/ui'
 import { LargeNumberDisplay } from '@/shared/ui/LargeNumberDisplay'
+import { GreenGradient } from '@/shared/ui/GradientBG'
 import type { Exercise } from '@/entities/training/model/types'
+import Entypo from '@expo/vector-icons/Entypo'
+import AntDesign from '@expo/vector-icons/AntDesign'
+
 
 interface ExerciseCountdownScreenProps {
 	exercise: Exercise
@@ -49,59 +53,68 @@ export function ExerciseCountdownScreen({
 	// }, [onComplete])
 
 	return (
-		<View className="bg-background-primary flex-1">
+		<View className="flex-1">
+			{/* Gradient Background */}
+			<GreenGradient />
+
 			{/* Control Buttons */}
-			<View className="absolute left-4 right-4 top-12 z-10 flex-row justify-between">
-				<Button variant="ghost" onPress={onPause} className="h-12 w-12 rounded-2xl">
-					<Icon name="pause" size={24} color="#FFFFFF" />
-				</Button>
-				<Button variant="ghost" onPress={onStop} className="h-12 w-12 rounded-2xl">
-					<Icon name="close" size={24} color="#FFFFFF" />
-				</Button>
+			<View className="absolute left-4 right-4 top-16 z-10 flex-row justify-end gap-2">
+				<ControlButton
+					icon={<AntDesign name="pause" size={24} color="#FFFFFF" />}
+					onPress={onPause}
+				/>
+				<ControlButton
+					icon={<Entypo name="cross" size={24} color="#FFFFFF" />}
+					onPress={onStop}
+				/>
 			</View>
 
-		{/* Video */}
-		<View className="h-2/3">
-			{exercise.videoUrl ? (
-				<VideoView
-					player={player}
-					style={{ flex: 1 }}
-					contentFit="cover"
-					nativeControls={false}
-				/>
-			) : (
-				<View className="bg-brand-dark-300 flex-1" />
-			)}
-		</View>
+			{/* Video */}
+			<View className="h-2/3">
+				{exercise.videoUrl ? (
+					<VideoView
+						player={player}
+						style={{ flex: 1 }}
+						contentFit="cover"
+						nativeControls={false}
+					/>
+				) : (
+					<View className="bg-brand-dark-300 flex-1" />
+				)}
+			</View>
 
-			{/* Exercise Info Overlay */}
-			<View className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 p-6">
+			{/* Step Progress */}
+			<View className="w-full px-4 py-4">
+				<StepProgress current={0} total={5} />
+			</View>
+
+			{/* Exercise Info */}
+			<View className="absolute bottom-0 left-0 right-0 p-6">
 				{/* Exercise Name */}
-				<Text className="text-body-medium text-text-primary mb-4">{exercise.name}</Text>
+				<Text className="text-t1 text-light-text-200 text-center">{exercise.name}</Text>
 
 				{/* Countdown */}
 				<View className="mb-6 items-center">
 					<LargeNumberDisplay
-						value={`00:${countdown.toString().padStart(5, '0')}`}
+						value={`00:${countdown.toString().padStart(2, '0')}`}
 						size="large"
 					/>
 				</View>
 
 				{/* Set Info */}
-				<View className="flex-row justify-center gap-8">
-					<View className="items-center">
-						<Text className="text-caption-regular text-text-secondary mb-1">подход</Text>
-						<Text className="text-h3-medium text-text-primary">
-							{currentSet} / {exercise.sets}
+				<View className="flex-row px-1 gap-2">
+					<View className="flex-1 basis-0 items-center bg-fill-800 rounded-3xl p-2 ">
+						<Text className="text-[64px] leading-[72px] text-light-text-200">
+							{currentSet}
+							<Text className="text-[32px] leading-[36px] color-[#949494] "> / {exercise.sets}</Text>
 						</Text>
+						<Text className="text-t2 color-[#949494] mb-1">подход</Text>
 					</View>
-					<View className="items-center">
-						<Text className="text-caption-regular text-text-secondary mb-1">
-							повторений
-						</Text>
-						<Text className="text-h3-medium text-text-primary">
+					<View className="flex-1 basis-0 items-center bg-fill-800 rounded-3xl p-2">
+						<Text className="text-[64px] leading-[72px] text-light-text-200">
 							{exercise.reps || exercise.duration}
 						</Text>
+						<Text className="text-t2 color-[#949494] mb-1">повторения</Text>
 					</View>
 				</View>
 			</View>
