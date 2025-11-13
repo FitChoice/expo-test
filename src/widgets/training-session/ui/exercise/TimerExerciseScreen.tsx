@@ -4,13 +4,15 @@
  * Показывает таймер обратного отсчета без pose detection
  */
 
-import { View, Text, Pressable } from 'react-native'
+import { View, Text, Pressable, useWindowDimensions } from 'react-native'
 import { useState, useEffect } from 'react'
 import { Button, Container, Icon, StepProgress } from '@/shared/ui'
 import { Exercise, useTrainingStore } from '@/entities/training'
 import { ExerciseWithCounterWrapper } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 import { CountdownDisplay } from './ExerciseCountdownScreen'
 import { useVideoPlayer, VideoView } from 'expo-video'
+import { CameraView } from 'expo-camera'
+
 
 interface TimerExerciseScreenProps {
 	onComplete: () => void
@@ -41,29 +43,41 @@ export function TimerExerciseScreen({
 		player.play()
 	})
 
-	
+	const height = 500
+
 	if (!exercise) return null
 
 	return (
 		<ExerciseWithCounterWrapper
-			//countdownInitial={currentExercise?.duration }
+			countdownInitial={exercise?.duration }
 			onComplete={onComplete}
 		>
 			<>
-				{/* Video */}
-
-				<View className="h-2/3">
-					{exercise.videoUrl ? (
-						<VideoView
-							player={player}
-							style={{ flex: 1 }}
-							contentFit="cover"
-							nativeControls={false}
-						/>
-					) : (
-						<View className="bg-brand-dark-300 flex-1" />
+				{/* Camera View with Video Overlay */}
+				<View  style={{ height, position: 'relative' }}   >
+					<CameraView style={{ height }} facing="front" />
+					
+					{/* Video Preview Window - Bottom Right Corner */}
+					{exercise.videoUrl && (
+						<View style={{
+							position: 'absolute',
+							bottom: 12,
+							right: 12,
+							width: 100,
+							height: 138,
+							overflow: 'hidden',
+					
+						}}>
+							<VideoView
+								player={player}
+								style={{ width: 100, height: 138 }}
+								contentFit="cover"
+								nativeControls={false}
+							/>
+						</View>
 					)}
 				</View>
+
 
 				{/* Step Progress */}
 				<View className="w-full px-4 py-4">

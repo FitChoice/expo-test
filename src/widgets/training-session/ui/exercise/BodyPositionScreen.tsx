@@ -29,7 +29,7 @@ export function BodyPositionScreen({
     const isFocused = useIsFocused()
 	const { width } = useWindowDimensions()
 
-	const height = 550
+	const height = 500
 
 	useEffect(() => {
 		const successTimer = setTimeout(() => {
