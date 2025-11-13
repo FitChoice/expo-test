@@ -66,7 +66,7 @@ const initialState = {
 	training: null,
 	status: 'idle' as TrainingStatus,
 	currentExerciseIndex: 0,
-	currentSet: 1,
+	currentSet: 0,
 	currentReps: 0,
 	currentSide: null,
 	elapsedTime: 0,

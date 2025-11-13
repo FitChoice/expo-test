@@ -133,7 +133,7 @@ export const ExerciseWithCounterWrapper = ({
 				<GreenGradient />
 
 				{/* Control Buttons */}
-				<View className="absolute left-4 right-4 top-16 z-10 flex-row justify-end gap-2">
+				<View className="absolute left-4 right-4 top-5 z-10 flex-row justify-end gap-2">
 					<ControlButton
 						icon={<AntDesign name="pause" size={24} color="#FFFFFF" />}
 						onPress={pauseTimer}

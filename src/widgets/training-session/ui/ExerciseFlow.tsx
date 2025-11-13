@@ -20,6 +20,7 @@ import {
 	TimerExerciseScreen
 } from '@/widgets/training-session/ui/exercise/TimerExerciseScreen'
 import { PauseModal } from '@/widgets/training-session'
+import { Container } from '@/shared/ui'
 
 type ExerciseStep =
 	| 'countdown'
@@ -127,16 +128,16 @@ export function ExerciseFlow() {
 
 	const nextExerciseData = training.exercises[currentExerciseIndex + 1]
 
-	return (
+	return (<Container>
 		<View className="flex-1">
-			{currentStep === 'countdown' && (
+			{/* {currentStep === 'countdown' && (
 				<ExerciseCountdownScreen
 					exercise={currentExercise}
 					currentSet={currentSet}
 					onComplete={handleCountdownComplete}
 			
 				/>
-			)}
+			)} */}
 			{currentStep === 'position' && (
 				<BodyPositionScreen
 					onComplete={handlePositionComplete}
@@ -149,10 +150,13 @@ export function ExerciseFlow() {
 					
 				/>
 			)}
-			{currentStep === 'execution' && !currentExercise.isAi && (
+			{currentStep === 'countdown' && !currentExercise.isAi && (
 				<TimerExerciseScreen
 					onComplete={handleExecutionComplete}
-					
+					exercise={currentExercise}
+					currentSet={currentSet}
+			
+				
 				/>
 			)}
 			{currentStep === 'success' && (
@@ -175,5 +179,6 @@ export function ExerciseFlow() {
 			)}
 
 		</View>
+		</Container>
 	)
 }

@@ -26,7 +26,7 @@ interface ExerciseCountdownScreenProps {
 	onStop: () => void
 }
 
-function CountdownDisplay() {
+export function CountdownDisplay() {
 	const countdown = useCountdown()
 	const minutes = Math.floor(countdown / 60)
 	const seconds = countdown % 60

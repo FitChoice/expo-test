@@ -27,12 +27,26 @@ export function BodyPositionScreen({
 	const [isPositionCorrect, setIsPositionCorrect] = useState(false)
 	const [showSuccess, setShowSuccess] = useState(false)
     const isFocused = useIsFocused()
-	const { width, height: screenHeight } = useWindowDimensions()
+	const { width } = useWindowDimensions()
 
 	const height = 550
 
+	useEffect(() => {
+		const successTimer = setTimeout(() => {
+			setShowSuccess(true)
+		}, 5000)
 
-	return (<Container>
+		const completeTimer = setTimeout(() => {
+			onComplete()
+		}, 6000)
+
+		return () => {
+			clearTimeout(successTimer)
+			clearTimeout(completeTimer)
+		}
+	}, [onComplete])
+
+	return (
 		<ExerciseWithCounterWrapper
 			onComplete={onComplete}
 		>
@@ -62,7 +76,9 @@ export function BodyPositionScreen({
 
 				{/* Body Silhouette Overlay */}
 				<View className="absolute inset-0 items-center justify-start pt-20">
-					<BodySilhouetteDefault />
+					<BodySilhouetteDefault 
+						fill={showSuccess ? '#8BC34A' : undefined}
+					/>
 				</View>
 			</View>
 
@@ -96,6 +112,5 @@ export function BodyPositionScreen({
 				)}
 			</LinearGradient>
 		</ExerciseWithCounterWrapper>
-		</Container>
 	)
 }

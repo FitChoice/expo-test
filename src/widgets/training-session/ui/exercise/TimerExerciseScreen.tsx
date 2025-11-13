@@ -5,129 +5,102 @@
  */
 
 import { View, Text, Pressable } from 'react-native'
-import { CameraView } from 'expo-camera'
-import { useState, useEffect, useRef } from 'react'
-import { Button, Icon } from '@/shared/ui'
-import { LargeNumberDisplay } from '@/shared/ui/LargeNumberDisplay'
-import { useTrainingStore } from '@/entities/training'
+import { useState, useEffect } from 'react'
+import { Button, Container, Icon, StepProgress } from '@/shared/ui'
+import { Exercise, useTrainingStore } from '@/entities/training'
+import { ExerciseWithCounterWrapper } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
+import { CountdownDisplay } from './ExerciseCountdownScreen'
+import { useVideoPlayer, VideoView } from 'expo-video'
 
 interface TimerExerciseScreenProps {
 	onComplete: () => void
-	onPause: () => void
-	onStop: () => void
+	exercise: Exercise
 }
 
 export function TimerExerciseScreen({
-	onComplete,
-	onPause,
-	onStop,
+	onComplete, exercise
 }: TimerExerciseScreenProps) {
-	const training = useTrainingStore((state) => state.training)
-	const currentExerciseIndex = useTrainingStore((state) => state.currentExerciseIndex)
-	const currentSet = useTrainingStore((state) => state.currentSet)
 
-	const currentExercise = training?.exercises[currentExerciseIndex]
-	const duration = currentExercise?.duration || 0
+	const [localCurrentSet, setLocalCurrentSet] = useState(0)
 
-	const [timeRemaining, setTimeRemaining] = useState(duration)
-	const [isTrainerVisible, setIsTrainerVisible] = useState(true)
-	const timerRef = useRef<NodeJS.Timeout | null>(null)
-
-	const progress = duration > 0 ? 1 - timeRemaining / duration : 0
-
-	// Timer countdown
 	useEffect(() => {
-		if (timeRemaining <= 0) {
-			onComplete()
-			return
-		}
+		const interval = setInterval(() => {
+			setLocalCurrentSet((prev) => {
+				if (prev >= exercise.sets) {
+					return prev
+				}
+				return prev + 1
+			})
+		}, 2000)
 
-		timerRef.current = setInterval(() => {
-			setTimeRemaining((prev) => Math.max(0, prev - 1))
-		}, 1000)
+		return () => clearInterval(interval)
+	}, [exercise.sets])
 
-		return () => {
-			if (timerRef.current) {
-				clearInterval(timerRef.current)
-			}
-		}
-	}, [timeRemaining, onComplete])
+	const player = useVideoPlayer(exercise.videoUrl || '', (player) => {
+		player.loop = true
+		player.play()
+	})
 
-	const formatTime = (seconds: number) => {
-		const mins = Math.floor(seconds / 60)
-		const secs = seconds % 60
-		return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-	}
-
-	if (!currentExercise) return null
+	
+	if (!exercise) return null
 
 	return (
-		<View className="bg-background-primary flex-1">
-			{/* Camera View */}
-			<View className="flex-1">
-				<CameraView style={{ flex: 1 }} facing="front">
-					{/* No pose overlay for timer exercises */}
-				</CameraView>
-			</View>
+		<ExerciseWithCounterWrapper
+			//countdownInitial={currentExercise?.duration }
+			onComplete={onComplete}
+		>
+			<>
+				{/* Video */}
 
-			{/* Control Buttons - Top */}
-			<View className="absolute left-4 right-4 top-12 flex-row justify-between">
-				<Button
-					variant="ghost"
-					onPress={onPause}
-					className="h-12 w-12 rounded-2xl bg-black/30"
-				>
-					<Icon name="pause" size={24} color="#FFFFFF" />
-				</Button>
-				<Button
-					variant="ghost"
-					onPress={onStop}
-					className="h-12 w-12 rounded-2xl bg-black/30"
-				>
-					<Icon name="close" size={24} color="#FFFFFF" />
-				</Button>
-			</View>
-
-			{/* Progress Bar - Left */}
-			<View className="absolute bottom-32 left-4 top-32">
-				<View className="bg-brand-dark-300 h-full w-2 overflow-hidden rounded-full">
-					<View
-						className="w-full rounded-full bg-brand-green-500"
-						style={{ height: `${progress * 100}%`, position: 'absolute', bottom: 0 }}
-					/>
+				<View className="h-2/3">
+					{exercise.videoUrl ? (
+						<VideoView
+							player={player}
+							style={{ flex: 1 }}
+							contentFit="cover"
+							nativeControls={false}
+						/>
+					) : (
+						<View className="bg-brand-dark-300 flex-1" />
+					)}
 				</View>
-			</View>
 
-			{/* Trainer Preview - Bottom Right */}
-			{isTrainerVisible && currentExercise.videoUrl && (
-				<Pressable
-					onPress={() => setIsTrainerVisible(false)}
-					className="absolute bottom-32 right-4 h-32 w-24 overflow-hidden rounded-2xl bg-black/50"
-				>
-					{/* TODO: Add Video component for trainer preview */}
-					<View className="flex-1 items-center justify-center">
-						<Text className="text-caption-regular text-white">Trainer</Text>
+				{/* Step Progress */}
+				<View className="w-full px-4 py-4">
+					<StepProgress current={0} total={5} />
+				</View>
+
+				{/* Exercise Info */}
+				<View className="absolute bottom-0 left-0 right-0 p-6">
+					{/* Exercise Name */}
+					<Text className="text-t1 text-light-text-200 text-center">{exercise.name}</Text>
+
+					{/* Countdown */}
+					<CountdownDisplay />
+
+					{/* Set Info */}
+					<View className="flex-row px-1 justify-center ">
+						<View className="flex-1 basis-0 items-center  ">
+							<Text className={`text-[64px] leading-[72px] ${
+								localCurrentSet === 0 
+									? 'text-light-text-200' 
+									: localCurrentSet === exercise.sets 
+										? 'text-brand-green-500' 
+										: 'text-light-text-200'
+							}`}>
+								{localCurrentSet}
+								<Text className={`text-[32px] leading-[36px] ${
+									localCurrentSet === exercise.sets 
+										? 'text-brand-green-500' 
+										: 'color-[#949494]'
+								}`}> / {exercise.sets}</Text>
+							</Text>
+							<Text className="text-t2 color-[#949494] mb-1">повторения</Text>
+						</View>
 					</View>
-				</Pressable>
-			)}
-
-			{/* Bottom Info Panel */}
-			<View className="bg-brand-dark-400/95 absolute bottom-0 left-0 right-0 p-6">
-				{/* Exercise Name */}
-				<Text className="text-body-medium text-text-primary mb-4 text-center">
-					{currentExercise.name}
-				</Text>
-
-				{/* Timer Countdown */}
-				<View className="mb-6 items-center">
-					<LargeNumberDisplay value={formatTime(timeRemaining)} size="xlarge" />
 				</View>
+			</>
+		</ExerciseWithCounterWrapper>
 
-				{/* Set Info */}
-				<Text className="text-body-regular text-text-secondary text-center">
-					Подход {currentSet} / {currentExercise.sets}
-				</Text>
-			</View>
-		</View>
 	)
 }
