@@ -6,15 +6,12 @@
 
 import { View, Text } from 'react-native'
 import { VideoView, useVideoPlayer } from 'expo-video'
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { ControlButton, StepProgress } from '@/shared/ui'
+
+import {  StepProgress } from '@/shared/ui'
 import { LargeNumberDisplay } from '@/shared/ui/LargeNumberDisplay'
-import { GreenGradient } from '@/shared/ui/GradientBG'
+
 import type { Exercise } from '@/entities/training/model/types'
-import Entypo from '@expo/vector-icons/Entypo'
-import AntDesign from '@expo/vector-icons/AntDesign'
-import { PauseModal, StopModal } from '@/widgets/training-session'
-import { router } from 'expo-router'
+
 import {
 	ExerciseWithCounterWrapper,
 	useCountdown
@@ -31,10 +28,12 @@ interface ExerciseCountdownScreenProps {
 
 function CountdownDisplay() {
 	const countdown = useCountdown()
+	const minutes = Math.floor(countdown / 60)
+	const seconds = countdown % 60
 	return (
 		<View className="mb-6 items-center">
 			<LargeNumberDisplay
-				value={`00:${countdown.toString().padStart(2, '0')}`}
+				value={`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}
 				size="large"
 			/>
 		</View>
@@ -45,8 +44,7 @@ export function ExerciseCountdownScreen({
 	exercise,
 	currentSet,
 	onComplete,
-	// onPause,
-	// onStop,
+
 }: ExerciseCountdownScreenProps) {
 //	const [countdown, setCountdown] = useState(5)
 	const player = useVideoPlayer(exercise.videoUrl || '', (player) => {

@@ -12,8 +12,8 @@ interface ContainerProps extends ViewProps {
 
 export const Container = ({ children, className, ...props }: ContainerProps) => {
 	return (
-		<SafeAreaView className="flex-1" edges={['top', 'bottom', 'left', 'right']}>
-			<View className={`mx-6 flex-1 ${className || ''}`} {...props}>
+		<SafeAreaView className="flex-1" edges={['top', 'bottom']}>
+			<View className={`flex-1 ${className || ''}`} {...props}>
 				{children}
 			</View>
 		</SafeAreaView>

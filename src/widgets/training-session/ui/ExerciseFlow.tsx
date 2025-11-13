@@ -114,46 +114,16 @@ export function ExerciseFlow() {
 		setCurrentStep('position')
 	}
 
-	const handleRestComplete = () => {
-		// Start next set (countdown)
-		setCurrentStep('countdown')
-	}
+
 
 	const handleTransitionComplete = () => {
 		// Start next exercise (countdown)
 		setCurrentStep('countdown')
 	}
 
-	const handlePause = useCallback(() => {
-		setIsPaused(true)
-		setShowPauseModal(true)
-		pause()
-	}, [pause])
 
-	const handlePauseResume = useCallback(() => {
-		setIsPaused(false)
-		setShowPauseModal(false)
-		resume()
-	}, [resume])
 
-	const handleStop = useCallback(() => {
-		setIsPaused(true)
-		setShowStopModal(true)
-		pause()
-	}, [pause])
 
-	const handleStopResume = useCallback(() => {
-		setIsPaused(false)
-		setShowStopModal(false)
-		resume()
-	}, [resume])
-
-	const handleStopTraining = useCallback(async () => {
-		setIsPaused(false)
-		setShowStopModal(false)
-		await stop()
-		router.replace('/home')
-	}, [stop])
 
 	const nextExerciseData = training.exercises[currentExerciseIndex + 1]
 
@@ -164,29 +134,25 @@ export function ExerciseFlow() {
 					exercise={currentExercise}
 					currentSet={currentSet}
 					onComplete={handleCountdownComplete}
-					onPause={handlePause}
-					onStop={handleStop}
+			
 				/>
 			)}
 			{currentStep === 'position' && (
 				<BodyPositionScreen
 					onComplete={handlePositionComplete}
-					onPause={handlePause}
-					onStop={handleStop}
+			
 				/>
 			)}
 			{currentStep === 'execution' && currentExercise.isAi && (
 				<AIExerciseScreen
 					onComplete={handleExecutionComplete}
-					onPause={handlePause}
-					onStop={handleStop}
+					
 				/>
 			)}
 			{currentStep === 'execution' && !currentExercise.isAi && (
 				<TimerExerciseScreen
 					onComplete={handleExecutionComplete}
-					onPause={handlePause}
-					onStop={handleStop}
+					
 				/>
 			)}
 			{currentStep === 'success' && (

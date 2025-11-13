@@ -9,6 +9,7 @@ import { useTrainingStore } from '@/entities/training'
 import { OnboardingFlow, ExerciseFlow } from '@/widgets/training-session'
 import TrainingReportScreen from './report'
 
+
 export default function TrainingSessionScreen() {
 	const training = useTrainingStore((state) => state.training)
 	const status = useTrainingStore((state) => state.status)
@@ -42,6 +43,8 @@ export default function TrainingSessionScreen() {
 						</View>
 
 		default:
-			return (<ExerciseFlow	/>)
+			return (
+				<ExerciseFlow	/>
+				)
 	}
 }

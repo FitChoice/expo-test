@@ -177,7 +177,7 @@ export default function TrainingEntryScreen() {
 					"side": "single",
 				"name": "Бёрпи",
 				"rest_time": 40,
-				"duration": 300,
+				"duration": 10,
 				"progress": 15,
 				"sets": 3,
 				"reps": 12,

@@ -22,18 +22,18 @@ export const useCountdown = () => useContext(CountdownContext)
 export const ExerciseWithCounterWrapper = ({
 	children, 
 	onComplete, 
-	countdownInitial = 6,
+	countdownInitial,
 }: {
 	children: ReactNode
 	onComplete: () => void
-	countdownInitial: number
+	countdownInitial?: number
 }) => {
 
 
 	const [showPauseModal, setShowPauseModal] = useState(false)
 	const [showStopModal, setShowStopModal] = useState(false)
 	const [isPaused, setIsPaused] = useState(false)
-	const [countdown, setCountdown] = useState(countdownInitial);
+	const [countdown, setCountdown] = useState(countdownInitial ?? 0);
 	const timerRef = useRef<number | null>(null);
 
 
@@ -66,8 +66,10 @@ export const ExerciseWithCounterWrapper = ({
 	}, [tick]);
 
 	useEffect(() => {
-		// Запускаем таймер при монтировании
-		startTimer();
+		// Запускаем таймер при монтировании только если countdownInitial передан
+		if (countdownInitial !== undefined) {
+			startTimer();
+		}
 		
 		return () => {
 			if (timerRef.current !== null) {
@@ -75,7 +77,7 @@ export const ExerciseWithCounterWrapper = ({
 				timerRef.current = null;
 			}
 		};
-	}, [startTimer]);
+	}, [startTimer, countdownInitial]);
 
 
 	const pauseTimer = useCallback(() => {
