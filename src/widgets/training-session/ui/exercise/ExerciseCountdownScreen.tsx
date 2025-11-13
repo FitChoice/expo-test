@@ -22,8 +22,6 @@ interface ExerciseCountdownScreenProps {
 	exercise: Exercise
 	currentSet: number
 	onComplete: () => void
-	onPause: () => void
-	onStop: () => void
 }
 
 export function CountdownDisplay() {
@@ -44,7 +42,6 @@ export function ExerciseCountdownScreen({
 	exercise,
 	currentSet,
 	onComplete,
-
 }: ExerciseCountdownScreenProps) {
 //	const [countdown, setCountdown] = useState(5)
 	const player = useVideoPlayer(exercise.videoUrl || '', (player) => {
@@ -52,6 +49,7 @@ export function ExerciseCountdownScreen({
 		player.play()
 	})
 
+	const height = 500
 
 	return (
 	<ExerciseWithCounterWrapper 
@@ -61,7 +59,7 @@ export function ExerciseCountdownScreen({
 		<>
 			{/* Video */}
 
-			<View className="h-2/3">
+			<View style={{ height }} >
 				{exercise.videoUrl ? (
 					<VideoView
 						player={player}

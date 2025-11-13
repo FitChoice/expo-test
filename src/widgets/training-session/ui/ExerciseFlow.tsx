@@ -40,11 +40,10 @@ export function ExerciseFlow() {
 	const training = useTrainingStore((state) => state.training)
 	const currentExerciseIndex = useTrainingStore((state) => state.currentExerciseIndex)
 	const currentSet = useTrainingStore((state) => state.currentSet)
-	const completeSet = useTrainingStore((state) => state.completeSet)
 	const nextExercise = useTrainingStore((state) => state.nextExercise)
-	const pause = useTrainingStore((state) => state.pause)
 	const stop = useTrainingStore((state) => state.stop)
-	const resume = useTrainingStore((state) => state.resume)
+
+	const [exerciseNumber, setExerciseNumber] = useState(0)
 
 	if (!training) return null
 
@@ -64,15 +63,17 @@ export function ExerciseFlow() {
 
 	const handleExecutionComplete = () => {
 		// Mark set as complete
-		completeSet({
-			exerciseIndex: currentExerciseIndex,
-			setNumber: currentSet,
-			reps: 0, // Will be updated during execution
-			formQuality: 0, // Will be updated during execution
-			elapsedTime: 0, // Will be updated during execution
-			errors: [], // Will be populated during execution
-		})
-		setCurrentStep('success')
+		setCurrentStep('side_switch')
+		setExerciseNumber((prev) => prev + 1)
+		// completeSet({
+		// 	exerciseIndex: currentExerciseIndex,
+		// 	setNumber: currentSet,
+		// 	reps: 0, // Will be updated during execution
+		// 	formQuality: 0, // Will be updated during execution
+		// 	elapsedTime: 0, // Will be updated during execution
+		// 	errors: [], // Will be populated during execution
+		// })
+		// setCurrentStep('success')
 	}
 
 	const handleSuccessComplete = () => {
@@ -112,7 +113,13 @@ export function ExerciseFlow() {
 	}
 	const handleSideSwitchComplete =() => {
 		// Start position check for second side
-		setCurrentStep('position')
+
+		if (exerciseNumber < 2) {
+			setCurrentStep('execution')
+		} else {
+			setCurrentStep( 'success')
+		}
+
 	}
 
 
@@ -130,43 +137,44 @@ export function ExerciseFlow() {
 
 	return (<Container>
 		<View className="flex-1">
-			{/* {currentStep === 'countdown' && (
+			{currentStep === 'countdown' && (
 				<ExerciseCountdownScreen
 					exercise={currentExercise}
 					currentSet={currentSet}
 					onComplete={handleCountdownComplete}
 			
 				/>
-			)} */}
+			)}
 			{currentStep === 'position' && (
 				<BodyPositionScreen
 					onComplete={handlePositionComplete}
-			
 				/>
 			)}
-			{currentStep === 'execution' && currentExercise.isAi && (
-				<AIExerciseScreen
-					onComplete={handleExecutionComplete}
-					
-				/>
-			)}
-			{currentStep === 'countdown' && !currentExercise.isAi && (
+			{/*{currentStep === 'execution' && currentExercise.isAi && (*/}
+			{/*	<AIExerciseScreen*/}
+			{/*		onComplete={handleExecutionComplete}*/}
+
+			{/*	/>*/}
+			{/*)}*/}
+			{currentStep === 'execution' && !currentExercise.isAi && (
 				<TimerExerciseScreen
 					onComplete={handleExecutionComplete}
 					exercise={currentExercise}
-					currentSet={currentSet}
-			
-				
 				/>
 			)}
 			{currentStep === 'success' && (
 				<ExerciseSuccessScreen onComplete={handleSuccessComplete} />
 			)}
 			{currentStep === 'side_switch' && (
-				<SideSwitchScreen
-					nextSide={currentSideState === null ? 'left' : 'right'}
+				<BodyPositionScreen
 					onComplete={handleSideSwitchComplete}
+					title={'Смена рабочей стороны'}
 				/>
+
+				// <SideSwitchScreen
+				// 	nextSide={currentSideState === null ? 'left' : 'right'}
+				// 	onComplete={handleSideSwitchComplete}
+				// />
 			)}
 			{/*{currentStep === 'rest' && (*/}
 			{/*	<RestScreen onComplete={handleRestComplete} duration={currentExercise.restTime} />*/}

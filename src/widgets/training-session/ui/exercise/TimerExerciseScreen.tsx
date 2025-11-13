@@ -44,6 +44,7 @@ export function TimerExerciseScreen({
 	})
 
 	const height = 500
+	const { width } = useWindowDimensions()
 
 	if (!exercise) return null
 
@@ -55,7 +56,7 @@ export function TimerExerciseScreen({
 			<>
 				{/* Camera View with Video Overlay */}
 				<View  style={{ height, position: 'relative' }}   >
-					<CameraView style={{ height }} facing="front" />
+					<CameraView style={{ height, width }} facing="front" />
 					
 					{/* Video Preview Window - Bottom Right Corner */}
 					{exercise.videoUrl && (
@@ -66,7 +67,6 @@ export function TimerExerciseScreen({
 							width: 100,
 							height: 138,
 							overflow: 'hidden',
-					
 						}}>
 							<VideoView
 								player={player}

@@ -18,15 +18,16 @@ import {
 
 interface BodyPositionScreenProps {
 	onComplete: () => void
+	title?: string
 	
 }
 
 export function BodyPositionScreen({
-	onComplete,
+	onComplete, title
 }: BodyPositionScreenProps) {
-	const [isPositionCorrect, setIsPositionCorrect] = useState(false)
+
 	const [showSuccess, setShowSuccess] = useState(false)
-    const isFocused = useIsFocused()
+   // const isFocused = useIsFocused()
 	const { width } = useWindowDimensions()
 
 	const height = 500
@@ -97,19 +98,29 @@ export function BodyPositionScreen({
 					padding: 24
 				}}
 			>
-				<Text className="text-h2 text-light-text-100 mb-2 text-center">
-					Примите исходное положение
-				</Text>
-				<Text className="text-t2 text-light-text-200 text-center">
-					Встаньте так, чтобы ваше тело полностью попадало в кадр и входило в контур
-				</Text>
 
-				{/* Success Message */}
-				{showSuccess && (
-					<View className="mt-6 items-center">
-						<Text className="text-h1 text-brand-green-500">Вперёд!</Text>
-					</View>
-				)}
+
+				{
+					title ? <View className="mt-6 items-center">
+						<Text className="text-h1 text-brand-green-500">{title}</Text>
+					</View> : <>
+						<Text className="text-h2 text-light-text-100 mb-2 text-center">
+							Примите исходное положение
+						</Text>
+						<Text className="text-t2 text-light-text-200 text-center">
+							Встаньте так, чтобы ваше тело полностью попадало в кадр и входило в контур
+						</Text>
+
+						{/* Success Message */}
+						{showSuccess && (
+							<View className="mt-6 items-center">
+								<Text className="text-h1 text-brand-green-500">Вперёд!</Text>
+							</View>
+						)}
+					</>
+
+				}
+
 			</LinearGradient>
 		</ExerciseWithCounterWrapper>
 	)
