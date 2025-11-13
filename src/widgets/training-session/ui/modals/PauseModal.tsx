@@ -14,10 +14,9 @@ import { sharedStyles } from '@/pages/survey/ui/components/shared-styles'
 interface PauseModalProps {
 	visible: boolean
 	onResume: () => void
-	onStop: () => void
 }
 
-export function PauseModal({ visible, onResume, onStop }: PauseModalProps) {
+export function PauseModal({ visible, onResume }: PauseModalProps) {
 	return (
 		<RNModal visible={visible} transparent animationType="fade">
 			<View className="flex-1">

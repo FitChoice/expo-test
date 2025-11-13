@@ -43,13 +43,18 @@ export function StopModal({ visible, onResume, onStop }: PauseModalProps) {
 						<Text style={sharedStyles.title}>
 							тренировку?
 						</Text>
+
+						<Text className='text-t2 text-light-text-200 mt-2'>Вы сможете начать с места, где остановились</Text>
 					</View>
 				</View>
 
 				{/* Button at bottom */}
-				<View className="absolute bottom-0 left-0 right-0 px-6 pb-safe-bottom pb-6">
-					<Button onPress={onResume} variant="primary" className="w-full">
-						Продолжить тренировку
+				<View className="absolute bottom-0 left-0 right-0 px-6 pb-safe-bottom  flex-row gap-2">
+					<Button onPress={onResume} variant="tertiary"  className="flex-1" >
+						Не выходить
+					</Button>
+					<Button onPress={onStop} variant="primary"  className="flex-1" >
+						Выйти
 					</Button>
 				</View>
 			</View>

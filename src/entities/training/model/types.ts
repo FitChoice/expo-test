@@ -3,7 +3,7 @@
 export type ExerciseType = 'ai' | 'timer'
 export type ExerciseSide = 'left' | 'right' | 'both'
 export type WorkoutCategory = 'strength' | 'cardio' | 'flexibility' | 'mobility'
-export type TrainingStatus = 'idle' | 'onboarding' | 'running' | 'paused' | 'finished'
+export type TrainingStatus = 'idle' | 'onboarding' | 'running' | 'finished'| 'report' | 'analytics'
 
 
 export const equipment = {
@@ -51,9 +51,11 @@ export interface Exercise {
 	reps: number;
 	isAi: boolean;
 	videoUrl: string;
-  }
+	isVertical: boolean; ////TEMPORARY FIELD
+	side: 'both' | 'single'
+}
   
-  export interface Training {
+export interface Training {
 	id: number;
 	trainingType: string;
 	title: string;
@@ -62,37 +64,19 @@ export interface Exercise {
 	experience: number;
 	inventory: number[];
 	exercises: Exercise[];
-  }
+}
   
 
 
-
-
-/**
- * Отчет о выполненной тренировке
- */
 export interface Report {
-	reportId?: string
-	completedAt: string
-	title: string
-	category: WorkoutCategory
-	experienceGained: number
-	report_duration: number
-	report_active_time: number
-	report_cals: number
-	report_technique_quality: number | null
+
+		report_active_time: number,
+		report_cals: number,
+		report_duration: number,
+		report_technique_quality: number
+	  
 }
 
-/**
- * Данные для создания отчета (без generated полей)
- */
-export interface ReportData {
-	training_id: number
-	report_duration: number
-	report_active_time: number
-	report_cals: number
-	report_technique_quality: number
-}
 
 /**
  * Прогресс выполнения упражнения

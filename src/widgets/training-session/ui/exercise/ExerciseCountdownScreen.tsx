@@ -6,13 +6,19 @@
 
 import { View, Text } from 'react-native'
 import { VideoView, useVideoPlayer } from 'expo-video'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { ControlButton, StepProgress } from '@/shared/ui'
 import { LargeNumberDisplay } from '@/shared/ui/LargeNumberDisplay'
 import { GreenGradient } from '@/shared/ui/GradientBG'
 import type { Exercise } from '@/entities/training/model/types'
 import Entypo from '@expo/vector-icons/Entypo'
 import AntDesign from '@expo/vector-icons/AntDesign'
+import { PauseModal, StopModal } from '@/widgets/training-session'
+import { router } from 'expo-router'
+import {
+	ExerciseWithCounterWrapper,
+	useCountdown
+} from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 
 
 interface ExerciseCountdownScreenProps {
@@ -23,53 +29,40 @@ interface ExerciseCountdownScreenProps {
 	onStop: () => void
 }
 
+function CountdownDisplay() {
+	const countdown = useCountdown()
+	return (
+		<View className="mb-6 items-center">
+			<LargeNumberDisplay
+				value={`00:${countdown.toString().padStart(2, '0')}`}
+				size="large"
+			/>
+		</View>
+	)
+}
+
 export function ExerciseCountdownScreen({
 	exercise,
 	currentSet,
 	onComplete,
-	onPause,
-	onStop,
+	// onPause,
+	// onStop,
 }: ExerciseCountdownScreenProps) {
-	const [countdown, setCountdown] = useState(5)
+//	const [countdown, setCountdown] = useState(5)
 	const player = useVideoPlayer(exercise.videoUrl || '', (player) => {
 		player.loop = true
 		player.play()
 	})
 
-	// useEffect(() => {
-	// 	const timer = setInterval(() => {
-	// 		setCountdown((prev) => {
-	// 			if (prev <= 1) {
-	// 				clearInterval(timer)
-	// 				// Use setTimeout to make the callback async and avoid setState during render
-	// 				setTimeout(() => onComplete(), 0)
-	// 				return 0
-	// 			}
-	// 			return prev - 1
-	// 		})
-	// 	}, 1000)
-
-	// 	return () => clearInterval(timer)
-	// }, [onComplete])
 
 	return (
-		<View className="flex-1">
-			{/* Gradient Background */}
-			<GreenGradient />
-
-			{/* Control Buttons */}
-			<View className="absolute left-4 right-4 top-16 z-10 flex-row justify-end gap-2">
-				<ControlButton
-					icon={<AntDesign name="pause" size={24} color="#FFFFFF" />}
-					onPress={onPause}
-				/>
-				<ControlButton
-					icon={<Entypo name="cross" size={24} color="#FFFFFF" />}
-					onPress={onStop}
-				/>
-			</View>
-
+	<ExerciseWithCounterWrapper 
+		onComplete={onComplete} 
+		countdownInitial={exercise.duration}
+	>
+		<>
 			{/* Video */}
+
 			<View className="h-2/3">
 				{exercise.videoUrl ? (
 					<VideoView
@@ -94,12 +87,7 @@ export function ExerciseCountdownScreen({
 				<Text className="text-t1 text-light-text-200 text-center">{exercise.name}</Text>
 
 				{/* Countdown */}
-				<View className="mb-6 items-center">
-					<LargeNumberDisplay
-						value={`00:${countdown.toString().padStart(2, '0')}`}
-						size="large"
-					/>
-				</View>
+				<CountdownDisplay />
 
 				{/* Set Info */}
 				<View className="flex-row px-1 gap-2">
@@ -118,6 +106,7 @@ export function ExerciseCountdownScreen({
 					</View>
 				</View>
 			</View>
-		</View>
+		</>
+	</ExerciseWithCounterWrapper>
 	)
 }

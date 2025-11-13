@@ -10,13 +10,16 @@ import { router } from 'expo-router'
 import { ExerciseCountdownScreen } from './exercise/ExerciseCountdownScreen'
 import { BodyPositionScreen } from './exercise/BodyPositionScreen'
 import { AIExerciseScreen } from './exercise/AIExerciseScreen'
-import { TimerExerciseScreen } from './exercise/TimerExerciseScreen'
 import { ExerciseSuccessScreen } from './exercise/ExerciseSuccessScreen'
 import { SideSwitchScreen } from './exercise/SideSwitchScreen'
 import { RestScreen } from './exercise/RestScreen'
 import { ExerciseTransitionScreen } from './exercise/ExerciseTransitionScreen'
 import { StopModal } from './modals/StopModal'
 import { useTrainingStore } from '@/entities/training'
+import {
+	TimerExerciseScreen
+} from '@/widgets/training-session/ui/exercise/TimerExerciseScreen'
+import { PauseModal } from '@/widgets/training-session'
 
 type ExerciseStep =
 	| 'countdown'
@@ -28,9 +31,11 @@ type ExerciseStep =
 	| 'transition'
 
 export function ExerciseFlow() {
+
 	const [currentStep, setCurrentStep] = useState<ExerciseStep>('countdown')
 	const [currentSideState, setCurrentSideState] = useState<'left' | 'right' | null>(null)
-	const [showStopModal, setShowStopModal] = useState(false)
+
+
 	const training = useTrainingStore((state) => state.training)
 	const currentExerciseIndex = useTrainingStore((state) => state.currentExerciseIndex)
 	const currentSet = useTrainingStore((state) => state.currentSet)
@@ -38,6 +43,7 @@ export function ExerciseFlow() {
 	const nextExercise = useTrainingStore((state) => state.nextExercise)
 	const pause = useTrainingStore((state) => state.pause)
 	const stop = useTrainingStore((state) => state.stop)
+	const resume = useTrainingStore((state) => state.resume)
 
 	if (!training) return null
 
@@ -45,22 +51,17 @@ export function ExerciseFlow() {
 	if (!currentExercise) return null
 
 	// Check if exercise has sides
-	const hasSides = currentExercise.side === 'both'
+	const hasSides = currentExercise?.side === 'both'
 
-	const handleCountdownComplete = useCallback(() => {
-		// Skip body position for timer exercises
-		if (currentExercise.type === 'timer') {
-			setCurrentStep('execution')
-		} else {
+	const handleCountdownComplete = () => {
 			setCurrentStep('position')
-		}
-	}, [currentExercise.type])
+	}
 
-	const handlePositionComplete = useCallback(() => {
+	const handlePositionComplete = () => {
 		setCurrentStep('execution')
-	}, [])
+	}
 
-	const handleExecutionComplete = useCallback(() => {
+	const handleExecutionComplete = () => {
 		// Mark set as complete
 		completeSet({
 			exerciseIndex: currentExerciseIndex,
@@ -71,9 +72,9 @@ export function ExerciseFlow() {
 			errors: [], // Will be populated during execution
 		})
 		setCurrentStep('success')
-	}, [completeSet, currentExerciseIndex, currentSet])
+	}
 
-	const handleSuccessComplete = useCallback(() => {
+	const handleSuccessComplete = () => {
 		// Check if need to switch sides
 		if (hasSides && currentSideState === null) {
 			// First side done, switch to right
@@ -96,7 +97,7 @@ export function ExerciseFlow() {
 				stop() // This marks training as finished
 				router.replace({
 					pathname: '/(training)/report',
-					params: { trainingId: training.trainingId },
+					params: { trainingId: training.id.toString() },
 				})
 			} else {
 				// Move to next exercise
@@ -107,40 +108,52 @@ export function ExerciseFlow() {
 			// Rest before next set
 			setCurrentStep('rest')
 		}
-	}, [hasSides, currentSideState, currentSet, currentExercise.sets, currentExerciseIndex, training.exercises.length, training.trainingId, stop, nextExercise])
-
-	const handleSideSwitchComplete = useCallback(() => {
+	}
+	const handleSideSwitchComplete =() => {
 		// Start position check for second side
 		setCurrentStep('position')
-	}, [])
+	}
 
-	const handleRestComplete = useCallback(() => {
+	const handleRestComplete = () => {
 		// Start next set (countdown)
 		setCurrentStep('countdown')
-	}, [])
+	}
 
-	const handleTransitionComplete = useCallback(() => {
+	const handleTransitionComplete = () => {
 		// Start next exercise (countdown)
 		setCurrentStep('countdown')
-	}, [])
+	}
 
 	const handlePause = useCallback(() => {
+		setIsPaused(true)
+		setShowPauseModal(true)
 		pause()
 	}, [pause])
 
+	const handlePauseResume = useCallback(() => {
+		setIsPaused(false)
+		setShowPauseModal(false)
+		resume()
+	}, [resume])
+
 	const handleStop = useCallback(() => {
+		setIsPaused(true)
 		setShowStopModal(true)
-	}, [])
+		pause()
+	}, [pause])
 
-	const handleStopConfirm = useCallback(() => {
-		stop()
+	const handleStopResume = useCallback(() => {
+		setIsPaused(false)
 		setShowStopModal(false)
-		router.back()
+		resume()
+	}, [resume])
+
+	const handleStopTraining = useCallback(async () => {
+		setIsPaused(false)
+		setShowStopModal(false)
+		await stop()
+		router.replace('/home')
 	}, [stop])
-
-	const handleStopCancel = useCallback(() => {
-		setShowStopModal(false)
-	}, [])
 
 	const nextExerciseData = training.exercises[currentExerciseIndex + 1]
 
@@ -162,14 +175,14 @@ export function ExerciseFlow() {
 					onStop={handleStop}
 				/>
 			)}
-			{currentStep === 'execution' && currentExercise.type === 'ai' && (
+			{currentStep === 'execution' && currentExercise.isAi && (
 				<AIExerciseScreen
 					onComplete={handleExecutionComplete}
 					onPause={handlePause}
 					onStop={handleStop}
 				/>
 			)}
-			{currentStep === 'execution' && currentExercise.type === 'timer' && (
+			{currentStep === 'execution' && !currentExercise.isAi && (
 				<TimerExerciseScreen
 					onComplete={handleExecutionComplete}
 					onPause={handlePause}
@@ -185,20 +198,16 @@ export function ExerciseFlow() {
 					onComplete={handleSideSwitchComplete}
 				/>
 			)}
-			{currentStep === 'rest' && (
-				<RestScreen onComplete={handleRestComplete} duration={currentExercise.restTime} />
-			)}
+			{/*{currentStep === 'rest' && (*/}
+			{/*	<RestScreen onComplete={handleRestComplete} duration={currentExercise.restTime} />*/}
+			{/*)}*/}
 			{currentStep === 'transition' && nextExerciseData && (
 				<ExerciseTransitionScreen
 					nextExercise={nextExerciseData}
 					onComplete={handleTransitionComplete}
 				/>
 			)}
-			<StopModal
-				visible={showStopModal}
-				onConfirm={handleStopConfirm}
-				onCancel={handleStopCancel}
-			/>
+
 		</View>
 	)
 }
