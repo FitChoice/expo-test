@@ -9,26 +9,29 @@ import { CameraView } from 'expo-camera'
 import { useState, useEffect } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, {  Circle } from 'react-native-svg'
-import BodySilhouetteDefault from '@/assets/body_silhouette_default.svg'
+import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
+import BodySilhouetteRightSide from '@/assets/images/silhouette_side_right.svg'
+import BodySilhouetteLeftSide from '@/assets/images/silhouette_side_left.svg'
 import {
 	ExerciseWithCounterWrapper
 } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
-
+import { VIDEO_SCREEN_HEIGHT as height } from '@/shared/constants/sizes'
 interface BodyPositionScreenProps {
 	onComplete: () => void
-	title?: string
+	title?: string,
+	side?:  'left' | 'right'
 	
 }
 
 export function BodyPositionScreen({
-	onComplete, title
+	onComplete, title, side
 }: BodyPositionScreenProps) {
 
+console.log('side', side)
 	const [showSuccess, setShowSuccess] = useState(false)
 	const [cameraKey, setCameraKey] = useState(0)
 	const { width } = useWindowDimensions()
 
-	const height = 500
 
 	useEffect(() => {
 		// Reset state when component mounts
@@ -82,9 +85,12 @@ export function BodyPositionScreen({
 
 				{/* Body Silhouette Overlay */}
 				<View className="absolute inset-0 items-center justify-start pt-20">
-					<BodySilhouetteDefault 
+					{
+						side == 'right' ? <BodySilhouetteRightSide stroke={showSuccess ? '#8BC34A' : 'white'} /> :
+							side == 'left' ? <BodySilhouetteLeftSide stroke={showSuccess ? '#8BC34A' : 'white'} /> :
+								<BodySilhouetteDefault
 						stroke={showSuccess ? '#8BC34A' : 'white'}
-					/>	
+					/>	}
 				</View>
 			</View>
 
@@ -107,7 +113,7 @@ export function BodyPositionScreen({
 
 				{
 					title ? <View className="mt-6 items-center">
-						<Text className="text-h1 text-brand-green-500">{title}</Text>
+						<Text className="text-h1 text-center text-brand-green-500">{title}</Text>
 					</View> : <>
 						<Text className="text-h2 text-light-text-100 mb-2 text-center">
 							Примите исходное положение

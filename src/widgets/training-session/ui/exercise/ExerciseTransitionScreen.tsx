@@ -8,6 +8,13 @@ import { View, Text } from 'react-native'
 import { useState, useEffect } from 'react'
 import { LargeNumberDisplay } from '@/shared/ui/LargeNumberDisplay'
 import type { Exercise } from '@/entities/training/model/types'
+import {
+	ExerciseWithCounterWrapper
+} from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
+import { Button } from '@/shared/ui'
+import {
+	CountdownDisplay
+} from '@/widgets/training-session/ui/exercise/ExerciseExampleCountdownScreen'
 
 interface ExerciseTransitionScreenProps {
 	nextExercise: Exercise
@@ -35,26 +42,36 @@ export function ExerciseTransitionScreen({
 		return () => clearInterval(timer)
 	}, [countdown, onComplete])
 
-	return (
-		<View className="bg-background-primary flex-1 items-center justify-center px-6">
-			{/* Next Exercise Label */}
-			<Text className="text-body-medium text-text-secondary mb-6">
-				Следующее упражнение
-			</Text>
+	return (	<ExerciseWithCounterWrapper
+		onComplete={onComplete}
+		countdownInitial={5}
+	>
 
-			{/* Exercise Name */}
-			<Text className="text-h2-medium text-text-primary mb-12 text-center">
-				{nextExercise.name}
-			</Text>
+		<View className="flex-1 items-center justify-center padding-4 ">
 
-			{/* Countdown */}
-			<LargeNumberDisplay value={countdown} size="xlarge" />
+				<View className="mt-6 items-center">
+					<Text className="text-h2 text-brand-green-500 text-center">	Следующее упражнение</Text>
+				</View>
 
-			{/* Info */}
-			<Text className="text-body-regular text-text-secondary mt-6">
-				{nextExercise.sets} × {nextExercise.reps || nextExercise.duration}{' '}
-				{nextExercise.reps ? 'повт.' : 'сек'}
-			</Text>
+			<CountdownDisplay />
+
+				{/* Exercise Name */}
+				<Text className="text-t2 text-light-text-100 mb-12 text-center">
+					{nextExercise.name}
+				</Text>
+
+				{/* Info */}
+				<Text className="text-t2 text-light-text-100 mt-6">
+					{nextExercise.sets} × {nextExercise.reps || nextExercise.duration}{' '}
+					{nextExercise.reps ? 'повт.' : 'сек'}
+				</Text>
+
+
+
+
 		</View>
+
+	</ExerciseWithCounterWrapper>
+
 	)
 }

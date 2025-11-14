@@ -16,6 +16,7 @@ import {
 	ExerciseWithCounterWrapper,
 	useCountdown
 } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
+import { VIDEO_SCREEN_HEIGHT as height } from '@/shared/constants/sizes'
 
 
 interface ExerciseCountdownScreenProps {
@@ -49,7 +50,6 @@ export function ExerciseExampleCountdownScreen({
 		player.play()
 	})
 
-	const height = 500
 
 	return (
 	<ExerciseWithCounterWrapper 
