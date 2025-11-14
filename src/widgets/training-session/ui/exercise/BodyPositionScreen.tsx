@@ -5,12 +5,10 @@
  */
 
 import { View, Text, useWindowDimensions } from 'react-native'
-import { useIsFocused } from '@react-navigation/native'
 import { CameraView } from 'expo-camera'
 import { useState, useEffect } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
-import { Button, Container, Icon } from '@/shared/ui'
-import Svg, { Path, Circle } from 'react-native-svg'
+import Svg, {  Circle } from 'react-native-svg'
 import BodySilhouetteDefault from '@/assets/body_silhouette_default.svg'
 import {
 	ExerciseWithCounterWrapper
@@ -27,12 +25,16 @@ export function BodyPositionScreen({
 }: BodyPositionScreenProps) {
 
 	const [showSuccess, setShowSuccess] = useState(false)
-   // const isFocused = useIsFocused()
+	const [cameraKey, setCameraKey] = useState(0)
 	const { width } = useWindowDimensions()
 
 	const height = 500
 
 	useEffect(() => {
+		// Reset state when component mounts
+		setShowSuccess(false)
+		setCameraKey(prev => prev + 1)
+		
 		const successTimer = setTimeout(() => {
 			setShowSuccess(true)
 		}, 5000)
@@ -45,7 +47,7 @@ export function BodyPositionScreen({
 			clearTimeout(successTimer)
 			clearTimeout(completeTimer)
 		}
-	}, [onComplete])
+	}, [onComplete, title])
 
 	return (
 		<ExerciseWithCounterWrapper
@@ -53,8 +55,11 @@ export function BodyPositionScreen({
 		>
       {/* Camera View with Overlay */}
       <View className="flex-1 bg-transparent">
-  
-          <CameraView style={{ flex: 1 }} facing="front" />
+			<CameraView 
+				key={`camera-${cameraKey}`}
+				style={{ flex: 1 }} 
+				facing="front" 
+			/>
     
 				{/* Grid pattern background - full width and height */}
 				<View className="absolute top-0 left-0 right-0 rounded-3xl " style={{  height }}>
@@ -78,8 +83,8 @@ export function BodyPositionScreen({
 				{/* Body Silhouette Overlay */}
 				<View className="absolute inset-0 items-center justify-start pt-20">
 					<BodySilhouetteDefault 
-						fill={showSuccess ? '#8BC34A' : undefined}
-					/>
+						stroke={showSuccess ? '#8BC34A' : 'white'}
+					/>	
 				</View>
 			</View>
 

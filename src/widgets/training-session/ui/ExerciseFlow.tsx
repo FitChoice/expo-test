@@ -7,7 +7,7 @@
 import { useState, useCallback } from 'react'
 import { View } from 'react-native'
 import { router } from 'expo-router'
-import { ExerciseCountdownScreen } from './exercise/ExerciseCountdownScreen'
+import { ExerciseExampleCountdownScreen } from './exercise/ExerciseExampleCountdownScreen'
 import { BodyPositionScreen } from './exercise/BodyPositionScreen'
 import { AIExerciseScreen } from './exercise/AIExerciseScreen'
 import { ExerciseSuccessScreen } from './exercise/ExerciseSuccessScreen'
@@ -138,18 +138,19 @@ export function ExerciseFlow() {
 	return (<Container>
 		<View className="flex-1">
 			{currentStep === 'countdown' && (
-				<ExerciseCountdownScreen
+				<ExerciseExampleCountdownScreen
 					exercise={currentExercise}
 					currentSet={currentSet}
 					onComplete={handleCountdownComplete}
 			
 				/>
 			)}
-			{currentStep === 'position' && (
-				<BodyPositionScreen
-					onComplete={handlePositionComplete}
-				/>
-			)}
+		{currentStep === 'position' && (
+			<BodyPositionScreen
+				key="position-check"
+				onComplete={handlePositionComplete}
+			/>
+		)}
 			{/*{currentStep === 'execution' && currentExercise.isAi && (*/}
 			{/*	<AIExerciseScreen*/}
 			{/*		onComplete={handleExecutionComplete}*/}
@@ -165,11 +166,12 @@ export function ExerciseFlow() {
 			{currentStep === 'success' && (
 				<ExerciseSuccessScreen onComplete={handleSuccessComplete} />
 			)}
-			{currentStep === 'side_switch' && (
-				<BodyPositionScreen
-					onComplete={handleSideSwitchComplete}
-					title={'Смена рабочей стороны'}
-				/>
+		{currentStep === 'side_switch' && (
+			<BodyPositionScreen
+				key="side-switch"
+				onComplete={handleSideSwitchComplete}
+				title={'Смена рабочей стороны'}
+			/>
 
 				// <SideSwitchScreen
 				// 	nextSide={currentSideState === null ? 'left' : 'right'}

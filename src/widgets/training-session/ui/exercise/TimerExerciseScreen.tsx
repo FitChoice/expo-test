@@ -6,12 +6,12 @@
 
 import { View, Text, Pressable, useWindowDimensions } from 'react-native'
 import { useState, useEffect } from 'react'
-import { Button, Container, Icon, StepProgress } from '@/shared/ui'
-import { Exercise, useTrainingStore } from '@/entities/training'
+import {  StepProgress } from '@/shared/ui'
+import { Exercise } from '@/entities/training'
 import { ExerciseWithCounterWrapper } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
-import { CountdownDisplay } from './ExerciseCountdownScreen'
+import { CountdownDisplay } from './ExerciseExampleCountdownScreen'
 import { useVideoPlayer, VideoView } from 'expo-video'
-import { CameraView } from 'expo-camera'
+import { CameraView, useCameraPermissions } from 'expo-camera'
 
 
 interface TimerExerciseScreenProps {
@@ -20,10 +20,17 @@ interface TimerExerciseScreenProps {
 }
 
 export function TimerExerciseScreen({
+
 	onComplete, exercise
 }: TimerExerciseScreenProps) {
 
 	const [localCurrentSet, setLocalCurrentSet] = useState(0)
+	const [cameraKey, setCameraKey] = useState(0)
+	const [permission] = useCameraPermissions()
+
+	useEffect(() => {
+		setCameraKey(prev => prev + 1)
+	}, [exercise.id])
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -46,8 +53,6 @@ export function TimerExerciseScreen({
 	const height = 500
 	const { width } = useWindowDimensions()
 
-	if (!exercise) return null
-
 	return (
 		<ExerciseWithCounterWrapper
 			countdownInitial={exercise?.duration }
@@ -55,25 +60,45 @@ export function TimerExerciseScreen({
 		>
 			<>
 				{/* Camera View with Video Overlay */}
-				<View  style={{ height, position: 'relative' }}   >
-					<CameraView style={{ height, width }} facing="front" />
+				<View style={{ height, position: 'relative', width: '100%', overflow: 'hidden' }}>
+					{/* Camera View - Background Layer */}
+					<CameraView 
+						key={`camera-${cameraKey}`}
+						style={{ height, width, position: 'absolute', top: 0, left: 0 }} 
+						facing="front" 
+					/>
 					
-					{/* Video Preview Window - Bottom Right Corner */}
-					{exercise.videoUrl && (
-						<View style={{
-							position: 'absolute',
-							bottom: 12,
-							right: 12,
-							width: 100,
-							height: 138,
-							overflow: 'hidden',
-						}}>
-							<VideoView
-								player={player}
-								style={{ width: 100, height: 138 }}
-								contentFit="cover"
-								nativeControls={false}
-							/>
+					{/* Video Preview Window - Bottom Right Corner - Foreground Layer */}
+					{exercise.videoUrl && player && (
+						<View 
+							style={{
+								position: 'absolute',
+								bottom: 12,
+								right: 12,
+								width: 100,
+								height: 138,
+								zIndex: 9,
+								elevation: 10,
+							}}
+						>
+							<View style={{
+								width: '100%',
+								height: '100%',
+								overflow: 'hidden',
+								backgroundColor: 'black',
+								borderRadius: 8,
+								shadowColor: '#000',
+								shadowOffset: { width: 0, height: 2 },
+								shadowOpacity: 0.25,
+								shadowRadius: 3.84,
+							}}>
+								<VideoView
+									player={player}
+									style={{ width: '100%', height: '100%' }}
+									contentFit="cover"
+									nativeControls={false}
+								/>
+							</View>
 						</View>
 					)}
 				</View>

@@ -38,7 +38,7 @@ export function CountdownDisplay() {
 	)
 }
 
-export function ExerciseCountdownScreen({
+export function ExerciseExampleCountdownScreen({
 	exercise,
 	currentSet,
 	onComplete,
