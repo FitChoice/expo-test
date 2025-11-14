@@ -30,6 +30,7 @@ export function ExerciseFlow() {
 
 	const [currentStep, setCurrentStep] = useState<ExerciseStep>('countdown')
 	const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
+	const [restType, setRestType] = useState<'rep' | 'set' | 'exercise'>('rep')
 
 
 	const training = useTrainingStore((state) => state.training)
@@ -56,8 +57,6 @@ export function ExerciseFlow() {
 	// Check if exercise has sides
 	const hasSides = currentExercise?.side === 'both'
 
-	console.log('hasSides')
-	console.log(hasSides)
 
 	const handleCountdownComplete = () => {
 			setCurrentStep('position')
@@ -76,17 +75,18 @@ export function ExerciseFlow() {
 			setRepNumber(newRepNumber)
 			
 			if (newRepNumber < currentExercise.reps) {
-				// Еще есть повторения в текущем сете - продолжаем выполнение
-				setCurrentStep('execution')
+				// Еще есть повторения в текущем сете - показываем отдых после rep (10 сек)
+				setRestType('rep')
+				setCurrentStep('rest')
 			} else {
 				// Завершили все повторения в сете
 				const newSetNumber = setNumber + 1
 				setSetNumber(newSetNumber)
-				setRepNumber(0) // Сбрасываем счетчик повторений для следующего сета
 				
 				if (newSetNumber < currentExercise.sets) {
-					// Есть еще сеты - сразу начинаем следующий сет без countdown
-					setCurrentStep('position')
+					// Есть еще сеты - показываем отдых после set (15 сек)
+					setRestType('set')
+					setCurrentStep('rest')
 				} else {
 					// Завершили все сеты упражнения
 					const isLastExercise = currentExerciseIndex === training.exercises.length - 1
@@ -94,6 +94,7 @@ export function ExerciseFlow() {
 						setCurrentStep('success')
 					} else {
 						// Показываем отдых после завершения упражнения
+						setRestType('exercise')
 						setCurrentStep('rest')
 					}
 				}
@@ -104,44 +105,67 @@ export function ExerciseFlow() {
 			setRepNumber(newRepNumber)
 			
 			if (newRepNumber < currentExercise.reps) {
-				// Еще есть повторения на текущей стороне - продолжаем выполнение
-				setCurrentStep('execution')
+				// Еще есть повторения на текущей стороне - показываем отдых после rep (10 сек)
+				setRestType('rep')
+				setCurrentStep('rest')
 			} else {
 				// Завершили все повторения на текущей стороне
 				// Проверяем, нужно ли переключать сторону
 				if (currentSideState === 'right') {
-					// Переключаемся на левую сторону
-					setRepNumber(0)
-					setCurrentSideState('left')
-					setCurrentStep('side_switch')
+					// Переключаемся на левую сторону - показываем отдых после rep перед переключением
+					setRestType('rep')
+					setCurrentStep('rest')
 				} else {
-					// Завершили обе стороны - сет завершен
-					const newSetNumber = setNumber + 1
-					setSetNumber(newSetNumber)
-					setRepNumber(0) // Сбрасываем счетчик повторений для следующего сета
-					setCurrentSideState('right') // Сбрасываем на начальную сторону для следующего сета
-					
-					if (newSetNumber < currentExercise.sets) {
-						// Есть еще сеты - сразу начинаем следующий сет без countdown
-						setCurrentStep('position')
-					} else {
-						// Завершили все сеты упражнения
-						const isLastExercise = currentExerciseIndex === training.exercises.length - 1
-						if (isLastExercise) {
-							setCurrentStep('success')
-						} else {
-							// Показываем отдых после завершения упражнения
-							setCurrentStep('rest')
-						}
-					}
+					// Завершили все повторения на левой стороне - показываем отдых после rep перед завершением сета
+					setRestType('rep')
+					setCurrentStep('rest')
 				}
 			}
 		}
 	}
 
 	const handleRestComplete = () => {
-		// После отдыха переходим к следующему упражнению через transition
-		setCurrentStep('transition')
+		if (restType === 'rep') {
+			// После отдыха после rep продолжаем выполнение или переключаем сторону/завершаем сет
+			if (currentExercise.side === 'both' && currentSideState === 'right' && repNumber >= currentExercise.reps) {
+				// Завершили все reps на правой стороне - переключаемся на левую
+				setRepNumber(0)
+				setCurrentSideState('left')
+				setCurrentStep('side_switch')
+			} else if (currentExercise.side === 'both' && currentSideState === 'left' && repNumber >= currentExercise.reps) {
+				// Завершили все reps на левой стороне - завершаем сет
+				const newSetNumber = setNumber + 1
+				setSetNumber(newSetNumber)
+				setRepNumber(0)
+				setCurrentSideState('right')
+				
+				if (newSetNumber < currentExercise.sets) {
+					// Есть еще сеты - показываем отдых после set (15 сек)
+					setRestType('set')
+					setCurrentStep('rest')
+				} else {
+					// Завершили все сеты упражнения
+					const isLastExercise = currentExerciseIndex === training.exercises.length - 1
+					if (isLastExercise) {
+						setCurrentStep('success')
+					} else {
+						// Показываем отдых после завершения упражнения
+						setRestType('exercise')
+						setCurrentStep('rest')
+					}
+				}
+			} else {
+				// Продолжаем выполнение
+				setCurrentStep('execution')
+			}
+		} else if (restType === 'set') {
+			// После отдыха после set начинаем следующий сет
+			setRepNumber(0) // Сбрасываем счетчик повторений для следующего сета
+			setCurrentStep('position')
+		} else if (restType === 'exercise') {
+			// После отдыха после упражнения переходим к следующему упражнению через transition
+			setCurrentStep('transition')
+		}
 	}
 
 	const handleSuccessComplete = () => {
@@ -163,6 +187,7 @@ export function ExerciseFlow() {
 		setRepNumber(0)
 		setSetNumber(0)
 		setCurrentSideState('right')
+		setRestType('rep')
 		setCurrentStep('countdown')
 	}
 
@@ -184,7 +209,6 @@ export function ExerciseFlow() {
 			<BodyPositionScreen
 				key="position-check"
 				onComplete={handlePositionComplete}
-				side={currentSideState}
 			/>
 		)}
 			{/*{currentStep === 'execution' && currentExercise.isAi && (*/}
@@ -207,7 +231,7 @@ export function ExerciseFlow() {
 				key="side-switch"
 				onComplete={handleSideSwitchComplete}
 				title={'Смена рабочей стороны'}
-			//	side={hasSides ? currentSideState : undefined}
+			  side={hasSides ? currentSideState : undefined}
 			/>
 
 				// <SideSwitchScreen
@@ -216,7 +240,10 @@ export function ExerciseFlow() {
 				// />
 			)}
 			{currentStep === 'rest' && 
-			<RestScreen onComplete={handleRestComplete} duration={currentExercise.rest_time} />}
+			<RestScreen 
+				onComplete={handleRestComplete} 
+				duration={restType === 'rep' ? 10 : restType === 'set' ? 15 : currentExercise.rest_time} 
+			/>}
 
 			{currentStep === 'transition' && nextExerciseData && (
 				<ExerciseTransitionScreen

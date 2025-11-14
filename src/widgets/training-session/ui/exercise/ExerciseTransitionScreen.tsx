@@ -49,19 +49,18 @@ export function ExerciseTransitionScreen({
 
 		<View className="flex-1 items-center justify-center padding-4 ">
 
+			<CountdownDisplay />
 				<View className="mt-6 items-center">
 					<Text className="text-h2 text-brand-green-500 text-center">	Следующее упражнение</Text>
 				</View>
 
-			<CountdownDisplay />
-
 				{/* Exercise Name */}
-				<Text className="text-t2 text-light-text-100 mb-12 text-center">
+				<Text className="text-h2 text-light-text-100 mb-12 text-center">
 					{nextExercise.name}
 				</Text>
 
 				{/* Info */}
-				<Text className="text-t2 text-light-text-100 mt-6">
+				<Text className="text-h2 text-light-text-100 mt-6">
 					{nextExercise.sets} × {nextExercise.reps || nextExercise.duration}{' '}
 					{nextExercise.reps ? 'повт.' : 'сек'}
 				</Text>

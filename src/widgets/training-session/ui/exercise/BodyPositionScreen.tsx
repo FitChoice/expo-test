@@ -27,7 +27,7 @@ export function BodyPositionScreen({
 	onComplete, title, side
 }: BodyPositionScreenProps) {
 
-console.log('side', side)
+
 	const [showSuccess, setShowSuccess] = useState(false)
 	const [cameraKey, setCameraKey] = useState(0)
 	const { width } = useWindowDimensions()
