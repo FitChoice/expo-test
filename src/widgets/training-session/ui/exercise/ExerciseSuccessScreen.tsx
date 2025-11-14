@@ -4,7 +4,13 @@
  */
 
 import { View, Text } from 'react-native'
-import { useEffect, useState } from 'react'
+import React, {  useState } from 'react'
+import {
+	ExerciseWithCounterWrapper
+} from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
+import { Button } from '@/shared/ui'
+import { sharedStyles } from '@/pages/survey/ui/components/shared-styles'
+import { useTrainingStore } from '@/entities/training'
 
 interface ExerciseSuccessScreenProps {
 	onComplete: () => void
@@ -13,7 +19,7 @@ interface ExerciseSuccessScreenProps {
 
 const motivationalMessages = [
 	'Так держать!',
-	'Отлично!',
+	'Вы отлично справились!',
 	'Прекрасно!',
 	'Молодец!',
 	'Великолепно!',
@@ -22,31 +28,46 @@ const motivationalMessages = [
 
 export function ExerciseSuccessScreen({
 	onComplete,
-	message,
+
 }: ExerciseSuccessScreenProps) {
+
+
+
+	const reportTraining = useTrainingStore((state) => state.reportTraining)
+
+
 	const [displayMessage] = useState(
 		() =>
-			message ||
+
 			motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)]
 	)
 
-	useEffect(() => {
-		// Auto-dismiss after 2 seconds
-		const timer = setTimeout(() => {
-			onComplete()
-		}, 2000)
 
-		return () => clearTimeout(timer)
-	}, [onComplete])
+
+	const handleGoToReportPage = () => {
+		reportTraining()
+	}
 
 	return (
-		<View className="bg-background-primary flex-1 items-center justify-center">
-			<Text
-				className="text-h1-medium px-6 text-center text-brand-green-500"
-				style={{ fontSize: 48 }}
-			>
-				{displayMessage}
-			</Text>
-		</View>
+		<ExerciseWithCounterWrapper
+			onComplete={onComplete}
+		>
+
+			<View className="flex-1 items-center justify-between padding-4 pt-20 pb-5  gap-10">
+
+				<View className="flex items-start gap-10">
+
+					<Text style={sharedStyles.titleCenter}>{displayMessage }</Text>
+
+					<Text className="text-h2 text-light-text-200" >Давайте посмотрим отчёт</Text>
+
+				</View>
+
+
+
+				<Button  variant="primary" onPress={handleGoToReportPage} className="w-full" >Далее</Button>
+			</View>
+
+		</ExerciseWithCounterWrapper>
 	)
 }

@@ -4,10 +4,15 @@
  * Использует данные из Zustand store
  */
 
-import { View, Text, ScrollView } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
 import { router } from 'expo-router'
-import { Button, StatCard, Icon, Container } from '@/shared/ui'
+import { Button, StatCard, Icon, Container, MetricCard } from '@/shared/ui'
 import { useTrainingStore } from '@/entities/training'
+import { GradientBg } from '@/shared/ui/GradientBG'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Fontisto from '@expo/vector-icons/Fontisto';
+
+
 
 export default function TrainingReportScreen() {
 	const training = useTrainingStore((state) => state.training)
@@ -24,8 +29,16 @@ export default function TrainingReportScreen() {
 		return `${Math.floor(seconds / 60)} мин`
 	}
 
+	// Format date as DD.MM.YYYY
+	const formatDate = (date: Date) => {
+		const day = String(date.getDate()).padStart(2, '0')
+		const month = String(date.getMonth() + 1).padStart(2, '0')
+		const year = date.getFullYear()
+		return `${day}.${month}.${year}`
+	}
+
 	// Calculate experience points based on workout
-	const experienceGained = training?.experiencePoints || 0
+	const experienceGained = training?.experience || 0
 
 	const handleFinish = () => {
 		// Reset training store
@@ -42,107 +55,92 @@ export default function TrainingReportScreen() {
 		)
 	}
 
-	return (
-		<View className="bg-background-primary flex-1">
-			<ScrollView showsVerticalScrollIndicator={false}>
-				{/* Header */}
-				<View className="bg-gradient-to-b from-brand-purple-500/20 to-transparent px-4 pb-8 pt-12">
-					<View className="mb-6 items-center">
-						<View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-brand-green-500">
-							<Icon name="check-circle" size={32} color="#000000" />
-						</View>
-						<Text className="text-h2-medium text-text-primary mb-2 text-center">
-							Отличная работа!
-						</Text>
-						<Text className="text-body-regular text-text-secondary text-center">
-							Тренировка завершена
-						</Text>
-					</View>
+	return ( <Container>
 
-					{/* Main Stats */}
-					<View className="flex-row gap-3">
-						<View className="flex-1">
-							<StatCard
-								icon="clock"
-								value={formatMinutes(elapsedTime)}
-								label="Общее время"
-								size="medium"
-							/>
+		    <GradientBg />
+
+			{/* Training Header Block */}
+			<View className="w-full flex-row items-center px-4 py-10 bg-transparent">
+				{/* Icon Circle */}
+				<View className="h-12 w-12 rounded-full bg-purple-500 items-center justify-center mr-3">
+					<MaterialCommunityIcons name="dumbbell" size={24} color="#FFFFFF" />
+				</View>
+
+				{/* Content */}
+				<View className="flex-1">
+					<Text className="text-white text-t2 mb-2">
+						{training.title || 'Силовая тренировка'}
+					</Text>
+					
+					{/* Tags */}
+					<View className="flex-row gap-2">
+						<View className="bg-gray-800/50 rounded-lg px-3 py-1">
+							<Text className="text-white text-t4">
+								{formatDate(new Date())}
+							</Text>
 						</View>
-						<View className="flex-1">
-							<StatCard
-								icon="star"
-								value={`+${experienceGained}`}
-								label="Опыт"
-								size="medium"
-							/>
+						<View className="bg-gray-800/50 rounded-lg px-3 py-1 flex-row items-center">
+							<MaterialCommunityIcons name="bow-arrow" size={16} color="#FFFFFF" />
+							<Text className="text-white text-t4 ml-1">
+								+{experienceGained} опыта
+							</Text>
 						</View>
 					</View>
 				</View>
 
-				<Container className="py-6">
-					{/* Additional Stats Grid */}
-					<View className="mb-6 gap-3">
-						<View className="flex-row gap-3">
-							<View className="flex-1">
-								<StatCard
-									icon="fire"
-									value={`${caloriesBurned}`}
-									label="Калории"
-									size="small"
-								/>
-							</View>
-							<View className="flex-1">
-								<StatCard
-									icon="activity"
-									value={formatMinutes(activeTime)}
-									label="Активное время"
-									size="small"
-								/>
-							</View>
-						</View>
-						<View className="flex-row gap-3">
-							<View className="flex-1">
-								<StatCard
-									icon="repeat"
-									value={totalReps}
-									label="Повторений"
-									size="small"
-								/>
-							</View>
-							<View className="flex-1">
-								<StatCard
-									icon="target"
-									value={`${Math.round(averageFormQuality)}%`}
-									label="Качество"
-									size="small"
-								/>
-							</View>
-						</View>
-					</View>
-
-					{/* Training Info */}
-					<View className="bg-brand-dark-300 mb-6 rounded-2xl p-4">
-						<Text className="text-body-medium text-text-primary mb-2">
-							{training.title}
-						</Text>
-						<Text className="text-caption-regular text-text-secondary mb-3">
-							{training.description}
-						</Text>
-						<Text className="text-caption-regular text-text-secondary">
-							Выполнено {completedExercises.length} из {training.exercises.length}{' '}
-							упражнений
-						</Text>
-					</View>
-				</Container>
-			</ScrollView>
-
-			{/* Action Button */}
-			<View className="border-brand-dark-300 bg-background-primary border-t p-4">
-				<Button onPress={handleFinish} variant="primary" className="w-full">
-					Завершить
-				</Button>
+				{/* Close Button */}
+				<TouchableOpacity 
+					className="h-10 w-10 rounded-lg bg-green-800/30 items-center justify-center ml-3"
+					onPress={handleFinish}
+				>
+					<MaterialCommunityIcons name="close" size={20} color="#FFFFFF" />
+				</TouchableOpacity>
 			</View>
+
+			<View className="w-full h-[250px] p-2">
+			<MetricCard
+				icon={<MaterialCommunityIcons name="clock-time-eight" size={24} color="#689F38" />}
+			displayNumber={20}
+			title={'минут'}
+			description={'Длительность тренировки'}
+
+			/>
+			</View>
+
+			<View className='flex-row flex-1 w-full px-2 gap-2'>
+
+			<View className='flex-1' >
+			<MetricCard
+				icon={<MaterialCommunityIcons name="run-fast" size={24} color="#689F38"  />}
+			displayNumber={20}
+			title={'минут'}
+			description={'Длительность тренировки'}
+
+			/>
+			</View>
+
+			<View className='flex-1' >
+			<MetricCard
+				icon={<Fontisto name="fire" size={24} color="#689F38"  />}
+			displayNumber={20}
+			title={'минут'}
+			description={'Длительность тренировки'}
+
+			/>
+			</View>
+
+			</View>
+
+		{/* Button at bottom */}
+		<View className=" flex-row gap-2 py-2">
+			<Button variant="tertiary"  className="flex-1" >
+				Закрыть
+			</Button>
+			<Button variant="primary"  className="flex-1" >
+				Анализ ошибок
+			</Button>
 		</View>
+
+		</Container>
 	)
 }

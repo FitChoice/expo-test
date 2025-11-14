@@ -24,13 +24,14 @@ export default function TrainingSessionScreen() {
 		)
 	}
 
+
 	// Render based on current status
 	switch (status) {
 		case 'onboarding':
 			return <OnboardingFlow />
 
 		case 'finished':
-		
+
 			return <View className="bg-background-primary flex-1 items-center justify-center" ><Text>finished</Text>
 						</View>
 
