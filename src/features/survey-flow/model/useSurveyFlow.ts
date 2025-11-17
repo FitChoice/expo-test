@@ -9,8 +9,103 @@ import {
 	calculateBMI,
 	getBMICategory,
 	type BMICategory,
+	type DayOfWeek,
+	type Goal,
+	type AgeGroup,
 } from '@/entities/survey'
 import { surveyApi } from '../api'
+
+// Битовая маска дней недели: 1=Пн, 2=Вт, 4=Ср, 8=Чт, 16=Пт, 32=Сб, 64=Вс
+const DAY_MASKS: Record<DayOfWeek, number> = {
+	monday: 1,
+	tuesday: 2,
+	wednesday: 4,
+	thursday: 8,
+	friday: 16,
+	saturday: 32,
+	sunday: 64,
+}
+
+// Конвертация DayOfWeek[] в массив битовых масок
+function daysToMasks(days: DayOfWeek[]): number[] {
+	return days.map((day) => DAY_MASKS[day])
+}
+
+// Конвертация массива битовых масок обратно в DayOfWeek[]
+function masksToDays(masks: number[]): DayOfWeek[] {
+	const maskToDay: Record<number, DayOfWeek> = {
+		1: 'monday',
+		2: 'tuesday',
+		4: 'wednesday',
+		8: 'thursday',
+		16: 'friday',
+		32: 'saturday',
+		64: 'sunday',
+	}
+	return masks.map((mask) => maskToDay[mask]).filter(Boolean) as DayOfWeek[]
+}
+
+// Битовая маска целей: 1=Осанка, 2=Боль, 4=Гибкость, 8=Укрепление, 16=Сброс веса, 32=Стресс, 64=Энергия, 128=Самочувствие
+const GOAL_MASKS: Record<Goal, number> = {
+	posture: 1,
+	pain_relief: 2,
+	flexibility: 4,
+	strength: 8,
+	weight_loss: 16,
+	stress_relief: 32,
+	energy: 64,
+	wellness: 128,
+}
+
+// Конвертация Goal[] в массив битовых масок
+function goalsToMasks(goals: Goal[]): number[] {
+	return goals.map((goal) => GOAL_MASKS[goal])
+}
+
+// Конвертация массива битовых масок обратно в Goal[]
+function masksToGoals(masks: number[]): Goal[] {
+	const maskToGoal: Record<number, Goal> = {
+		1: 'posture',
+		2: 'pain_relief',
+		4: 'flexibility',
+		8: 'strength',
+		16: 'weight_loss',
+		32: 'stress_relief',
+		64: 'energy',
+		128: 'wellness',
+	}
+	return masks.map((mask) => maskToGoal[mask]).filter(Boolean) as Goal[]
+}
+
+// Конвертация AgeGroup строки в число (среднее арифметическое)
+function ageGroupToNumber(ageGroup: AgeGroup): number {
+	if (ageGroup === 'under_18') {
+		return 17 // Среднее для < 18
+	}
+	if (ageGroup === '65_plus') {
+		return 70 // Среднее для ≥ 65
+	}
+	// Извлекаем два числа из строки типа '18_24'
+	const parts = ageGroup.split('_').map(Number)
+	const min = parts[0]
+	const max = parts[1]
+	if (min === undefined || max === undefined) {
+		throw new Error(`Invalid ageGroup format: ${ageGroup}`)
+	}
+	return Math.round((min + max) / 2)
+}
+
+// Конвертация числа обратно в AgeGroup строку
+function numberToAgeGroup(age: number): AgeGroup | null {
+	if (age < 18) return 'under_18'
+	if (age >= 18 && age <= 24) return '18_24'
+	if (age >= 25 && age <= 34) return '25_34'
+	if (age >= 35 && age <= 44) return '35_44'
+	if (age >= 45 && age <= 54) return '45_54'
+	if (age >= 55 && age <= 64) return '55_64'
+	if (age >= 65) return '65_plus'
+	return null
+}
 
 interface SurveyFlowStore {
 	// UI state
@@ -27,12 +122,13 @@ interface SurveyFlowStore {
 	// Методы обновления данных
 	updateName: (name: string) => void
 	updateGender: (gender: SurveyData['gender']) => void
-	updateTrainingDays: (days: SurveyData['trainingDays']) => void
-	updateFrequency: (frequency: SurveyData['frequency']) => void
-	updateGoals: (goals: SurveyData['goals']) => void
-	updateMainDirection: (direction: SurveyData['mainDirection']) => void
-	updateAdditionalDirections: (directions: SurveyData['additionalDirections']) => void
-	updateAgeGroup: (ageGroup: SurveyData['ageGroup']) => void
+	updateTrainingDays: (days: DayOfWeek[]) => void
+	updateFrequency: (frequency: SurveyData['train_frequency']) => void
+	updateGoals: (goals: Goal[]) => void
+	updateMainDirection: (direction: SurveyData['main_direction']) => void
+	updateAdditionalDirection: (direction: SurveyData['secondary_direction']) => void
+	updateAgeGroup: (ageGroup: AgeGroup) => void
+	setAgeGroupFromNumber: (age: number) => void
 	updateHeight: (height: number | null) => void
 	updateWeight: (weight: number | null) => void
 	updateBMI: (bmi: number | null) => void
@@ -45,6 +141,11 @@ interface SurveyFlowStore {
 	// BMI methods (using business logic from entities)
 	calculateBMI: () => void
 	getBMICategory: () => BMICategory | null
+
+	// Helper methods
+	getTrainingDaysAsStrings: () => DayOfWeek[]
+	getGoalsAsStrings: () => Goal[]
+	getAgeGroupAsString: () => AgeGroup | null
 
 	// Navigation methods
 	nextStep: () => void
@@ -61,16 +162,16 @@ interface SurveyFlowStore {
 const initialSurveyData: SurveyData = {
 	name: '',
 	gender: null,
-	trainingDays: [],
-	frequency: null,
-	goals: [],
-	mainDirection: null,
-	additionalDirections: [],
-	ageGroup: null,
+	train_days: [], // Будет храниться как number[] (битовые маски)
+	train_frequency: null,
+	train_goals: [], // Будет храниться как number[] (битовые маски)
+	main_direction: null,
+	secondary_direction: null,
+	age: null,
 	height: null,
 	weight: null,
 	bmi: null,
-	notificationsEnabled: false,
+	notif_main: false,
 }
 
 export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
@@ -91,35 +192,55 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 			surveyData: { ...state.surveyData, gender },
 		})),
 
-	updateTrainingDays: (trainingDays) =>
+	updateTrainingDays: (days) =>
 		set((state) => ({
-			surveyData: { ...state.surveyData, trainingDays },
+			surveyData: {
+				...state.surveyData,
+				train_days: daysToMasks(days) as any, // Конвертируем в массив чисел
+			},
 		})),
 
 	updateFrequency: (frequency) =>
 		set((state) => ({
-			surveyData: { ...state.surveyData, frequency },
+			surveyData: { ...state.surveyData, train_frequency: frequency },
 		})),
 
 	updateGoals: (goals) =>
 		set((state) => ({
-			surveyData: { ...state.surveyData, goals },
+			surveyData: {
+				...state.surveyData,
+				train_goals: goalsToMasks(goals) as any, // Конвертируем в массив чисел
+			},
 		})),
 
 	updateMainDirection: (mainDirection) =>
 		set((state) => ({
-			surveyData: { ...state.surveyData, mainDirection },
+			surveyData: { ...state.surveyData, main_direction: mainDirection },
 		})),
 
-	updateAdditionalDirections: (additionalDirections) =>
+	updateAdditionalDirection: (additionalDirection) =>
 		set((state) => ({
-			surveyData: { ...state.surveyData, additionalDirections },
+			surveyData: { ...state.surveyData, secondary_direction: additionalDirection },
 		})),
 
 	updateAgeGroup: (ageGroup) =>
 		set((state) => ({
-			surveyData: { ...state.surveyData, ageGroup },
+			surveyData: {
+				...state.surveyData,
+				age: ageGroupToNumber(ageGroup) as any, // Конвертируем в число (среднее арифметическое)
+			},
 		})),
+
+	setAgeGroupFromNumber: (age) =>
+		set((state) => {
+			const ageGroup = numberToAgeGroup(age)
+			return {
+				surveyData: {
+					...state.surveyData,
+					age: ageGroup ? (ageGroupToNumber(ageGroup) as any) : null,
+				},
+			}
+		}),
 
 	updateHeight: (height) =>
 		set((state) => ({
@@ -138,7 +259,7 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 
 	updateNotificationsEnabled: (notificationsEnabled) =>
 		set((state) => ({
-			surveyData: { ...state.surveyData, notificationsEnabled },
+			surveyData: { ...state.surveyData, notif_main: notificationsEnabled },
 		})),
 
 	// Submit state methods
@@ -161,6 +282,25 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 	getBMICategory: () => {
 		const state = get()
 		return getBMICategory(state.surveyData.bmi)
+	},
+
+	getTrainingDaysAsStrings: () => {
+		const state = get()
+		const masks = (state.surveyData.train_days as unknown as number[]) || []
+		return masksToDays(masks)
+	},
+
+	getGoalsAsStrings: () => {
+		const state = get()
+		const masks = (state.surveyData.train_goals as unknown as number[]) || []
+		return masksToGoals(masks)
+	},
+
+	getAgeGroupAsString: () => {
+		const state = get()
+		const age = state.surveyData.age as unknown as number
+		if (age === null || age === undefined) return null
+		return numberToAgeGroup(age)
 	},
 
 	// Navigation methods

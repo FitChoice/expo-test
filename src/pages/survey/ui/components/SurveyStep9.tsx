@@ -22,13 +22,13 @@ export const SurveyStep9: React.FC<SurveyStep9Props> = ({
 			<View className="bg-transparent">
 				<RadioSelect
 					options={[
-						{ value: 'never', label: 'Не тренируюсь' },
-						{ value: 'sometimes', label: 'Иногда двигаюсь' },
-						{ value: '2-3times', label: '2-3 раза в неделю' },
-						{ value: 'almost_daily', label: 'Почти каждый день' },
+						{ value: '0', label: 'Не тренируюсь' },
+						{ value: '1', label: 'Иногда двигаюсь' },
+						{ value: '2', label: '2-3 раза в неделю' },
+						{ value: '3', label: 'Почти каждый день' },
 					]}
-					value={frequency || ''}
-					onChange={(value) => onFrequencyChange(value as Frequency)}
+					value={String(frequency) || '0'}
+					onChange={(value) => onFrequencyChange(Number(value) as Frequency)}
 				/>
 			</View>
 		</>

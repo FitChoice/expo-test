@@ -27,13 +27,13 @@ export const SurveyStep11: React.FC<SurveyStep11Props> = ({
 			<View className="bg-transparent">
 				<RadioSelect
 					options={[
-						{ value: 'strength', label: 'Силовые тренировки', icon: <Dumbbell /> },
-						{ value: 'cardio', label: 'Кардио', icon:  <Cardio /> },
-						{ value: 'stretching', label: 'Растяжка', icon: <Stretching /> },
-						{ value: 'back_health', label: 'Здоровая спина', icon: <Posture /> },
+						{ value: '0', label: 'Силовые тренировки', icon: <Dumbbell /> },
+						{ value: '1', label: 'Кардио', icon:  <Cardio /> },
+						{ value: '2', label: 'Растяжка', icon: <Stretching /> },
+						{ value: '3', label: 'Здоровая спина', icon: <Posture /> },
 					]}
-					value={mainDirection || ''}
-					onChange={(value) => onMainDirectionChange(value as Direction)}
+					value={String(mainDirection) || ''}
+					onChange={(value) => onMainDirectionChange(Number(value) as Direction)}
 				/>
 			</View>
 		</>

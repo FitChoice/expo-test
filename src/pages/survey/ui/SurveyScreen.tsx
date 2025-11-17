@@ -52,15 +52,21 @@ export const SurveyScreen = () => {
 		updateFrequency,
 		updateGoals,
 		updateMainDirection,
-		updateAdditionalDirections,
+		updateAdditionalDirection,
+		updateNotificationsEnabled,
 		calculateBMI,
 		getBMICategory,
+		getTrainingDaysAsStrings,
+		getGoalsAsStrings,
+		getAgeGroupAsString,
 		nextStep,
 		prevStep,
 		submitSurvey,
 		setIsSubmitting,
 		setSubmitError,
 	} = useSurveyFlow()
+
+
 
 
 	const [hasRequested, setHasRequested] = useState(false)
@@ -154,6 +160,7 @@ export const SurveyScreen = () => {
 					}
 
 					setHasRequested(true)
+					updateNotificationsEnabled(true)
 				} catch (error) {
 					// Игнорируем ошибку в Expo Go
 					console.log('Notifications unavailable:', error)
@@ -195,8 +202,8 @@ export const SurveyScreen = () => {
 			case 3:
 				return (
 					<SurveyStep3
-						ageGroup={surveyData.ageGroup}
-						onAgeGroupChange={(value) => updateAgeGroup(value as AgeGroup)}
+						ageGroup={getAgeGroupAsString()}
+						onAgeGroupChange={(value) => updateAgeGroup(value)}
 					/>
 				)
 
@@ -219,8 +226,8 @@ export const SurveyScreen = () => {
 			case 7:
 				return (
 					<SurveyStep7
-						selectedDays={surveyData.trainingDays}
-						onDaysChange={(days) => updateTrainingDays(days as DayOfWeek[])}
+						selectedDays={getTrainingDaysAsStrings()}
+						onDaysChange={(days) => updateTrainingDays(days)}
 					/>
 				)
 
@@ -230,23 +237,23 @@ export const SurveyScreen = () => {
 			case 9:
 				return (
 					<SurveyStep9
-						frequency={surveyData.frequency}
-						onFrequencyChange={(value) => updateFrequency(value as Frequency)}
+						frequency={surveyData.train_frequency}
+						onFrequencyChange={(value) => updateFrequency(+value as Frequency)}
 					/>
 				)
 
 			case 10:
 				return (
 					<SurveyStep10
-						goals={surveyData.goals}
-						onGoalsChange={(value) => updateGoals(value as Goal[])}
+						goals={getGoalsAsStrings()}
+						onGoalsChange={(value) => updateGoals(value)}
 					/>
 				)
 
 			case 11:
 				return (
 					<SurveyStep11
-						mainDirection={surveyData.mainDirection}
+						mainDirection={surveyData.main_direction}
 						onMainDirectionChange={(value) => updateMainDirection(value as Direction)}
 					/>
 				)
@@ -254,10 +261,10 @@ export const SurveyScreen = () => {
 			case 12:
 				return (
 					<SurveyStep12
-						mainDirection={surveyData.mainDirection}
-						additionalDirections={surveyData.additionalDirections}
+						mainDirection={String(surveyData.main_direction)}
+						additionalDirection={surveyData.secondary_direction}
 						onAdditionalDirectionsChange={(value) =>
-							updateAdditionalDirections(value as Direction[])
+							updateAdditionalDirection(value as Direction)
 						}
 					/>
 				)
@@ -289,7 +296,7 @@ export const SurveyScreen = () => {
 			case 2:
 				return surveyData.gender !== null
 			case 3:
-				return surveyData.ageGroup !== null
+				return getAgeGroupAsString() !== null
 			case 4:
 				return surveyData.height !== null && surveyData.weight !== null
 			case 5:
@@ -297,15 +304,15 @@ export const SurveyScreen = () => {
 			case 6:
 				return true // На экране результата ИМТ всегда показываем кнопку
 			case 7:
-				return surveyData.trainingDays.length >= 3 // Минимум 3 дня
+				return getTrainingDaysAsStrings().length >= 3 // Минимум 3 дня
 			case 8:
 				return true // Информационный экран
 			case 9:
-				return surveyData.frequency !== null
+				return surveyData.train_frequency !== null
 			case 10:
-				return surveyData.goals.length > 0 && surveyData.goals.length <= 3
+				return getGoalsAsStrings().length > 0 && getGoalsAsStrings().length <= 3
 			case 11:
-				return surveyData.mainDirection !== null
+				return surveyData.main_direction !== null
 			case 12:
 				return true // Опциональный вопрос
 			case 13:

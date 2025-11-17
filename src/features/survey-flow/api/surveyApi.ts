@@ -28,77 +28,31 @@ interface UpdateUserResponse {
  * Преобразует SurveyData в формат API
  */
 function surveyDataToApiFormat(data: SurveyData): UpdateUserMetadataInput {
-	// Конвертируем массив дней в битовую маску
-	const trainDaysMask = data.trainingDays.reduce((mask, day) => {
-		const dayIndex = [
-			'monday',
-			'tuesday',
-			'wednesday',
-			'thursday',
-			'friday',
-			'saturday',
-			'sunday',
-		].indexOf(day)
-		return mask | (1 << dayIndex)
+	// Конвертируем массив битовых масок дней в одно число (битовую маску)
+	const trainingDaysMasks = data.train_days as unknown as number[]
+	const trainDaysMask = trainingDaysMasks.reduce((mask, dayMask) => {
+		return mask | dayMask
 	}, 0)
 
-	// Конвертируем массив целей в битовую маску
-	const goalsMask = data.goals.reduce((mask, goal) => {
-		const goalIndex = [
-			'posture',
-			'pain_relief',
-			'flexibility',
-			'strength',
-			'weight_loss',
-			'stress_relief',
-			'energy',
-			'wellness',
-		].indexOf(goal)
-		return mask | (1 << goalIndex)
+	// Конвертируем массив битовых масок целей в одно число (битовую маску)
+	const goalsMasks = data.train_goals as unknown as number[]
+	const goalsMask = goalsMasks.reduce((mask, goalMask) => {
+		return mask | goalMask
 	}, 0)
 
-	// Конвертируем age group в число
-	const ageGroupMap: Record<string, number> = {
-		under_18: 17,
-		'18_24': 21,
-		'25_34': 29,
-		'35_44': 39,
-		'45_54': 49,
-		'55_64': 59,
-		'65_plus': 70,
-	}
-
-	// Конвертируем frequency в число
-	const frequencyMap: Record<string, number> = {
-		never: 0,
-		sometimes: 1,
-		'2-3times': 2,
-		almost_daily: 3,
-	}
-
-	// Конвертируем direction в число
-	const directionMap: Record<string, number> = {
-		strength: 0,
-		cardio: 1,
-		stretching: 2,
-		back_health: 3,
-	}
+	// age уже хранится как число (среднее арифметическое) в стейте
 
 	return {
 		name: data.name || undefined,
 		gender: data.gender || undefined,
-		age: data.ageGroup ? ageGroupMap[data.ageGroup] : undefined,
+		age: (data.age as unknown as number) || undefined,
 		height: data.height || undefined,
 		weight: data.weight || undefined,
 		train_days: trainDaysMask || undefined,
-		train_frequency: data.frequency ? frequencyMap[data.frequency] : undefined,
+		train_frequency: data.train_frequency || undefined,
 		train_goals: goalsMask || undefined,
-		main_direction: data.mainDirection
-			? directionMap[data.mainDirection]
-			: undefined,
-		secondary_direction: data.additionalDirections[0]
-			? directionMap[data.additionalDirections[0]]
-			: undefined,
+		main_direction: data.main_direction || undefined,
+		secondary_direction: data.secondary_direction || undefined,
 	}
 }
 
@@ -118,14 +72,15 @@ export const surveyApi = {
 			}
 		}
 
-		if (data.goals.length === 0) {
+		const goalsMasks = data.train_goals as unknown as number[]
+		if (!goalsMasks || goalsMasks.length === 0) {
 			return {
 				success: false,
 				error: 'Выберите хотя бы одну цель',
 			}
 		}
 
-		if (!data.mainDirection) {
+		if (!data.main_direction) {
 			return {
 				success: false,
 				error: 'Выберите основное направление',

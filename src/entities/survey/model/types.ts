@@ -11,7 +11,7 @@ export type DayOfWeek =
 	| 'saturday'
 	| 'sunday'
 
-export type Frequency = 'never' | 'sometimes' | '2-3times' | 'almost_daily'
+export type Frequency = number
 
 export type Goal =
 	| 'posture' // Улучшить осанку
@@ -23,11 +23,7 @@ export type Goal =
 	| 'energy' // Повысить энергию
 	| 'wellness' // Общее оздоровление
 
-export type Direction =
-	| 'strength' // Силовые тренировки
-	| 'cardio' // Кардио
-	| 'stretching' // Растяжка
-	| 'back_health' // Здоровая спина
+export type Direction = number
 
 export type AgeGroup =
 	| 'under_18'
@@ -42,16 +38,16 @@ export type AgeGroup =
 export interface SurveyData {
 	name: string
 	gender: Gender | null
-	trainingDays: DayOfWeek[]
-	frequency: Frequency | null
-	goals: Goal[]
-	mainDirection: Direction | null
-	additionalDirections: Direction[]
-	ageGroup: AgeGroup | null
+	train_days: DayOfWeek[]
+	train_frequency: Frequency | null
+	train_goals: Goal[]
+	main_direction: Direction | null
+	secondary_direction: Direction | null
+	age: AgeGroup | null
 	height: number | null
 	weight: number | null
 	bmi: number | null
-	notificationsEnabled: boolean
+	notif_main: boolean
 }
 
 // Результат ИМТ

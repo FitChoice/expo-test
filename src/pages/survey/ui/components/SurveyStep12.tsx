@@ -10,9 +10,9 @@ import Dumbbell from '@/shared/ui/Icon/assets/dumbbell-purple.svg'
 import Stretching from '@/shared/ui/Icon/assets/stretching-purple.svg'
 
 interface SurveyStep12Props {
-	mainDirection: Direction | null
-	additionalDirections: Direction[]
-	onAdditionalDirectionsChange: (directions: Direction[]) => void
+	mainDirection: string
+	additionalDirection: Direction | null
+	onAdditionalDirectionsChange: (direction: Direction) => void
 }
 
 /**
@@ -20,15 +20,17 @@ interface SurveyStep12Props {
  */
 export const SurveyStep12: React.FC<SurveyStep12Props> = ({
 	mainDirection,
-	additionalDirections,
+	additionalDirection,
 	onAdditionalDirectionsChange,
 }) => {
+
+
 	const availableDirections = useMemo(() => {
 		const allDirections = [
-			{ value: 'strength' as Direction, label: 'Силовые тренировки', icon: <Dumbbell /> },
-			{ value: 'cardio' as Direction, label: 'Кардио', icon:  <Cardio /> },
-			{ value: 'stretching' as Direction, label: 'Растяжка', icon: <Stretching /> },
-			{ value: 'back_health' as Direction, label: 'Здоровая спина', icon: <Posture /> },
+			{ value: '0' , label: 'Силовые тренировки', icon: <Dumbbell /> },
+			{ value: '1', label: 'Кардио', icon:  <Cardio /> },
+			{ value: '2', label: 'Растяжка', icon: <Stretching /> },
+			{ value: '3' , label: 'Здоровая спина', icon: <Posture /> },
 		]
 
 		return allDirections.filter((dir) => dir.value !== mainDirection)
@@ -42,8 +44,8 @@ export const SurveyStep12: React.FC<SurveyStep12Props> = ({
 			<View className="bg-transparent">
 				<RadioSelect
 					options={availableDirections}
-					value={additionalDirections || ''}
-					onChange={(value) => onAdditionalDirectionsChange(value as Direction)}
+					value={String(additionalDirection) || ''}
+					onChange={(value) => onAdditionalDirectionsChange(Number(value) as Direction)}
 				/>
 			</View>
 		</>

@@ -27,6 +27,9 @@ export const SurveyStep7: React.FC<SurveyStep7Props> = ({
 					? [...selectedDays, day]
 					: selectedDays
 
+			console.log('updated')
+			console.log(updated)
+
 			onDaysChange(updated)
 		},
 		[selectedDays, maxDays, onDaysChange]
