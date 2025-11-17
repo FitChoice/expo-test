@@ -19,31 +19,24 @@ interface CameraPermissionScreenProps {
 
 export function CameraPermissionScreen({ onNext }: CameraPermissionScreenProps) {
 	const [permission, requestPermission] = useCameraPermissions();
-	const [hasBeenRequested, setHasBeenRequested] = useState(false);
+
 
 	const handleStop = () => {
 		router.back();
 	};
 
 	const handleNext = async () => {
-		// Если разрешение уже получено — переходим на следующий экран
+	
 		if (permission?.granted) {
 			onNext();
 			return;
 		}
 
-		// Если ещё не запрашивали — запрашиваем разрешение
-		if (!hasBeenRequested) {
-			setHasBeenRequested(true);
+	
 			await requestPermission();
-			return;
-		}
-
-		// Если запросили, но разрешения нет — ничего не делаем (ждём действий пользователя)
-		// Кнопка остаётся активной, можно нажать ещё раз (например, открыть настройки)
+		
 	};
 
-	const isNextEnabled = permission?.granted || hasBeenRequested;
 
 	return (
 		<View className="flex-1 bg-black">
@@ -81,7 +74,7 @@ export function CameraPermissionScreen({ onNext }: CameraPermissionScreenProps) 
 				<Button
 					variant="primary"
 					onPress={handleNext}
-					disabled={!isNextEnabled} // блокируем, пока не запрашивали и нет разрешения
+					//disabled={!permission?.granted} // блокируем, пока не запрашивали и нет разрешения
 					className="w-full"
 				>
 					{permission?.granted ? 'Далее' : 'Разрешить доступ'}

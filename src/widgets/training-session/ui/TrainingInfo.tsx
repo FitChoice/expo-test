@@ -5,28 +5,32 @@ import { Button, Icon, Switch, Container, TrainingTags, ExerciseInfoCard } from 
 import { useTrainingStore } from "@/entities/training"
 import { useState, useMemo } from "react"
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { GradientBg } from '@/shared/ui/GradientBG'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const trainingInfoBanner = require("@/assets/images/training_info_banner.png")
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const equipment1 = require("@/assets/images/equipment/1.png")
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const equipment2 = require("@/assets/images/equipment/2.png")
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const equipment3 = require("@/assets/images/equipment/3.png")
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const equipment4 = require("@/assets/images/equipment/4.png")
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const equipment5 = require("@/assets/images/equipment/5.png")
-
-const equipmentImages = [equipment1, equipment2, equipment3, equipment4, equipment5]
+// Динамический импорт картинок оборудования
+const equipmentImages = [
+	require("@/assets/images/equipment/1.png"),
+	require("@/assets/images/equipment/2.png"),
+	require("@/assets/images/equipment/3.png"),
+	require("@/assets/images/equipment/4.png"),
+	require("@/assets/images/equipment/5.png"),
+	require("@/assets/images/equipment/6.png"),
+	require("@/assets/images/equipment/7.png"),
+	require("@/assets/images/equipment/8.png"),
+	require("@/assets/images/equipment/9.png"),
+	require("@/assets/images/equipment/10.png"),
+	require("@/assets/images/equipment/11.png"),
+]
 
 export const TrainingInfo = () => {
 	const insets = useSafeAreaInsets()
 	const training = useTrainingStore((state) => state.training)
 	const startOnboarding = useTrainingStore((state) => state.startOnboarding)
 	const [showTutorial, setShowTutorial] = useState(true)
+
 
 	// Calculate training duration in minutes
 	const trainingDuration = useMemo(() => {
@@ -52,7 +56,8 @@ export const TrainingInfo = () => {
 	}
 
 	return ( <Container>
-		<View className="bg-background-primary flex-1">
+		<View className="flex-1">
+			<GradientBg />
 			<ScrollView 
 				className="flex-1" 
 				showsVerticalScrollIndicator={false}
@@ -78,7 +83,7 @@ export const TrainingInfo = () => {
 				{/* Black Block with Text */}
 				<View style={{ marginTop: -180 }}>
 					{/* Tags */}
-                    <View className="bg-black px-6 pt-6 pb-6 rounded-t-2xl rounded-b-2xl">
+                    <View className="bg-black px-6 pt-6 pb-6 mb-2 rounded-t-2xl rounded-b-2xl">
 					<TrainingTags
 						icon1={<MaterialCommunityIcons name="clock-time-eight" size={16} color="#FFFFFF" />}
 						title1={`${trainingDuration} минут`}
@@ -87,16 +92,19 @@ export const TrainingInfo = () => {
 						className="mb-4"
 					/>
 
-					<Text className="text-h2-medium text-white mb-4">
+					<Text className="text-h2 text-white mb-4">
 						{training?.title || 'Подвижность верхнего отдела позвоночника'}
 					</Text>
-					<Text className="text-body-regular text-white leading-6 mb-6">
-						Сделай тест и узнай свой уровень. Камера зафиксирует движения, а ИИ подскажет ошибки и подсчитает повторения. В конце ты получишь свой стартовый уровень и персональные рекомендации для тренировок. Всего несколько минут — и ты готов начать!
+					<Text className="text-t2 text-light-text-500 leading-6 mb-6">
+
+						{
+							training?.description || 'Сделай тест и узнай свой уровень. Камера зафиксирует движения, а ИИ подскажет ошибки и подсчитает повторения. В конце ты получишь свой стартовый уровень и персональные рекомендации для тренировок. Всего несколько минут — и ты готов начать!'
+						}
 					</Text>
 
 					{/* Switch Section */}
 					<View className="flex-row items-center justify-between">
-						<Text className="text-body-regular text-white">
+						<Text className="text-t3 text-white">
 							Обучение перед упражнением
 						</Text>
 						<Switch 
@@ -108,8 +116,8 @@ export const TrainingInfo = () => {
 				</View>
 
 				{/* Equipment Section */}
-				<View className="bg-black px-6 pt-6 pb-6 rounded-t-2xl rounded-b-2xl">
-					<Text className="text-body-medium text-white mb-4">
+				<View className="bg-black px-6 pt-6 pb-6 rounded-t-2xl rounded-b-2xl mb-2 ">
+					<Text className="text-t1.1 text-white mb-4">
 						Инвентарь
 					</Text>
 					<ScrollView 
@@ -117,18 +125,21 @@ export const TrainingInfo = () => {
 						showsHorizontalScrollIndicator={false}
 						contentContainerStyle={{ gap: 16 }}
 					>
-						{equipmentImages.map((image, index) => (
-							<Image
-								key={index}
-								source={image}
-								className="w-16 h-16"
-								resizeMode="contain"
-							/>
-						))}
+					{training?.inventory.map((image, index) => (
+						<Image
+							key={index}
+							source={equipmentImages[image]}
+							className="w-16 h-16"
+							resizeMode="contain"
+						/>
+					))}
 					</ScrollView>
 				</View>
 
                 <View className="bg-black px-6 pt-6 pb-6 rounded-t-2xl rounded-b-2xl">
+									<Text className="text-t1.1 text-white mb-4">
+										Инвентарь
+									</Text>
                 <ExerciseInfoCard
   name="Дыхательное упражнение"
   sets="3 подхода"

@@ -16,7 +16,7 @@ export const TrainingTags: React.FC<TrainingTagsProps> = ({
 }) => {
 	return (
 		<View className={`flex-row gap-2 ${className || ''}`} {...props}>
-			<View className={`bg-gray-800/50 rounded-lg px-3 py-1 ${icon1 ? 'flex-row items-center' : ''}`}>
+			<View className={`bg-gray-600/50 rounded-full px-3 py-1 ${icon1 ? 'flex-row items-center' : ''}`}>
 				{icon1 && icon1}
 				<Text className={`text-white text-t4 ${icon1 ? 'ml-1' : ''}`}>
 					{title1}
