@@ -45,6 +45,11 @@ function masksToDays(masks: number[]): DayOfWeek[] {
 	return masks.map((mask) => maskToDay[mask]).filter(Boolean) as DayOfWeek[]
 }
 
+// Конвертация массива битовых масок дней в одно число (битовую маску)
+function masksToDaysNumber(masks: number[]): number {
+	return masks.reduce((mask, dayMask) => mask | dayMask, 0)
+}
+
 // Битовая маска целей: 1=Осанка, 2=Боль, 4=Гибкость, 8=Укрепление, 16=Сброс веса, 32=Стресс, 64=Энергия, 128=Самочувствие
 const GOAL_MASKS: Record<Goal, number> = {
 	posture: 1,
@@ -75,6 +80,11 @@ function masksToGoals(masks: number[]): Goal[] {
 		128: 'wellness',
 	}
 	return masks.map((mask) => maskToGoal[mask]).filter(Boolean) as Goal[]
+}
+
+// Конвертация массива битовых масок целей в одно число (битовую маску)
+function masksToGoalsNumber(masks: number[]): number {
+	return masks.reduce((mask, goalMask) => mask | goalMask, 0)
 }
 
 // Конвертация AgeGroup строки в число (среднее арифметическое)
@@ -328,9 +338,19 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 
 	// Submit survey
 	submitSurvey: async (userId: number) => {
-		const surveyData = get().surveyData
+		const { bmi, ...surveyData } = get().surveyData
 
-		const result = await surveyApi.submitSurvey(userId, surveyData)
+		// Преобразуем массивы битовых масок в числа
+		const trainDaysMasks = (surveyData.train_days as unknown as number[]) || []
+		const trainGoalsMasks = (surveyData.train_goals as unknown as number[]) || []
+
+		const dataToSend = {
+			...surveyData,
+			train_days: masksToDaysNumber(trainDaysMasks) as any,
+			train_goals: masksToGoalsNumber(trainGoalsMasks) as any,
+		}
+
+		const result = await surveyApi.submitSurvey(userId, dataToSend as SurveyData)
 
 		if (!result.success) {
 			return { success: false, error: result.error }

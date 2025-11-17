@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as SecureStore from 'expo-secure-store'
 import { trainingApi } from '@/entities/training'
 import { useTrainingStore } from '@/entities/training'
+import { authApi } from '@/features/auth'
 import { BackButton, Button, InfoTag, Container, Icon } from '@/shared/ui'
 import type { SavedWorkoutState, Training } from '@/entities/training/model/types'
 
@@ -27,6 +28,7 @@ export default function TrainingEntryScreen() {
 	const [showTutorial, setShowTutorial] = useState(true)
 	const [savedSession, setSavedSession] = useState<SavedWorkoutState | null>(null)
 	const [isCheckingSession, setIsCheckingSession] = useState(true)
+	const [isRefreshing, setIsRefreshing] = useState(false)
 	const startTraining = useTrainingStore((state) => state.startTraining)
 	const resumeTraining = useTrainingStore((state) => state.resumeTraining)
 
@@ -149,6 +151,31 @@ export default function TrainingEntryScreen() {
 		})
 	}
 
+	const handleRefresh = async () => {
+		setIsRefreshing(true)
+		try {
+			const refreshToken = await SecureStore.getItemAsync('refresh_token')
+			if (!refreshToken) {
+				console.error('No refresh token found')
+				return
+			}
+
+			const result = await authApi.refresh(refreshToken)
+			if (result.success) {
+				// Save new tokens
+				await SecureStore.setItemAsync('auth_token', result.data.access_token)
+				await SecureStore.setItemAsync('refresh_token', result.data.refresh_token)
+				console.log('Token refreshed successfully')
+			} else {
+				console.error('Failed to refresh token:', result.error)
+			}
+		} catch (error) {
+			console.error('Error refreshing token:', error)
+		} finally {
+			setIsRefreshing(false)
+		}
+	}
+
 	if (isLoading || isCheckingSession || isAuthenticated === null) {
 		return (
 			<View className="bg-background-primary flex-1 items-center justify-center">
@@ -231,7 +258,7 @@ export default function TrainingEntryScreen() {
             Повторить
           </Button>
           <Button onPress={() =>handleOpenDemo()} variant="secondary" className="w-full">
-            Открыть демо-тренировку
+            о-тренировку
           </Button>
 		  			{/* Survey Button */}
 					  <Button
@@ -241,6 +268,16 @@ export default function TrainingEntryScreen() {
 				>
 					📋 Пройти опрос
 				</Button>
+
+				{/* Refresh Button */}
+          <Button 
+            onPress={handleRefresh} 
+            variant="secondary" 
+            className="w-full"
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? 'Обновление...' : 'Refresh Token'}
+          </Button>
 
 				{/* Training Buttons */}
           <Button onPress={() => router.back()} variant="secondary" className="w-full">

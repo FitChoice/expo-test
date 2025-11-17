@@ -87,8 +87,10 @@ export const surveyApi = {
 			}
 		}
 
-		const apiData = surveyDataToApiFormat(data)
-		return apiClient.patch(`/api/v1/user/update/${userId}`, apiData)
+		console.log('data')
+		console.log(data)
+
+		return apiClient.patch(`/user/update/${userId}`, data)
 	},
 
 	/**
@@ -97,7 +99,7 @@ export const surveyApi = {
 	async getUserMetadata(
 		userId: number
 	): Promise<ApiResult<UpdateUserMetadataInput>> {
-		return apiClient.get(`/api/v1/user/${userId}`)
+		return apiClient.get(`/user/${userId}`)
 	},
 }
 

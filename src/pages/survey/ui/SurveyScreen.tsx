@@ -67,10 +67,8 @@ export const SurveyScreen = () => {
 	} = useSurveyFlow()
 
 
-
-
 	const [hasRequested, setHasRequested] = useState(false)
-	
+
 	// Используем хук для анимации клавиатуры
 	const { translateY } = useKeyboardAnimation({
 		offsetMultiplier: 0.92, // Кнопка поднимается на полную высоту клавиатуры
@@ -95,44 +93,44 @@ export const SurveyScreen = () => {
 	}, [currentStep, calculateBMI, nextStep])
 
 	// Отправка данных опроса при переходе на шаг 14
-	// useEffect(() => {
-	// 	if (currentStep === 14 && !isSubmitting && !submitError) {
-	// 		const submitData = async () => {
-	// 			setIsSubmitting(true)
-	// 			setSubmitError(null)
-	//
-	// 			try {
-	// 				let userId = await getUserId()
-	//
-	// 				console.log('User ID:', userId)
-	//
-	// 				// Fallback для режима разработки/тестирования
-	// 				if (!userId && __DEV__) {
-	// 					console.warn('Using mock user_id for development')
-	// 					userId = 1 // Mock user ID для тестирования
-	// 				}
-	//
-	// 				if (!userId) {
-	// 					setSubmitError('Не удалось получить идентификатор пользователя')
-	// 					setIsSubmitting(false)
-	// 					return
-	// 				}
-	//
-	// 				const result = await submitSurvey(userId)
-	//
-	// 				if (!result.success) {
-	// 					setSubmitError(result.error || 'Ошибка отправки данных')
-	// 				}
-	// 			} catch (error) {
-	// 				setSubmitError('Произошла непредвиденная ошибка')
-	// 			} finally {
-	// 				setIsSubmitting(false)
-	// 			}
-	// 		}
-	//
-	// 		submitData()
-	// 	}
-	// }, [currentStep, isSubmitting, submitError, submitSurvey, setIsSubmitting, setSubmitError])
+
+	const submitData = async () => {
+		setIsSubmitting(true)
+		setSubmitError(null)
+
+		try {
+			let userId = await getUserId()
+
+			console.log('User ID:', userId)
+
+			// Fallback для режима разработки/тестирования
+			if (!userId && __DEV__) {
+				console.warn('Using mock user_id for development')
+				userId = 6// Mock user ID для тестирования
+			}
+
+
+			console.log('User ID:', userId)
+			// if (!userId) {
+			// 	setSubmitError('Не удалось получить идентификатор пользователя')
+			// 	setIsSubmitting(false)
+			// 	return
+			// }
+
+			const result = await submitSurvey(userId)
+
+			if (!result.success) {
+				setSubmitError(result.error || 'Ошибка отправки данных')
+			}
+		} catch (error) {
+			setSubmitError('Произошла непредвиденная ошибка')
+		} finally {
+			setIsSubmitting(false)
+		}
+
+}
+
+
 
 	const handleBack = () => {
 		if (currentStep === 1) {
@@ -156,7 +154,6 @@ export const SurveyScreen = () => {
 
 					if (finalStatus === 'granted') {
 						const token = await Notifications.getExpoPushTokenAsync()
-						console.log('Push token:', token.data)
 					}
 
 					setHasRequested(true)
@@ -409,7 +406,7 @@ export const SurveyScreen = () => {
 							<Button
 								iconLeft={<Icon name="dumbbell" />}
 								variant={'secondary'}
-								onPress={() => router.push('/(training)')}
+								onPress={submitData}
 							>
 								Перейти к тренировкам
 							</Button>
