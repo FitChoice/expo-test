@@ -77,5 +77,19 @@
 	},
 	"experiments": {
 		"tsconfigPaths": true
+	},
+	"updates": {
+		"url": "https://u.expo.dev/your-project-id",
+		"fallbackToCacheTimeout": 0,
+		"checkAutomatically": "ON_LOAD",
+		"enabled": true
+	},
+	"runtimeVersion": {
+		"policy": "appVersion"
+	},
+	"extra": {
+		"eas": {
+			"projectId": "your-project-id"
+		}
 	}
 }

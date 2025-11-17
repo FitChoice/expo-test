@@ -31,7 +31,6 @@ export default function TrainingSessionScreen() {
 			return <OnboardingFlow />
 
 		case 'finished':
-
 			return <View className="bg-background-primary flex-1 items-center justify-center" ><Text>finished</Text>
 						</View>
 

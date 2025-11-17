@@ -21,10 +21,10 @@ type ExerciseStep =
 	| 'countdown'
 	| 'position'
 	| 'execution'
-	| 'success'
 	| 'side_switch'
 	| 'rest'
 	| 'transition'
+	| 'success'
 
 export function ExerciseFlow() {
 

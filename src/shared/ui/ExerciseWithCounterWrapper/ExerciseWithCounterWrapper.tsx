@@ -8,16 +8,34 @@ import React, {
 	ReactNode,
 	useCallback,
 	useEffect,
+	useMemo,
 	useRef,
 	useState,
 	createContext,
 	useContext,
 } from 'react'
 import { router } from 'expo-router'
+import type { VideoPlayer } from 'expo-video'
 
 const CountdownContext = createContext<number>(0)
 
 export const useCountdown = () => useContext(CountdownContext)
+
+interface VideoPlayerContextValue {
+	registerPlayer: (player: VideoPlayer) => () => void
+}
+
+const VideoPlayerContext = createContext<VideoPlayerContextValue | null>(null)
+
+export const useVideoPlayerContext = () => {
+	const context = useContext(VideoPlayerContext)
+	console.log('useVideoPlayerContext called, context:', context);
+	if (!context) {
+		console.warn('useVideoPlayerContext: context is null!');
+		return null
+	}
+	return context
+}
 
 export const ExerciseWithCounterWrapper = ({
 	children, 
@@ -35,6 +53,7 @@ export const ExerciseWithCounterWrapper = ({
 	const [isPaused, setIsPaused] = useState(false)
 	const [countdown, setCountdown] = useState(countdownInitial ?? 0);
 	const timerRef = useRef<number | null>(null);
+	const videoPlayersRef = useRef<Set<VideoPlayer>>(new Set());
 
 
 
@@ -57,6 +76,14 @@ export const ExerciseWithCounterWrapper = ({
 			timerRef.current = null;
 			setIsPaused(true);
 		}
+		// Пауза видео
+		videoPlayersRef.current.forEach((player) => {
+			try {
+				player.pause();
+			} catch (e) {
+				console.error('Error pausing video:', e);
+			}
+		});
 	}, []);
 
 	const startTimer = useCallback(() => {
@@ -79,14 +106,23 @@ export const ExerciseWithCounterWrapper = ({
 		};
 	}, [startTimer, countdownInitial]);
 
-
 	const pauseTimer = useCallback(() => {
+		
 		setShowPauseModal(true)
 		if (timerRef.current !== null) {
 			clearInterval(timerRef.current);
 			timerRef.current = null;
 			setIsPaused(true);
 		}
+		// Пауза видео
+		videoPlayersRef.current.forEach((player) => {
+	
+			try {
+				player.pause();
+			} catch (e) {
+				console.error('Error pausing video:', e);
+			}
+		});
 	}, []);
 
 	const resumeTimer = useCallback(() => {
@@ -94,6 +130,14 @@ export const ExerciseWithCounterWrapper = ({
 			startTimer();
 		}
 		setShowPauseModal(false)
+		// Возобновление видео
+		videoPlayersRef.current.forEach((player) => {
+			try {
+				player.play();
+			} catch (e) {
+				// Игнорируем ошибки если плеер уже уничтожен
+			}
+		});
 	}, [countdown, startTimer]);
 
 
@@ -102,6 +146,14 @@ export const ExerciseWithCounterWrapper = ({
 			startTimer();
 		}
 		setShowStopModal(false)
+		// Возобновление видео
+		videoPlayersRef.current.forEach((player) => {
+			try {
+				player.play();
+			} catch (e) {
+				// Игнорируем ошибки если плеер уже уничтожен
+			}
+		});
 	}, [countdown, startTimer]);
 
 
@@ -111,11 +163,24 @@ export const ExerciseWithCounterWrapper = ({
 
 	}
 
+	const registerPlayer = useCallback((player: VideoPlayer) => {
 
+		videoPlayersRef.current.add(player);
+	
+		return () => {
+			videoPlayersRef.current.delete(player);
+			
+		};
+	}, []);
+
+	const videoPlayerContextValue = useMemo<VideoPlayerContextValue>(() => ({
+		registerPlayer,
+	}), [registerPlayer]);
 
 	return (
 		<CountdownContext.Provider value={countdown}>
-			<View className="flex-1">
+			<VideoPlayerContext.Provider value={videoPlayerContextValue}>
+				<View className="flex-1">
 				<StopModal
 					visible={showStopModal}
 					onResume={handleStopResume}
@@ -146,6 +211,7 @@ export const ExerciseWithCounterWrapper = ({
 
 				{children}
 			</View>
+			</VideoPlayerContext.Provider>
 		</CountdownContext.Provider>
 	)
 }

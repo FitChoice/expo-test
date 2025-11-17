@@ -5,6 +5,7 @@
  */
 
 import { View, Text } from 'react-native'
+import { useEffect } from 'react'
 import { VideoView, useVideoPlayer } from 'expo-video'
 
 import {  StepProgress } from '@/shared/ui'
@@ -14,7 +15,8 @@ import type { Exercise } from '@/entities/training/model/types'
 
 import {
 	ExerciseWithCounterWrapper,
-	useCountdown
+	useCountdown,
+	useVideoPlayerContext
 } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 import { VIDEO_SCREEN_HEIGHT as height } from '@/shared/constants/sizes'
 
@@ -39,26 +41,32 @@ export function CountdownDisplay() {
 	)
 }
 
-export function ExerciseExampleCountdownScreen({
-	exercise,
-	currentSet,
-	onComplete,
-}: ExerciseCountdownScreenProps) {
-//	const [countdown, setCountdown] = useState(5)
-	const player = useVideoPlayer(exercise.videoUrl || '', (player) => {
-		player.loop = true
-		player.play()
-	})
+function ExerciseExampleCountdownContent({ 
+	exercise, 
+	currentSet, 
+	player 
+}: { 
+	exercise: Exercise
+	currentSet: number
+	player: ReturnType<typeof useVideoPlayer>
+}) {
+	const videoPlayerContext = useVideoPlayerContext()
 
+	useEffect(() => {
+		console.log('ExerciseExampleCountdownScreen: player:', player, 'context:', videoPlayerContext);
+		if (player && videoPlayerContext) {
+			console.log('ExerciseExampleCountdownScreen: registering player');
+			const unregister = videoPlayerContext.registerPlayer(player)
+			return unregister
+		} else {
+			console.log('ExerciseExampleCountdownScreen: cannot register - missing player or context');
+		}
+		return undefined
+	}, [player, videoPlayerContext])
 
 	return (
-	<ExerciseWithCounterWrapper 
-		onComplete={onComplete} 
-		countdownInitial={exercise.duration}
-	>
 		<>
 			{/* Video */}
-
 			<View style={{ height }} >
 				{exercise.videoUrl ? (
 					<VideoView
@@ -103,6 +111,29 @@ export function ExerciseExampleCountdownScreen({
 				</View>
 			</View>
 		</>
-	</ExerciseWithCounterWrapper>
+	)
+}
+
+export function ExerciseExampleCountdownScreen({
+	exercise,
+	currentSet,
+	onComplete,
+}: ExerciseCountdownScreenProps) {
+	const player = useVideoPlayer(exercise.videoUrl || '', (player) => {
+		player.loop = true
+		player.play()
+	})
+
+	return (
+		<ExerciseWithCounterWrapper 
+			onComplete={onComplete} 
+			countdownInitial={exercise.duration}
+		>
+			<ExerciseExampleCountdownContent 
+				exercise={exercise} 
+				currentSet={currentSet} 
+				player={player} 
+			/>
+		</ExerciseWithCounterWrapper>
 	)
 }

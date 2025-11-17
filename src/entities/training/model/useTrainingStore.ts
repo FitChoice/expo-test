@@ -42,25 +42,14 @@ interface TrainingState {
 	// Actions
 	startTraining: (training: Training) => void
 	resumeTraining: (state: SavedWorkoutState) => void
-	pause: () => Promise<void>
 	resume: () => void
 	stop: () => Promise<void>
 	reportTraining: () => void
+	reset: () => void
 
 	nextExercise: () => void
 	nextSet: () => void
 	completeSet: (setData: SetData) => void
-	incrementRep: () => void
-
-	logError: (error: ErrorLog) => void
-
-	updateTimer: (elapsed: number, active: number) => void
-
-	reset: () => void
-
-	// Helpers
-	getSavedState: () => Promise<SavedWorkoutState | null>
-	clearSavedState: () => Promise<void>
 }
 
 const initialState = {
@@ -113,50 +102,30 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
 		})
 	},
 
+	/**
+	 * Resume training after onboarding (change status from 'onboarding' to 'running')
+	 */
+	resume: () => {
+		const { status } = get()
+		if (status === 'onboarding') {
+			set({ status: 'running' })
+		}
+	},
+
 	reportTraining: () => {
 		set({ status: 'report' })
 	},
 
-	/**
-	 * Pause training and save state
-	 */
-	pause: async () => {
-		const state = get()
-		const { training } = state
-		if (!training) return
 
-		set({ status: 'paused' })
-
-		// Save state to AsyncStorage
-		const savedState: SavedWorkoutState = {
-			trainingId: training.trainingId,
-			currentExerciseIndex: state.currentExerciseIndex,
-			currentSet: state.currentSet,
-			currentReps: state.currentReps,
-			currentSide: state.currentSide,
-			elapsedTime: state.elapsedTime,
-			completedExercises: state.completedExercises,
-			pausedAt: new Date().toISOString(),
-		}
-
-		await AsyncStorage.setItem(
-			`training_session_${training.trainingId}`,
-			JSON.stringify(savedState)
-		)
-	},
-
-	/**
-	 * Resume from pause
-	 */
-	resume: () => {
-		set({ status: 'running' })
-	},
-
-	/**
-	 * Stop training and save state
-	 */
 	stop: async () => {
-		await get().pause()
+		set({ status: 'idle' })
+	},
+
+	/**
+	 * Reset training store to initial state
+	 */
+	reset: () => {
+		set({ ...initialState })
 	},
 
 	/**
@@ -168,11 +137,12 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
 
 		const newIndex = currentExerciseIndex + 1
 
+		const exerciseSide = training.exercises[newIndex]?.side
 		set({
 			currentExerciseIndex: newIndex,
 			currentSet: 1,
 			currentReps: 0,
-			currentSide: training.exercises[newIndex]?.side || null,
+			currentSide: exerciseSide === 'single' ? null : (exerciseSide as ExerciseSide | null),
 			completedExercises: [...completedExercises, currentExerciseIndex],
 		})
 
@@ -217,67 +187,6 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
 		})
 	},
 
-	/**
-	 * Increment rep counter
-	 */
-	incrementRep: () => {
-		const { currentReps } = get()
-		set({ currentReps: currentReps + 1 })
-	},
 
-	/**
-	 * Log an error
-	 */
-	logError: (error) => {
-		const { errors } = get()
-		set({ errors: [...errors, error] })
-	},
 
-	/**
-	 * Update timers
-	 */
-	updateTimer: (elapsed, active) => {
-		set({
-			elapsedTime: elapsed,
-			activeTime: active,
-		})
-	},
-
-	/**
-	 * Reset store to initial state
-	 */
-	reset: () => {
-		set(initialState)
-	},
-
-	/**
-	 * Get saved state from AsyncStorage
-	 */
-	getSavedState: async () => {
-		const { training } = get()
-		if (!training) return null
-
-		const savedJson = await AsyncStorage.getItem(
-			`training_session_${training.trainingId}`
-		)
-
-		if (!savedJson) return null
-
-		try {
-			return JSON.parse(savedJson) as SavedWorkoutState
-		} catch (error) {
-			console.error('Failed to parse saved workout state:', error)
-			return null
-		}
-	},
-
-	/**
-	 * Clear saved state from AsyncStorage
-	 */
-	clearSavedState: async () => {
-		const { training } = get()
-		if (!training) return
-
-		await AsyncStorage.removeItem(`training_session_${training.trainingId}`)
-	},
 }))
