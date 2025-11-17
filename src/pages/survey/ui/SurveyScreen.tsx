@@ -6,6 +6,7 @@ import { Button, BackButton, BackgroundLayout, BackgroundLayoutNoSidePadding, Ic
 import { useOrientation, useKeyboardAnimation, getUserId } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { useSurveyFlow } from '@/features/survey-flow'
+import { userApi } from '@/features/user'
 import {
 	SurveyStep1,
 	SurveyStep2,
@@ -109,19 +110,29 @@ export const SurveyScreen = () => {
 				userId = 6// Mock user ID для тестирования
 			}
 
-
-			console.log('User ID:', userId)
-			// if (!userId) {
-			// 	setSubmitError('Не удалось получить идентификатор пользователя')
-			// 	setIsSubmitting(false)
-			// 	return
-			// }
+			if (!userId) {
+				setSubmitError('Не удалось получить идентификатор пользователя')
+				setIsSubmitting(false)
+				return
+			}
 
 			const result = await submitSurvey(userId)
 
 			if (!result.success) {
 				setSubmitError(result.error || 'Ошибка отправки данных')
+				return
 			}
+
+			// После успешной отправки опроса создаем план тренировок
+			const planResult = await userApi.buildTrainingPlan(String(userId))
+			
+			if (!planResult.success) {
+				setSubmitError(planResult.error || 'Ошибка создания плана тренировок')
+				return
+			}
+
+			// План успешно создан - переходим на домашнюю страницу
+			router.push('/home')
 		} catch (error) {
 			setSubmitError('Произошла непредвиденная ошибка')
 		} finally {

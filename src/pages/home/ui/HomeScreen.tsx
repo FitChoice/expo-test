@@ -8,10 +8,14 @@ import {
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useQuery } from '@tanstack/react-query'
+import { useState, useEffect } from 'react'
 import { Icon, Button, AuthGuard, BackgroundLayout } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import type { Training } from '@/entities/training'
 import { useTrainingStore } from '@/entities/training'
+import { trainingApi } from '@/features/training/api'
+import { getUserId } from '@/shared/lib/auth'
 
 /**
  * Home screen - main page according to Figma design
@@ -33,10 +37,31 @@ export const HomeScreen = () => {
  */
 const MobileContent = () => {
 	const insets = useSafeAreaInsets()
-
-
 	const router = useRouter()
 	const startTraining = useTrainingStore((state) => state.startTraining)
+
+	const [userId, setUserId] = useState<number | null>(null)
+
+	// Get user ID on mount
+	useEffect(() => {
+		const fetchUserId = async () => {
+			const id = await getUserId()
+			setUserId(id)
+		}
+		fetchUserId()
+	}, [])
+
+	// Fetch training plan when userId is available
+	const { data: trainingPlan } = useQuery({
+		queryKey: ['trainingPlan', userId],
+		queryFn: async () => {
+			if (!userId) throw new Error('User ID is required')
+			return await trainingApi.getTrainingPlan(userId)
+		},
+		enabled: !!userId,
+		retry: false,
+	})
+
 
 	const handleOpenDemo = () => {
 		const demo: Training = {

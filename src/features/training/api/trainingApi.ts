@@ -55,21 +55,21 @@ export const trainingApi = {
 	 * Get latest training program
 	 */
 	async getTrainingPlan(userId: number): Promise<ApiResult<TrainingPlan>> {
-		return apiClient.get(`/api/v1/trainings/plan/${userId}`)
+		return apiClient.get(`/trainings/plan/${userId}`)
 	},
 
 	/**
 	 * Get training report
 	 */
 	async getTrainingReport(trainingId: number): Promise<ApiResult<TrainingReport>> {
-		return apiClient.get(`/api/v1/trainings/report/${trainingId}`)
+		return apiClient.get(`/trainings/report/${trainingId}`)
 	},
 
 	/**
 	 * Get training info
 	 */
 	async getTrainingInfo(trainingId: number): Promise<ApiResult<TrainingInfo>> {
-		return apiClient.get(`/api/v1/trainings/train/${trainingId}`)
+		return apiClient.get(`/trainings/train/${trainingId}`)
 	},
 
 	/**
@@ -78,7 +78,7 @@ export const trainingApi = {
 	async completeTraining(
 		data: CompleteTrainingInput
 	): Promise<ApiResult<CompleteTrainingResponse>> {
-		return apiClient.put(`/api/v1/trainings/complete`, data)
+		return apiClient.put(`/trainings/complete`, data)
 	},
 
 	/**
@@ -87,7 +87,7 @@ export const trainingApi = {
 	async executeExercise(
 		data: ExecuteExerciseInput
 	): Promise<ApiResult<ExecuteExerciseResponse>> {
-		return apiClient.put(`/api/v1/trainings/exercise`, data)
+		return apiClient.put(`/trainings/exercise`, data)
 	},
 
 	/**
@@ -100,7 +100,7 @@ export const trainingApi = {
 		id: number,
 		data: BuildTrainingPlanInput
 	): Promise<ApiResult<BuildTrainingPlanResponse>> {
-		return apiClient.post(`/api/v1/trainings/plan/${id}`, data)
+		return apiClient.post(`/trainings/plan/${id}`, data)
 	},
 }
 
