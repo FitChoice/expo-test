@@ -92,7 +92,7 @@ export const LandingScreen = () => {
 						/>
 					</View>
 
-					{/* Основная фотокарточка IMG_3254 2 */}
+					{/*/!* Основная фотокарточка IMG_3254 2 *!/*/}
 					<RNImage source={landingPhoto1} className="h-full w-full" resizeMode="cover" />
 
 					{/* Слой 2: Текст перед изображением (только в области маски) */}
@@ -140,7 +140,7 @@ export const LandingScreen = () => {
 			<View className="relative mx-[3.6%] mb-[3.6%] h-[38.6%] w-[92.8%] rounded-[40px] bg-[#4B4B4B]">
 				{/* Фотокарточка Group 310 */}
 				<View className="absolute left-0 top-0 h-full w-full overflow-hidden rounded-[40px]">
-					{/* Основное изображение */}
+				
 					<RNImage source={landingPhoto2} className="h-full w-full" resizeMode="cover" />
 				</View>
 
