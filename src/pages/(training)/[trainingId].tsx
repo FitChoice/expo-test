@@ -215,7 +215,6 @@ export default function TrainingEntryScreen() {
 			  }
 			]
 		  }
-      
 
       startTraining(demo)
       router.push({ pathname: '/(training)/session', params: { trainingId: 1} })

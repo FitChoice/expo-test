@@ -8,6 +8,7 @@ import { View, ActivityIndicator, Text } from 'react-native'
 import { useTrainingStore } from '@/entities/training'
 import { OnboardingFlow, ExerciseFlow } from '@/widgets/training-session'
 import TrainingReportScreen from './report'
+import { TrainingInfo } from '@/widgets/training-session/ui/TrainingInfo'
 
 
 export default function TrainingSessionScreen() {
@@ -27,6 +28,8 @@ export default function TrainingSessionScreen() {
 
 	// Render based on current status
 	switch (status) {
+		case 'info':
+			return  <TrainingInfo />
 		case 'onboarding':
 			return <OnboardingFlow />
 

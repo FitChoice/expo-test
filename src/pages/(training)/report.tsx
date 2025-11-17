@@ -6,7 +6,7 @@
 
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
 import { router } from 'expo-router'
-import { Button, StatCard, Icon, Container, MetricCard } from '@/shared/ui'
+import { Button, StatCard, Icon, Container, MetricCard, TrainingTags } from '@/shared/ui'
 import { useTrainingStore } from '@/entities/training'
 import { GradientBg } from '@/shared/ui/GradientBG'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -73,19 +73,12 @@ export default function TrainingReportScreen() {
 					</Text>
 					
 					{/* Tags */}
-					<View className="flex-row gap-2">
-						<View className="bg-gray-800/50 rounded-lg px-3 py-1">
-							<Text className="text-white text-t4">
-								{formatDate(new Date())}
-							</Text>
-						</View>
-						<View className="bg-gray-800/50 rounded-lg px-3 py-1 flex-row items-center">
-							<MaterialCommunityIcons name="bow-arrow" size={16} color="#FFFFFF" />
-							<Text className="text-white text-t4 ml-1">
-								+{experienceGained} опыта
-							</Text>
-						</View>
-					</View>
+					<TrainingTags
+						icon1={null}
+						title1={formatDate(new Date())}
+						icon2={<MaterialCommunityIcons name="bow-arrow" size={16} color="#FFFFFF" />}
+						title2={`+${experienceGained} опыта`}
+					/>
 				</View>
 
 				{/* Close Button */}

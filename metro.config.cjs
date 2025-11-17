@@ -1,11 +1,12 @@
+const path = require("path");
 const { getDefaultConfig } = require("expo/metro-config");
-const { withNativeWind } = require("nativewind/metro");
 
-const config = getDefaultConfig(__dirname);
+const projectRoot = __dirname;
+const config = getDefaultConfig(projectRoot);
 
 // Add path aliases
 config.resolver.alias = {
-	'@': './src',
+	'@': path.resolve(projectRoot, 'src'),
 };
 
 // Configure SVG support
@@ -14,14 +15,6 @@ config.resolver.assetExts = config.resolver.assetExts.filter(ext => ext !== 'svg
 config.resolver.sourceExts = [...config.resolver.sourceExts, 'svg'];
 
 // Performance optimizations
-config.transformer.inlineRequires = true; // Auto-optimize imports for faster startup
+config.transformer.inlineRequires = true;
 
-// Exclude providers from Expo Router (only for routing, not for imports)
-// config.resolver.blockList = [
-// 	/.*\/src\/app\/_providers\/.*/,
-// ];
-
-module.exports = withNativeWind(config, { 
-	input: "./src/global.css",
-	configPath: "./tailwind.config.cjs",
-});
+module.exports = config;

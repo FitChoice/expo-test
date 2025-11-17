@@ -3,7 +3,7 @@
 export type ExerciseType = 'ai' | 'timer'
 export type ExerciseSide = 'left' | 'right' | 'both'
 export type WorkoutCategory = 'strength' | 'cardio' | 'flexibility' | 'mobility'
-export type TrainingStatus = 'idle' | 'onboarding' | 'running' | 'finished'| 'report' | 'analytics'
+export type TrainingStatus = 'idle' | 'info'| 'onboarding' | 'running' | 'finished'| 'report' | 'analytics'
 
 
 export const equipment = {

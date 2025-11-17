@@ -40,6 +40,7 @@ interface TrainingState {
 	caloriesBurned: number
 
 	// Actions
+	startOnboarding : () => void
 	startTraining: (training: Training) => void
 	resumeTraining: (state: SavedWorkoutState) => void
 	resume: () => void
@@ -80,6 +81,12 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
 		set({
 			...initialState,
 			training,
+			status: 'info',
+		})
+	},
+
+	startOnboarding: () => {
+		set({
 			status: 'onboarding',
 		})
 	},
