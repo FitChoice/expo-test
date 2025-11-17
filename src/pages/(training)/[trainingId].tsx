@@ -258,7 +258,7 @@ export default function TrainingEntryScreen() {
             Повторить
           </Button>
           <Button onPress={() =>handleOpenDemo()} variant="secondary" className="w-full">
-            о-тренировку
+            открыть демо-тренировку
           </Button>
 		  			{/* Survey Button */}
 					  <Button

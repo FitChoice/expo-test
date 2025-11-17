@@ -197,6 +197,86 @@ class ApiClient {
 	}
 
 	/**
+	 * Perform PUT request
+	 */
+	async put<TRequest, TResponse>(
+		endpoint: string,
+		data: TRequest,
+		options?: { skipAuthHandler?: boolean }
+	): Promise<ApiResult<TResponse>> {
+		const authHeaders = await this.getAuthHeaders()
+
+		try {
+			const response = await fetch(`${this.baseUrl}${endpoint}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					...authHeaders,
+				},
+				body: JSON.stringify(data),
+			})
+
+		// Handle 401 - unauthorized (skip for public endpoints)
+		if (response.status === 401 && !options?.skipAuthHandler) {
+			await this.handleUnauthorized()
+			return { success: false, error: 'Unauthorized' }
+		}
+
+		// Read response body as text first (can only be read once)
+		const responseText = await response.text()
+		
+		// Try to parse as JSON if content-type indicates JSON
+		const contentType = response.headers.get('content-type')
+		const hasJsonContent = contentType?.includes('application/json')
+
+		let responseData: unknown = null
+
+		if (hasJsonContent && responseText) {
+			try {
+				responseData = JSON.parse(responseText)
+			} catch (jsonError) {
+				console.error('Failed to parse JSON response:', jsonError)
+				return {
+					success: false,
+					error: `Ошибка сервера: ${response.status}`,
+				}
+			}
+		}
+
+		if (!response.ok) {
+			// Log non-JSON error responses
+			if (!hasJsonContent && responseText) {
+				console.error('Non-JSON response for error status:', responseText)
+			}
+
+			const errorMessage =
+				responseData && typeof responseData === 'object' && 'error' in responseData
+					? String(responseData.error)
+					: responseText || `Ошибка сервера: ${response.status}`
+
+			return {
+				success: false,
+				error: errorMessage,
+			}
+		}
+
+		return {
+			success: true,
+			data: responseData as TResponse,
+		}
+		} catch (err) {
+			// Handle network errors
+			const errorMessage = err instanceof Error ? err.message : 'Ошибка сети'
+			console.error('API request failed:', err)
+
+			return {
+				success: false,
+				error: errorMessage,
+			}
+		}
+	}
+
+	/**
 	 * Perform GET request
 	 */
 	async get<TResponse>(endpoint: string): Promise<ApiResult<TResponse>> {

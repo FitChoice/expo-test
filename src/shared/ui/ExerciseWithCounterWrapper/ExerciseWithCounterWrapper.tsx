@@ -157,7 +157,7 @@ export const ExerciseWithCounterWrapper = ({
 	}, [countdown, startTimer]);
 
 
-	const handleStopTraining =() => {
+	const handleStopTraining = () => {
 		setShowStopModal(false)
 		router.push('/')
 
