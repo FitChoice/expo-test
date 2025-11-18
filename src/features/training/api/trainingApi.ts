@@ -16,14 +16,41 @@ interface TrainingReport {
 	[key: string]: unknown
 }
 
-interface TrainingInfo {
-	// TODO: Define based on actual API response
-	[key: string]: unknown
+
+
+
+export interface Exercise {
+	id: number;
+	name: string;
+	rest_time: number;
+	duration: number;
+	progress: number;
+	sets: number;
+	reps: number;
+	isAi: boolean;
+	videoUrl: string;
 }
 
+export interface TrainingInfo {
+	id: number;
+	trainingType: string;
+	title: string;
+	description: string;
+	difficulty: number;
+	experience: number;
+	inventory: number[];
+	exercises: Exercise[];
+}
+
+
 interface CompleteTrainingInput {
-	// TODO: Define based on actual API request
-	[key: string]: unknown
+	"report_active_time": number,
+	"report_cals": number,
+	"report_duration": number,
+	"report_technique_quality": number,
+	"time": string, ////ISO
+	"training_id": number
+
 }
 
 interface CompleteTrainingResponse {
@@ -32,8 +59,9 @@ interface CompleteTrainingResponse {
 }
 
 interface ExecuteExerciseInput {
-	// TODO: Define based on actual API request
-	[key: string]: unknown
+	"id":number,
+	"reps": number,
+	"training_id": number
 }
 
 interface ExecuteExerciseResponse {
@@ -42,7 +70,7 @@ interface ExecuteExerciseResponse {
 }
 
 interface BuildTrainingPlanInput {
-	time: string
+	time: string ////ISO
 }
 
 interface BuildTrainingPlanResponse {

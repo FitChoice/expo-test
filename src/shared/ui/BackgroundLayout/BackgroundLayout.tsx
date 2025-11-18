@@ -23,6 +23,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: '#1E1E1E', // BG/Dark 500 BG - контентный контейнер
 		borderRadius: 32,
+		paddingHorizontal: '4%',
 		position: 'relative', // Для позиционирования элементов
 		zIndex: 3, // Поверх браслета и заголовка
 		overflow: 'hidden', // Для корректного отображения градиента

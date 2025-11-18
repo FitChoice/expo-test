@@ -10,11 +10,11 @@ import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as SecureStore from 'expo-secure-store'
-import { trainingApi } from '@/entities/training'
 import { useTrainingStore } from '@/entities/training'
 import { authApi } from '@/features/auth'
 import { BackButton, Button, InfoTag, Container, Icon } from '@/shared/ui'
 import type { SavedWorkoutState, Training } from '@/entities/training/model/types'
+import { trainingApi } from '@/features/training/api'
 
 // Import image using relative path
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -22,8 +22,6 @@ const landingPhoto1 = require('../../../assets/images/landing-photo-1.png')
 
 export default function TrainingEntryScreen() {
 	const { trainingId } = useLocalSearchParams<{ trainingId: string }>()
-
-
 
 	const [showTutorial, setShowTutorial] = useState(true)
 	const [savedSession, setSavedSession] = useState<SavedWorkoutState | null>(null)
@@ -57,42 +55,13 @@ export default function TrainingEntryScreen() {
 		queryKey: ['training', trainingId],
 		queryFn: async () => {
 			if (!trainingId) throw new Error('Training ID is required')
-			return await trainingApi.getTraining(trainingId)
+			return await trainingApi.getTrainingInfo(Number(trainingId))
 		},
 		enabled: !!trainingId && isAuthenticated === true,
 		retry: false,
 	})
 
-	// If not authenticated, automatically show demo
-	// useEffect(() => {
-	// 	if (isAuthenticated === false && trainingId) {
-	// 		const demo: Training = {
-	// 			trainingId: trainingId,
-	// 			title: 'Демо тренировка',
-	// 			description: 'Локальная демо-тренировка для теста без сети',
-	// 			category: 'mobility',
-	// 			experiencePoints: 50,
-	// 			inventory: [],
-	// 			exercises: [
-	// 				{
-	// 					id: 'ex_demo_1',
-	// 					name: 'Приседания',
-	// 					type: 'ai',
-	// 					sets: 2,
-	// 					reps: 10,
-	// 					duration: null,
-	// 					restTime: 30,
-	// 					videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
-	// 					thumbnailUrl: '',
-	// 					progress: 0,
-	// 				},
-	// 			],
-	// 		}
-	//
-	// 		startTraining(demo)
-	// 		//router.replace({ pathname: '/(training)/session', params: { trainingId: demo.trainingId } })
-	// 	}
-	// }, [isAuthenticated, trainingId, startTraining])
+
 
 	// Check for saved session on mount
 	useEffect(() => {
