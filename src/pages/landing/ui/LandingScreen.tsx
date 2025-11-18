@@ -22,7 +22,6 @@ import LandingIcon from '../../../../assets/images/landing_icon.svg'
  */
 export const LandingScreen = () => {
 	const router = useRouter()
-	const insets = useSafeAreaInsets()
 	const { width: screenWidth, height: screenHeight } = useWindowDimensions()
 
 	// Блокируем поворот экрана в портретную ориентацию
@@ -40,18 +39,6 @@ export const LandingScreen = () => {
 		router.push('/auth')
 	}
 
-	// ВРЕМЕННАЯ КНОПКА ДЛЯ ТЕСТИРОВАНИЯ
-	// TODO: Удалить в проде - это только для быстрого доступа к опросу при разработке
-	const handleTestSurvey = () => {
-		router.push('/survey')
-	}
-
-	// ВРЕМЕННАЯ КНОПКА ДЛЯ ТЕСТИРОВАНИЯ ТРЕНИРОВОК
-	// TODO: Удалить в проде - это только для быстрого доступа к тренировкам при разработке
-	const handleTestTraining = () => {
-		// Переходим к экрану тренировки с тестовым ID
-		router.push('/(training)/1')
-	}
 
 	return (
 		<View className="flex-1 bg-[#151515]">
@@ -173,23 +160,6 @@ export const LandingScreen = () => {
 				</View>
 			</View>
 
-			{/* ВРЕМЕННЫЕ КНОПКИ ДЛЯ ТЕСТИРОВАНИЯ - УДАЛИТЬ В ПРОДЕ */}
-			<View
-				className="absolute left-[14px] z-[1000] flex-col gap-2"
-				style={{ top: insets.top + 14 }}
-			>
-		
-	
-				<TouchableOpacity
-					onPress={handleTestTraining}
-					className="h-10 w-10 items-center justify-center rounded-lg bg-[#C5F680] opacity-70"
-					activeOpacity={0.6}
-					accessibilityRole="button"
-					accessibilityLabel="Тестовая тренировка"
-				>
-					<Text className="text-xl text-black">💪</Text>
-				</TouchableOpacity>
-			</View>
 		</View>
 	)
 }

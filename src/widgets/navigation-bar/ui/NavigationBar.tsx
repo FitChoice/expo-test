@@ -3,6 +3,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { Icon } from '@/shared/ui'
 import Entypo from '@expo/vector-icons/Entypo';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Fontisto from '@expo/vector-icons/Fontisto';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+
+
+
 
 /**
  * Bottom navigation bar widget
@@ -41,7 +47,7 @@ export const NavigationBar = () => {
 					accessibilityRole="button"
 					accessibilityLabel="Чат"
 				>
-					<Icon name="dots-three-vertical" size={32} color="#FFFFFF" />
+					<MaterialCommunityIcons name="message-processing" size={32} color="white" />
 				</TouchableOpacity>
 
 				<TouchableOpacity
@@ -52,18 +58,16 @@ export const NavigationBar = () => {
 					accessibilityRole="button"
 					accessibilityLabel="Выход"
 				>
-					<Icon name="sign-out" size={32} color="#FFFFFF" />
+					<Fontisto name="pie-chart-2" size={32} color="white" />
 				</TouchableOpacity>
 
 				<TouchableOpacity
 					style={styles.navButton}
-					onPress={() => {
-						// TODO: Add profile navigation
-					}}
+					onPress={() => router.push('/profile')}
 					accessibilityRole="button"
 					accessibilityLabel="Профиль"
 				>
-					<Icon name="user-circle" size={32} color="#FFFFFF" />
+				<FontAwesome6 name="user-large" size={32} color="white"  />
 				</TouchableOpacity>
 			</View>
 		</View>

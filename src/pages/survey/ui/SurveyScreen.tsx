@@ -33,6 +33,7 @@ import type {
 	DayOfWeek,
 	AgeGroup,
 } from '@/entities/survey'
+import { trainingApi } from '@/features/training/api'
 
 /**
  * Страница опроса - рефакторированная версия с компонентами-шагами
@@ -93,7 +94,7 @@ export const SurveyScreen = () => {
 		return undefined
 	}, [currentStep, calculateBMI, nextStep])
 
-	// Отправка данных опроса при переходе на шаг 14
+	// Отправка данных опроса при переходе на шаг 13
 
 	const submitData = async () => {
 		setIsSubmitting(true)
@@ -124,15 +125,16 @@ export const SurveyScreen = () => {
 			}
 
 			// После успешной отправки опроса создаем план тренировок
-			const planResult = await userApi.buildTrainingPlan(String(userId))
+			const planResult = await trainingApi.buildTrainingPlan(userId, {
+				time: new Date().toISOString()
+			})
 			
 			if (!planResult.success) {
 				setSubmitError(planResult.error || 'Ошибка создания плана тренировок')
 				return
 			}
 
-			// План успешно создан - переходим на домашнюю страницу
-			router.push('/home')
+			// План успешно создан - данные уже отправлены, остаемся на шаге 14
 		} catch (error) {
 			setSubmitError('Произошла непредвиденная ошибка')
 		} finally {
@@ -151,31 +153,39 @@ export const SurveyScreen = () => {
 		}
 	}
 
+	const handleEnableNotifications = async () => {
+		if (!hasRequested) {
+			try {
+				const { status: existingStatus } = await Notifications.getPermissionsAsync()
+				let finalStatus = existingStatus
+
+				if (existingStatus !== 'granted') {
+					const { status } = await Notifications.requestPermissionsAsync()
+					finalStatus = status
+				}
+
+				if (finalStatus === 'granted') {
+					const token = await Notifications.getExpoPushTokenAsync()
+					updateNotificationsEnabled(true)
+				}
+
+				setHasRequested(true)
+			} catch (error) {
+				// Игнорируем ошибку в Expo Go
+				console.log('Notifications unavailable:', error)
+			}
+		}
+		
+		// Переходим на шаг 14 и запускаем отправку данных
+		nextStep()
+		submitData()
+	}
+
 	const handleNext = async () => {
 		if (currentStep === 13) {
-			if (!hasRequested) {
-				try {
-					const { status: existingStatus } = await Notifications.getPermissionsAsync()
-					let finalStatus = existingStatus
-
-					if (existingStatus !== 'granted') {
-						const { status } = await Notifications.requestPermissionsAsync()
-						finalStatus = status
-					}
-
-					if (finalStatus === 'granted') {
-						const token = await Notifications.getExpoPushTokenAsync()
-					}
-
-					setHasRequested(true)
-					updateNotificationsEnabled(true)
-				} catch (error) {
-					// Игнорируем ошибку в Expo Go
-					console.log('Notifications unavailable:', error)
-				}
-			}
-			
+			// Для шага 13 "Не сейчас" - просто переходим дальше без запроса разрешений
 			nextStep()
+			submitData()
 		} else if (currentStep === 14) {
 			// Финальный экран - переход на home
 			router.push('/home')
@@ -290,7 +300,7 @@ export const SurveyScreen = () => {
 				return <SurveyStepError error={submitError} onRetry={handleRetry} onBack={prevStep} />
 			}
 			
-			return <SurveyStep14 userName={surveyData.name} gender={surveyData.gender} />
+			return <SurveyStep14 userName={surveyData.name} gender={surveyData.gender || 'male'} />
 
 			default:
 				return <SurveyStep1 name={surveyData.name} onNameChange={updateName} />
@@ -393,7 +403,7 @@ export const SurveyScreen = () => {
 								variant="primary"
 								size="l"
 								fullWidth
-								onPress={handleNext}
+								onPress={currentStep === 13 ? handleEnableNotifications : handleNext}
 								className="h-[56px]"
 							>
 								{currentStep == 13 ? 'Включить' : 'Далее'}
@@ -405,7 +415,10 @@ export const SurveyScreen = () => {
 								variant="tertiary"
 								size="l"
 								fullWidth
-								onPress={nextStep}
+								onPress={async () => {
+									handleNext()
+			
+								}}
 								className="h-[56px]"
 							>
 							Не сейчас
@@ -417,7 +430,7 @@ export const SurveyScreen = () => {
 							<Button
 								iconLeft={<Icon name="dumbbell" />}
 								variant={'secondary'}
-								onPress={submitData}
+								onPress={() => router.push('/home')}
 							>
 								Перейти к тренировкам
 							</Button>

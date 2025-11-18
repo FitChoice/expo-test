@@ -10,7 +10,9 @@ import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
-import { Icon, Button, AuthGuard, BackgroundLayout } from '@/shared/ui'
+import {
+	Icon, Button, AuthGuard, BackgroundLayout, BackgroundLayoutNoSidePadding,
+} from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import type { Training } from '@/entities/training'
 import { useTrainingStore } from '@/entities/training'
@@ -23,11 +25,11 @@ import { getUserId } from '@/shared/lib/auth'
 export const HomeScreen = () => {
 	return (
 		<AuthGuard>
-			<BackgroundLayout>
+			<BackgroundLayoutNoSidePadding>
 				<View style={styles.container}>
 					{Platform.OS === 'web' ? <WebContent /> : <MobileContent />}
 				</View>
-			</BackgroundLayout>
+			</BackgroundLayoutNoSidePadding>
 		</AuthGuard>
 	)
 }
@@ -99,7 +101,7 @@ const MobileContent = () => {
 				contentContainerStyle={{ paddingBottom: 120 }}
 			>
 				{/* Header with progress */}
-				<View style={[styles.header, { paddingTop: insets.top + 14 }]}>
+				<View style={{ paddingTop: insets.top + 14 }}>
 					<View style={styles.progressSection}>
 						<View style={styles.progressItem}>
 							<Icon name="barbell" size={56} color="rgba(255, 255, 255, 0.1)" />
@@ -214,9 +216,7 @@ const styles = StyleSheet.create({
 	scrollView: {
 		flex: 1,
 	},
-	header: {
-		paddingHorizontal: 14,
-	},
+
 	progressSection: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
 	},
 	mainCard: {
 		marginTop: 64,
-		marginHorizontal: 14,
+
 		backgroundColor: '#1E1E1E',
 		borderRadius: 40,
 		paddingVertical: 32,

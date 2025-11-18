@@ -3,7 +3,7 @@
  */
 
 import { apiClient } from '@/shared/api'
-import type { ApiResult, TrainingResponse } from '@/shared/api/types'
+import type { ApiResult } from '@/shared/api/types'
 
 export const userApi = {
 	/**
@@ -16,27 +16,29 @@ export const userApi = {
 		return apiClient.post(`/user/update/${userId}`, data)
 	},
 
+
+
+
+
+
 	/**
-	 * Build training plan for user
+	 * Delete user account
 	 */
-	async buildTrainingPlan(userId: string): Promise<ApiResult<unknown>> {
-		return apiClient.post(`/user/build-plan/${userId}`, {})
+	async deleteUser(userId: string): Promise<ApiResult<unknown>> {
+		return apiClient.delete(`/user/delete/${userId}`)
 	},
 
 	/**
-	 * Get training information
+	 * Change user password
 	 */
-	async getTrainInformation(
-		trainingId: string,
-		index: number
+	async changePassword(
+		userId: string,
+		oldPassword: string,
+		newPassword: string
 	): Promise<ApiResult<unknown>> {
-		return apiClient.get(`/user/train/${trainingId}/${index}`)
-	},
-
-	/**
-	 * Get training program for user
-	 */
-	async getTrainingProgram(userId: string): Promise<ApiResult<TrainingResponse[]>> {
-		return apiClient.get(`/user/train-program/${userId}`)
+		return apiClient.post(`/user/change-password/${userId}`, {
+			oldPassword,
+			newPassword,
+		})
 	},
 }
