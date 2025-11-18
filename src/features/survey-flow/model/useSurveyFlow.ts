@@ -338,24 +338,30 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 
 	// Submit survey
 	submitSurvey: async (userId: number) => {
-		const { bmi, notif_main, ...surveyData } = get().surveyData
+		try {
+			const { bmi, notif_main, ...surveyData } = get().surveyData
 
-		// Преобразуем массивы битовых масок в числа
-		const trainDaysMasks = (surveyData.train_days as unknown as number[]) || []
-		const trainGoalsMasks = (surveyData.train_goals as unknown as number[]) || []
+			// Преобразуем массивы битовых масок в числа
+			const trainDaysMasks = (surveyData.train_days as unknown as number[]) || []
+			const trainGoalsMasks = (surveyData.train_goals as unknown as number[]) || []
 
-		const dataToSend = {
-			...surveyData,
-			train_days: masksToDaysNumber(trainDaysMasks) as any,
-			train_goals: masksToGoalsNumber(trainGoalsMasks) as any,
+			const dataToSend = {
+				...surveyData,
+				train_days: masksToDaysNumber(trainDaysMasks) as any,
+				train_goals: masksToGoalsNumber(trainGoalsMasks) as any,
+			}
+
+			const result = await surveyApi.submitSurvey(userId, dataToSend as SurveyData)
+
+			if (!result.success) {
+				return { success: false, error: result.error }
+			}
+
+			return { success: true }
+		} catch (error) {
+			console.error('Error in submitSurvey:', error)
+			const errorMessage = error instanceof Error ? error.message : 'Ошибка при отправке опроса'
+			return { success: false, error: errorMessage }
 		}
-
-		const result = await surveyApi.submitSurvey(userId, dataToSend as SurveyData)
-
-		if (!result.success) {
-			return { success: false, error: result.error }
-		}
-
-		return { success: true }
 	},
 }))

@@ -41,3 +41,58 @@ export const clearUserId = async (): Promise<void> => {
 	}
 }
 
+/**
+ * Save auth token to SecureStore
+ * @param token - Auth token to save
+ */
+export const saveAuthToken = async (token: string): Promise<void> => {
+	try {
+		await SecureStore.setItemAsync('auth_token', token)
+	} catch (error) {
+		console.error('Failed to save auth token:', error)
+	}
+}
+
+/**
+ * Get auth token from SecureStore
+ * @returns Auth token or null if not found
+ */
+export const getAuthToken = async (): Promise<string | null> => {
+	try {
+		return await SecureStore.getItemAsync('auth_token')
+	} catch (error) {
+		console.error('Failed to get auth token:', error)
+		return null
+	}
+}
+
+/**
+ * Clear auth token from SecureStore
+ */
+export const clearAuthToken = async (): Promise<void> => {
+	try {
+		await SecureStore.deleteItemAsync('auth_token')
+	} catch (error) {
+		console.error('Failed to clear auth token:', error)
+	}
+}
+
+/**
+ * Save refresh token to SecureStore
+ * @param refreshToken - Refresh token to save
+ */
+export const saveRefreshToken = async (refreshToken: string): Promise<void> => {
+	try {
+		await SecureStore.setItemAsync('refresh_token', refreshToken)
+	} catch (error) {
+		console.error('Failed to save refresh token:', error)
+	}
+}
+
+/**
+ * Clear all auth data from SecureStore
+ */
+export const clearAuthData = async (): Promise<void> => {
+	await Promise.all([clearUserId(), clearAuthToken()])
+}
+

@@ -6,7 +6,6 @@ import { Button, BackButton, BackgroundLayout, BackgroundLayoutNoSidePadding, Ic
 import { useOrientation, useKeyboardAnimation, getUserId } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { useSurveyFlow } from '@/features/survey-flow'
-import { userApi } from '@/features/user'
 import {
 	SurveyStep1,
 	SurveyStep2,
@@ -63,6 +62,7 @@ export const SurveyScreen = () => {
 		getAgeGroupAsString,
 		nextStep,
 		prevStep,
+		goToStep,
 		submitSurvey,
 		setIsSubmitting,
 		setSubmitError,
@@ -70,6 +70,7 @@ export const SurveyScreen = () => {
 
 
 	const [hasRequested, setHasRequested] = useState(false)
+	const [isSubmittingData, setIsSubmittingData] = useState(false)
 
 	// Используем хук для анимации клавиатуры
 	const { translateY } = useKeyboardAnimation({
@@ -94,26 +95,38 @@ export const SurveyScreen = () => {
 		return undefined
 	}, [currentStep, calculateBMI, nextStep])
 
+	// Сброс шага на 1 при размонтировании компонента
+	useEffect(() => {
+		return () => {
+			goToStep(1)
+		}
+	}, [goToStep])
+
 	// Отправка данных опроса при переходе на шаг 13
 
 	const submitData = async () => {
+		// Защита от повторных вызовов
+		if (isSubmittingData) {
+			return
+		}
+
+		setIsSubmittingData(true)
 		setIsSubmitting(true)
 		setSubmitError(null)
 
 		try {
 			let userId = await getUserId()
 
-			console.log('User ID:', userId)
-
 			// Fallback для режима разработки/тестирования
 			if (!userId && __DEV__) {
 				console.warn('Using mock user_id for development')
-				userId = 6// Mock user ID для тестирования
+				userId = 6 // Mock user ID для тестирования
 			}
 
 			if (!userId) {
 				setSubmitError('Не удалось получить идентификатор пользователя')
 				setIsSubmitting(false)
+				setIsSubmittingData(false)
 				return
 			}
 
@@ -121,6 +134,8 @@ export const SurveyScreen = () => {
 
 			if (!result.success) {
 				setSubmitError(result.error || 'Ошибка отправки данных')
+				setIsSubmitting(false)
+				setIsSubmittingData(false)
 				return
 			}
 
@@ -131,17 +146,21 @@ export const SurveyScreen = () => {
 			
 			if (!planResult.success) {
 				setSubmitError(planResult.error || 'Ошибка создания плана тренировок')
+				setIsSubmitting(false)
+				setIsSubmittingData(false)
 				return
 			}
 
 			// План успешно создан - данные уже отправлены, остаемся на шаге 14
 		} catch (error) {
-			setSubmitError('Произошла непредвиденная ошибка')
+			console.error('Submit data error:', error)
+			const errorMessage = error instanceof Error ? error.message : 'Произошла непредвиденная ошибка'
+			setSubmitError(errorMessage)
 		} finally {
 			setIsSubmitting(false)
+			setIsSubmittingData(false)
 		}
-
-}
+	}
 
 
 
@@ -328,7 +347,7 @@ export const SurveyScreen = () => {
 			case 9:
 				return surveyData.train_frequency !== null
 			case 10:
-				return getGoalsAsStrings().length > 0 && getGoalsAsStrings().length <= 3
+				return getGoalsAsStrings().length == 3
 			case 11:
 				return surveyData.main_direction !== null
 			case 12:

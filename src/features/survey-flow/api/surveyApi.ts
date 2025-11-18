@@ -29,16 +29,30 @@ interface UpdateUserResponse {
  */
 function surveyDataToApiFormat(data: SurveyData): UpdateUserMetadataInput {
 	// Конвертируем массив битовых масок дней в одно число (битовую маску)
-	const trainingDaysMasks = data.train_days as unknown as number[]
-	const trainDaysMask = trainingDaysMasks.reduce((mask, dayMask) => {
-		return mask | dayMask
-	}, 0)
+	// train_days может быть уже числом (если пришло из useSurveyFlow) или массивом
+	const trainingDaysMasks = data.train_days as unknown as number[] | number
+	let trainDaysMask: number | undefined
+	
+	if (Array.isArray(trainingDaysMasks)) {
+		trainDaysMask = trainingDaysMasks.reduce((mask, dayMask) => {
+			return mask | dayMask
+		}, 0) || undefined
+	} else if (typeof trainingDaysMasks === 'number') {
+		trainDaysMask = trainingDaysMasks || undefined
+	}
 
 	// Конвертируем массив битовых масок целей в одно число (битовую маску)
-	const goalsMasks = data.train_goals as unknown as number[]
-	const goalsMask = goalsMasks.reduce((mask, goalMask) => {
-		return mask | goalMask
-	}, 0)
+	// train_goals может быть уже числом (если пришло из useSurveyFlow) или массивом
+	const goalsMasks = data.train_goals as unknown as number[] | number
+	let goalsMask: number | undefined
+	
+	if (Array.isArray(goalsMasks)) {
+		goalsMask = goalsMasks.reduce((mask, goalMask) => {
+			return mask | goalMask
+		}, 0) || undefined
+	} else if (typeof goalsMasks === 'number') {
+		goalsMask = goalsMasks || undefined
+	}
 
 	// age уже хранится как число (среднее арифметическое) в стейте
 
@@ -48,9 +62,9 @@ function surveyDataToApiFormat(data: SurveyData): UpdateUserMetadataInput {
 		age: (data.age as unknown as number) || undefined,
 		height: data.height || undefined,
 		weight: data.weight || undefined,
-		train_days: trainDaysMask || undefined,
+		train_days: trainDaysMask,
 		train_frequency: data.train_frequency || undefined,
-		train_goals: goalsMask || undefined,
+		train_goals: goalsMask,
 		main_direction: data.main_direction || undefined,
 		secondary_direction: data.secondary_direction || undefined,
 	}
@@ -72,8 +86,13 @@ export const surveyApi = {
 			}
 		}
 
-		const goalsMasks = data.train_goals as unknown as number[]
-		if (!goalsMasks || goalsMasks.length === 0) {
+		// Проверяем goals - может быть массивом или числом
+		const goalsMasks = data.train_goals as unknown as number[] | number
+		const hasGoals = Array.isArray(goalsMasks) 
+			? goalsMasks.length > 0 
+			: typeof goalsMasks === 'number' && goalsMasks > 0
+		
+		if (!hasGoals) {
 			return {
 				success: false,
 				error: 'Выберите хотя бы одну цель',
@@ -87,10 +106,10 @@ export const surveyApi = {
 			}
 		}
 
-		console.log('data')
-		console.log(data)
+		const apiData = surveyDataToApiFormat(data)
+		console.log('API data:', apiData)
 
-		return apiClient.patch(`/user/update/${userId}`, data)
+		return apiClient.patch(`/user/update/${userId}`, apiData)
 	},
 
 	/**

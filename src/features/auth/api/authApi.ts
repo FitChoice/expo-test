@@ -3,7 +3,7 @@
  */
 
 import { apiClient } from '@/shared/api'
-import { saveUserId } from '@/shared/lib/auth'
+import { saveUserId, saveAuthToken, saveRefreshToken } from '@/shared/lib/auth'
 import type {
 	SendCodeInput,
 	SendCodeResponse,
@@ -103,9 +103,17 @@ export const authApi = {
 			)
 		}
 		
-		// Save user_id to SecureStore on successful registration
-		if (result.success && result.data.id) {
-			await saveUserId(result.data.id)
+		// Save user_id and tokens to SecureStore on successful registration
+		if (result.success && result.data) {
+			if (result.data.id) {
+				await saveUserId(result.data.id)
+			}
+			if (result.data.access_token) {
+				await saveAuthToken(result.data.access_token)
+			}
+			if (result.data.refresh_token) {
+				await saveRefreshToken(result.data.refresh_token)
+			}
 		}
 		
 		return result
@@ -129,9 +137,17 @@ export const authApi = {
 			)
 		}
 		
-		// Save user_id to SecureStore on successful login
-		if (result.success && result.data.id) {
-			await saveUserId(result.data.id)
+		// Save user_id and tokens to SecureStore on successful login
+		if (result.success && result.data) {
+			if (result.data.id) {
+				await saveUserId(result.data.id)
+			}
+			if (result.data.access_token) {
+				await saveAuthToken(result.data.access_token)
+			}
+			if (result.data.refresh_token) {
+				await saveRefreshToken(result.data.refresh_token)
+			}
 		}
 		
 		return result
@@ -142,10 +158,22 @@ export const authApi = {
 	 */
 	async refresh(refreshToken: string): Promise<ApiResult<TokenResponse>> {
 		const payload: RefreshInput = { refresh_token: refreshToken }
-		return apiClient.post<RefreshInput, TokenResponse>(
+		const result = await apiClient.post<RefreshInput, TokenResponse>(
 			'/auth/refresh', 
 			payload,
 			{ skipAuthHandler: true }
 		)
+		
+		// Save tokens to SecureStore on successful refresh
+		if (result.success && result.data) {
+			if (result.data.access_token) {
+				await saveAuthToken(result.data.access_token)
+			}
+			if (result.data.refresh_token) {
+				await saveRefreshToken(result.data.refresh_token)
+			}
+		}
+		
+		return result
 	},
 }

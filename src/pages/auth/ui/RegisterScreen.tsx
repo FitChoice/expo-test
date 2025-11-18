@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Alert, Image as RNImage, Animated, Keyboard, Text } from 'react-native'
+import { View, Alert, Image as RNImage, Animated, Keyboard, Text, InteractionManager } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import { Button, BackButton, MaskedText, BackgroundLayout, Input } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation } from '@/shared/lib'
@@ -161,6 +161,40 @@ export const RegisterScreen = () => {
 		validatePasswordOnBlur()
 	}
 
+	// Обработчик изменения текста в поле пароля
+	const handlePasswordChange = (text: string) => {
+		setPassword(text)
+		// Если поле подтверждения было затронуто и заполнено, проверяем совпадение
+		if (confirmPasswordTouched && confirmPassword) {
+			if (text && confirmPassword) {
+				if (text !== confirmPassword) {
+					setConfirmPasswordError('Пароли не совпадают')
+				} else {
+					setConfirmPasswordError('')
+				}
+			} else {
+				setConfirmPasswordError('')
+			}
+		}
+	}
+
+	// Обработчик изменения текста в поле подтверждения пароля
+	const handleConfirmPasswordChange = (text: string) => {
+		setConfirmPassword(text)
+		// Если поле было затронуто, проверяем совпадение с основным паролем
+		if (confirmPasswordTouched) {
+			if (text && password) {
+				if (text !== password) {
+					setConfirmPasswordError('Пароли не совпадают')
+				} else {
+					setConfirmPasswordError('')
+				}
+			} else {
+				setConfirmPasswordError('')
+			}
+		}
+	}
+
 	// Валидация email
 	const validateEmail = () => {
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -173,29 +207,50 @@ export const RegisterScreen = () => {
 
 	const handleSubmit = async () => {
 		// Dismiss keyboard to prevent system password save dialog from interfering
-		//Keyboard.dismiss()
+	
+		
+		Keyboard.dismiss()
+
+		// Валидация перед отправкой
+		if (!email || !password || !confirmPassword) {
+			return
+		}
+
+		if (passwordError || emailError || confirmPasswordError) {
+			return
+		}
 
 		setIsLoading(true)
 
 		try {
+		
 			const result = await authApi.sendCode(email)
+
+		
 
 			if (result.success) {
 				// Переход на страницу проверки кода с email и паролем
-				router.push({
-					pathname: '/verification',
-					params: { email, password },
+			
+				// Используем InteractionManager чтобы убедиться, что навигация происходит после всех взаимодействий
+				InteractionManager.runAfterInteractions(() => {
+					router.push({
+						pathname: '/verification',
+						params: { email, password },
+					})
 				})
 			} else {
 				// Показываем конкретную ошибку пользователю
-				Alert.alert('Ошибка', result.error || 'Не удалось отправить код')
+				const errorMessage = result.error || 'Не удалось отправить код'
+				console.error('Send code error:', errorMessage)
+				Alert.alert('Ошибка', errorMessage)
+				setIsLoading(false)
 			}
 		} catch (error) {
 			// Показываем ошибку сети
 			const errorMessage =
 				error instanceof Error ? error.message : 'Не удалось отправить код'
+			console.error('Send code exception:', error)
 			Alert.alert('Ошибка', errorMessage)
-		} finally {
 			setIsLoading(false)
 		}
 	}
@@ -292,7 +347,7 @@ export const RegisterScreen = () => {
 								label="Пароль"
 								placeholder="Пароль"
 								value={password}
-								onChangeText={setPassword}
+								onChangeText={handlePasswordChange}
 								onFocus={handlePasswordFocus}
 								onBlur={handlePasswordBlur}
 								variant="password"
@@ -309,7 +364,7 @@ export const RegisterScreen = () => {
 								label="Подтверждение пароля"
 								placeholder="Подтвердите пароль"
 								value={confirmPassword}
-								onChangeText={setConfirmPassword}
+								onChangeText={handleConfirmPasswordChange}
 								onFocus={handleConfirmPasswordFocus}
 								onBlur={handleConfirmPasswordBlur}
 								variant="password"
@@ -325,7 +380,7 @@ export const RegisterScreen = () => {
 				{/* Кнопки внизу экрана */}
 				<View className="gap-2 pb-[50px] pt-8">
 					{/* Кнопка регистрации */}
-					<Animated.View className="w-full" style={{ transform: [{ translateY }] }}>
+				
 						<Button
 							variant="primary"
 							size="l"
@@ -345,7 +400,7 @@ export const RegisterScreen = () => {
 						>
 							{isLoading ? 'Отправка...' : 'Зарегистрироваться'}
 						</Button>
-					</Animated.View>
+				
 
 					{/* Текст с соглашениями */}
 					<Text className="text-center text-xs text-light-text-500 px-4 leading-4">
