@@ -23,7 +23,7 @@ export const NavigationBar = () => {
 			style={[
 				styles.container,
 				{
-					paddingBottom: insets.bottom + 8,
+					paddingBottom: 10,
 				},
 			]}
 		>
