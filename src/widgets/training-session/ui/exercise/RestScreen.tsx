@@ -37,6 +37,7 @@ export function RestScreen({ onComplete, duration }: RestScreenProps) {
 		<ExerciseWithCounterWrapper
 			onComplete={onComplete}
 			countdownInitial={duration}
+			isShowActionButtons={false}
 		>
 
 				<View className="flex-1 items-center justify-center padding-4 pt-5 pb-5  gap-10">

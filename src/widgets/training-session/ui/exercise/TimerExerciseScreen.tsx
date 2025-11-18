@@ -6,12 +6,13 @@
 
 import { View, Text, Pressable, useWindowDimensions } from 'react-native'
 import { useState, useEffect } from 'react'
+import { useIsFocused } from '@react-navigation/native'
 import {  StepProgress } from '@/shared/ui'
 import { Exercise } from '@/entities/training'
 import { ExerciseWithCounterWrapper, useVideoPlayerContext } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 import { CountdownDisplay } from './ExerciseExampleCountdownScreen'
 import { useVideoPlayer, VideoView } from 'expo-video'
-import { CameraView, useCameraPermissions } from 'expo-camera'
+import { CameraView } from 'expo-camera'
 
 
 interface TimerExerciseScreenProps {
@@ -23,8 +24,15 @@ function TimerExerciseContent({ exercise, player }: { exercise: Exercise, player
 	const [localCurrentSet, setLocalCurrentSet] = useState(0)
 	const [cameraKey, setCameraKey] = useState(0)
 	const videoPlayerContext = useVideoPlayerContext()
+	const isFocused = useIsFocused()
 
 	useEffect(() => {
+		// Обновляем cameraKey при монтировании компонента для гарантированной инициализации камеры
+		setCameraKey(prev => prev + 1)
+	}, [])
+
+	useEffect(() => {
+		// Обновляем cameraKey при изменении exercise.id
 		setCameraKey(prev => prev + 1)
 	}, [exercise.id])
 
@@ -42,9 +50,7 @@ function TimerExerciseContent({ exercise, player }: { exercise: Exercise, player
 	}, [exercise.sets])
 
 	useEffect(() => {
-		console.log('TimerExerciseScreen: player:', player, 'context:', videoPlayerContext);
 		if (player && videoPlayerContext) {
-			console.log('TimerExerciseScreen: registering player');
 			const unregister = videoPlayerContext.registerPlayer(player)
 			return unregister
 		} else {
@@ -61,14 +67,18 @@ function TimerExerciseContent({ exercise, player }: { exercise: Exercise, player
 			{/* Camera View with Video Overlay */}
 			<View style={{ height, position: 'relative', width: '100%', overflow: 'hidden' }}>
 				{/* Camera View - Background Layer */}
-				<CameraView 
-					key={`camera-${cameraKey}`}
-					style={{ height, width, position: 'absolute', top: 0, left: 0 }} 
-					facing="front" 
-				/>
+				{isFocused ? (
+					<CameraView 
+						key={`camera-${cameraKey}`}
+						style={{ height, width, position: 'absolute', top: 0, left: 0 }} 
+						facing="front" 
+					/>
+				) : (
+					<View style={{ height, width, position: 'absolute', top: 0, left: 0, backgroundColor: 'black' }} />
+				)}
 				
 				{/* Video Preview Window - Bottom Right Corner - Foreground Layer */}
-				{exercise.videoUrl && player && (
+				{/* {exercise.videoUrl && player && (
 					<View 
 						style={{
 							position: 'absolute',
@@ -99,7 +109,7 @@ function TimerExerciseContent({ exercise, player }: { exercise: Exercise, player
 							/>
 						</View>
 					</View>
-				)}
+				)} */}
 			</View>
 
 

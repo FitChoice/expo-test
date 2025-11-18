@@ -393,7 +393,7 @@ export default function TrainingEntryScreen() {
 						</Button>
 					</>
 				) : (
-					<Button onPress={handleStart} variant="primary" className="w-full">
+					<Button onPress={handleStart} variant="primary" className="w-full mb-4">
 						Начать
 					</Button>
 				)}

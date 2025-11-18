@@ -41,10 +41,12 @@ export const ExerciseWithCounterWrapper = ({
 	children, 
 	onComplete, 
 	countdownInitial,
+	isShowActionButtons = true,
 }: {
 	children: ReactNode
 	onComplete: () => void
 	countdownInitial?: number
+	isShowActionButtons?: boolean
 }) => {
 
 
@@ -159,7 +161,7 @@ export const ExerciseWithCounterWrapper = ({
 
 	const handleStopTraining = () => {
 		setShowStopModal(false)
-		router.push('/')
+		router.push('/home')
 
 	}
 
@@ -197,7 +199,10 @@ export const ExerciseWithCounterWrapper = ({
 				{/* Gradient Background */}
 				<GreenGradient />
 
-				{/* Control Buttons */}
+{/* Control Buttons */}
+{isShowActionButtons &&
+	
+				
 				<View className="absolute left-4 right-4 top-5 z-10 flex-row justify-end gap-2">
 					<ControlButton
 						icon={<AntDesign name="pause" size={24} color="#FFFFFF" />}
@@ -208,6 +213,8 @@ export const ExerciseWithCounterWrapper = ({
 						onPress={onStop}
 					/>
 				</View>
+}
+			
 
 				{children}
 			</View>

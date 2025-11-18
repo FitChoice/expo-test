@@ -44,7 +44,7 @@ export default function TrainingReportScreen() {
 		// Reset training store
 		reset()
 		// Navigate to home
-		router.replace('/')
+		router.replace('/home')
 	}
 
 	if (!training) {
@@ -126,7 +126,7 @@ export default function TrainingReportScreen() {
 
 		{/* Button at bottom */}
 		<View className=" flex-row gap-2 py-2">
-			<Button variant="tertiary"  className="flex-1" >
+			<Button variant="tertiary" onPress={handleFinish}  className="flex-1" >
 				Закрыть
 			</Button>
 			<Button variant="primary"  className="flex-1" >

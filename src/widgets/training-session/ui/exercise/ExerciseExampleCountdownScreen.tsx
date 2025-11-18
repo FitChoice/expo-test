@@ -32,7 +32,7 @@ export function CountdownDisplay() {
 	const minutes = Math.floor(countdown / 60)
 	const seconds = countdown % 60
 	return (
-		<View className="mb-6 items-center">
+		<View className="mb-2 items-center">
 			<LargeNumberDisplay
 				value={`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}
 				size="large"
@@ -53,9 +53,9 @@ function ExerciseExampleCountdownContent({
 	const videoPlayerContext = useVideoPlayerContext()
 
 	useEffect(() => {
-		console.log('ExerciseExampleCountdownScreen: player:', player, 'context:', videoPlayerContext);
+
 		if (player && videoPlayerContext) {
-			console.log('ExerciseExampleCountdownScreen: registering player');
+
 			const unregister = videoPlayerContext.registerPlayer(player)
 			return unregister
 		} else {

@@ -138,7 +138,7 @@ export const TrainingInfo = () => {
 
                 <View className="bg-black px-6 pt-6 pb-6 rounded-t-2xl rounded-b-2xl">
 									<Text className="text-t1.1 text-white mb-4">
-										Инвентарь
+									3 упражнения
 									</Text>
                 <ExerciseInfoCard
   name="Дыхательное упражнение"
@@ -170,6 +170,7 @@ export const TrainingInfo = () => {
 					fullWidth 
 					onPress={handleStart}
 					size="l"
+					className="mb-2"
 				>
 					Начать
 				</Button>

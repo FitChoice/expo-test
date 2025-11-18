@@ -84,7 +84,7 @@ export function BodyPositionScreen({
 				</View>
 
 				{/* Body Silhouette Overlay */}
-				<View className="absolute inset-0 items-center justify-start pt-20">
+				<View className="absolute inset-0 items-center justify-start pt-10">
 					{
 						side == 'right' ? <BodySilhouetteRightSide stroke={showSuccess ? '#8BC34A' : 'white'} /> :
 							side == 'left' ? <BodySilhouetteLeftSide stroke={showSuccess ? '#8BC34A' : 'white'} /> :
