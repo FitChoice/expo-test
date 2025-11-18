@@ -6,6 +6,8 @@ import { useTrainingStore } from "@/entities/training"
 import { useState, useMemo } from "react"
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { GradientBg } from '@/shared/ui/GradientBG'
+import Entypo from '@expo/vector-icons/Entypo';
+
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const trainingInfoBanner = require("@/assets/images/training_info_banner.png")
@@ -73,10 +75,8 @@ export const TrainingInfo = () => {
 					{/* Close Button - Top Right */}
 					<TouchableOpacity
 						onPress={handleClose}
-						className="absolute right-4 h-12 w-12 items-center justify-center rounded-2xl bg-black/30"
-						style={{ top: insets.top + 12 }}
-					>
-						<Icon name="close" size={24} color="#FFFFFF" />
+						className="absolute right-4  top-5 h-12 w-12 items-center justify-center rounded-2xl bg-white/30">
+						<Entypo name="cross" size={24} color="white" />
 					</TouchableOpacity>
 				</View>
 
