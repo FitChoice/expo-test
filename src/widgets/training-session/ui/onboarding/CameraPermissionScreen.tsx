@@ -11,7 +11,7 @@ import { useCameraPermissions } from 'expo-camera';
 import { GradientBg } from '@/shared/ui/GradientBG';
 import { CloseBtn } from '@/shared/ui/CloseBtn';
 import { router } from 'expo-router';
-import { useState } from 'react';
+
 
 interface CameraPermissionScreenProps {
 	onNext: () => void;

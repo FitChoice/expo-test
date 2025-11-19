@@ -25,6 +25,7 @@ type ExerciseStep =
 	| 'rest'
 	| 'transition'
 	| 'success'
+	| 'rotate'
 
 export function ExerciseFlow() {
 

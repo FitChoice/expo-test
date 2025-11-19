@@ -6,8 +6,12 @@
   "web": {
     "output": "static"
   },
+  "expo": {
+    "orientation": "portrait"
+  },
   "plugins": [
     "expo-router",
+
     "expo-screen-orientation",
     [
       "expo-build-properties",

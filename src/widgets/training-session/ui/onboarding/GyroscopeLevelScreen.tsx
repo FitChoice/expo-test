@@ -24,9 +24,10 @@ import { GradientBg } from '@/shared/ui/GradientBG'
 
 interface GyroscopeLevelScreenProps {
 	onNext: () => void;
+	isVertical: boolean;
 }
 
-export function GyroscopeLevelScreen({ onNext }: GyroscopeLevelScreenProps) {
+export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScreenProps) {
 	const [angle, setAngle] = useState(0);
 	const [isCalibrated, setIsCalibrated] = useState(false);
 	const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
@@ -60,6 +61,7 @@ export function GyroscopeLevelScreen({ onNext }: GyroscopeLevelScreenProps) {
 				Accelerometer.setUpdateInterval(100);
 
 			subscription = Accelerometer.addListener(({ x, y, z }) => {
+
 				// Угол наклона вперед-назад, когда телефон стоит вертикально
 				// y ≈ -1 когда телефон вертикален, z показывает наклон вперед/назад
 				const angleRad = Math.atan2(z, Math.abs(y));
