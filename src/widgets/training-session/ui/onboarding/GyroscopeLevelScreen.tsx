@@ -88,8 +88,10 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
 				setAngle(angleDeg);
 			  
 				// Анимация полоски
+				// Для горизонтального положения нормализуем угол, чтобы полоска была горизонтальной при 0°
+				const normalizedAngle = isVertical ? angleDeg : (angleDeg >= 0 ? angleDeg - 90 : angleDeg + 90);
 				Animated.timing(barRotation, {
-				  toValue: angleDeg,
+				  toValue: normalizedAngle,
 				  duration: 100,
 				  useNativeDriver: true,
 				}).start();

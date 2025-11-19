@@ -1,6 +1,6 @@
-import { View, Text, Animated, Easing, useWindowDimensions } from 'react-native';
+import { View, Text, Animated, Easing, Alert } from 'react-native';
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import { GradientBg } from '@/shared/ui/GradientBG'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
@@ -13,7 +13,9 @@ interface RotatePhoneScreenProps {
 
 export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
 
-	const { width, height } = useWindowDimensions();
+	const orientationChangedRef = useRef(false);
+	const hasShownAlertRef = useRef(false);
+	
 	const handleStop = () => {
 		router.back()
 	}
@@ -22,35 +24,96 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
 
 
 	// // Анимация мерцания
-	// const opacity = useRef(new Animated.Value(0.5)).current
-	//
-	// useEffect(() => {
-	// 	Animated.loop(
-	// 		Animated.sequence([
-	// 			Animated.timing(opacity, {
-	// 				toValue: 1,
-	// 				duration: 500,
-	// 				easing: Easing.inOut(Easing.ease),
-	// 				useNativeDriver: true,
-	// 			}),
-	// 			Animated.timing(opacity, {
-	// 				toValue: 0.3,
-	// 				duration: 500,
-	// 				easing: Easing.inOut(Easing.ease),
-	// 				useNativeDriver: true,
-	// 			}),
-	// 		])
-	// 	).start()
-	// }, [opacity])
+	const opacity = useRef(new Animated.Value(0.5)).current
+
+	useEffect(() => {
+		Animated.loop(
+			Animated.sequence([
+				Animated.timing(opacity, {
+					toValue: 1,
+					duration: 500,
+					easing: Easing.inOut(Easing.ease),
+					useNativeDriver: true,
+				}),
+				Animated.timing(opacity, {
+					toValue: 0.3,
+					duration: 500,
+					easing: Easing.inOut(Easing.ease),
+					useNativeDriver: true,
+				}),
+			])
+		).start()
+	}, [opacity])
 
 
 	useEffect(() => {
-		ScreenOrientation.unlockAsync().catch((err) =>
-			console.warn('Не удалось разблокировать ориентацию:', err)
-		);
+		// Сбрасываем refs при монтировании
+		orientationChangedRef.current = false;
+		hasShownAlertRef.current = false;
+		
+		let checkTimeout: ReturnType<typeof setTimeout> | null = null;
+		let subscription: { remove: () => void } | null = null;
+
+		const checkRotationLock = async () => {
+			try {
+				await ScreenOrientation.unlockAsync();
+				
+				// Получаем начальную ориентацию
+				const initialOrientation = await ScreenOrientation.getOrientationAsync();
+				
+				// Слушаем изменения ориентации
+				subscription = ScreenOrientation.addOrientationChangeListener(() => {
+					orientationChangedRef.current = true;
+					if (checkTimeout) {
+						clearTimeout(checkTimeout);
+						checkTimeout = null;
+					}
+					if (subscription) {
+						ScreenOrientation.removeOrientationChangeListener(subscription);
+						subscription = null;
+					}
+				});
+				
+				// Проверяем через 3 секунды, изменилась ли ориентация
+				// Если нет и мы все еще в портретной ориентации, возможно поворот заблокирован
+				checkTimeout = setTimeout(async () => {
+					try {
+						const currentOrientation = await ScreenOrientation.getOrientationAsync();
+						
+						if (
+							!orientationChangedRef.current &&
+							currentOrientation === initialOrientation &&
+							currentOrientation === ScreenOrientation.Orientation.PORTRAIT_UP &&
+							!hasShownAlertRef.current
+						) {
+							hasShownAlertRef.current = true;
+							Alert.alert('Пожалуйста, разблокируйте поворот экрана');
+						}
+					} catch (err) {
+						// Игнорируем ошибки при проверке
+					}
+					if (subscription) {
+						ScreenOrientation.removeOrientationChangeListener(subscription);
+						subscription = null;
+					}
+				}, 3000);
+			} catch (err) {
+				if (!hasShownAlertRef.current) {
+					hasShownAlertRef.current = true;
+					Alert.alert('Пожалуйста, разблокируйте поворот экрана');
+				}
+			}
+		};
+
+		checkRotationLock();
 
 		return () => {
-			ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT).catch(() => {});
+			if (checkTimeout) {
+				clearTimeout(checkTimeout);
+			}
+			if (subscription) {
+				ScreenOrientation.removeOrientationChangeListener(subscription);
+			}
 		};
 	}, []);
 
@@ -58,18 +121,22 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
 	useEffect(() => {
 		let hasTriggered = false; // Защита от дублирования вызова
 
-		const handler = (event: ScreenOrientation.OrientationChangeEvent) => {
+		const handler = async () => {
 			if (hasTriggered) return;
 
-			const { orientationLock } = event.orientationInfo;
+			try {
+				const orientation = await ScreenOrientation.getOrientationAsync();
 
-			const isLandscape =
-				orientationLock === ScreenOrientation.OrientationLock.LANDSCAPE_LEFT ||
-				orientationLock === ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT;
+				const isLandscape =
+					orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
+					orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT;
 
-			if (isLandscape) {
-				hasTriggered = true;
-				onNext();
+				if (isLandscape) {
+					hasTriggered = true;
+					onNext();
+				}
+			} catch (err) {
+				console.warn('Error reading orientation:', err);
 			}
 		};
 
@@ -105,7 +172,7 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
 							clearInterval(interval);
 						}
 					}
-				} catch (err) {        console.warn('Error reading orientation:', err);
+				} catch (err) { console.warn('Error reading orientation:', err);
 					// Если ошибка — напр. из-за permissions или unmount
 				}
 			}, 300);
