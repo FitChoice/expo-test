@@ -3,14 +3,13 @@
  */
 
 import { create } from 'zustand'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import type {
-	Training,
-	TrainingStatus,
-	ExerciseSide,
-	ErrorLog,
-	SetData,
-	SavedWorkoutState,
+    Training,
+    TrainingStatus,
+    ExerciseSide,
+    ErrorLog,
+    SetData,
+    SavedWorkoutState,
 } from './types'
 
 interface TrainingState {
@@ -54,146 +53,143 @@ interface TrainingState {
 }
 
 const initialState = {
-	training: null,
-	status: 'idle' as TrainingStatus,
-	currentExerciseIndex: 0,
-	currentSet: 0,
-	currentReps: 0,
-	currentSide: null,
-	elapsedTime: 0,
-	activeTime: 0,
-	restTime: 0,
-	completedExercises: [],
-	setHistory: [],
-	errors: [],
-	totalReps: 0,
-	averageFormQuality: 0,
-	caloriesBurned: 0,
+    training: null,
+    status: 'idle' as TrainingStatus,
+    currentExerciseIndex: 0,
+    currentSet: 0,
+    currentReps: 0,
+    currentSide: null,
+    elapsedTime: 0,
+    activeTime: 0,
+    restTime: 0,
+    completedExercises: [],
+    setHistory: [],
+    errors: [],
+    totalReps: 0,
+    averageFormQuality: 0,
+    caloriesBurned: 0,
 }
 
 export const useTrainingStore = create<TrainingState>((set, get) => ({
-	...initialState,
+    ...initialState,
 
-	/**
+    /**
 	 * Start a new training session
 	 */
-	startTraining: (training) => {
-		set({
-			...initialState,
-			training,
-			status: 'info',
-		})
-	},
+    startTraining: (training) => {
+        set({
+            ...initialState,
+            training,
+            status: 'info',
+        })
+    },
 
-	startOnboarding: () => {
-		set({
-			status: 'onboarding',
-		})
-	},
+    startOnboarding: () => {
+        set({
+            status: 'onboarding',
+        })
+    },
 
-	/**
+    /**
 	 * Resume training from saved state
 	 */
-	resumeTraining: (savedState) => {
-		const { training } = get()
-		if (!training) return
+    resumeTraining: (savedState) => {
+        const { training } = get()
+        if (!training) return
 
-		set({
-			currentExerciseIndex: savedState.currentExerciseIndex,
-			currentSet: savedState.currentSet,
-			currentReps: savedState.currentReps,
-			currentSide: savedState.currentSide,
-			elapsedTime: savedState.elapsedTime,
-			completedExercises: savedState.completedExercises,
-			status: 'running',
-		})
-	},
+        set({
+            currentExerciseIndex: savedState.currentExerciseIndex,
+            currentSet: savedState.currentSet,
+            currentReps: savedState.currentReps,
+            currentSide: savedState.currentSide,
+            elapsedTime: savedState.elapsedTime,
+            completedExercises: savedState.completedExercises,
+            status: 'running',
+        })
+    },
 
-	/**
+    /**
 	 * Resume training after onboarding (change status from 'onboarding' to 'running')
 	 */
-	resume: () => {
-		const { status } = get()
-		if (status === 'onboarding') {
-			set({ status: 'running' })
-		}
-	},
+    resume: () => {
+        const { status } = get()
+        if (status === 'onboarding') {
+            set({ status: 'running' })
+        }
+    },
 
-	reportTraining: () => {
-		set({ status: 'report' })
-	},
+    reportTraining: () => {
+        set({ status: 'report' })
+    },
 
+    stop: async () => {
+        set({ status: 'idle' })
+    },
 
-	stop: async () => {
-		set({ status: 'idle' })
-	},
-
-	/**
+    /**
 	 * Reset training store to initial state
 	 */
-	reset: () => {
-		set({ ...initialState })
-	},
+    reset: () => {
+        set({ ...initialState })
+    },
 
-	/**
+    /**
 	 * Move to next exercise
 	 */
-	nextExercise: () => {
-		const { training, currentExerciseIndex, completedExercises } = get()
-		if (!training) return
+    nextExercise: () => {
+        const { training, currentExerciseIndex, completedExercises } = get()
+        if (!training) return
 
-		const newIndex = currentExerciseIndex + 1
+        const newIndex = currentExerciseIndex + 1
 
-		const exerciseSide = training.exercises[newIndex]?.side
-		set({
-			currentExerciseIndex: newIndex,
-			currentSet: 1,
-			currentReps: 0,
-			currentSide: exerciseSide === 'single' ? null : (exerciseSide as ExerciseSide | null),
-			completedExercises: [...completedExercises, currentExerciseIndex],
-		})
+        const exerciseSide = training.exercises[newIndex]?.side
+        set({
+            currentExerciseIndex: newIndex,
+            currentSet: 1,
+            currentReps: 0,
+            currentSide: exerciseSide === 'single' ? null : (exerciseSide as ExerciseSide | null),
+            completedExercises: [...completedExercises, currentExerciseIndex],
+        })
 
-		// Check if training is finished
-		if (newIndex >= training.exercises.length) {
-			set({ status: 'finished' })
-		}
-	},
+        // Check if training is finished
+        if (newIndex >= training.exercises.length) {
+            set({ status: 'finished' })
+        }
+    },
 
-	/**
+    /**
 	 * Move to next set
 	 */
-	nextSet: () => {
-		const { currentSet } = get()
-		set({
-			currentSet: currentSet + 1,
-			currentReps: 0,
-		})
-	},
+    nextSet: () => {
+        const { currentSet } = get()
+        set({
+            currentSet: currentSet + 1,
+            currentReps: 0,
+        })
+    },
 
-	/**
+    /**
 	 * Complete current set and log data
 	 */
-	completeSet: (setData) => {
-		const { setHistory, totalReps, caloriesBurned } = get()
+    completeSet: (setData) => {
+        const { setHistory, totalReps, caloriesBurned } = get()
 
-		const newSetHistory = [...setHistory, setData]
-		const newTotalReps = totalReps + setData.reps
+        const newSetHistory = [...setHistory, setData]
+        const newTotalReps = totalReps + setData.reps
 
-		// Calculate new average form quality
-		const totalQuality = setHistory.reduce((sum, s) => sum + s.formQuality, 0)
-		const newAvgQuality = (totalQuality + setData.formQuality) / newSetHistory.length
+        // Calculate new average form quality
+        const totalQuality = setHistory.reduce((sum, s) => sum + s.formQuality, 0)
+        const newAvgQuality = (totalQuality + setData.formQuality) / newSetHistory.length
 
-		// Estimate calories (simple: 0.5 cal per rep)
-		const newCalories = caloriesBurned + setData.reps * 0.5
+        // Estimate calories (simple: 0.5 cal per rep)
+        const newCalories = caloriesBurned + setData.reps * 0.5
 
-		set({
-			setHistory: newSetHistory,
-			totalReps: newTotalReps,
-			averageFormQuality: Math.round(newAvgQuality),
-			caloriesBurned: Math.round(newCalories),
-		})
-	},
-
-
+        set({
+            setHistory: newSetHistory,
+            totalReps: newTotalReps,
+            averageFormQuality: Math.round(newAvgQuality),
+            caloriesBurned: Math.round(newCalories),
+        })
+    },
 
 }))

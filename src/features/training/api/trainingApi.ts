@@ -16,9 +16,6 @@ interface TrainingReport {
 	[key: string]: unknown
 }
 
-
-
-
 export interface Exercise {
 	id: number;
 	name: string;
@@ -42,14 +39,13 @@ export interface TrainingInfo {
 	exercises: Exercise[];
 }
 
-
 interface CompleteTrainingInput {
-	"report_active_time": number,
-	"report_cals": number,
-	"report_duration": number,
-	"report_technique_quality": number,
-	"time": string, ////ISO
-	"training_id": number
+	'report_active_time': number,
+	'report_cals': number,
+	'report_duration': number,
+	'report_technique_quality': number,
+	'time': string, ////ISO
+	'training_id': number
 
 }
 
@@ -59,9 +55,9 @@ interface CompleteTrainingResponse {
 }
 
 interface ExecuteExerciseInput {
-	"id":number,
-	"reps": number,
-	"training_id": number
+	'id':number,
+	'reps': number,
+	'training_id': number
 }
 
 interface ExecuteExerciseResponse {
@@ -79,56 +75,55 @@ interface BuildTrainingPlanResponse {
 }
 
 export const trainingApi = {
-	/**
+    /**
 	 * Get latest training program
 	 */
-	async getTrainingPlan(userId: number): Promise<ApiResult<TrainingPlan>> {
-		return apiClient.get(`/trainings/plan/${userId}`)
-	},
+    async getTrainingPlan(userId: number): Promise<ApiResult<TrainingPlan>> {
+        return apiClient.get(`/trainings/plan/${userId}`)
+    },
 
-	/**
+    /**
 	 * Get training report
 	 */
-	async getTrainingReport(trainingId: number): Promise<ApiResult<TrainingReport>> {
-		return apiClient.get(`/trainings/report/${trainingId}`)
-	},
+    async getTrainingReport(trainingId: number): Promise<ApiResult<TrainingReport>> {
+        return apiClient.get(`/trainings/report/${trainingId}`)
+    },
 
-	/**
+    /**
 	 * Get training info
 	 */
-	async getTrainingInfo(trainingId: number): Promise<ApiResult<TrainingInfo>> {
-		return apiClient.get(`/trainings/train/${trainingId}`)
-	},
+    async getTrainingInfo(trainingId: number): Promise<ApiResult<TrainingInfo>> {
+        return apiClient.get(`/trainings/train/${trainingId}`)
+    },
 
-	/**
+    /**
 	 * Complete a training
 	 */
-	async completeTraining(
-		data: CompleteTrainingInput
-	): Promise<ApiResult<CompleteTrainingResponse>> {
-		return apiClient.put(`/trainings/complete`, data)
-	},
+    async completeTraining(
+        data: CompleteTrainingInput
+    ): Promise<ApiResult<CompleteTrainingResponse>> {
+        return apiClient.put('/trainings/complete', data)
+    },
 
-	/**
+    /**
 	 * Execute exercise
 	 */
-	async executeExercise(
-		data: ExecuteExerciseInput
-	): Promise<ApiResult<ExecuteExerciseResponse>> {
-		return apiClient.put(`/trainings/exercise`, data)
-	},
+    async executeExercise(
+        data: ExecuteExerciseInput
+    ): Promise<ApiResult<ExecuteExerciseResponse>> {
+        return apiClient.put('/trainings/exercise', data)
+    },
 
-	/**
+    /**
 	 * Build training plan
 	 * Generates and saves a personalized training plan for a user based on their metadata and start date.
 	 * @param id - User ID (path parameter)
 	 * @param data - Input data with start time
 	 */
-	async buildTrainingPlan(
-		id: number,
-		data: BuildTrainingPlanInput
-	): Promise<ApiResult<BuildTrainingPlanResponse>> {
-		return apiClient.post(`/trainings/plan/${id}`, data)
-	},
+    async buildTrainingPlan(
+        id: number,
+        data: BuildTrainingPlanInput
+    ): Promise<ApiResult<BuildTrainingPlanResponse>> {
+        return apiClient.post(`/trainings/plan/${id}`, data)
+    },
 }
-

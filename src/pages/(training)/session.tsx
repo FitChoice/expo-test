@@ -10,44 +10,41 @@ import { OnboardingFlow, ExerciseFlow } from '@/widgets/training-session'
 import TrainingReportScreen from './report'
 import { TrainingInfo } from '@/widgets/training-session/ui/TrainingInfo'
 
-
 export default function TrainingSessionScreen() {
-	const training = useTrainingStore((state) => state.training)
-	const status = useTrainingStore((state) => state.status)
+    const training = useTrainingStore((state) => state.training)
+    const status = useTrainingStore((state) => state.status)
 
+    // If training data is not loaded, show loading
+    if (!training) {
+        return (
+            <View className="bg-background-primary flex-1 items-center justify-center">
+                <ActivityIndicator size="large" color="#9333EA" />
+            </View>
+        )
+    }
 
-	// If training data is not loaded, show loading
-	if (!training) {
-		return (
-			<View className="bg-background-primary flex-1 items-center justify-center">
-				<ActivityIndicator size="large" color="#9333EA" />
-			</View>
-		)
-	}
+    // Render based on current status
+    switch (status) {
+    case 'info':
+        return  <TrainingInfo />
+    case 'onboarding':
+        return <OnboardingFlow />
 
+    case 'finished':
+        return <View className="bg-background-primary flex-1 items-center justify-center" ><Text>finished</Text>
+        </View>
 
-	// Render based on current status
-	switch (status) {
-		case 'info':
-			return  <TrainingInfo />
-		case 'onboarding':
-			return <OnboardingFlow />
+    case 'report':
+        return <TrainingReportScreen />
 
-		case 'finished':
-			return <View className="bg-background-primary flex-1 items-center justify-center" ><Text>finished</Text>
-						</View>
+    case 'analytics':
+        return <View className="bg-background-primary flex-1 items-center justify-center" >
+            <Text>Analytics</Text>
+        </View>
 
-			case 'report':
-				return <TrainingReportScreen />
-
-			case 'analytics':
-					return <View className="bg-background-primary flex-1 items-center justify-center" >
-						<Text>Analytics</Text>
-						</View>
-
-		default:
-			return (
-				<ExerciseFlow	/>
-				)
-	}
+    default:
+        return (
+            <ExerciseFlow	/>
+        )
+    }
 }

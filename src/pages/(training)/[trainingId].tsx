@@ -21,383 +21,380 @@ import { trainingApi } from '@/features/training/api'
 const landingPhoto1 = require('../../../assets/images/landing-photo-1.png')
 
 export default function TrainingEntryScreen() {
-	const { trainingId } = useLocalSearchParams<{ trainingId: string }>()
+    const { trainingId } = useLocalSearchParams<{ trainingId: string }>()
 
-	const [showTutorial, setShowTutorial] = useState(true)
-	const [savedSession, setSavedSession] = useState<SavedWorkoutState | null>(null)
-	const [isCheckingSession, setIsCheckingSession] = useState(true)
-	const [isRefreshing, setIsRefreshing] = useState(false)
-	const startTraining = useTrainingStore((state) => state.startTraining)
-	const resumeTraining = useTrainingStore((state) => state.resumeTraining)
+    const [showTutorial, setShowTutorial] = useState(true)
+    const [savedSession, setSavedSession] = useState<SavedWorkoutState | null>(null)
+    const [isCheckingSession, setIsCheckingSession] = useState(true)
+    const [isRefreshing, setIsRefreshing] = useState(false)
+    const startTraining = useTrainingStore((state) => state.startTraining)
+    const resumeTraining = useTrainingStore((state) => state.resumeTraining)
 
-	// Check if user is authenticated before making API call
-	const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+    // Check if user is authenticated before making API call
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
 
-	useEffect(() => {
-		const checkAuth = async () => {
-			try {
-				const token = await SecureStore.getItemAsync('auth_token')
-				setIsAuthenticated(!!token)
-			} catch (error) {
-				setIsAuthenticated(false)
-			}
-		}
-		checkAuth()
-	}, [])
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const token = await SecureStore.getItemAsync('auth_token')
+                setIsAuthenticated(!!token)
+            } catch (error) {
+                setIsAuthenticated(false)
+            }
+        }
+        checkAuth()
+    }, [])
 
-	// Fetch training data - only if authenticated
-	const {
-    data: training,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-		queryKey: ['training', trainingId],
-		queryFn: async () => {
-			if (!trainingId) throw new Error('Training ID is required')
-			return await trainingApi.getTrainingInfo(Number(trainingId))
-		},
-		enabled: !!trainingId && isAuthenticated === true,
-		retry: false,
-	})
+    // Fetch training data - only if authenticated
+    const {
+        data: training,
+        isLoading,
+        error,
+        refetch,
+    } = useQuery({
+        queryKey: ['training', trainingId],
+        queryFn: async () => {
+            if (!trainingId) throw new Error('Training ID is required')
+            return await trainingApi.getTrainingInfo(Number(trainingId))
+        },
+        enabled: !!trainingId && isAuthenticated === true,
+        retry: false,
+    })
 
+    // Check for saved session on mount
+    useEffect(() => {
+        const checkSavedSession = async () => {
+            if (!trainingId) {
+                setIsCheckingSession(false)
+                return
+            }
 
+            try {
+                const savedJson = await AsyncStorage.getItem(`training_session_${trainingId}`)
+                if (savedJson) {
+                    const saved = JSON.parse(savedJson) as SavedWorkoutState
+                    setSavedSession(saved)
+                }
+            } catch (error) {
+                console.error('Failed to load saved session:', error)
+            } finally {
+                setIsCheckingSession(false)
+            }
+        }
 
-	// Check for saved session on mount
-	useEffect(() => {
-		const checkSavedSession = async () => {
-			if (!trainingId) {
-				setIsCheckingSession(false)
-				return
-			}
+        checkSavedSession()
+    }, [trainingId])
 
-			try {
-				const savedJson = await AsyncStorage.getItem(`training_session_${trainingId}`)
-				if (savedJson) {
-					const saved = JSON.parse(savedJson) as SavedWorkoutState
-					setSavedSession(saved)
-				}
-			} catch (error) {
-				console.error('Failed to load saved session:', error)
-			} finally {
-				setIsCheckingSession(false)
-			}
-		}
+    const handleStart = () => {
+        if (!training) return
 
-		checkSavedSession()
-	}, [trainingId])
+        if (savedSession) {
+            // Resume training from saved state
+            startTraining(training)
+            resumeTraining(savedSession)
+        } else {
+            // Start new training
+            startTraining(training)
+        }
 
-	const handleStart = () => {
-		if (!training) return
+        router.push({
+            pathname: '/(training)/session',
+            params: { trainingId },
+        })
+    }
 
-		if (savedSession) {
-			// Resume training from saved state
-			startTraining(training)
-			resumeTraining(savedSession)
-		} else {
-			// Start new training
-			startTraining(training)
-		}
+    const handleStartFresh = async () => {
+        if (!training || !trainingId) return
 
-		router.push({
-			pathname: '/(training)/session',
-			params: { trainingId },
-		})
-	}
+        // Clear saved session
+        await AsyncStorage.removeItem(`training_session_${trainingId}`)
+        setSavedSession(null)
 
-	const handleStartFresh = async () => {
-		if (!training || !trainingId) return
+        // Start new training
+        startTraining(training)
+        router.push({
+            pathname: '/(training)/session',
+            params: { trainingId },
+        })
+    }
 
-		// Clear saved session
-		await AsyncStorage.removeItem(`training_session_${trainingId}`)
-		setSavedSession(null)
+    const handleRefresh = async () => {
+        setIsRefreshing(true)
+        try {
+            const refreshToken = await SecureStore.getItemAsync('refresh_token')
+            if (!refreshToken) {
+                console.error('No refresh token found')
+                return
+            }
 
-		// Start new training
-		startTraining(training)
-		router.push({
-			pathname: '/(training)/session',
-			params: { trainingId },
-		})
-	}
+            const result = await authApi.refresh(refreshToken)
+            if (result.success) {
+                // Save new tokens
+                await SecureStore.setItemAsync('auth_token', result.data.access_token)
+                await SecureStore.setItemAsync('refresh_token', result.data.refresh_token)
+                console.log('Token refreshed successfully')
+            } else {
+                console.error('Failed to refresh token:', result.error)
+            }
+        } catch (error) {
+            console.error('Error refreshing token:', error)
+        } finally {
+            setIsRefreshing(false)
+        }
+    }
 
-	const handleRefresh = async () => {
-		setIsRefreshing(true)
-		try {
-			const refreshToken = await SecureStore.getItemAsync('refresh_token')
-			if (!refreshToken) {
-				console.error('No refresh token found')
-				return
-			}
+    if (isLoading || isCheckingSession || isAuthenticated === null) {
+        return (
+            <View className="bg-background-primary flex-1 items-center justify-center">
+                <ActivityIndicator size="large" color="#9333EA" />
+            </View>
+        )
+    }
 
-			const result = await authApi.refresh(refreshToken)
-			if (result.success) {
-				// Save new tokens
-				await SecureStore.setItemAsync('auth_token', result.data.access_token)
-				await SecureStore.setItemAsync('refresh_token', result.data.refresh_token)
-				console.log('Token refreshed successfully')
-			} else {
-				console.error('Failed to refresh token:', result.error)
-			}
-		} catch (error) {
-			console.error('Error refreshing token:', error)
-		} finally {
-			setIsRefreshing(false)
-		}
-	}
-
-	if (isLoading || isCheckingSession || isAuthenticated === null) {
-		return (
-			<View className="bg-background-primary flex-1 items-center justify-center">
-				<ActivityIndicator size="large" color="#9333EA" />
-			</View>
-		)
-	}
-
-  if (error || !training) {
-    const handleOpenDemo = () => {
-      const demo: Training = {
-			"id": 295,
-			"trainingType": "t7",
-			"title": "Интенсивное кардио",
-			"description": "Серьёзная нагрузка для опытных. Максимум пота — максимум результата.",
-			"difficulty": 2,
-			"experience": 60,
-			"inventory": [
+    if (error || !training) {
+        const handleOpenDemo = () => {
+            const demo: Training = {
+                'id': 295,
+                'trainingType': 't7',
+                'title': 'Интенсивное кардио',
+                'description': 'Серьёзная нагрузка для опытных. Максимум пота — максимум результата.',
+                'difficulty': 2,
+                'experience': 60,
+                'inventory': [
 			  1,
 			  2,
 			  3
-			],
-			"exercises": [
+                ],
+                'exercises': [
 			  {
-				"id": 0,
-					"side": "single",
-				"name": "Бёрпи",
-				"rest_time": 10,
-				"duration": 5,
-				"progress": 15,
-				"sets": 2,
-				"reps": 2,
-				"isAi": false,
-				"videoUrl": "https://media.istockphoto.com/id/1215790847/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D1%81%D0%BF%D0%BE%D1%80%D1%82%D1%81%D0%BC%D0%B5%D0%BD%D0%BA%D0%B0-%D0%B2%D1%8B%D1%81%D1%82%D1%83%D0%BF%D0%B0%D1%8F-burpees-%D0%B8-%D0%BF%D1%80%D0%B5%D1%81%D1%81-ups.mp4?s=mp4-640x640-is&k=20&c=GvRVrCP2Et2qv3v3NC7iArJhImaY2xEE3OKntdPvSFw=",
-					"isVertical": true,
-				},
+                        'id': 0,
+                        'side': 'single',
+                        'name': 'Бёрпи',
+                        'rest_time': 10,
+                        'duration': 5,
+                        'progress': 15,
+                        'sets': 2,
+                        'reps': 2,
+                        'isAi': false,
+                        'videoUrl': 'https://media.istockphoto.com/id/1215790847/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D1%81%D0%BF%D0%BE%D1%80%D1%82%D1%81%D0%BC%D0%B5%D0%BD%D0%BA%D0%B0-%D0%B2%D1%8B%D1%81%D1%82%D1%83%D0%BF%D0%B0%D1%8F-burpees-%D0%B8-%D0%BF%D1%80%D0%B5%D1%81%D1%81-ups.mp4?s=mp4-640x640-is&k=20&c=GvRVrCP2Et2qv3v3NC7iArJhImaY2xEE3OKntdPvSFw=',
+                        'isVertical': true,
+                    },
 
-
 			  {
-				"id": 1,
-					"side": "single",
-				"name": "Прыжки из приседа",
-				"rest_time": 40,
-				"duration": 5,
-				"progress": 15,
-				"sets": 2,
-				"reps": 2,
-				"isAi": false,
-				"videoUrl": "https://media.istockphoto.com/id/2184393997/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D0%BF%D0%BE%D0%B4%D1%82%D1%8F%D0%BD%D1%83%D1%82%D0%B0%D1%8F-%D0%B4%D0%B5%D0%B2%D1%83%D1%88%D0%BA%D0%B0-%D0%B4%D0%B5%D0%BB%D0%B0%D0%B5%D1%82-%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B0-%D0%BF%D1%80%D0%B8%D1%81%D0%B5%D0%B4%D0%B0%D0%BD%D0%B8%D1%8F%D1%85-%D1%81-%D0%B2%D1%8B%D1%81%D0%BE%D0%BA%D0%B8%D0%BC%D0%B8-%D0%BF%D1%80%D1%8B%D0%B6%D0%BA%D0%B0%D0%BC%D0%B8-%D0%B2-%D0%BD%D0%B5%D0%BE%D0%BD%D0%BE%D0%B2%D0%BE%D0%B9-%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%B5.mp4?s=mp4-640x640-is&k=20&c=7j3dgWV_DpEGrH9QH8rRF9i1U84b6D5NGinAG6Lalt0=",
-					"isVertical": true,
-				},
+                        'id': 1,
+                        'side': 'single',
+                        'name': 'Прыжки из приседа',
+                        'rest_time': 40,
+                        'duration': 5,
+                        'progress': 15,
+                        'sets': 2,
+                        'reps': 2,
+                        'isAi': false,
+                        'videoUrl': 'https://media.istockphoto.com/id/2184393997/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D0%BF%D0%BE%D0%B4%D1%82%D1%8F%D0%BD%D1%83%D1%82%D0%B0%D1%8F-%D0%B4%D0%B5%D0%B2%D1%83%D1%88%D0%BA%D0%B0-%D0%B4%D0%B5%D0%BB%D0%B0%D0%B5%D1%82-%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B0-%D0%BF%D1%80%D0%B8%D1%81%D0%B5%D0%B4%D0%B0%D0%BD%D0%B8%D1%8F%D1%85-%D1%81-%D0%B2%D1%8B%D1%81%D0%BE%D0%BA%D0%B8%D0%BC%D0%B8-%D0%BF%D1%80%D1%8B%D0%B6%D0%BA%D0%B0%D0%BC%D0%B8-%D0%B2-%D0%BD%D0%B5%D0%BE%D0%BD%D0%BE%D0%B2%D0%BE%D0%B9-%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%B5.mp4?s=mp4-640x640-is&k=20&c=7j3dgWV_DpEGrH9QH8rRF9i1U84b6D5NGinAG6Lalt0=',
+                        'isVertical': true,
+                    },
 			  {
-				"id": 2,
-					"side": "single",
-				"name": "Mountain climbers",
-				"rest_time": 10,
-				"duration": 5,
-				"progress": 15,
-				"sets": 2,
-				"reps": 3,
-				"isAi": false,
-				"videoUrl": "https://media.istockphoto.com/id/1168953490/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D0%BA%D1%80%D0%B0%D1%81%D0%B8%D0%B2%D0%B0%D1%8F-%D0%B8-%D0%BC%D0%BE%D0%BB%D0%BE%D0%B4%D0%B0%D1%8F-%D0%B4%D0%B5%D0%B2%D1%83%D1%88%D0%BA%D0%B0-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D1%83%D0%B5%D1%82-%D1%81%D0%BC%D0%B0%D1%80%D1%82%D1%84%D0%BE%D0%BD-%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B4%D0%BB%D1%8F-%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B8-%D1%82%D0%B0%D0%B9%D0%BC%D0%B5%D1%80-%D0%B4%D0%BB%D1%8F-%D0%B5%D0%B5.mp4?s=mp4-640x640-is&k=20&c=WnK2BGUMPiFkH_Psck7BFARdog0WVjVSIJ1cXeWQa24=",
-					"isVertical": false,
+                        'id': 2,
+                        'side': 'single',
+                        'name': 'Mountain climbers',
+                        'rest_time': 10,
+                        'duration': 5,
+                        'progress': 15,
+                        'sets': 2,
+                        'reps': 3,
+                        'isAi': false,
+                        'videoUrl': 'https://media.istockphoto.com/id/1168953490/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D0%BA%D1%80%D0%B0%D1%81%D0%B8%D0%B2%D0%B0%D1%8F-%D0%B8-%D0%BC%D0%BE%D0%BB%D0%BE%D0%B4%D0%B0%D1%8F-%D0%B4%D0%B5%D0%B2%D1%83%D1%88%D0%BA%D0%B0-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D1%83%D0%B5%D1%82-%D1%81%D0%BC%D0%B0%D1%80%D1%82%D1%84%D0%BE%D0%BD-%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B4%D0%BB%D1%8F-%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B8-%D1%82%D0%B0%D0%B9%D0%BC%D0%B5%D1%80-%D0%B4%D0%BB%D1%8F-%D0%B5%D0%B5.mp4?s=mp4-640x640-is&k=20&c=WnK2BGUMPiFkH_Psck7BFARdog0WVjVSIJ1cXeWQa24=',
+                        'isVertical': false,
 			  }
-			]
+                ]
 		  }
 
-      startTraining(demo)
-      router.push({ pathname: '/(training)/session', params: { trainingId: 1} })
-    }
+            startTraining(demo)
+            router.push({ pathname: '/(training)/session', params: { trainingId: 1 } })
+        }
 
-    return (
-      <View className="bg-background-primary flex-1 items-center justify-center px-4">
-        <Text className="text-h3-medium text-text-primary mb-2">Ошибка загрузки</Text>
-        <Text className="text-body-regular text-text-secondary mb-6 text-center">
+        return (
+            <View className="bg-background-primary flex-1 items-center justify-center px-4">
+                <Text className="text-h3-medium text-text-primary mb-2">Ошибка загрузки</Text>
+                <Text className="text-body-regular text-text-secondary mb-6 text-center">
           Не удалось загрузить данные тренировки
-        </Text>
-        <View className="w-full gap-3">
-          <Button onPress={() => refetch()} variant="primary" className="w-full">
+                </Text>
+                <View className="w-full gap-3">
+                    <Button onPress={() => refetch()} variant="primary" className="w-full">
             Повторить
-          </Button>
-          <Button onPress={() =>handleOpenDemo()} variant="secondary" className="w-full">
+                    </Button>
+                    <Button onPress={() =>handleOpenDemo()} variant="secondary" className="w-full">
             открыть демо-тренировку
-          </Button>
+                    </Button>
 		  			{/* Survey Button */}
 					  <Button
-					onPress={() => router.push('/survey')}
-					variant="secondary"
-					className="mb-3 w-full"
-				>
+                        onPress={() => router.push('/survey')}
+                        variant="secondary"
+                        className="mb-3 w-full"
+                    >
 					📋 Пройти опрос
-				</Button>
+                    </Button>
 
-				{/* Refresh Button */}
-          <Button 
-            onPress={handleRefresh} 
-            variant="secondary" 
-            className="w-full"
-            disabled={isRefreshing}
-          >
-            {isRefreshing ? 'Обновление...' : 'Refresh Token'}
-          </Button>
+                    {/* Refresh Button */}
+                    <Button 
+                        onPress={handleRefresh} 
+                        variant="secondary" 
+                        className="w-full"
+                        disabled={isRefreshing}
+                    >
+                        {isRefreshing ? 'Обновление...' : 'Refresh Token'}
+                    </Button>
 
-				{/* Training Buttons */}
-          <Button onPress={() => router.back()} variant="secondary" className="w-full">
+                    {/* Training Buttons */}
+                    <Button onPress={() => router.back()} variant="secondary" className="w-full">
             Назад
-          </Button>
-        </View>
-      </View>
+                    </Button>
+                </View>
+            </View>
+        )
+    }
+
+    // Calculate duration in minutes
+    const duration = Math.round(
+        training.exercises.reduce((sum, ex) => {
+            const exerciseTime = ex.duration || (ex.reps || 0) * 3 // Estimate 3 sec per rep
+            const restTotal = ex.restTime * (ex.sets - 1)
+            return sum + exerciseTime * ex.sets + restTotal
+        }, 0) / 60
     )
-	}
 
-	// Calculate duration in minutes
-	const duration = Math.round(
-		training.exercises.reduce((sum, ex) => {
-			const exerciseTime = ex.duration || (ex.reps || 0) * 3 // Estimate 3 sec per rep
-			const restTotal = ex.restTime * (ex.sets - 1)
-			return sum + exerciseTime * ex.sets + restTotal
-		}, 0) / 60
-	)
+    return (
+        <View className="bg-background-primary flex-1">
+            <ScrollView showsVerticalScrollIndicator={false}>
+                {/* Hero Header with Background Image */}
+                <View className="relative h-[280px]">
+                    {/* Background Image with Gradient Overlay */}
+                    <Image source={landingPhoto1} className="h-full w-full" resizeMode="cover" />
+                    <View className="to-background-primary absolute inset-0 bg-gradient-to-b from-transparent" />
 
-	return (
-		<View className="bg-background-primary flex-1">
-			<ScrollView showsVerticalScrollIndicator={false}>
-				{/* Hero Header with Background Image */}
-				<View className="relative h-[280px]">
-					{/* Background Image with Gradient Overlay */}
-					<Image source={landingPhoto1} className="h-full w-full" resizeMode="cover" />
-					<View className="to-background-primary absolute inset-0 bg-gradient-to-b from-transparent" />
+                    {/* Back Button */}
+                    <View className="absolute left-4 top-12">
+                        <BackButton onPress={() => router.back()} />
+                    </View>
 
-					{/* Back Button */}
-					<View className="absolute left-4 top-12">
-						<BackButton onPress={() => router.back()} />
-					</View>
+                    {/* Tags */}
+                    <View className="absolute bottom-6 left-4 flex-row gap-2">
+                        <InfoTag label={`${duration} мин`} icon="clock" />
+                        <InfoTag
+                            label={`${training.experiencePoints} опыта`}
+                            icon="star"
+                            variant="accent"
+                        />
+                    </View>
+                </View>
 
-					{/* Tags */}
-					<View className="absolute bottom-6 left-4 flex-row gap-2">
-						<InfoTag label={`${duration} мин`} icon="clock" />
-						<InfoTag
-							label={`${training.experiencePoints} опыта`}
-							icon="star"
-							variant="accent"
-						/>
-					</View>
-				</View>
+                <Container className="py-6">
+                    {/* Title */}
+                    <Text className="text-h2-medium text-text-primary mb-3">{training.title}</Text>
 
-				<Container className="py-6">
-					{/* Title */}
-					<Text className="text-h2-medium text-text-primary mb-3">{training.title}</Text>
+                    {/* Description */}
+                    <Text className="text-body-regular text-text-secondary mb-6">
+                        {training.description}
+                    </Text>
 
-					{/* Description */}
-					<Text className="text-body-regular text-text-secondary mb-6">
-						{training.description}
-					</Text>
-
-					{/* Tutorial Toggle */}
-					<View className="mb-6 flex-row items-center justify-between py-4">
-						<Text className="text-body-medium text-text-primary">
+                    {/* Tutorial Toggle */}
+                    <View className="mb-6 flex-row items-center justify-between py-4">
+                        <Text className="text-body-medium text-text-primary">
 							Обучение перед упражнениями
-						</Text>
-						<Switch
-							value={showTutorial}
-							onValueChange={setShowTutorial}
-							trackColor={{ false: '#374151', true: '#9333EA' }}
-							thumbColor="#FFFFFF"
-						/>
-					</View>
+                        </Text>
+                        <Switch
+                            value={showTutorial}
+                            onValueChange={setShowTutorial}
+                            trackColor={{ false: '#374151', true: '#9333EA' }}
+                            thumbColor="#FFFFFF"
+                        />
+                    </View>
 
-					{/* Inventory Section */}
-					{training.inventory.length > 0 && (
-						<View className="mb-6">
-							<Text className="text-body-medium text-text-primary mb-3">Инвентарь</Text>
-							<ScrollView
-								horizontal
-								showsHorizontalScrollIndicator={false}
-								className="flex-row gap-3"
-							>
-								{training.inventory.map((item) => (
-									<View
-										key={item.id}
-										className="bg-brand-dark-200 h-20 w-20 items-center justify-center rounded-2xl"
-									>
-										<View className="bg-brand-dark-300 h-12 w-12 rounded-lg" />
-										<Text className="text-caption-regular text-text-secondary mt-1 text-center">
-											{item.name}
-										</Text>
-									</View>
-								))}
-							</ScrollView>
-						</View>
-					)}
+                    {/* Inventory Section */}
+                    {training.inventory.length > 0 && (
+                        <View className="mb-6">
+                            <Text className="text-body-medium text-text-primary mb-3">Инвентарь</Text>
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                className="flex-row gap-3"
+                            >
+                                {training.inventory.map((item) => (
+                                    <View
+                                        key={item.id}
+                                        className="bg-brand-dark-200 h-20 w-20 items-center justify-center rounded-2xl"
+                                    >
+                                        <View className="bg-brand-dark-300 h-12 w-12 rounded-lg" />
+                                        <Text className="text-caption-regular text-text-secondary mt-1 text-center">
+                                            {item.name}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        </View>
+                    )}
 
-					{/* Exercises List */}
-					<View className="mb-6">
-						<Text className="text-body-medium text-text-primary mb-3">
-							{training.exercises.length} упражнений
-						</Text>
-						{training.exercises.map((exercise, index) => {
-							const isCompleted = savedSession?.completedExercises.includes(index)
+                    {/* Exercises List */}
+                    <View className="mb-6">
+                        <Text className="text-body-medium text-text-primary mb-3">
+                            {training.exercises.length} упражнений
+                        </Text>
+                        {training.exercises.map((exercise, index) => {
+                            const isCompleted = savedSession?.completedExercises.includes(index)
 
-							return (
-								<View
-									key={exercise.id}
-									className="border-brand-dark-300 mb-3 flex-row items-center gap-4 border-b pb-3"
-								>
-									{/* Thumbnail */}
-									<View className="bg-brand-dark-300 h-16 w-16 rounded-2xl" />
+                            return (
+                                <View
+                                    key={exercise.id}
+                                    className="border-brand-dark-300 mb-3 flex-row items-center gap-4 border-b pb-3"
+                                >
+                                    {/* Thumbnail */}
+                                    <View className="bg-brand-dark-300 h-16 w-16 rounded-2xl" />
 
-									{/* Exercise Info */}
-									<View className="flex-1">
-										<View className="mb-2 flex-row items-center gap-2">
-											<Text className="text-body-medium text-text-primary">
-												{exercise.name}
-											</Text>
-											{isCompleted && (
-												<Icon name="check-circle" size={16} color="#00CF1B" />
-											)}
-										</View>
-										<View className="flex-row gap-2">
-											<InfoTag label={`${exercise.sets} подхода`} variant="default" />
-											<InfoTag
-												label={`${exercise.reps || exercise.duration} ${exercise.reps ? 'повт.' : 'сек'}`}
-												variant="default"
-											/>
-											{exercise.type === 'ai' && (
-												<InfoTag label="AI-анализ" variant="accent" />
-											)}
-										</View>
-									</View>
-								</View>
-							)
-						})}
-					</View>
-				</Container>
-			</ScrollView>
+                                    {/* Exercise Info */}
+                                    <View className="flex-1">
+                                        <View className="mb-2 flex-row items-center gap-2">
+                                            <Text className="text-body-medium text-text-primary">
+                                                {exercise.name}
+                                            </Text>
+                                            {isCompleted && (
+                                                <Icon name="check-circle" size={16} color="#00CF1B" />
+                                            )}
+                                        </View>
+                                        <View className="flex-row gap-2">
+                                            <InfoTag label={`${exercise.sets} подхода`} variant="default" />
+                                            <InfoTag
+                                                label={`${exercise.reps || exercise.duration} ${exercise.reps ? 'повт.' : 'сек'}`}
+                                                variant="default"
+                                            />
+                                            {exercise.type === 'ai' && (
+                                                <InfoTag label="AI-анализ" variant="accent" />
+                                            )}
+                                        </View>
+                                    </View>
+                                </View>
+                            )
+                        })}
+                    </View>
+                </Container>
+            </ScrollView>
 
-			{/* Action Buttons */}
-			<View className="border-brand-dark-300 bg-background-primary border-t p-4">
-				{savedSession ? (
-					<>
-						<Button onPress={handleStart} variant="primary" className="mb-3 w-full">
-							{`Продолжить с «${training.exercises[savedSession.currentExerciseIndex]?.name || 'упражнения'}»`}
-						</Button>
-						<Button onPress={handleStartFresh} variant="secondary" className="w-full">
+            {/* Action Buttons */}
+            <View className="border-brand-dark-300 bg-background-primary border-t p-4">
+                {savedSession ? (
+                    <>
+                        <Button onPress={handleStart} variant="primary" className="mb-3 w-full">
+                            {`Продолжить с «${training.exercises[savedSession.currentExerciseIndex]?.name || 'упражнения'}»`}
+                        </Button>
+                        <Button onPress={handleStartFresh} variant="secondary" className="w-full">
 							Начать сначала
-						</Button>
-					</>
-				) : (
-					<Button onPress={handleStart} variant="primary" className="w-full mb-4">
+                        </Button>
+                    </>
+                ) : (
+                    <Button onPress={handleStart} variant="primary" className="w-full mb-4">
 						Начать
-					</Button>
-				)}
-			</View>
-		</View>
-	)
+                    </Button>
+                )}
+            </View>
+        </View>
+    )
 }

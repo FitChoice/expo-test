@@ -1,4 +1,4 @@
-export { CloseBtn } from './CloseBtn';
+export { CloseBtn } from './CloseBtn'
 export type {
-	CloseBtnProps
+    CloseBtnProps
 } from './types'

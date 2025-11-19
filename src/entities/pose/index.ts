@@ -9,9 +9,9 @@ export { PoseLandmarkIndex } from './model/types'
 
 // Analysis functions
 export {
-	isLandmarkValid,
-	calculateDistance,
-	calculateAngle,
-	validatePose,
-	logLandmarks,
+    isLandmarkValid,
+    calculateDistance,
+    calculateAngle,
+    validatePose,
+    logLandmarks,
 } from './lib/analyzer'

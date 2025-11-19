@@ -15,55 +15,49 @@ interface ContainerProps extends ViewProps {
 }
 
 export const Container = ({ children, className, ...props }: ContainerProps) => {
-	const [isLandscape, setIsLandscape] = useState(false)
+    const [isLandscape, setIsLandscape] = useState(false)
 
-	useEffect(() => {
-		const checkOrientation = async () => {
-			try {
-				const orientation = await ScreenOrientation.getOrientationAsync()
-				const landscape =
+    useEffect(() => {
+        const checkOrientation = async () => {
+            try {
+                const orientation = await ScreenOrientation.getOrientationAsync()
+                const landscape =
 					orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
 					orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
-				setIsLandscape(landscape)
-			} catch (err) {
-				console.warn('Error reading orientation:', err)
-			}
-		}
+                setIsLandscape(landscape)
+            } catch (err) {
+                console.warn('Error reading orientation:', err)
+            }
+        }
 
-		checkOrientation()
+        checkOrientation()
 
-		const subscription = ScreenOrientation.addOrientationChangeListener(async () => {
-			await checkOrientation()
-		})
+        const subscription = ScreenOrientation.addOrientationChangeListener(async () => {
+            await checkOrientation()
+        })
 
-		return () => {
-			ScreenOrientation.removeOrientationChangeListener(subscription)
-		}
-	}, [])
+        return () => {
+            ScreenOrientation.removeOrientationChangeListener(subscription)
+        }
+    }, [])
 
-	const edges: readonly ('top' | 'bottom' | 'left' | 'right')[] = isLandscape
-		? (['top', 'bottom', 'left', 'right'] as const)
-		: (['top', 'bottom'] as const)
+    const edges: readonly ('top' | 'bottom' | 'left' | 'right')[] = isLandscape
+        ? (['top', 'bottom', 'left', 'right'] as const)
+        : (['top', 'bottom'] as const)
 
-	return (
-		<SafeAreaView className="flex-1" edges={edges} style={styles.safeArea}>
-			{/* Blur фон для safe area */}
-			<BlurView
-				intensity={10}
-				tint="light"
-				style={StyleSheet.absoluteFill}
-				experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
-				blurReductionFactor={Platform.OS === 'android' ? 4 : undefined}
-			/>
-			<View className={`flex-1 ${className || ''}`} {...props}>
-				{children}
-			</View>
-		</SafeAreaView>
-	)
+    return (
+        <SafeAreaView className="flex-1" edges={edges} style={styles.safeArea}>
+            {/* Blur фон для safe area */}
+
+            <View className={`flex-1 ${className || ''}`} {...props}>
+                {children}
+            </View>
+        </SafeAreaView>
+    )
 }
 
 const styles = StyleSheet.create({
-	safeArea: {
-		backgroundColor: 'transparent',
-	},
+    safeArea: {
+        backgroundColor: 'transparent',
+    },
 })

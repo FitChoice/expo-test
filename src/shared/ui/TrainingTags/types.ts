@@ -1,5 +1,5 @@
-import { ReactNode } from 'react'
-import { ViewProps } from 'react-native'
+import { type ReactNode } from 'react'
+import { type ViewProps } from 'react-native'
 
 export interface TrainingTagsProps extends ViewProps {
 	/** Иконка для первого тега (опционально) */
@@ -11,4 +11,3 @@ export interface TrainingTagsProps extends ViewProps {
 	/** Текст для второго тега */
 	title2: string
 }
-

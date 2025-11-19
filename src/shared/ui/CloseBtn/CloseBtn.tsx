@@ -1,10 +1,10 @@
 import { Button, Icon } from '@/shared/ui'
-import { CloseBtnProps } from '@/shared/ui/CloseBtn/types'
+import { type CloseBtnProps } from '@/shared/ui/CloseBtn/types'
 
 export const CloseBtn = ({
-	handlePress, classNames
+    handlePress, classNames
 												 }: CloseBtnProps) => {
-	return 	<Button variant="ghost" onPress={handlePress} className={classNames}>
-		<Icon name="close" size={24} color="#FFFFFF" />
-	</Button>
+    return 	<Button variant="ghost" onPress={handlePress} className={classNames}>
+        <Icon name="close" size={24} color="#FFFFFF" />
+    </Button>
 }

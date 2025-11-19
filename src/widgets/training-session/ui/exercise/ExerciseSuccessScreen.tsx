@@ -6,7 +6,7 @@
 import { View, Text } from 'react-native'
 import React, {  useState } from 'react'
 import {
-	ExerciseWithCounterWrapper
+    ExerciseWithCounterWrapper
 } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 import { Button } from '@/shared/ui'
 import { sharedStyles } from '@/pages/survey/ui/components/shared-styles'
@@ -18,56 +18,49 @@ interface ExerciseSuccessScreenProps {
 }
 
 const motivationalMessages = [
-	'Так держать!',
-	'Вы отлично справились!',
-	'Прекрасно!',
-	'Молодец!',
-	'Великолепно!',
-	'Продолжай!',
+    'Так держать!',
+    'Вы отлично справились!',
+    'Прекрасно!',
+    'Молодец!',
+    'Великолепно!',
+    'Продолжай!',
 ]
 
 export function ExerciseSuccessScreen({
-	onComplete,
+    onComplete,
 
 }: ExerciseSuccessScreenProps) {
 
+    const reportTraining = useTrainingStore((state) => state.reportTraining)
 
+    const [displayMessage] = useState(
+        () =>
 
-	const reportTraining = useTrainingStore((state) => state.reportTraining)
+            motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)]
+    )
 
+    const handleGoToReportPage = () => {
+        reportTraining()
+    }
 
-	const [displayMessage] = useState(
-		() =>
+    return (
+        <ExerciseWithCounterWrapper
+            onComplete={onComplete}
+        >
 
-			motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)]
-	)
+            <View className="flex-1 items-center justify-between padding-4 pt-20 pb-5  gap-10">
 
+                <View className="flex items-start gap-10">
 
+                    <Text style={sharedStyles.titleCenter}>{displayMessage }</Text>
 
-	const handleGoToReportPage = () => {
-		reportTraining()
-	}
+                    <Text className="text-h2 text-light-text-200" >Давайте посмотрим отчёт</Text>
 
-	return (
-		<ExerciseWithCounterWrapper
-			onComplete={onComplete}
-		>
+                </View>
 
-			<View className="flex-1 items-center justify-between padding-4 pt-20 pb-5  gap-10">
+                <Button  variant="primary" onPress={handleGoToReportPage} className="w-full" >Далее</Button>
+            </View>
 
-				<View className="flex items-start gap-10">
-
-					<Text style={sharedStyles.titleCenter}>{displayMessage }</Text>
-
-					<Text className="text-h2 text-light-text-200" >Давайте посмотрим отчёт</Text>
-
-				</View>
-
-
-
-				<Button  variant="primary" onPress={handleGoToReportPage} className="w-full" >Далее</Button>
-			</View>
-
-		</ExerciseWithCounterWrapper>
-	)
+        </ExerciseWithCounterWrapper>
+    )
 }

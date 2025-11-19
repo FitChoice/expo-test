@@ -15,25 +15,25 @@ interface StatCardProps {
 }
 
 export function StatCard({ icon, value, label, size = 'medium' }: StatCardProps) {
-	const sizeStyles = {
-		small: 'p-3',
-		medium: 'p-4',
-		large: 'p-6',
-	}
+    const sizeStyles = {
+        small: 'p-3',
+        medium: 'p-4',
+        large: 'p-6',
+    }
 
-	const valueStyles = {
-		small: 'text-h3-medium',
-		medium: 'text-h2-medium',
-		large: 'text-h1-medium',
-	}
+    const valueStyles = {
+        small: 'text-h3-medium',
+        medium: 'text-h2-medium',
+        large: 'text-h1-medium',
+    }
 
-	return (
-		<View className={`bg-brand-dark-300 rounded-2xl ${sizeStyles[size]}`}>
-			<View className="mb-2 flex-row items-center gap-2">
-				<Icon name={icon} size={20} color="#C5F680" />
-				<Text className="text-caption-regular text-text-secondary">{label}</Text>
-			</View>
-			<Text className={`${valueStyles[size]} text-text-primary`}>{value}</Text>
-		</View>
-	)
+    return (
+        <View className={`bg-brand-dark-300 rounded-2xl ${sizeStyles[size]}`}>
+            <View className="mb-2 flex-row items-center gap-2">
+                <Icon name={icon} size={20} color="#C5F680" />
+                <Text className="text-caption-regular text-text-secondary">{label}</Text>
+            </View>
+            <Text className={`${valueStyles[size]} text-text-primary`}>{value}</Text>
+        </View>
+    )
 }

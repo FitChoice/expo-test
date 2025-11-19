@@ -8,4 +8,3 @@ export interface SwitchProps {
 	/** Дополнительные классы */
 	className?: string
 }
-

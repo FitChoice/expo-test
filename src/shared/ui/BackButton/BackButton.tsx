@@ -10,35 +10,35 @@ import type { BackButtonProps } from './types'
  * Supports both absolute (floating) and relative (in-flow) positioning
  */
 export const BackButton: React.FC<BackButtonProps> = ({
-	onPress,
-	color = '#FFFFFF',
-	style,
-	variant = 'translucent',
-	position = 'absolute',
+    onPress,
+    color = '#FFFFFF',
+    style,
+    variant = 'translucent',
+    position = 'absolute',
 }) => {
-	const insets = useSafeAreaInsets()
+    const insets = useSafeAreaInsets()
 
-	const backgroundClass =
+    const backgroundClass =
 		variant === 'translucent' ? 'bg-[rgba(244,244,244,0.2)]' : 'bg-transparent'
 
-	const positionClass = position === 'absolute' ? 'absolute left-2' : 'relative'
+    const positionClass = position === 'absolute' ? 'absolute left-2' : 'relative'
 
-	// For absolute positioning, use top offset from safe area
-	// For relative positioning, use marginTop to maintain spacing
-	const spacingStyle =
+    // For absolute positioning, use top offset from safe area
+    // For relative positioning, use marginTop to maintain spacing
+    const spacingStyle =
 		position === 'absolute' ? { top: insets.top + 14 } : { marginTop: insets.top + 14 }
 
-	return (
-		<TouchableOpacity
-			className={`z-10 h-12 w-12 items-center justify-center rounded-2xl ${backgroundClass} ${positionClass}`}
-			style={[spacingStyle, style]}
-			onPress={onPress}
-			activeOpacity={0.8}
-			accessibilityRole="button"
-			accessibilityLabel="Go back"
-			accessibilityHint="Navigate to the previous screen"
-		>
-			<Icon name="chevron-left" size={24} color={color} />
-		</TouchableOpacity>
-	)
+    return (
+        <TouchableOpacity
+            className={`z-10 h-12 w-12 items-center justify-center rounded-2xl ${backgroundClass} ${positionClass}`}
+            style={[spacingStyle, style]}
+            onPress={onPress}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            accessibilityHint="Navigate to the previous screen"
+        >
+            <Icon name="chevron-left" size={24} color={color} />
+        </TouchableOpacity>
+    )
 }

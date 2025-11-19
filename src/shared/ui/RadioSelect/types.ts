@@ -1,4 +1,4 @@
-import { SelectOption } from '@/shared/types'
+import { type SelectOption } from '@/shared/types'
 
 // Варианты размера RadioSelect
 export type RadioSelectSize = 'full' | 'half' | 'small'

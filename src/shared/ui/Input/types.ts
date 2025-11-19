@@ -1,6 +1,6 @@
-import { ReactNode } from 'react'
-import { TextInputProps, ViewStyle, ImageSourcePropType } from 'react-native'
-import { IconName } from '../Icon/types'
+import { type ReactNode } from 'react'
+import { type TextInputProps, type ViewStyle, type ImageSourcePropType } from 'react-native'
+import { type IconName } from '../Icon/types'
 
 // Типы: text, password, dropdown, textarea
 export type InputVariant = 'text' | 'password' | 'dropdown' | 'textarea'

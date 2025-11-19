@@ -4,22 +4,13 @@
  * Показывает обратный отсчет с возможностью пропустить
  */
 
-import { View, Text, useWindowDimensions } from 'react-native'
-import { useState, useEffect } from 'react'
+import { View, Text } from 'react-native'
 import { Button } from '@/shared/ui'
-import { LargeNumberDisplay } from '@/shared/ui/LargeNumberDisplay'
 import {
-	ExerciseWithCounterWrapper
+    ExerciseWithCounterWrapper
 } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
-import { CameraView } from 'expo-camera'
-import { VIDEO_SCREEN_HEIGHT as height } from '@/shared/constants/sizes'
-import Svg, { Circle } from 'react-native-svg'
-import BodySilhouetteRightSide from '@/assets/images/silhouette_side_right.svg'
-import BodySilhouetteLeftSide from '@/assets/images/silhouette_side_left.svg'
-import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
-import { LinearGradient } from 'expo-linear-gradient'
 import {
-	CountdownDisplay
+    CountdownDisplay
 } from '@/widgets/training-session/ui/exercise/ExerciseExampleCountdownScreen'
 
 interface RestScreenProps {
@@ -29,28 +20,28 @@ interface RestScreenProps {
 
 export function RestScreen({ onComplete, duration }: RestScreenProps) {
 
-	const handleSkip = () => {
-		onComplete()
-	}
+    const handleSkip = () => {
+        onComplete()
+    }
 
-	return (
-		<ExerciseWithCounterWrapper
-			onComplete={onComplete}
-			countdownInitial={duration}
-			isShowActionButtons={false}
-		>
+    return (
+        <ExerciseWithCounterWrapper
+            onComplete={onComplete}
+            countdownInitial={duration}
+            isShowActionButtons={false}
+        >
 
-				<View className="flex-1 items-center justify-center padding-4 pt-5 pb-5  gap-10">
+            <View className="flex-1 items-center justify-center padding-4 pt-5 pb-5  gap-10">
 
-							<View className="mt-6 items-center">
-								<Text className="text-h1 text-brand-purple-500">Отдых</Text>
-							</View>
+                <View className="mt-6 items-center">
+                    <Text className="text-h1 text-brand-purple-500">Отдых</Text>
+                </View>
 
-					<CountdownDisplay />
+                <CountdownDisplay />
 
-					<Button variant="primary" onPress={handleSkip} >Пропустить</Button>
-				</View>
+                <Button variant="primary" onPress={handleSkip} >Пропустить</Button>
+            </View>
 
-		</ExerciseWithCounterWrapper>
-	)
+        </ExerciseWithCounterWrapper>
+    )
 }

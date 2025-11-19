@@ -6,31 +6,31 @@ const windowWidth = Dimensions.get('window').width
 const windowHeight = Dimensions.get('window').height
 
 export const PoseCamera = () => {
-	const handleLandmarks = (event: unknown) => {
-		if (Array.isArray(event)) {
-			// Cast landmarks to PoseLandmark type
-			const landmarks = event as PoseLandmark[]
+    const handleLandmarks = (event: unknown) => {
+        if (Array.isArray(event)) {
+            // Cast landmarks to PoseLandmark type
+            const landmarks = event as PoseLandmark[]
 
-			// Use the analyzer function from entities
-			logLandmarks(landmarks)
-		}
-	}
+            // Use the analyzer function from entities
+            logLandmarks(landmarks)
+        }
+    }
 
-	return (
-		<View style={styles.container}>
-			<RNMediapipe
-				width={windowWidth}
-				height={windowHeight}
-				onLandmark={handleLandmarks}
-				face={false}
-			/>
-		</View>
-	)
+    return (
+        <View style={styles.container}>
+            <RNMediapipe
+                width={windowWidth}
+                height={windowHeight}
+                onLandmark={handleLandmarks}
+                face={false}
+            />
+        </View>
+    )
 }
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: 'black',
-	},
+    container: {
+        flex: 1,
+        backgroundColor: 'black',
+    },
 })

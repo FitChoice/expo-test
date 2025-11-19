@@ -1,4 +1,4 @@
-import { SelectOption } from '@/shared/types'
+import { type SelectOption } from '@/shared/types'
 
 // Варианты размера CheckboxSelect
 export type CheckboxSelectSize = 'full' | 'half'

@@ -18,51 +18,51 @@ interface RadioSelectOptionProps {
  * Компонент отдельной опции RadioSelect с анимированным blur-эффектом
  */
 export const RadioSelectOption: React.FC<RadioSelectOptionProps> = ({
-	option,
-	isSelected,
-	disabled,
-	onPress,
-																																			isNeedCheckbox
+    option,
+    isSelected,
+    disabled,
+    onPress,
+    isNeedCheckbox
 }) => {
-	return (
-		<GlowButton
-			isSelected={isSelected}
-			onPress={onPress}
-			disabled={disabled}
-			style={styles.optionContainer}
-			contentStyle={styles.contentContainer}
-			isNeedCheckbox={isNeedCheckbox}
-		>
-			{/* Иконка если есть */}
-			{option.icon && <View style={styles.iconContainer}>{option.icon}</View>}
+    return (
+        <GlowButton
+            isSelected={isSelected}
+            onPress={onPress}
+            disabled={disabled}
+            style={styles.optionContainer}
+            contentStyle={styles.contentContainer}
+            isNeedCheckbox={isNeedCheckbox}
+        >
+            {/* Иконка если есть */}
+            {option.icon && <View style={styles.iconContainer}>{option.icon}</View>}
 
-			{/* Текст */}
-			<Text style={[styles.optionText, { color: disabled ? '#C1C1C1' : '#FFFFFF' }]}>
-				{option.label}
-			</Text>
-		</GlowButton>
-	)
+            {/* Текст */}
+            <Text style={[styles.optionText, { color: disabled ? '#C1C1C1' : '#FFFFFF' }]}>
+                {option.label}
+            </Text>
+        </GlowButton>
+    )
 }
 
 const styles = StyleSheet.create({
-	optionContainer: {
-		paddingHorizontal: 20,
-		paddingVertical: 18,
-		minHeight: 56,
-	},
-	contentContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 8,
-		//justifyContent: 'center',
-	},
-	iconContainer: {
-		marginRight: 8,
-	},
-	optionText: {
-		fontFamily: 'Onest',
-		fontWeight: '500',
-		fontSize: 14,
-		lineHeight: 16.8,
-	},
+    optionContainer: {
+        paddingHorizontal: 20,
+        paddingVertical: 18,
+        minHeight: 56,
+    },
+    contentContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        //justifyContent: 'center',
+    },
+    iconContainer: {
+        marginRight: 8,
+    },
+    optionText: {
+        fontFamily: 'Onest',
+        fontWeight: '500',
+        fontSize: 14,
+        lineHeight: 16.8,
+    },
 })

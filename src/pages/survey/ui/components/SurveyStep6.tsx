@@ -13,61 +13,59 @@ interface SurveyStep6Props {
  * Шаг 6: Отображение результата ИМТ
  */
 export const SurveyStep6: React.FC<SurveyStep6Props> = ({ bmiCategory }) => {
-	const { width: screenWidth, height: screenHeight } = useWindowDimensions()
+    const { width: screenWidth, height: screenHeight } = useWindowDimensions()
 
+    if (!bmiCategory) {
+        return <Text style={sharedStyles.title}>Ошибка расчета ИМТ</Text>
+    }
 
-	if (!bmiCategory) {
-		return <Text style={sharedStyles.title}>Ошибка расчета ИМТ</Text>
-	}
-
-
-	return (
-		<View  >
-			<View className="px-4">
-			<Text style={sharedStyles.title}>ваша отправная точка</Text>	
-			</View>
+    return (
+        <View  >
+            <View className="px-4">
+                <Text style={sharedStyles.title}>ваша отправная точка</Text>	
+            </View>
 			
-			<View className="flex-row items-baseline gap-2 px-4">
-				<Text className="text-white">
+            <View className="flex-row items-baseline gap-2 px-4">
+                <Text className="text-white">
 					Индекс Массы Тела -
-				</Text>
-				<Text style={sharedStyles.title}>
-					{bmiCategory.bmi}
-				</Text>
-			</View>
-			<View className="px-4">
-			<Text className="font-inter text-left text-base font-normal leading-[19.2px] text-white">
-				{bmiCategory.description}
-			</Text>
-			</View>
+                </Text>
+                <Text style={sharedStyles.title}>
+                    {bmiCategory.bmi}
+                </Text>
+            </View>
+            <View className="px-4">
+                <Text className="font-inter text-left text-base font-normal leading-[19.2px] text-white">
+                    {bmiCategory.description}
+                </Text>
+            </View>
 		
-		<View className="h-[50%] w-full relative "  >
-		<View className="absolute left-20 right-0 -top-20 " >
-			<RNImage source={GymnastImage} className="w-full "  />
+            <View className="h-[50%] w-full relative "  >
+                <View className="absolute left-20 right-0 -top-20 " >
+                    <RNImage source={GymnastImage} className="w-full "  />
 
-		{/* Слой 2: Текст перед изображением (только в области маски) */}
-		<View className="absolute overflow-visible" style={{ left: screenWidth * -0.42 + 280,
-			top: screenHeight * 0.05 + 300, 
-			width: screenWidth * 4, 
-			height: screenHeight * 0.5 }}  >
-		<CircularText
-				text="fit choice fit choice fit choice fit choice fit choice fit choice fit choice fit choice fit choice fit choice"
-				width={screenWidth * 0.45}
-				height={screenHeight * 0.2}
-				centerX={screenWidth * 0.25}
-				centerY={screenHeight * 0.001}
-				fontSize={screenWidth * 0.039}
-				fill="#FFFFFF"
-				startOffset="0%"
-				fontWeight="300"
-				letterSpacing="-3%"
-				rotation={-17.05}
-				debug={false}
-			/>
-			</View>
-			</View>
-			</View>
+                    {/* Слой 2: Текст перед изображением (только в области маски) */}
+                    <View className="absolute overflow-visible" style={{ left: screenWidth * -0.42 + 280,
+                        top: screenHeight * 0.05 + 300, 
+                        width: screenWidth * 4, 
+                        height: screenHeight * 0.5 }}  >
+                        <CircularText
+                            text="fit choice fit choice fit choice fit choice fit choice fit choice fit choice fit choice fit choice fit choice"
+                            width={screenWidth * 0.45}
+                            height={screenHeight * 0.2}
+                            centerX={screenWidth * 0.25}
+                            centerY={screenHeight * 0.001}
+                            fontSize={screenWidth * 0.039}
+                            fill="#FFFFFF"
+                            startOffset="0%"
+                            fontWeight="300"
+                            letterSpacing="-3%"
+                            rotation={-17.05}
+                            debug={false}
+                        />
+                    </View>
+                </View>
+            </View>
 
-		</View>
-	)
+        </View>
+    )
 }

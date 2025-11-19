@@ -4,7 +4,7 @@
  */
 
 import { TouchableOpacity, View, type TouchableOpacityProps } from 'react-native'
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 
 export interface ControlButtonProps extends Omit<TouchableOpacityProps, 'children'> {
 	/** Элемент иконки (например, из AntDesign, Entypo и т.д.) */
@@ -14,22 +14,21 @@ export interface ControlButtonProps extends Omit<TouchableOpacityProps, 'childre
 }
 
 export function ControlButton({
-	icon,
-	size = 48,
-	onPress,
-	className = '',
-	...props
+    icon,
+    size = 48,
+    onPress,
+    className = '',
+    ...props
 }: ControlButtonProps) {
-	return (
-		<TouchableOpacity
-			onPress={onPress}
-			className={`items-center justify-center bg-light-text-200 rounded-2xl ${className}`}
-			style={{ width: size, height: size }}
-			activeOpacity={0.7}
-			{...props}
-		>
-			<View>{icon}</View>
-		</TouchableOpacity>
-	)
+    return (
+        <TouchableOpacity
+            onPress={onPress}
+            className={`items-center justify-center bg-light-text-200 rounded-2xl ${className}`}
+            style={{ width: size, height: size }}
+            activeOpacity={0.7}
+            {...props}
+        >
+            <View>{icon}</View>
+        </TouchableOpacity>
+    )
 }
-

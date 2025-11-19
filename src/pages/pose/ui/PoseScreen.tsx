@@ -6,9 +6,9 @@ import { PoseCamera } from '@/widgets/pose-camera'
  * Can be used for dedicated pose detection route
  */
 export const PoseScreen = () => {
-	return (
-		<View className="flex flex-1">
-			<PoseCamera />
-		</View>
-	)
+    return (
+        <View className="flex flex-1">
+            <PoseCamera />
+        </View>
+    )
 }

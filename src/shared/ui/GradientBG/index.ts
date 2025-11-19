@@ -1,2 +1,2 @@
-export {GradientBg} from './GradientBg'
-export {GreenGradient} from './GreenGradient'
+export { GradientBg } from './GradientBg'
+export { GreenGradient } from './GreenGradient'

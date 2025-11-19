@@ -5,22 +5,19 @@ export type ExerciseSide = 'left' | 'right' | 'both'
 export type WorkoutCategory = 'strength' | 'cardio' | 'flexibility' | 'mobility'
 export type TrainingStatus = 'idle' | 'info'| 'onboarding' | 'running' | 'finished'| 'report' | 'analytics'
 
-
 export const equipment = {
-	1: '/src/assets/images/equipment/1.png',
-	2: '/src/assets/images/equipment/2.png',
-	3: '/src/assets/images/equipment/3.png',
-	4: '/src/assets/images/equipment/4.png',
-	5: '/src/assets/images/equipment/5.png',
-	6: '/src/assets/images/equipment/6.png',
-	7: '/src/assets/images/equipment/7.png',
-	8: '/src/assets/images/equipment/8.png',
-	9: '/src/assets/images/equipment/9.png',
-	10: '/src/assets/images/equipment/10.png',
-	11: '/src/assets/images/equipment/11.png',
+    1: '/src/assets/images/equipment/1.png',
+    2: '/src/assets/images/equipment/2.png',
+    3: '/src/assets/images/equipment/3.png',
+    4: '/src/assets/images/equipment/4.png',
+    5: '/src/assets/images/equipment/5.png',
+    6: '/src/assets/images/equipment/6.png',
+    7: '/src/assets/images/equipment/7.png',
+    8: '/src/assets/images/equipment/8.png',
+    9: '/src/assets/images/equipment/9.png',
+    10: '/src/assets/images/equipment/10.png',
+    11: '/src/assets/images/equipment/11.png',
 }
-
-
 
 export interface Activity {
 	duration: number;
@@ -39,7 +36,6 @@ export interface ActivitiesResponseItem {
   }
   
 export type ActivitiesResponse = ActivitiesResponseItem[];
-
 
 export interface Exercise {
 	id: number;
@@ -65,8 +61,6 @@ export interface Training {
 	inventory: number[];
 	exercises: Exercise[];
 }
-  
-
 
 export interface Report {
 
@@ -76,7 +70,6 @@ export interface Report {
 		report_technique_quality: number
 	  
 }
-
 
 /**
  * Прогресс выполнения упражнения

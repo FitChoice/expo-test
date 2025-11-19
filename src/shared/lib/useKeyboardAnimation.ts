@@ -58,77 +58,77 @@ interface UseKeyboardAnimationReturn {
  * ```
  */
 export const useKeyboardAnimation = (
-	config: UseKeyboardAnimationConfig = {}
+    config: UseKeyboardAnimationConfig = {}
 ): UseKeyboardAnimationReturn => {
-	const { offsetMultiplier = 0.3, animateOpacity = false, duration = 250 } = config
+    const { offsetMultiplier = 0.3, animateOpacity = false, duration = 250 } = config
 
-	const translateY = useMemo(() => new Animated.Value(0), [])
-	const opacity = useMemo(() => new Animated.Value(1), [])
+    const translateY = useMemo(() => new Animated.Value(0), [])
+    const opacity = useMemo(() => new Animated.Value(1), [])
 
-	useEffect(() => {
-		// Используем разные события для iOS и Android
-		const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow'
-		const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
+    useEffect(() => {
+        // Используем разные события для iOS и Android
+        const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow'
+        const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
 
-		const keyboardShowListener = Keyboard.addListener(showEvent, (e) => {
-			const animationDuration = Platform.OS === 'ios' ? e.duration || duration : duration
+        const keyboardShowListener = Keyboard.addListener(showEvent, (e) => {
+            const animationDuration = Platform.OS === 'ios' ? e.duration || duration : duration
 
-			const animations = [
-				// Анимация поднятия элементов
-				Animated.timing(translateY, {
-					toValue: -e.endCoordinates.height * offsetMultiplier,
-					duration: animationDuration,
-					useNativeDriver: true,
-				}),
-			]
+            const animations = [
+                // Анимация поднятия элементов
+                Animated.timing(translateY, {
+                    toValue: -e.endCoordinates.height * offsetMultiplier,
+                    duration: animationDuration,
+                    useNativeDriver: true,
+                }),
+            ]
 
-			// Добавляем анимацию затемнения если включена
-			if (animateOpacity) {
-				animations.push(
-					Animated.timing(opacity, {
-						toValue: 0.1,
-						duration: animationDuration,
-						useNativeDriver: true,
-					})
-				)
-			}
+            // Добавляем анимацию затемнения если включена
+            if (animateOpacity) {
+                animations.push(
+                    Animated.timing(opacity, {
+                        toValue: 0.1,
+                        duration: animationDuration,
+                        useNativeDriver: true,
+                    })
+                )
+            }
 
-			// Запускаем все анимации параллельно
-			Animated.parallel(animations).start()
-		})
+            // Запускаем все анимации параллельно
+            Animated.parallel(animations).start()
+        })
 
-		const keyboardHideListener = Keyboard.addListener(hideEvent, (e) => {
-			const animationDuration = Platform.OS === 'ios' ? e.duration || duration : duration
+        const keyboardHideListener = Keyboard.addListener(hideEvent, (e) => {
+            const animationDuration = Platform.OS === 'ios' ? e.duration || duration : duration
 
-			const animations = [
-				// Анимация возврата элементов
-				Animated.timing(translateY, {
-					toValue: 0,
-					duration: animationDuration,
-					useNativeDriver: true,
-				}),
-			]
+            const animations = [
+                // Анимация возврата элементов
+                Animated.timing(translateY, {
+                    toValue: 0,
+                    duration: animationDuration,
+                    useNativeDriver: true,
+                }),
+            ]
 
-			// Добавляем анимацию возврата прозрачности если включена
-			if (animateOpacity) {
-				animations.push(
-					Animated.timing(opacity, {
-						toValue: 1,
-						duration: animationDuration,
-						useNativeDriver: true,
-					})
-				)
-			}
+            // Добавляем анимацию возврата прозрачности если включена
+            if (animateOpacity) {
+                animations.push(
+                    Animated.timing(opacity, {
+                        toValue: 1,
+                        duration: animationDuration,
+                        useNativeDriver: true,
+                    })
+                )
+            }
 
-			// Запускаем все анимации параллельно
-			Animated.parallel(animations).start()
-		})
+            // Запускаем все анимации параллельно
+            Animated.parallel(animations).start()
+        })
 
-		return () => {
-			keyboardShowListener.remove()
-			keyboardHideListener.remove()
-		}
-	}, [translateY, opacity, offsetMultiplier, animateOpacity, duration])
+        return () => {
+            keyboardShowListener.remove()
+            keyboardHideListener.remove()
+        }
+    }, [translateY, opacity, offsetMultiplier, animateOpacity, duration])
 
-	return { translateY, opacity }
+    return { translateY, opacity }
 }

@@ -5,9 +5,9 @@ import { SurveyScreen } from '@/pages/survey'
  * Survey page route (protected)
  */
 export default function SurveyPage() {
-	return (
-		<AuthGuard>
-			<SurveyScreen />
-		</AuthGuard>
-	)
+    return (
+        <AuthGuard>
+            <SurveyScreen />
+        </AuthGuard>
+    )
 }

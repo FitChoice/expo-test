@@ -12,19 +12,19 @@ interface SurveyStep1Props {
  * Шаг 1: Ввод имени пользователя
  */
 export const SurveyStep1: React.FC<SurveyStep1Props> = ({ name, onNameChange }) => {
-	return (
-		<>
-			<Text style={sharedStyles.title}>Как к вам обращаться?</Text>
-			<View className="bg-transparent">
-				<Input
-					label=""
-					placeholder="Ваше имя"
-					value={name}
-					onChangeText={onNameChange}
-					variant="text"
-					size="default"
-				/>
-			</View>
-		</>
-	)
+    return (
+        <>
+            <Text style={sharedStyles.title}>Как к вам обращаться?</Text>
+            <View className="bg-transparent">
+                <Input
+                    label=""
+                    placeholder="Ваше имя"
+                    value={name}
+                    onChangeText={onNameChange}
+                    variant="text"
+                    size="default"
+                />
+            </View>
+        </>
+    )
 }

@@ -7,7 +7,7 @@
  * @returns A unique string ID
  */
 export const generateId = (): string => {
-	return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 }
 
 /**
@@ -16,7 +16,7 @@ export const generateId = (): string => {
  * @returns Promise that resolves after the delay
  */
 export const delay = (ms: number): Promise<void> => {
-	return new Promise((resolve) => setTimeout(resolve, ms))
+    return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 /**
@@ -27,7 +27,7 @@ export const delay = (ms: number): Promise<void> => {
  * @returns Clamped value
  */
 export const clamp = (value: number, min: number, max: number): number => {
-	return Math.min(Math.max(value, min), max)
+    return Math.min(Math.max(value, min), max)
 }
 
 /**
@@ -37,5 +37,5 @@ export const clamp = (value: number, min: number, max: number): number => {
  * @returns Formatted number string
  */
 export const formatNumber = (value: number, decimals: number = 2): string => {
-	return value.toFixed(decimals)
+    return value.toFixed(decimals)
 }

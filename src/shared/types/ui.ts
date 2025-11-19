@@ -2,7 +2,7 @@
  * Shared UI types used across different layers
  */
 
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 
 /**
  * Generic select option type
