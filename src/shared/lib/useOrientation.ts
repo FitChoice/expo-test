@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Platform } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 
 /**
@@ -12,12 +13,23 @@ export const useOrientation = (
     unlockOnUnmount: boolean = true
 ) => {
     useEffect(() => {
-        ScreenOrientation.lockAsync(lockType)
+        // Пропускаем блокировку ориентации на вебе
+        if (Platform.OS === 'web') {
+            return undefined
+        }
+
+        ScreenOrientation.lockAsync(lockType).catch((err) => {
+            console.warn('Failed to lock orientation:', err)
+        })
 
         // Возвращаем ориентацию при размонтировании компонента
         if (unlockOnUnmount) {
             return () => {
-                ScreenOrientation.unlockAsync()
+                if (Platform.OS !== 'web') {
+                    ScreenOrientation.unlockAsync().catch((err) => {
+                        console.warn('Failed to unlock orientation:', err)
+                    })
+                }
             }
         }
         return undefined
@@ -25,12 +37,24 @@ export const useOrientation = (
 
     return {
         lockOrientation: (type: ScreenOrientation.OrientationLock) => {
-            ScreenOrientation.lockAsync(type)
+            if (Platform.OS !== 'web') {
+                ScreenOrientation.lockAsync(type).catch((err) => {
+                    console.warn('Failed to lock orientation:', err)
+                })
+            }
         },
         unlockOrientation: () => {
-            ScreenOrientation.unlockAsync()
+            if (Platform.OS !== 'web') {
+                ScreenOrientation.unlockAsync().catch((err) => {
+                    console.warn('Failed to unlock orientation:', err)
+                })
+            }
         },
         getOrientation: async () => {
+            if (Platform.OS === 'web') {
+                // Возвращаем portrait по умолчанию для веба
+                return ScreenOrientation.Orientation.PORTRAIT_UP
+            }
             return await ScreenOrientation.getOrientationAsync()
         },
     }

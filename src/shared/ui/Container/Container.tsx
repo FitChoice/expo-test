@@ -18,6 +18,11 @@ export const Container = ({ children, className, ...props }: ContainerProps) => 
     const [isLandscape, setIsLandscape] = useState(false)
 
     useEffect(() => {
+        // Пропускаем проверку ориентации на вебе
+        if (Platform.OS === 'web') {
+            return undefined
+        }
+
         const checkOrientation = async () => {
             try {
                 const orientation = await ScreenOrientation.getOrientationAsync()

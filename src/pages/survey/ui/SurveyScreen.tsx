@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { View, Animated } from 'react-native'
+import { View, Animated, Platform } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
-import * as Notifications from 'expo-notifications'
 import { Button, BackButton, BackgroundLayout, BackgroundLayoutNoSidePadding, Icon } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation, getUserId } from '@/shared/lib'
 import { useRouter } from 'expo-router'
@@ -167,8 +166,11 @@ export const SurveyScreen = () => {
     }
 
     const handleEnableNotifications = async () => {
-        if (!hasRequested) {
+        if (!hasRequested && Platform.OS !== 'web') {
             try {
+                // Динамический импорт expo-notifications только для нативных платформ
+                const Notifications = await import('expo-notifications')
+                
                 const { status: existingStatus } = await Notifications.getPermissionsAsync()
                 let finalStatus = existingStatus
 

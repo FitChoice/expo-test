@@ -7,11 +7,16 @@
     "output": "static"
   },
   "expo": {
-    "orientation": "portrait"
+    "orientation": "portrait",
+    "extra": {
+      "eas": {
+        "projectId": "b1d8755a-5582-47bc-ac32-b2e0717a41c7"
+      }
+    },
+    "owner": "azamat687"
   },
   "plugins": [
     "expo-router",
-
     "expo-screen-orientation",
     [
       "expo-build-properties",

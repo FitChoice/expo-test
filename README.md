@@ -2,6 +2,8 @@
 
 Мобильное приложение для фитнес-тренировок с анализом позы на базе **Expo + React Native**.
 
+**🌐 Веб-версия:** https://fitchoice--d42hz8qkh8.expo.app
+
 ## 📦 Быстрый старт
 
 ```bash
@@ -227,19 +229,65 @@ make ios        # iOS
 
 ---
 
-## 🚀 Сборка
+## 🚀 Деплой и сборка
 
-### Web Deploy
+### Web Deploy (EAS Hosting) 🌐
+
+**Текущий деплой:** https://fitchoice--d42hz8qkh8.expo.app
+
+**Быстрый деплой (одна команда):**
 
 ```bash
-pnpm run deploy  # export + EAS deploy
+# Полный деплой (экспорт + загрузка)
+pnpm run deploy
+
+# Для production
+npx eas-cli deploy --prod
 ```
+
+**Пошаговая инструкция для первого деплоя:**
+
+```bash
+# 1. Залогиниться в EAS (если еще не залогинены)
+npx eas-cli whoami
+
+# Если не залогинены:
+npx eas-cli login
+# Email: azamat687
+# Password: (спросите у команды)
+
+# 2. Инициализировать EAS проект (только первый раз)
+npx eas-cli project:init
+
+# 3. Экспортировать веб-билд
+npx expo export --platform web
+
+# 4. Задеплоить на EAS Hosting
+npx eas-cli deploy
+
+# 5. При первом деплое выбрать preview subdomain (например: fitchoice)
+```
+
+**После деплоя получите 2 ссылки:**
+- **Preview URL:** `https://fitchoice--[hash].expo.app` (для команды)
+- **Production URL:** `https://fitchoice.expo.app` (после `eas deploy --prod`)
+
+**Dashboard:** https://expo.dev/projects/b1d8755a-5582-47bc-ac32-b2e0717a41c7/hosting/deployments
+
+---
 
 ### Native Builds
 
 ```bash
-pnpm exec eas-cli build --platform ios
-pnpm exec eas-cli build --platform android
+# Android APK (preview)
+pnpm run build:preview:android
+
+# iOS build (preview)
+pnpm run build:preview:ios
+
+# Production builds
+npx eas-cli build --platform ios --profile production
+npx eas-cli build --platform android --profile production
 ```
 
 ---
@@ -340,16 +388,40 @@ import { Button, Input, RadioSelect, Icon } from '@/shared/ui'
 
 - ✅ **iOS**: `com.yzned.Fitchoice`
 - ✅ **Android**: `com.yzned.Fitchoice`
-- ✅ **Web**: static export
+- ✅ **Web**: https://fitchoice--d42hz8qkh8.expo.app (EAS Hosting)
 
 ### Permissions
 
 **iOS**: Camera (pose detection)  
 **Android**: CAMERA, READ/WRITE_EXTERNAL_STORAGE, RECORD_AUDIO
 
+### Веб-платформа: Ограничения
+
+На веб-версии **недоступны** следующие функции:
+- ❌ Pose detection (MediaPipe) — требует нативную камеру
+- ❌ Push уведомления — используется fallback
+- ⚠️ Secure storage → использует `localStorage` (менее безопасно)
+
+**Что работает на вебе:**
+- ✅ Аутентификация (auth, register, verification)
+- ✅ Survey flow (14 шагов опроса)
+- ✅ Home screen и навигация
+- ✅ API запросы
+- ✅ Все UI компоненты
+
+**Реализация веб-совместимости:**
+- Условные импорты для `expo-notifications` и `@react-native-masked-view`
+- Platform checks для нативных API
+- Fallback UI для недоступных функций
+
 ---
 
 ## 📝 TODO
+
+### Выполнено ✅
+
+- ✅ **Web Deploy**: Настроен EAS Hosting (https://fitchoice--d42hz8qkh8.expo.app)
+- ✅ **Веб-совместимость**: Добавлены условные импорты для нативных модулей
 
 ### Высокий приоритет
 
@@ -365,13 +437,15 @@ import { Button, Input, RadioSelect, Icon } from '@/shared/ui'
 
 - **ErrorBoundary**: Интегрировать Sentry для отслеживания ошибок
 - **Testing**: Добавить unit/integration/e2e тесты
+- **Production Deploy**: Настроить автоматический деплой через EAS Workflows
 
 ---
 
 ## 📄 Документация
 
-- `swagger.yaml` — OpenAPI спецификация backend API
-- `refactor.md` — история архитектурных изменений
+- **`DEPLOYMENT.md`** — полная инструкция по деплою веб-версии
+- **`swagger.yaml`** — OpenAPI спецификация backend API
+- **`refactor.md`** — история архитектурных изменений
 
 ---
 

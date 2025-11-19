@@ -1,9 +1,14 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, Platform } from 'react-native'
 import { BlurView } from 'expo-blur'
 import { LinearGradient } from 'expo-linear-gradient'
-import MaskedView from '@react-native-masked-view/masked-view'
 import { sharedStyles } from './shared-styles'
+
+// Условный импорт MaskedView только для нативных платформ
+let MaskedView: any = View
+if (Platform.OS !== 'web') {
+    MaskedView = require('@react-native-masked-view/masked-view').default
+}
 
 /**
  * Шаг 13: Предложение включить уведомления
@@ -70,17 +75,19 @@ export const SurveyStep13: React.FC = () => {
             <View className="absolute bottom-0 left-0 right-0">
                 <MaskedView
                     style={{ height: 180 }}
-                    maskElement={
-                        <View style={{ flex: 1 }}>
-                            <LinearGradient
-                                colors={['transparent', 'white', 'white', 'transparent']}
-                                locations={[0, 0.1, 0.9, 1]}
-                                start={{ x: 0, y: 0.5 }}
-                                end={{ x: 1, y: 0.5 }}
-                                style={{ flex: 1 }}
-                            />
-                        </View>
-                    }
+                    {...(Platform.OS !== 'web' && {
+                        maskElement: (
+                            <View style={{ flex: 1 }}>
+                                <LinearGradient
+                                    colors={['transparent', 'white', 'white', 'transparent']}
+                                    locations={[0, 0.1, 0.9, 1]}
+                                    start={{ x: 0, y: 0.5 }}
+                                    end={{ x: 1, y: 0.5 }}
+                                    style={{ flex: 1 }}
+                                />
+                            </View>
+                        )
+                    })}
                 >
                     <View style={{ flex: 1 }}>
                         <BlurView intensity={40} tint="dark" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
