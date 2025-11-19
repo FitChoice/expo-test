@@ -11,6 +11,7 @@ import {
 	Platform,
 	StyleProp,
 	ViewStyle,
+	Dimensions,
 } from 'react-native';
 import { Accelerometer } from 'expo-sensors';
 import { useState, useEffect, useRef } from 'react';
@@ -35,9 +36,10 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
 	// Анимация поворота — остаётся в Animated (натив)
 	const barRotation = useRef(new Animated.Value(0)).current;
 
+
 	// Цвет — уходим от Animated.Value, используем состояние
 	const [barStyle, setBarStyle] = useState<StyleProp<ViewStyle>>({
-		width: 200,
+		width: isVertical ? 170 : 450,
 		height: 4,
 		backgroundColor: '#FFFFFF',
 		borderRadius: 2,
@@ -99,11 +101,11 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
 				setIsCalibrated(isAligned);
 			  
 				setBarStyle({
-				  width: 200,
-				  height: 4,
-				  backgroundColor: isAligned ? '#C5F680' : '#FFFFFF',
-				  borderRadius: 2,
-				});
+					width: isVertical ? 170 : 450,
+					height: 4,
+					borderRadius: 2,
+					backgroundColor: isAligned ? '#C5F680' : '#FFFFFF',
+				}) 
 			  });
 				  
 			} catch (error) {
@@ -127,72 +129,94 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
 	};
 
 	return (
-		<View className="bg-background-primary flex-1  ">
+		<View className="bg-background-primary flex-1 items-center">
 
 			{/* Gradient Background */}
 			<GradientBg  />
 			{/* Close Button */}
-			<View className="absolute right-4 top-12 z-10">
+			<View className={`absolute  ${isVertical ? 'top-12 right-5' : 'top-5 right-16'} z-10`}>
 				<CloseBtn handlePress={handleStop} classNames={"h-12 w-12 rounded-2xl"} />
 			</View>
 
 			{/* Progress Dots */}
-			<View className="absolute left-1/2 -translate-x-1/2 top-20 z-10">
+			<View   className={`absolute left-1/2 -translate-x-1/2 ${isVertical ? 'top-20' : 'top-5'} z-10`}>
 				<DotsProgress total={4} current={3} variant="onboarding" />
 			</View>
 			{/* Content */}
-			<View className="flex-1 items-center justify-center px-6">
+			<View className="flex-1 items-center justify-center pt-20 w-full">
 				{/* Gyroscope Visualizer */}
-				<View className="w-full items-center justify-center">
-			<Animated.View
-				style={[
-					{
-						transform: [
+				<View className="flex-row items-center justify-center w-full px-6 ">
+					{/* Left side bar */}
+					<View 
+						style={{
+							width: 80,
+							height: 4,
+							backgroundColor: (barStyle as ViewStyle)?.backgroundColor || '#6e6e6e',
+							borderRadius: 2,
+						}}
+					/>
+					
+					{/* Main animated bar */}
+					<Animated.View
+						style={[
 							{
-								rotate: barRotation.interpolate({
-									inputRange: [-45, 0, 45], // отклонения влево и вправо
-									outputRange: ['-45deg', '0deg', '45deg'],
-								}),
+								transform: [
+									{
+										rotate: barRotation.interpolate({
+											inputRange: [-45, 0, 45], // отклонения влево и вправо
+											outputRange: ['-45deg', '0deg', '45deg'],
+										}),
+									},
+								],
 							},
-						],
-					},
-					barStyle,
-				]}
-			/>
+							barStyle,
+						]}
+					/>
+					
+					{/* Right side bar */}
+					<View 
+						style={{
+							width: 80,
+							height: 4,
+							backgroundColor: (barStyle as ViewStyle)?.backgroundColor || '#6e6e6e',
+							borderRadius: 2,
+						}}
+					/>
 				</View>
+			
 
-			{/* Угол или fallback для веба */}
-			{isAvailable === false && Platform.OS === 'web' ? (
-				<Text className="text-body-regular text-text-secondary mt-4 mb-12 text-center">
-					Датчик акселерометра недоступен в веб. Нажмите «Далее», чтобы продолжить.
-				</Text>
-			) : (
-				<Text className={`text-h1 mt-4 mb-12 text-center ${isAvailable !== false && !isCalibrated ? 'text-light-text-100' : 'text-brand-green-500'}`}>
+		
+
+				<Text className={`text-h1 text-center ${isAvailable !== false && !isCalibrated ? 'text-light-text-100' : 'text-brand-green-500'} ${isVertical ? 'mt-4 mb-12' : ''}`}>
 					{ isVertical ? angle : angle - 90 }°
 				</Text>
-			)}
+		
 			</View>
 
 			{/* Text and Button Section */}
-			<View className="px-6 pb-6">
+			<View className={`px-6 pb-6 ${isVertical ? 'w-full' : 'justify-center items-center w-1/2'}`}>
 				{/* Title */}
 				<Text className="text-h2 font-bold text-light-text-100 mb-3 text-left">
 					Проверьте уровень
 				</Text>
 
 				{/* Description */}
-				<Text className="text-t2 text-light-text-500 text-left leading-6 mb-20">
+				<Text className={`text-t2 text-light-text-500 text-left leading-6 ${isVertical ? 'mb-20' : 'mb-10'}`}>
 					Поставьте телефон так, чтобы он стоял ровно и градус наклона был равен 0</Text>
 
 				{/* Button */}
-				<Button
-					variant="primary"
-					onPress={onNext}
-					disabled={isAvailable !== false && !isCalibrated}
-					className="w-full"
+
+					<Button
+				variant="primary"
+				onPress={onNext}
+				disabled={isAvailable !== false && !isCalibrated}
+				className={isVertical ? "w-full" : "w-1/2"}
 				>
-					Далее
+				Далее
 				</Button>
+
+			
+			
 			</View>
 
 		</View>

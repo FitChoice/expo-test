@@ -140,26 +140,11 @@ export const TrainingInfo = () => {
 									<Text className="text-t1.1 text-white mb-4">
 									3 упражнения
 									</Text>
-                <ExerciseInfoCard
-  name="Дыхательное упражнение"
-  sets="3 подхода"
-  reps="10 повторений"
-  isAi={true}
-/>
 
-<ExerciseInfoCard
-  name="Дыхательное упражнение"
-  sets="3 подхода"
-  reps="10 повторений"
+									{training?.exercises.map((exercise) => (
+                <ExerciseInfoCard exercise={exercise}/>))}
 
-/>
 
-<ExerciseInfoCard
-  name="Дыхательное упражнение"
-  sets="3 подхода"
-  reps="10 повторений"
-  isAi={true}
-/>
                 </View>
 			</ScrollView>
 

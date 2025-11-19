@@ -5,13 +5,13 @@
  */
 
 import { useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { SoundCheckScreen } from './onboarding/SoundCheckScreen'
 import { CameraPermissionScreen } from './onboarding/CameraPermissionScreen'
 import { PhonePositionScreen } from './onboarding/PhonePositionScreen'
 import { GyroscopeLevelScreen } from './onboarding/GyroscopeLevelScreen'
 import { RotatePhoneScreen } from './onboarding/RotatePhoneScreen'
 import { useTrainingStore } from '@/entities/training'
+import { View } from 'react-native'
 
 type OnboardingStep = 'sound' | 'camera' | 'position' | 'gyroscope' | 'rotate'
 
@@ -50,12 +50,12 @@ export function OnboardingFlow() {
 	}
 
 	return (
-		<SafeAreaView className="flex-1 bg-black" edges={['bottom']}>
+		<View className="flex-1">
 			{currentStep === 'sound' && <SoundCheckScreen onNext={handleNextStep} />}
 			{currentStep === 'camera' && <CameraPermissionScreen onNext={handleNextStep} />}
 			{currentStep === 'rotate' && <RotatePhoneScreen onNext={handleNextStep} />}
 			{currentStep === 'position' && <PhonePositionScreen onNext={handleNextStep} />}
 			{currentStep === 'gyroscope' && <GyroscopeLevelScreen onNext={handleNextStep}  isVertical={firstExercise?.isVertical ?? false} />}
-		</SafeAreaView>
+		</View>
 	)
 }
