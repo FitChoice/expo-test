@@ -5,7 +5,7 @@
  */
 
 import { View, Text, useWindowDimensions } from 'react-native'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useIsFocused } from '@react-navigation/native'
 import {  StepProgress } from '@/shared/ui'
 import { type Exercise } from '@/entities/training'
@@ -14,6 +14,7 @@ import { CountdownDisplay } from './ExerciseExampleCountdownScreen'
 import { useVideoPlayer } from 'expo-video'
 import { CameraView } from 'expo-camera'
 import { VIDEO_SCREEN_HEIGHT as verticalCameraViewHeight } from '@/shared/constants/sizes'
+import { Audio } from 'expo-av'
 
 interface TimerExerciseScreenProps {
 	isVertical?: boolean
@@ -27,6 +28,9 @@ function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exer
     const [stepProgressHeight, setStepProgressHeight] = useState(0)
     const videoPlayerContext = useVideoPlayerContext()
     const isFocused = useIsFocused()
+    const soundRef = useRef<Audio.Sound | null>(null)
+
+    const beepSound = require('@/assets/sounds/beep.mp3')
 
     useEffect(() => {
         // Обновляем cameraKey при монтировании компонента для гарантированной инициализации камеры
@@ -39,12 +43,46 @@ function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exer
     }, [exercise.id])
 
     useEffect(() => {
+        // Инициализация звука
+        const loadSound = async () => {
+            try {
+                await Audio.setAudioModeAsync({
+                    playsInSilentModeIOS: true,
+                    staysActiveInBackground: false,
+                })
+                // Создаем простой beep звук
+                const { sound } = await Audio.Sound.createAsync(
+                    beepSound,
+                    { shouldPlay: false, volume: 0.5 }
+                )
+                soundRef.current = sound
+            } catch (error) {
+                console.log('Error loading sound:', error)
+            }
+        }
+        loadSound()
+
+        return () => {
+            if (soundRef.current) {
+                soundRef.current.unloadAsync()
+            }
+        }
+    }, [])
+
+    useEffect(() => {
         const interval = setInterval(() => {
             setLocalCurrentSet((prev) => {
                 if (prev >= exercise.sets) {
                     return prev
                 }
-                return prev + 1
+                const newValue = prev + 1
+                // Воспроизводим звук при увеличении счетчика
+                if (newValue > 0 && soundRef.current) {
+                    soundRef.current.replayAsync().catch((error) => {
+                        console.log('Error playing sound:', error)
+                    })
+                }
+                return newValue
             })
         }, 2000)
 
@@ -63,7 +101,7 @@ function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exer
   
     const { height: windowHeight } = useWindowDimensions()
 
-	const height = isVertical ? verticalCameraViewHeight : windowHeight
+    const height = isVertical ? verticalCameraViewHeight : windowHeight
 
     return (
         <View className="flex-1">

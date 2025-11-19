@@ -16,6 +16,7 @@ import { useTrainingStore } from '@/entities/training'
 import {
     TimerExerciseScreen
 } from '@/widgets/training-session/ui/exercise/TimerExerciseScreen'
+import { ExerciseExampleCountdownScreen } from './exercise/ExerciseExampleCountdownScreen'
 
 type ExerciseStep =
 	| 'countdown'
@@ -251,20 +252,13 @@ export function ExerciseFlow() {
                 onComplete={handleRotateComplete}
             />
         )}
-        {currentStep === 'countdown' && (
-				
-            <TimerExerciseScreen
-                isVertical={isVertical}
-			   onComplete={handleExecutionComplete}
-			   exercise={currentExercise}
-		   />
-        // <ExerciseExampleCountdownScreen
-        // isVertical={isVertical}
-        //     exercise={currentExercise}
-        //     currentSet={currentSet}
-        //     onComplete={handleCountdownComplete}
+        {currentStep === 'countdown' && ( <ExerciseExampleCountdownScreen
+        isVertical={isVertical}
+            exercise={currentExercise}
+            currentSet={currentSet}
+            onComplete={handleCountdownComplete}
 			
-        // />
+        />
         )}
         {currentStep === 'position' && (
             <BodyPositionScreen
