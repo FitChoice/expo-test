@@ -23,7 +23,7 @@ export function SoundCheckScreen({ onNext }: SoundCheckScreenProps) {
     }, [])
 
     return (
-        <View className="flex-1 bg-black">
+        <View className="flex-1 bg-black pb-10">
             {/* Gradient Background */}
             <GradientBg />
 

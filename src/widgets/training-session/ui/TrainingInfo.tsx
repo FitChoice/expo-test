@@ -145,7 +145,7 @@ export const TrainingInfo = () => {
         </ScrollView>
 
         {/* Start Button - Fixed at Bottom */}
-        <View className="absolute bottom-0 left-0 right-0 px-6 bg-background-primary">
+        <View className="absolute bottom-12 left-0 right-0 px-6 bg-background-primary">
             <Button
                 variant="primary"
                 fullWidth

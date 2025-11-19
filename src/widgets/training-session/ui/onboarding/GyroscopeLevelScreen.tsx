@@ -188,7 +188,7 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
             </View>
 
             {/* Text and Button Section */}
-            <View className={`px-6 pb-6 ${isVertical ? 'w-full' : 'justify-center items-center w-1/2'}`}>
+            <View className={`px-6 pb-10 ${isVertical ? 'w-full' : 'justify-center items-center w-1/2'}`}>
                 {/* Title */}
                 <Text className="text-h2 font-bold text-light-text-100 mb-3 text-left">
 					Проверьте уровень

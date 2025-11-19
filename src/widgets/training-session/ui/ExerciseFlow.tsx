@@ -7,7 +7,6 @@
 import { useState, useEffect } from 'react'
 import { View } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
-import { ExerciseExampleCountdownScreen } from './exercise/ExerciseExampleCountdownScreen'
 import { BodyPositionScreen } from './exercise/BodyPositionScreen'
 import { ExerciseSuccessScreen } from './exercise/ExerciseSuccessScreen'
 import { RestScreen } from './exercise/RestScreen'
@@ -17,7 +16,6 @@ import { useTrainingStore } from '@/entities/training'
 import {
     TimerExerciseScreen
 } from '@/widgets/training-session/ui/exercise/TimerExerciseScreen'
-import { Container } from '@/shared/ui'
 
 type ExerciseStep =
 	| 'countdown'
@@ -247,72 +245,77 @@ export function ExerciseFlow() {
     const nextExerciseData = training.exercises[currentExerciseIndex + 1]
 
     return (<View className="flex-1">
-            {currentStep === 'rotate' && (
-                <RotateScreen
-                    isVertical={isVertical ?? false}
-                    onComplete={handleRotateComplete}
-                />
-            )}
-            {currentStep === 'countdown' && (
+        {currentStep === 'rotate' && (
+            <RotateScreen
+                isVertical={isVertical ?? false}
+                onComplete={handleRotateComplete}
+            />
+        )}
+        {currentStep === 'countdown' && (
 				
-                <ExerciseExampleCountdownScreen
-				isVertical={isVertical}
-                    exercise={currentExercise}
-                    currentSet={currentSet}
-                    onComplete={handleCountdownComplete}
+            <TimerExerciseScreen
+                isVertical={isVertical}
+			   onComplete={handleExecutionComplete}
+			   exercise={currentExercise}
+		   />
+        // <ExerciseExampleCountdownScreen
+        // isVertical={isVertical}
+        //     exercise={currentExercise}
+        //     currentSet={currentSet}
+        //     onComplete={handleCountdownComplete}
 			
-                />
-            )}
-            {currentStep === 'position' && (
-                <BodyPositionScreen
-                    isVertical={isVertical}
-                    //side={hasSides ? currentSideState : undefined}
-                    key="position-check"
-                    onComplete={handlePositionComplete}
-                />
-            )}
-            {/*{currentStep === 'execution' && currentExercise.isAi && (*/}
-            {/*	<AIExerciseScreen*/}
-            {/*		onComplete={handleExecutionComplete}*/}
+        // />
+        )}
+        {currentStep === 'position' && (
+            <BodyPositionScreen
+                isVertical={isVertical}
+                //side={hasSides ? currentSideState : undefined}
+                key="position-check"
+                onComplete={handlePositionComplete}
+            />
+        )}
+        {/*{currentStep === 'execution' && currentExercise.isAi && (*/}
+        {/*	<AIExerciseScreen*/}
+        {/*		onComplete={handleExecutionComplete}*/}
 
-            {/*	/>*/}
-            {/*)}*/}
-            {currentStep === 'execution' &&  (
-                <TimerExerciseScreen
+        {/*	/>*/}
+        {/*)}*/}
+        {currentStep === 'execution' &&  (
+            <TimerExerciseScreen
 				     isVertical={isVertical}
-                    onComplete={handleExecutionComplete}
-                    exercise={currentExercise}
-                />
-            )}
-            {currentStep === 'success' && (
-                <ExerciseSuccessScreen onComplete={handleSuccessComplete} />
-            )}
-            {currentStep === 'side_switch' && (
-                <BodyPositionScreen
-                    key="side-switch"
-                    onComplete={handleSideSwitchComplete}
-                    title={'Смена рабочей стороны'}
+                onComplete={handleExecutionComplete}
+                exercise={currentExercise}
+            />
+        )}
+        {currentStep === 'success' && (
+            <ExerciseSuccessScreen onComplete={handleSuccessComplete} />
+        )}
+        {currentStep === 'side_switch' && (
+            <BodyPositionScreen
+                key="side-switch"
+                onComplete={handleSideSwitchComplete}
+                title={'Смена рабочей стороны'}
 			  side={hasSides ? currentSideState : undefined}
-                />
+            />
 
-            // <SideSwitchScreen
-            // 	nextSide={currentSideState === null ? 'left' : 'right'}
-            // 	onComplete={handleSideSwitchComplete}
-            // />
-            )}
-            {currentStep === 'rest' && 
+        // <SideSwitchScreen
+        // 	nextSide={currentSideState === null ? 'left' : 'right'}
+        // 	onComplete={handleSideSwitchComplete}
+        // />
+        )}
+        {currentStep === 'rest' && 
 			<RestScreen 
 			    onComplete={handleRestComplete} 
 			    duration={restType === 'rep' ? 10 : restType === 'set' ? 15 : currentExercise.rest_time} 
 			/>}
 
-            {currentStep === 'transition' && nextExerciseData && (
-                <ExerciseTransitionScreen
-                    nextExercise={nextExerciseData}
-                    onComplete={handleTransitionComplete}
-                />
-            )}
+        {currentStep === 'transition' && nextExerciseData && (
+            <ExerciseTransitionScreen
+                nextExercise={nextExerciseData}
+                onComplete={handleTransitionComplete}
+            />
+        )}
 
-        </View>
+    </View>
     )
 }

@@ -13,6 +13,7 @@ import { ExerciseWithCounterWrapper, useVideoPlayerContext } from '@/shared/ui/E
 import { CountdownDisplay } from './ExerciseExampleCountdownScreen'
 import { useVideoPlayer } from 'expo-video'
 import { CameraView } from 'expo-camera'
+import { VIDEO_SCREEN_HEIGHT as verticalCameraViewHeight } from '@/shared/constants/sizes'
 
 interface TimerExerciseScreenProps {
 	isVertical?: boolean
@@ -23,6 +24,7 @@ interface TimerExerciseScreenProps {
 function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exercise, player: ReturnType<typeof useVideoPlayer>, isVertical?: boolean }) {
     const [localCurrentSet, setLocalCurrentSet] = useState(0)
     const [cameraKey, setCameraKey] = useState(0)
+    const [stepProgressHeight, setStepProgressHeight] = useState(0)
     const videoPlayerContext = useVideoPlayerContext()
     const isFocused = useIsFocused()
 
@@ -58,9 +60,10 @@ function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exer
         }
         return undefined
     }, [player, videoPlayerContext])
+  
+    const { height: windowHeight } = useWindowDimensions()
 
-    const height = 500
-    const { width } = useWindowDimensions()
+	const height = isVertical ? verticalCameraViewHeight : windowHeight
 
     return (
         <View className="flex-1">
@@ -70,11 +73,11 @@ function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exer
                 {isFocused ? (
                     <CameraView 
                         key={`camera-${cameraKey}`}
-                        style={{ height, width, position: 'absolute', top: 0, left: 0 }} 
+                        style={{ height, width: '100%', position: 'absolute', top: 0, left: 0 }}
                         facing="front" 
                     />
                 ) : (
-                    <View style={{ height, width, position: 'absolute', top: 0, left: 0, backgroundColor: 'black' }} />
+                    <View style={{ height, width: '100%', position: 'absolute', top: 0, left: 0, backgroundColor: 'black' }} />
                 )}
 				
                 {/* Video Preview Window - Bottom Right Corner - Foreground Layer */}
@@ -113,38 +116,123 @@ function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exer
             </View>
 
             {/* Step Progress */}
-            <View className="w-full px-4 py-4">
-                <StepProgress current={0} total={5} />
+            {isVertical ? (
+                <View  
+                    className="justify-center items-center pt-10"
+                >
+                    <View 
+                        onLayout={(e) => setStepProgressHeight(e.nativeEvent.layout.height)}
+                    >
+                        <StepProgress current={0} total={5} />
+                    </View>
+                </View>
+            ) : (
+                <View className="w-full px-4 py-4">
+                    <StepProgress current={0} total={5} />
+                </View>
+            )}
+
+            { !isVertical && 
+            <View className="absolute top-5 left-0 right-0 justify-center items-center ">
+                <StepProgress current={0} total={5} isVertical={isVertical} />
+                <Text className="text-t1 text-light-text-200 text-center">{exercise.name}</Text>
             </View>
+            }
 
             {/* Exercise Info */}
             <View className="absolute bottom-0 left-0 right-0 p-6">
                 {/* Exercise Name */}
-                <Text className="text-t1 text-light-text-200 text-center">{exercise.name}</Text>
+                {/* Exercise Name */}
+                { isVertical ? <Text className="text-t1 text-light-text-200 text-center">{exercise.name}</Text> : <></>}
 
-                {/* Countdown */}
-                <CountdownDisplay />
+                {isVertical ? <>
+                    {/* Countdown */}
+                    <CountdownDisplay />
 
-                {/* Set Info */}
-                <View className="flex-row px-1 justify-center ">
-                    <View className="flex-1 basis-0 items-center  ">
-                        <Text className={`text-[64px] leading-[72px] ${
-                            localCurrentSet === 0 
-                                ? 'text-light-text-200' 
-                                : localCurrentSet === exercise.sets 
-                                    ? 'text-brand-green-500' 
-                                    : 'text-light-text-200'
-                        }`}>
-                            {localCurrentSet}
-                            <Text className={`text-[32px] leading-[36px] ${
-                                localCurrentSet === exercise.sets 
-                                    ? 'text-brand-green-500' 
-                                    : 'color-[#949494]'
-                            }`}> / {exercise.sets}</Text>
-                        </Text>
-                        <Text className="text-t2 color-[#949494] mb-1">повторения</Text>
+                    {/* Set Info */}
+                    <View className="flex-row px-1 justify-center ">
+                        <View className="flex-1 basis-0 items-center  ">
+                            <Text className={`text-[64px] leading-[72px] ${
+                                localCurrentSet === 0 
+                                    ? 'text-light-text-200' 
+                                    : localCurrentSet === exercise.sets 
+                                        ? 'text-brand-green-500' 
+                                        : 'text-light-text-200'
+                            }`}>
+                                {localCurrentSet}
+                                <Text className={`text-[32px] leading-[36px] ${
+                                    localCurrentSet === exercise.sets 
+                                        ? 'text-brand-green-500' 
+                                        : 'color-[#949494]'
+                                }`}> / {exercise.sets}</Text>
+                            </Text>
+                            <Text className="text-t2 color-[#949494] mb-1">повторения</Text>
+                        </View>
                     </View>
-                </View>
+
+                </> : <>
+                    <View className="flex-row px-1">
+
+                        <View className="flex-[0.5] basis-0 items-center bg-fill-800 rounded-3xl p-1">
+                            <Text className={`text-[64px] leading-[72px] ${
+                                localCurrentSet === 0 
+                                    ? 'text-light-text-200' 
+                                    : localCurrentSet === exercise.sets 
+                                        ? 'text-brand-green-500' 
+                                        : 'text-light-text-200'
+                            }`}>
+                                {localCurrentSet}
+                                <Text className={`text-[32px] leading-[36px] ${
+                                    localCurrentSet === exercise.sets 
+                                        ? 'text-brand-green-500' 
+                                        : 'color-[#949494]'
+                                }`}> / {exercise.sets}</Text>
+                            </Text>
+                            <Text className="text-t2 color-[#949494] mb-1">повторения</Text>
+                        </View>
+                        <View className="flex-[1.9] basis-0 justify-end align-center ">
+                            <CountdownDisplay />
+                        </View>
+                        <View className="flex-[0.7] basis-0  justify-end ">
+                            <View className="flex-[0.5] basis-0 items-center bg-fill-800 rounded-3xl"></View>
+                        </View>
+
+                        {/* {exercise.videoUrl && player && (
+					<View 
+						style={{
+							position: 'absolute',
+							bottom: 12,
+							right: 12,
+							width: 100,
+							height: 138,
+							zIndex: 9,
+							elevation: 10,
+						}}
+					>
+						<View style={{
+							width: '100%',
+							height: '100%',
+							overflow: 'hidden',
+							backgroundColor: 'black',
+							borderRadius: 8,
+							shadowColor: '#000',
+							shadowOffset: { width: 0, height: 2 },
+							shadowOpacity: 0.25,
+							shadowRadius: 3.84,
+						}}>
+							<VideoView
+								player={player}
+								style={{ width: '100%', height: '100%' }}
+								contentFit="cover"
+								nativeControls={false}
+							/>
+						</View>
+					</View>
+				)} */}
+                    </View>
+
+                </>}
+        
             </View>
         </View>
     )

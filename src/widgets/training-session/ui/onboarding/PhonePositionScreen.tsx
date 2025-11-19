@@ -55,7 +55,7 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
     }
 
     return (
-        <View className="bg-background-primary flex-1  ">
+        <View className="bg-background-primary flex-1 pb-10 ">
 
             {/* Gradient Background */}
             <GradientBg  />
