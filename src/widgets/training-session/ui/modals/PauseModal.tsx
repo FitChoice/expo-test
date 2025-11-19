@@ -4,7 +4,7 @@
  * Показывается при нажатии на кнопку паузы
  */
 
-import { View, Text, Modal as RNModal, StyleSheet, Platform } from 'react-native'
+import { View, Text, Modal as RNModal, StyleSheet, Platform, useWindowDimensions } from 'react-native'
 import { BlurView } from 'expo-blur'
 import BigPauseIcon from 'assets/images/big_pause.svg'
 import { Button } from '@/shared/ui'
@@ -16,8 +16,11 @@ interface PauseModalProps {
 }
 
 export function PauseModal({ visible, onResume }: PauseModalProps) {
+    const { width, height } = useWindowDimensions()
+    const isLandscape = width > height
+
     return (
-        <RNModal visible={visible} transparent animationType="fade">
+        <RNModal visible={visible} transparent animationType="fade" supportedOrientations={['portrait', 'landscape']}>
             <View className="flex-1">
                 {/* Blurred gradient background */}
                 <BlurView
@@ -47,8 +50,8 @@ export function PauseModal({ visible, onResume }: PauseModalProps) {
                 </View>
 
                 {/* Button at bottom */}
-                <View className="absolute bottom-0 left-0 right-0 px-6 pb-safe-bottom pb-6">
-                    <Button onPress={onResume} variant="primary" className="w-full">
+                <View className={`absolute bottom-0 left-0 right-0 px-6 pb-safe-bottom ${isLandscape ? 'pb-6' : 'pb-6'}`}>
+                    <Button onPress={onResume} variant="primary" className={isLandscape ? 'w-full max-w-[300px] mx-auto' : 'w-full'}>
 						Продолжить тренировку
                     </Button>
                 </View>

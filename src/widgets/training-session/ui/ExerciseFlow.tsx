@@ -4,13 +4,15 @@
  * Включает countdown, body position check, exercise execution, rest, transitions
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { View } from 'react-native'
+import * as ScreenOrientation from 'expo-screen-orientation'
 import { ExerciseExampleCountdownScreen } from './exercise/ExerciseExampleCountdownScreen'
 import { BodyPositionScreen } from './exercise/BodyPositionScreen'
 import { ExerciseSuccessScreen } from './exercise/ExerciseSuccessScreen'
 import { RestScreen } from './exercise/RestScreen'
 import { ExerciseTransitionScreen } from './exercise/ExerciseTransitionScreen'
+import { RotateScreen } from './exercise/RotateScreen'
 import { useTrainingStore } from '@/entities/training'
 import {
     TimerExerciseScreen
@@ -51,6 +53,37 @@ export function ExerciseFlow() {
 
     // Check if exercise has sides
     const hasSides = currentExercise?.side === 'both'
+
+    // Проверяем ориентацию при изменении упражнения или при первом запуске
+    useEffect(() => {
+        if (currentStep === 'countdown' && currentExercise) {
+            const checkOrientation = async () => {
+                try {
+                    const orientation = await ScreenOrientation.getOrientationAsync()
+                    const isPortrait =
+                        orientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
+                        orientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
+                    const isLandscape =
+                        orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
+                        orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
+
+                    const exerciseIsVertical = currentExercise.isVertical ?? false
+
+                    // Если ориентация не соответствует упражнению, показываем rotate экран
+                    if ((exerciseIsVertical && !isPortrait) || (!exerciseIsVertical && !isLandscape)) {
+                        setCurrentStep('rotate')
+                    }
+                } catch (err) {
+                    console.warn('Error checking orientation:', err)
+                }
+            }
+            checkOrientation()
+        }
+    }, [currentExerciseIndex, currentStep, currentExercise])
+
+    const handleRotateComplete = () => {
+        setCurrentStep('countdown')
+    }
 
     const handleCountdownComplete = () => {
         setCurrentStep('position')
@@ -172,7 +205,10 @@ export function ExerciseFlow() {
         setCurrentStep('execution')
     }
 
-    const handleTransitionComplete = () => {
+    const handleTransitionComplete = async () => {
+        // Получаем данные следующего упражнения до вызова nextExercise()
+        const nextExerciseData = training.exercises[currentExerciseIndex + 1]
+        
         // Переход к следующему упражнению
         nextExercise()
         // Сбрасываем счетчики для нового упражнения
@@ -180,14 +216,45 @@ export function ExerciseFlow() {
         setSetNumber(0)
         setCurrentSideState('right')
         setRestType('rep')
-        setCurrentStep('countdown')
+        
+        // Проверяем ориентацию перед началом следующего упражнения
+        if (nextExerciseData) {
+            const nextIsVertical = nextExerciseData.isVertical ?? false
+            try {
+                const orientation = await ScreenOrientation.getOrientationAsync()
+                const isPortrait =
+                    orientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
+                    orientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
+                const isLandscape =
+                    orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
+                    orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
+
+                // Если ориентация не соответствует следующему упражнению, показываем rotate экран
+                if ((nextIsVertical && !isPortrait) || (!nextIsVertical && !isLandscape)) {
+                    setCurrentStep('rotate')
+                } else {
+                    setCurrentStep('countdown')
+                }
+            } catch (err) {
+                console.warn('Error checking orientation:', err)
+                setCurrentStep('countdown')
+            }
+        } else {
+            setCurrentStep('countdown')
+        }
     }
 
     const nextExerciseData = training.exercises[currentExerciseIndex + 1]
 
-    return (<Container>
-        <View className="flex-1">
+    return (<View className="flex-1">
+            {currentStep === 'rotate' && (
+                <RotateScreen
+                    isVertical={isVertical ?? false}
+                    onComplete={handleRotateComplete}
+                />
+            )}
             {currentStep === 'countdown' && (
+				
                 <ExerciseExampleCountdownScreen
 				isVertical={isVertical}
                     exercise={currentExercise}
@@ -247,6 +314,5 @@ export function ExerciseFlow() {
             )}
 
         </View>
-    </Container>
     )
 }

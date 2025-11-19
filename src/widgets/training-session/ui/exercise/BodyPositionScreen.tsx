@@ -34,7 +34,7 @@ export function BodyPositionScreen({
     const screenHeight = isVertical ? height : windowHeight
 
     useEffect(() => {
-        // Reset state when component mounts
+       // Reset state when component mounts
         setShowSuccess(false)
         setCameraKey(prev => prev + 1)
 		
@@ -94,8 +94,8 @@ export function BodyPositionScreen({
                                     />	}
                     </View>
                 ) : (
-                    <View className="absolute inset-0 items-center justify-center">
-                        <View style={{ transform: [{ rotate: '90deg' }] }}>
+                    <View className="absolute inset-0 bottom-20 items-center justify-center">
+                        <View style={{ transform: [{ rotate: '-90deg' }] }}>
                             <BodySilhouetteDefault
                                 stroke={showSuccess ? '#8BC34A' : 'white'}
                             />

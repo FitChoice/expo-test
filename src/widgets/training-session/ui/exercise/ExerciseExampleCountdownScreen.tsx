@@ -120,7 +120,7 @@ function ExerciseExampleCountdownContent({
                         </View>
                     </>
                 ) : (
-                    <View className="flex-row px-1 gap-2">
+                    <View className="flex-row px-1 pb-2 gap-2">
                         {/* Set Info */}
                         <View className="flex-1 basis-0 flex-row gap-2  items-end">
                             <View className="flex-[0.5] basis-0 items-center bg-fill-800 rounded-3xl p-1">
