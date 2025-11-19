@@ -44,7 +44,6 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
 	// }, [opacity])
 
 
-	// 🔓 Разблокируем ориентацию при входе
 	useEffect(() => {
 		ScreenOrientation.unlockAsync().catch((err) =>
 			console.warn('Не удалось разблокировать ориентацию:', err)
@@ -55,7 +54,7 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
 		};
 	}, []);
 
-	// ✅ Отслеживаем ориентацию через слушатель (более надёжно, чем width/height)
+
 	useEffect(() => {
 		let hasTriggered = false; // Защита от дублирования вызова
 

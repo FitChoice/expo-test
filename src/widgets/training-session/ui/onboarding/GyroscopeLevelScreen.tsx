@@ -61,23 +61,39 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
 				Accelerometer.setUpdateInterval(100);
 
 			subscription = Accelerometer.addListener(({ x, y, z }) => {
+				let angleDeg: number;
+				let isAligned: boolean;
 
-				// Угол наклона вперед-назад, когда телефон стоит вертикально
-				// y ≈ -1 когда телефон вертикален, z показывает наклон вперед/назад
-				const angleRad = Math.atan2(z, Math.abs(y));
-				const angleDeg = Math.round((angleRad * 180) / Math.PI);
+				if (isVertical) {
+					// Угол наклона вперед-назад, когда телефон стоит вертикально
+					// y ≈ -1 когда телефон вертикален, z показывает наклон вперед/назад
+					const angleRad = Math.atan2(z, Math.abs(y));
+					angleDeg = Math.round((angleRad * 180) / Math.PI);
+					
+					// Телефон вертикален, когда angleDeg близок к 0
+					isAligned = Math.abs(angleDeg) <= 5;
+				} else {
+					// Для горизонтального положения: проверяем перпендикулярность экрана к поверхности
+					// Когда экран перпендикулярен поверхности, телефон повернут на 90° относительно горизонтали
+					// Используем x и z для расчета угла наклона в горизонтальной плоскости
+					const angleRad = Math.atan2(x, Math.abs(z));
+					angleDeg = Math.round((angleRad * 180) / Math.PI);
+					
+					// Экран перпендикулярен поверхности, когда угол близок к 90° или -90°
+					// Проверяем отклонение от 90° (или -90°)
+					const deviationFrom90 = Math.abs(Math.abs(angleDeg) - 90);
+					isAligned = deviationFrom90 <= 5;
+				}
 			  
 				setAngle(angleDeg);
 			  
-				// Анимация полоски — линия горизонтальна при angleDeg=0 (вертикальный телефон)
+				// Анимация полоски
 				Animated.timing(barRotation, {
 				  toValue: angleDeg,
 				  duration: 100,
 				  useNativeDriver: true,
 				}).start();
 			  
-				// Телефон вертикален, когда angleDeg близок к 0
-				const isAligned = Math.abs(angleDeg) <= 5;
 				setIsCalibrated(isAligned);
 			  
 				setBarStyle({
@@ -102,7 +118,7 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
 				deactivateKeepAwake();
 			}
 		};
-	}, [isFocused]);
+	}, [isFocused, isVertical]);
 
 	const handleStop = () => {
 		router.back();
@@ -150,7 +166,7 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
 				</Text>
 			) : (
 				<Text className={`text-h1 mt-4 mb-12 text-center ${isAvailable !== false && !isCalibrated ? 'text-light-text-100' : 'text-brand-green-500'}`}>
-					{angle}°
+					{ isVertical ? angle : angle - 90 }°
 				</Text>
 			)}
 			</View>
