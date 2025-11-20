@@ -6,10 +6,14 @@
 
 import { View, Text, useWindowDimensions } from 'react-native'
 import { CameraView } from 'expo-camera'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, {  Circle } from 'react-native-svg'
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
+// Dynamic imports for TensorFlow to avoid Metro bundler issues
+let tf: typeof import('@tensorflow/tfjs') | null = null
+let decodeJpeg: typeof import('@tensorflow/tfjs-react-native').decodeJpeg | null = null
+let poseDetection: typeof import('@tensorflow-models/pose-detection') | null = null
 import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
 import BodySilhouetteRightSide from '@/assets/images/silhouette_side_right.svg'
 import BodySilhouetteLeftSide from '@/assets/images/silhouette_side_left.svg'
@@ -33,6 +37,104 @@ export function BodyPositionScreen({
     const [cameraKey, setCameraKey] = useState(0)
     const { width, height: windowHeight } = useWindowDimensions()
     const screenHeight = isVertical ? height : windowHeight
+    const cameraRef = useRef<CameraView>(null)
+    const detectorRef = useRef<any>(null)
+    const processingRef = useRef(false)
+
+    // Initialize TensorFlow and Pose Detector
+    useEffect(() => {
+        let processingInterval: NodeJS.Timeout | null = null
+
+        const initTensorFlow = async () => {
+            try {
+                // Pre-import MediaPipe to ensure it's available
+                try {
+                    await import('@mediapipe/pose')
+                } catch (e) {
+                    console.warn('MediaPipe import warning:', e)
+                }
+
+                // Dynamic imports
+                tf = await import('@tensorflow/tfjs')
+                await import('@tensorflow/tfjs-react-native')
+                const tfReactNative = await import('@tensorflow/tfjs-react-native')
+                decodeJpeg = tfReactNative.decodeJpeg
+                poseDetection = await import('@tensorflow-models/pose-detection')
+
+                await tf.ready()
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
+                const tfRN = require('@tensorflow/tfjs-react-native')
+                if (tfRN.platform && tfRN.platform.initialize) {
+                    await tfRN.platform.initialize()
+                }
+
+                // Use MoveNet Lightning (doesn't require MediaPipe)
+                const detector = await poseDetection.createDetector(
+                    poseDetection.SupportedModels.MoveNet,
+                    {
+                        modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+                    }
+                )
+                detectorRef.current = detector
+
+                // Process frames every 1 second
+                processingInterval = setInterval(async () => {
+                    if (processingRef.current || !cameraRef.current || !detectorRef.current) return
+                    processingRef.current = true
+
+                    try {
+                        const photo = await cameraRef.current.takePictureAsync({
+                            quality: 0.8,
+                            base64: true,
+                        })
+
+                        if (photo?.base64 && tf && decodeJpeg && poseDetection) {
+                            const binaryString = atob(photo.base64)
+                            const imageData = new Uint8Array(binaryString.length)
+                            for (let i = 0; i < binaryString.length; i++) {
+                                imageData[i] = binaryString.charCodeAt(i)
+                            }
+
+                            const imageTensor = decodeJpeg(imageData) as any
+                            const resized = tf.image.resizeBilinear(imageTensor, [256, 256])
+                            const poses = await detectorRef.current.estimatePoses(resized)
+
+                            imageTensor.dispose()
+                            resized.dispose()
+
+                            if (poses && poses.length > 0 && poses[0]) {
+                                console.log('=== Pose Detection Results ===')
+                                poses[0].keypoints.forEach((keypoint: any, index: number) => {
+                                    console.log(
+                                        `Keypoint ${index} (${keypoint.name || 'unknown'}): ` +
+                                        `x: ${keypoint.x.toFixed(2)}, y: ${keypoint.y.toFixed(2)}, score: ${keypoint.score?.toFixed(3) || 'N/A'}`
+                                    )
+                                })
+                                console.log('=== End Pose Detection ===')
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error processing image:', error)
+                    } finally {
+                        processingRef.current = false
+                    }
+                }, 1000)
+            } catch (error) {
+                console.error('TensorFlow initialization error:', error)
+            }
+        }
+
+        initTensorFlow()
+
+        return () => {
+            if (processingInterval) {
+                clearInterval(processingInterval)
+            }
+            if (detectorRef.current) {
+                detectorRef.current.dispose()
+            }
+        }
+    }, [])
 
     useEffect(() => {
         let keepAwakeActivated = false
@@ -81,6 +183,7 @@ export function BodyPositionScreen({
             {/* Camera View with Overlay */}
             <View className="flex-1 bg-transparent">
                 <CameraView 
+                    ref={cameraRef}
                     key={`camera-${cameraKey}`}
                     style={{ flex: 1}} 
                     facing="front" 
