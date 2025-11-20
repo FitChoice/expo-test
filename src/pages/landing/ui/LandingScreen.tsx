@@ -129,8 +129,19 @@ export const LandingScreen = () => {
                 </View>
 
                 {/* Кнопки Frame 48097895 */}
-                <View className="absolute left-[4%] top-[58%] w-[92%]">
+                <View className="absolute  bottom-[8%]  w-full px-2">
                     <View className="gap-2">
+                        <Button
+                            variant="primary"
+                            size="l"
+                            fullWidth
+                            onPress={ () =>   router.push('/home')}
+                            accessibilityRole="button"
+                            accessibilityLabel="Зарегистрироваться"
+                            accessibilityHint="Создать новый аккаунт в приложении"
+                        >
+												Home
+                        </Button>
                         <Button
                             variant="primary"
                             size="l"
@@ -153,6 +164,7 @@ export const LandingScreen = () => {
                         >
 							Войти
                         </Button>
+
                     </View>
                 </View>
             </View>

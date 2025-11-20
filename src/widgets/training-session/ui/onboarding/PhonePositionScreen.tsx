@@ -55,7 +55,7 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
     }
 
     return (
-        <View className="bg-background-primary flex-1 pb-10 ">
+        <View className="bg-background-primary flex-1 ">
 
             {/* Gradient Background */}
             <GradientBg  />
@@ -70,9 +70,9 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
             </View>
 
             {/* Content */}
-            <View className="flex-1 items-center justify-center px-6">
+            <View className="flex-1 items-center justify-center px-6 mb-10">
                 {/* Camera Preview */}
-                <View className="mb-20 h-96 w-full overflow-hidden rounded-3xl bg-black">
+                <View className=" h-96 w-full overflow-hidden rounded-3xl bg-black">
                     <CameraView
                         facing="front"
                         className="flex-1"
@@ -93,7 +93,7 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
             </View>
 
             {/* Button */}
-            <View className="p-6">
+            <View className="p-6 pb-12">
                 <Button
                     variant="primary"
                     onPress={onNext}

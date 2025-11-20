@@ -29,6 +29,7 @@ interface BodyPositionScreenProps {
 import '@tensorflow/tfjs-backend-webgl'
 import * as tf from '@tensorflow/tfjs'
 import * as poseDetection from '@tensorflow-models/pose-detection'
+const tfRN = require('@tensorflow/tfjs-react-native')
 
 export function BodyPositionScreen({
     onComplete, title, side, isVertical
@@ -37,11 +38,10 @@ export function BodyPositionScreen({
     const [showSuccess, setShowSuccess] = useState(false)
     const [cameraKey, setCameraKey] = useState(0)
     const [isDetectorReady, setIsDetectorReady] = useState(false)
+    const [isCameraReady, setIsCameraReady] = useState(false)
     const { width, height: windowHeight } = useWindowDimensions()
     const screenHeight = isVertical ? height : windowHeight
     const cameraRef = useRef<CameraView>(null)
-    const processingRef = useRef(false)
-    const isInitializedRef = useRef(false)
 
 
 
@@ -133,11 +133,11 @@ export function BodyPositionScreen({
 
     // Обработка кадров из камеры через requestAnimationFrame
     useEffect(() => {
-        if (!isDetectorReady || !cameraRef.current) return
+        if (!isDetectorReady || !isCameraReady || !cameraRef.current) return
 
         let rafId: number | null = null
         let lastProcessTime = 0
-        const PROCESS_INTERVAL_MS = 200 // Ограничиваем частоту обработки до 5 FPS
+        const PROCESS_INTERVAL_MS = 50 // Интервал между обработками
 
         const processFrame = async () => {
             const now = Date.now()
@@ -167,7 +167,7 @@ export function BodyPositionScreen({
                 if (photo?.base64 && detectorRef.current) {
                     // Преобразуем base64 в тензор
                     // eslint-disable-next-line @typescript-eslint/no-require-imports
-                    const tfRN = require('@tensorflow/tfjs-react-native')
+                   
                     const decodeJpeg = tfRN.decodeJpeg
 
                     const binaryString = atob(photo.base64)
@@ -207,15 +207,15 @@ export function BodyPositionScreen({
             }
         }
 
-        // Запускаем цикл обработки
-        rafId = requestAnimationFrame(processFrame)
+        // Запускаем первую обработку сразу, не дожидаясь requestAnimationFrame
+        processFrame()
 
         return () => {
             if (rafId !== null) {
                 cancelAnimationFrame(rafId)
             }
         }
-    }, [isDetectorReady])
+    }, [isDetectorReady, isCameraReady])
 
     // if (hasPermission === null) return <View><Text>Requesting camera permission</Text></View>
     // if (hasPermission === false) return <View><Text>No access to camera</Text></View>
@@ -223,14 +223,19 @@ export function BodyPositionScreen({
     return (
         <ExerciseWithCounterWrapper
             onComplete={onComplete}
+            isShowActionButtons={false}
         >
             {/* Camera View with Overlay */}
-            <View className="flex-1 bg-transparent">
+            <View className="flex-1 rounded-3xl">
                 <CameraView
                     ref={cameraRef}
                     key={`camera-${cameraKey}`}
                     style={{ flex: 1 }}
                     facing="front"
+                    onCameraReady={() => {
+                        console.log('Camera is ready, starting pose detection')
+                        setIsCameraReady(true)
+                    }}
                 />
                 {/* Grid pattern background - full width and height */}
                 <View className="absolute top-0 left-0 right-0 rounded-3xl " style={{ height: screenHeight }}>

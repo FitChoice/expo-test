@@ -2,7 +2,7 @@
   "scheme": "acme",
   "userInterfaceStyle": "automatic",
   "orientation": "default",
-  "icon": "src/assets/images/logo_purple.png",
+  "icon": "assets/images/logo_purple.png",
   "web": {
     "output": "static"
   },
@@ -55,6 +55,7 @@
   ],
   "assetBundlePatterns": [
     "assets/fonts/*",
+    "assets/images/**/*",
     "src/assets/**/*"
   ],
   "name": "Fitchoice",

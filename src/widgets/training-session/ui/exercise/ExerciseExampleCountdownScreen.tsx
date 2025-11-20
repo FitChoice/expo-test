@@ -82,7 +82,7 @@ function ExerciseExampleCountdownContent({
                 )}
             </View>
           
-            <View className="w-full px-4 py-4">
+            <View className="w-full px-4 py-4 justify-center items-center ">
                 <StepProgress current={0} total={5} />
             </View>
             { !isVertical && 
