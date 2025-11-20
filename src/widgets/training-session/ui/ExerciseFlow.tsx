@@ -14,8 +14,8 @@ import { ExerciseTransitionScreen } from './exercise/ExerciseTransitionScreen'
 import { RotateScreen } from './exercise/RotateScreen'
 import { useTrainingStore } from '@/entities/training'
 import {
-    TimerExerciseScreen
-} from '@/widgets/training-session/ui/exercise/TimerExerciseScreen'
+    ExerciseExecutionScreen
+} from '@/widgets/training-session/ui/exercise/ExerciseExecutionScreen'
 import { ExerciseExampleCountdownScreen } from './exercise/ExerciseExampleCountdownScreen'
 
 type ExerciseStep =
@@ -252,14 +252,6 @@ export function ExerciseFlow() {
                 onComplete={handleRotateComplete}
             />
         )}
-        {currentStep === 'countdown' && ( <ExerciseExampleCountdownScreen
-        isVertical={isVertical}
-            exercise={currentExercise}
-            currentSet={currentSet}
-            onComplete={handleCountdownComplete}
-			
-        />
-        )}
         {currentStep === 'position' && (
             <BodyPositionScreen
                 isVertical={isVertical}
@@ -268,6 +260,16 @@ export function ExerciseFlow() {
                 onComplete={handlePositionComplete}
             />
         )}
+        
+        {currentStep === 'countdown' && ( <ExerciseExampleCountdownScreen
+            isVertical={isVertical}
+            exercise={currentExercise}
+            currentSet={currentSet}
+            onComplete={handleCountdownComplete}
+			
+        />
+        )}
+   
         {/*{currentStep === 'execution' && currentExercise.isAi && (*/}
         {/*	<AIExerciseScreen*/}
         {/*		onComplete={handleExecutionComplete}*/}
@@ -275,7 +277,7 @@ export function ExerciseFlow() {
         {/*	/>*/}
         {/*)}*/}
         {currentStep === 'execution' &&  (
-            <TimerExerciseScreen
+            <ExerciseExecutionScreen
 				     isVertical={isVertical}
                 onComplete={handleExecutionComplete}
                 exercise={currentExercise}
@@ -289,7 +291,7 @@ export function ExerciseFlow() {
                 key="side-switch"
                 onComplete={handleSideSwitchComplete}
                 title={'Смена рабочей стороны'}
-			  side={hasSides ? currentSideState : undefined}
+			          side={hasSides ? currentSideState : undefined}
             />
 
         // <SideSwitchScreen

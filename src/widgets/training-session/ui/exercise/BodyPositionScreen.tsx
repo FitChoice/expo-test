@@ -9,6 +9,7 @@ import { CameraView } from 'expo-camera'
 import { useState, useEffect } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, {  Circle } from 'react-native-svg'
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
 import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
 import BodySilhouetteRightSide from '@/assets/images/silhouette_side_right.svg'
 import BodySilhouetteLeftSide from '@/assets/images/silhouette_side_left.svg'
@@ -34,23 +35,44 @@ export function BodyPositionScreen({
     const screenHeight = isVertical ? height : windowHeight
 
     useEffect(() => {
-       // Reset state when component mounts
-        setShowSuccess(false)
-        setCameraKey(prev => prev + 1)
-		
-        const successTimer = setTimeout(() => {
-            setShowSuccess(true)
-        }, 5000)
+        let keepAwakeActivated = false
 
-        const completeTimer = setTimeout(() => {
-            onComplete()
-        }, 6000)
+        const init = async () => {
+            try {
+                await activateKeepAwakeAsync()
+                keepAwakeActivated = true
+            } catch (error) {
+                console.error('Keep awake activation error:', error)
+            }
+        }
+
+        init()
 
         return () => {
-            clearTimeout(successTimer)
-            clearTimeout(completeTimer)
+            if (keepAwakeActivated) {
+                deactivateKeepAwake()
+            }
         }
-    }, [onComplete, title])
+    }, [])
+
+    // useEffect(() => {
+    //    // Reset state when component mounts
+    //     setShowSuccess(false)
+    //     setCameraKey(prev => prev + 1)
+		
+    //     const successTimer = setTimeout(() => {
+    //         setShowSuccess(true)
+    //     }, 5000)
+
+    //     const completeTimer = setTimeout(() => {
+    //         onComplete()
+    //     }, 6000)
+
+    //     return () => {
+    //         clearTimeout(successTimer)
+    //         clearTimeout(completeTimer)
+    //     }
+    // }, [onComplete, title])
 
     return (
         <ExerciseWithCounterWrapper
@@ -60,7 +82,7 @@ export function BodyPositionScreen({
             <View className="flex-1 bg-transparent">
                 <CameraView 
                     key={`camera-${cameraKey}`}
-                    style={{ flex: 1 }} 
+                    style={{ flex: 1}} 
                     facing="front" 
                 />
     

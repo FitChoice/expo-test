@@ -94,7 +94,7 @@ function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exer
             const unregister = videoPlayerContext.registerPlayer(player)
             return unregister
         } else {
-            console.log('TimerExerciseScreen: cannot register - missing player or context')
+            console.log('ExerciseExecutionScreen: cannot register - missing player or context')
         }
         return undefined
     }, [player, videoPlayerContext])
@@ -276,7 +276,7 @@ function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exer
     )
 }
 
-export function TimerExerciseScreen({
+export function ExerciseExecutionScreen({
     isVertical,
     onComplete, exercise
 }: TimerExerciseScreenProps) {
