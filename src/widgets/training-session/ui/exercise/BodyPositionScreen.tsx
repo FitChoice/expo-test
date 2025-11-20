@@ -43,100 +43,7 @@ export function BodyPositionScreen({
     const processingRef = useRef(false)
     const isInitializedRef = useRef(false)
 
-    // // Initialize TensorFlow and Pose Detector
-    // useEffect(() => {
-    //     let processingInterval: NodeJS.Timeout | null = null
 
-    //     const initTensorFlow = async () => {
-    //         try {
-    //             // Pre-import MediaPipe to ensure it's available
-    //             try {
-    //                 await import('@mediapipe/pose')
-    //             } catch (e) {
-    //                 console.warn('MediaPipe import warning:', e)
-    //             }
-
-    //             // Dynamic imports
-    //             tf = await import('@tensorflow/tfjs')
-    //             await import('@tensorflow/tfjs-react-native')
-    //             const tfReactNative = await import('@tensorflow/tfjs-react-native')
-    //             decodeJpeg = tfReactNative.decodeJpeg
-    //             poseDetection = await import('@tensorflow-models/pose-detection')
-
-    //             await tf.ready()
-    //             // eslint-disable-next-line @typescript-eslint/no-require-imports
-    //             const tfRN = require('@tensorflow/tfjs-react-native')
-    //             if (tfRN.platform && tfRN.platform.initialize) {
-    //                 await tfRN.platform.initialize()
-    //             }
-
-    //             // Use MoveNet Lightning (doesn't require MediaPipe)
-    //             const detector = await poseDetection.createDetector(
-    //                 poseDetection.SupportedModels.MoveNet,
-    //                 {
-    //                     modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
-    //                 }
-    //             )
-    //             detectorRef.current = detector
-
-    //             // Process frames every 1 second
-    //             processingInterval = setInterval(async () => {
-    //                 if (processingRef.current || !cameraRef.current || !detectorRef.current) return
-    //                 processingRef.current = true
-
-    //                 try {
-    //                     const photo = await cameraRef.current.takePictureAsync({
-    //                         quality: 0.8,
-    //                         base64: true,
-    //                     })
-
-    //                     if (photo?.base64 && tf && decodeJpeg && poseDetection) {
-    //                         const binaryString = atob(photo.base64)
-    //                         const imageData = new Uint8Array(binaryString.length)
-    //                         for (let i = 0; i < binaryString.length; i++) {
-    //                             imageData[i] = binaryString.charCodeAt(i)
-    //                         }
-
-    //                         const imageTensor = decodeJpeg(imageData) as any
-    //                         const resized = tf.image.resizeBilinear(imageTensor, [256, 256])
-    //                         const poses = await detectorRef.current.estimatePoses(resized)
-
-    //                         imageTensor.dispose()
-    //                         resized.dispose()
-
-    //                         if (poses && poses.length > 0 && poses[0]) {
-    //                             console.log('=== Pose Detection Results ===')
-    //                             poses[0].keypoints.forEach((keypoint: any, index: number) => {
-    //                                 console.log(
-    //                                     `Keypoint ${index} (${keypoint.name || 'unknown'}): ` +
-    //                                     `x: ${keypoint.x.toFixed(2)}, y: ${keypoint.y.toFixed(2)}, score: ${keypoint.score?.toFixed(3) || 'N/A'}`
-    //                                 )
-    //                             })
-    //                             console.log('=== End Pose Detection ===')
-    //                         }
-    //                     }
-    //                 } catch (error) {
-    //                     console.error('Error processing image:', error)
-    //                 } finally {
-    //                     processingRef.current = false
-    //                 }
-    //             }, 1000)
-    //         } catch (error) {
-    //             console.error('TensorFlow initialization error:', error)
-    //         }
-    //     }
-
-    //     initTensorFlow()
-
-    //     return () => {
-    //         if (processingInterval) {
-    //             clearInterval(processingInterval)
-    //         }
-    //         if (detectorRef.current) {
-    //             detectorRef.current.dispose()
-    //         }
-    //     }
-    // }, [])
 
     useEffect(() => {
         let keepAwakeActivated = false
@@ -178,7 +85,7 @@ export function BodyPositionScreen({
     //     }
     // }, [onComplete, title])
 
-    const [hasPermission, setHasPermission] = useState(null)
+
     const detectorRef = useRef<poseDetection.PoseDetector | null>(null)
     const isProcessingRef = useRef(false)
 
@@ -224,16 +131,30 @@ export function BodyPositionScreen({
         }
     }, [])
 
-    // Обработка кадров из камеры через takePictureAsync
+    // Обработка кадров из камеры через requestAnimationFrame
     useEffect(() => {
         if (!isDetectorReady || !cameraRef.current) return
 
-        let processingInterval: NodeJS.Timeout | null = null
+        let rafId: number | null = null
+        let lastProcessTime = 0
+        const PROCESS_INTERVAL_MS = 200 // Ограничиваем частоту обработки до 5 FPS
 
         const processFrame = async () => {
-            if (isProcessingRef.current || !cameraRef.current || !detectorRef.current) return
+            const now = Date.now()
+            
+            // Пропускаем кадр, если прошло меньше времени с последней обработки
+            if (now - lastProcessTime < PROCESS_INTERVAL_MS) {
+                rafId = requestAnimationFrame(processFrame)
+                return
+            }
+
+            if (isProcessingRef.current || !cameraRef.current || !detectorRef.current) {
+                rafId = requestAnimationFrame(processFrame)
+                return
+            }
 
             isProcessingRef.current = true
+            lastProcessTime = now
 
             try {
                 // Получаем кадр с камеры
@@ -281,15 +202,17 @@ export function BodyPositionScreen({
                 console.error('Error processing frame:', error)
             } finally {
                 isProcessingRef.current = false
+                // Продолжаем цикл
+                rafId = requestAnimationFrame(processFrame)
             }
         }
 
-        // Обрабатываем кадры каждые 200ms (5 FPS для pose detection)
-        processingInterval = setInterval(processFrame, 200)
+        // Запускаем цикл обработки
+        rafId = requestAnimationFrame(processFrame)
 
         return () => {
-            if (processingInterval) {
-                clearInterval(processingInterval)
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId)
             }
         }
     }, [isDetectorReady])
