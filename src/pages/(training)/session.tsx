@@ -9,16 +9,19 @@ import { useTrainingStore } from '@/entities/training'
 import { OnboardingFlow, ExerciseFlow } from '@/widgets/training-session'
 import TrainingReportScreen from './report'
 import { TrainingInfo } from '@/widgets/training-session/ui/TrainingInfo'
+import { usePoseCameraSetup } from '@/widgets/pose-camera'
 
 export default function TrainingSessionScreen() {
     const training = useTrainingStore((state) => state.training)
     const status = useTrainingStore((state) => state.status)
+    const { tfReady, model, orientation, error } = usePoseCameraSetup()
 
-    // If training data is not loaded, show loading
-    if (!training) {
+    // If training data is not loaded or camera is not ready, show loading
+    if (!training || !tfReady || !model || !orientation) {
         return (
             <View className="bg-background-primary flex-1 items-center justify-center">
                 <ActivityIndicator size="large" color="#9333EA" />
+                {error && <Text className="mt-4 text-red-500">Error: {error.message}</Text>}
             </View>
         )
     }
@@ -44,7 +47,7 @@ export default function TrainingSessionScreen() {
 
     default:
         return (
-            <ExerciseFlow	/>
+            <ExerciseFlow model={model} orientation={orientation} />
         )
     }
 }

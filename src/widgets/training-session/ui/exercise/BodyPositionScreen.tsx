@@ -2,35 +2,36 @@ import {
     ExerciseWithCounterWrapper
 } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 import { PoseCamera } from '@/widgets/pose-camera'
-import { useWindowDimensions, View, Text, Dimensions } from 'react-native'
+import { View, Text, Dimensions } from 'react-native'
 import { useState, useEffect } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
+import type * as posedetection from '@tensorflow-models/pose-detection'
+import type * as ScreenOrientation from 'expo-screen-orientation'
 
 type BodyPositionScreenProps = {
 	isVertical?: boolean,
 	onComplete: () => void,
+	model: posedetection.PoseDetector
+	orientation: ScreenOrientation.Orientation
 }
 
 const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height - 180
 
-export  const BodyPositionScreen = ({ isVertical, onComplete }: BodyPositionScreenProps) => {
+export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation }: BodyPositionScreenProps) => {
 
     const [showSuccess, setShowSuccess] = useState(false)
-    const [cameraKey, setCameraKey] = useState(0)
-    const { width } = useWindowDimensions()
 
     useEffect(() => {
         // Reset state when component mounts
         setShowSuccess(false)
-        setCameraKey(prev => prev + 1)
     
         const successTimer = setTimeout(() => {
             setShowSuccess(true)
-        }, 6000)
+        }, 7000)
     
         const completeTimer = setTimeout(() => {
             onComplete()
-        }, 6000)
+        }, 8000)
     
         return () => {
             clearTimeout(successTimer)
@@ -42,7 +43,7 @@ export  const BodyPositionScreen = ({ isVertical, onComplete }: BodyPositionScre
         onComplete={onComplete}
     >
         <View>
-            <PoseCamera />
+            <PoseCamera model={model} orientation={orientation} />
         </View>
 
         {/*/!* Grid pattern background - full width and height *!/*/}

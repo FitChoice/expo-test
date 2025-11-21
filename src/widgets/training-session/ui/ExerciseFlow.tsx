@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react'
 import { View } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
+import * as posedetection from '@tensorflow-models/pose-detection'
 import { BodyPositionScreen } from './exercise/BodyPositionScreen'
 import { ExerciseSuccessScreen } from './exercise/ExerciseSuccessScreen'
 import { RestScreen } from './exercise/RestScreen'
@@ -27,7 +28,12 @@ type ExerciseStep =
 	| 'success'
 	| 'rotate'
 
-export function ExerciseFlow() {
+type ExerciseFlowProps = {
+	model: posedetection.PoseDetector
+	orientation: ScreenOrientation.Orientation
+}
+
+export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
     const [currentStep, setCurrentStep] = useState<ExerciseStep>('countdown')
     const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
@@ -257,6 +263,8 @@ export function ExerciseFlow() {
                 //side={hasSides ? currentSideState : undefined}
                 key="position-check"
                 onComplete={handlePositionComplete}
+                model={model}
+                orientation={orientation}
             />
         )}
         
@@ -265,6 +273,8 @@ export function ExerciseFlow() {
             //side={hasSides ? currentSideState : undefined}
             key="position-check"
             onComplete={handlePositionComplete}
+            model={model}
+            orientation={orientation}
         />
 
             // 	( <ExerciseExampleCountdownScreen
@@ -298,8 +308,8 @@ export function ExerciseFlow() {
             <BodyPositionScreen
                 key="side-switch"
                 onComplete={handleSideSwitchComplete}
-                title={'Смена рабочей стороны'}
-			          side={hasSides ? currentSideState : undefined}
+                model={model}
+                orientation={orientation}
             />
 
         // <SideSwitchScreen

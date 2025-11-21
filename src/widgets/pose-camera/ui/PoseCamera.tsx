@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { StyleSheet, Text, View, Dimensions, Platform } from 'react-native'
+import { StyleSheet, View, Dimensions, Platform } from 'react-native'
 
 import { Camera } from 'expo-camera'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -11,7 +11,7 @@ import * as ScreenOrientation from 'expo-screen-orientation'
 import {
     cameraWithTensors,
 } from '@tensorflow/tfjs-react-native'
-import Svg, { Circle } from 'react-native-svg'
+import Svg, { Circle, Line } from 'react-native-svg'
 import { type ExpoWebGLRenderingContext } from 'expo-gl'
 
 // Polyfill for Camera.Constants which was removed in expo-camera v17
@@ -43,7 +43,8 @@ const IS_IOS = Platform.OS === 'ios'
 // This might not cover all cases.
 
 const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height - 180
-const CAM_PREVIEW_WIDTH = Dimensions.get('window').width 
+// Уменьшаем ширину для более естественного соотношения сторон (примерно 3:4)
+const CAM_PREVIEW_WIDTH = CAM_PREVIEW_HEIGHT * (3 / 4) 
 // The score threshold for pose detection results.
 const MIN_KEYPOINT_SCORE = 0.3
 
@@ -58,16 +59,17 @@ const OUTPUT_TENSOR_HEIGHT = OUTPUT_TENSOR_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4)
 // Whether to auto-render TensorCamera preview.
 const AUTO_RENDER = false
 
-export  const PoseCamera: React.FC = () => {
+type PoseCameraProps = {
+    model: posedetection.PoseDetector
+    orientation: ScreenOrientation.Orientation
+}
+
+export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) => {
     const cameraRef = useRef(null)
-    const [tfReady, setTfReady] = useState(false)
-    const [model, setModel] = useState<posedetection.PoseDetector>()
     const [poses, setPoses] = useState<posedetection.Pose[]>()
 
-    const [orientation, setOrientation] =
-		useState<ScreenOrientation.Orientation>()
     // Use front camera by default
-    const [cameraType, setCameraType] = useState<CameraType>('front')
+    const [cameraType] = useState<CameraType>('front')
     // Use `useRef` so that changing it won't trigger a re-render.
     //
     // - null: unset (initial value).
@@ -76,43 +78,7 @@ export  const PoseCamera: React.FC = () => {
     const rafId = useRef<number | null>(null)
 
     useEffect(() => {
-        async function prepare() {
-            rafId.current = null
-
-            // Set initial orientation.
-            const curOrientation = await ScreenOrientation.getOrientationAsync()
-            setOrientation(curOrientation)
-
-            // Listens to orientation change.
-            ScreenOrientation.addOrientationChangeListener((event) => {
-                setOrientation(event.orientationInfo.orientation)
-            })
-
-            // Camera permission.
-            await Camera.requestCameraPermissionsAsync()
-
-            // Wait for tfjs to initialize the backend.
-            await tf.ready()
-
-            const movenetModelConfig: posedetection.MoveNetModelConfig = {
-                modelType: posedetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
-                enableSmoothing: true,
-            }
-
-            const model = await posedetection.createDetector(
-                posedetection.SupportedModels.MoveNet,
-                movenetModelConfig
-            )
-            setModel(model)
-
-            // Ready!
-            setTfReady(true)
-        }
-
-        prepare()
-    }, [])
-
-    useEffect(() => {
+        rafId.current = null
         // Called when the app is unmounted.
         return () => {
             if (rafId.current != null && rafId.current !== 0) {
@@ -131,7 +97,7 @@ export  const PoseCamera: React.FC = () => {
             // Get the tensor and run pose detection.
             const imageTensor = images.next().value as tf.Tensor3D
          
-            const poses = await model!.estimatePoses(
+            const poses = await model.estimatePoses(
                 imageTensor,
                 undefined,
                 Date.now()
@@ -143,18 +109,18 @@ export  const PoseCamera: React.FC = () => {
                 return
             }
 
-            // // Render camera preview manually when autorender=false.
-            // if (!AUTO_RENDER) {
-            //     try {
-            //         updatePreview()
-            //         if (gl && typeof gl.endFrameEXP === 'function') {
-            //             gl.endFrameEXP()
-            //         }
-            //     } catch (error) {
-            //         // Silently continue - preview update is not critical
-            //         console.warn('Error updating preview:', error)
-            //     }
-            // }
+            // Render camera preview manually when autorender=false.
+            if (!AUTO_RENDER) {
+                try {
+                    updatePreview()
+                    if (gl && typeof gl.endFrameEXP === 'function') {
+                        gl.endFrameEXP()
+                    }
+                } catch (error) {
+                    // Silently continue - preview update is not critical
+                    console.warn('Error updating preview:', error)
+                }
+            }
 
             rafId.current = requestAnimationFrame(loop)
         }
@@ -164,33 +130,92 @@ export  const PoseCamera: React.FC = () => {
 
     const renderPose = () => {
         if (poses != null && poses.length > 0 && poses[0]) {
-            const keypoints = poses[0].keypoints
+            const pose = poses[0]
+            const flipX = IS_ANDROID || cameraType === 'back'
+            
+            // Создаем карту keypoints по имени для быстрого доступа
+            const keypointMap = new Map<string, { x: number; y: number; cx: number; cy: number }>()
+            
+            pose.keypoints
                 .filter((k) => (k.score ?? 0) > MIN_KEYPOINT_SCORE)
-                .map((k) => {
-                    // Flip horizontally on android or when using back camera on iOS.
-                    const flipX = IS_ANDROID || cameraType === 'back'
+                .forEach((k) => {
                     const x = flipX ? getOutputTensorWidth() - k.x : k.x
                     const y = k.y
                     const cx =
-						(x / getOutputTensorWidth()) *
-						(isPortrait() ? CAM_PREVIEW_WIDTH : CAM_PREVIEW_HEIGHT)
+                        (x / getOutputTensorWidth()) *
+                        (isPortrait() ? CAM_PREVIEW_WIDTH : CAM_PREVIEW_HEIGHT)
                     const cy =
-						(y / getOutputTensorHeight()) *
-						(isPortrait() ? CAM_PREVIEW_HEIGHT : CAM_PREVIEW_WIDTH)
-                    return (
-                        <Circle
-                            key={`skeletonkp_${k.name}`}
-                            cx={cx}
-                            cy={cy}
-                            r='4'
-                            strokeWidth='2'
-                            fill='#00AA00'
-                            stroke='white'
-                        />
-                    )
+                        (y / getOutputTensorHeight()) *
+                        (isPortrait() ? CAM_PREVIEW_HEIGHT : CAM_PREVIEW_WIDTH)
+                    keypointMap.set(k.name ?? '', { x, y, cx, cy })
                 })
 
-            return <Svg style={styles.svg}>{keypoints}</Svg>
+            // Определяем соединения для скелета (пары имен точек)
+            const skeletonConnections: Array<[string, string]> = [
+                // Голова и шея
+                ['nose', 'left_shoulder'],
+                ['nose', 'right_shoulder'],
+                // Торс
+                ['left_shoulder', 'right_shoulder'],
+                ['left_shoulder', 'left_hip'],
+                ['right_shoulder', 'right_hip'],
+                ['left_hip', 'right_hip'],
+                // Левая рука
+                ['left_shoulder', 'left_elbow'],
+                ['left_elbow', 'left_wrist'],
+                // Правая рука
+                ['right_shoulder', 'right_elbow'],
+                ['right_elbow', 'right_wrist'],
+                // Левая нога
+                ['left_hip', 'left_knee'],
+                ['left_knee', 'left_ankle'],
+                // Правая нога
+                ['right_hip', 'right_knee'],
+                ['right_knee', 'right_ankle'],
+            ]
+
+            // Отрисовываем линии скелета
+            const skeletonLines = skeletonConnections
+                .map(([startName, endName]) => {
+                    const start = keypointMap.get(startName)
+                    const end = keypointMap.get(endName)
+                    
+                    if (start && end) {
+                        return (
+                            <Line
+                                key={`skeleton_${startName}_${endName}`}
+                                x1={start.cx}
+                                y1={start.cy}
+                                x2={end.cx}
+                                y2={end.cy}
+                                stroke='white'
+                                strokeWidth='2'
+                            />
+                        )
+                    }
+                    return null
+                })
+                .filter(Boolean)
+
+            // Отрисовываем точки
+            const keypointCircles = Array.from(keypointMap.entries()).map(([name, coords]) => (
+                <Circle
+                    key={`skeletonkp_${name}`}
+                    cx={coords.cx}
+                    cy={coords.cy}
+                    r='4'
+                    strokeWidth='2'
+                    fill='#00AA00'
+                    stroke='white'
+                />
+            ))
+
+            return (
+                <Svg style={styles.svg}>
+                    {skeletonLines}
+                    {keypointCircles}
+                </Svg>
+            )
         } else {
             return <View></View>
         }
@@ -243,38 +268,31 @@ export  const PoseCamera: React.FC = () => {
         }
     }
 
-    if (!tfReady) {
-        return (
-            <View style={styles.loadingMsg}>
-                <Text>Loading...</Text>
-            </View>
-        )
-    } else {
-        return (
-            <View
-                style={
-                    isPortrait() ? styles.containerPortrait : styles.containerLandscape
-                }
-            >
-                <TensorCamera
-                    ref={cameraRef}
-                    style={styles.camera}
-                    autorender={AUTO_RENDER}
-                    facing={cameraType}
-                    // tensor related props
-                    resizeWidth={getOutputTensorWidth()}
-                    resizeHeight={getOutputTensorHeight()}
-                    resizeDepth={3}
-                    rotation={getTextureRotationAngleInDegrees()}
-                    onReady={handleCameraStream}
-                    useCustomShadersToResize={false}
-                    cameraTextureWidth={0}
-                    cameraTextureHeight={0}
-                />
-                {renderPose()}
-            </View>
-        )
-    }
+    return (
+        <View
+            style={
+                isPortrait() ? styles.containerPortrait : styles.containerLandscape
+            }
+        >
+            {/* @ts-ignore - TensorCamera type issue */}
+            <TensorCamera
+                ref={cameraRef}
+                style={styles.camera}
+                autorender={AUTO_RENDER}
+                facing={cameraType}
+                // tensor related props
+                resizeWidth={getOutputTensorWidth()}
+                resizeHeight={getOutputTensorHeight()}
+                resizeDepth={3}
+                rotation={getTextureRotationAngleInDegrees()}
+                onReady={handleCameraStream}
+                useCustomShadersToResize={false}
+                cameraTextureWidth={0}
+                cameraTextureHeight={0}
+            />
+            {renderPose()}
+        </View>
+    )
 }
 
 const styles = StyleSheet.create({
@@ -282,21 +300,15 @@ const styles = StyleSheet.create({
         position: 'relative',
         width: CAM_PREVIEW_WIDTH,
         height: CAM_PREVIEW_HEIGHT,
-			  borderRadius: 20
+        alignSelf: 'center',
+        borderRadius: 20
     },
     containerLandscape: {
         position: 'relative',
         width: CAM_PREVIEW_HEIGHT,
         height: CAM_PREVIEW_WIDTH,
-        marginLeft: Dimensions.get('window').height / 2 - CAM_PREVIEW_HEIGHT / 2,
+        alignSelf: 'center',
         borderRadius: 20
-    },
-    loadingMsg: {
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     camera: {
         width: '100%',
