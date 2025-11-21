@@ -30,18 +30,6 @@ export function LargeNumberDisplay({
     className,
     ...props
 }: LargeNumberDisplayProps) {
-    const scale = useSharedValue(1)
-
-    useEffect(() => {
-        // Animate on value change
-        scale.value = withSpring(1.1, { damping: 10 }, () => {
-            scale.value = withSpring(1, { damping: 10 })
-        })
-    }, [value, scale])
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }],
-    }))
 
     const sizeStyles = {
         large: 'text-[64px] leading-[72px]',
@@ -56,7 +44,7 @@ export function LargeNumberDisplay({
 
     return (
         <View {...props} className={`items-center ${className || ''}`}>
-            <Animated.View style={animatedStyle}>
+            <Animated.View >
                 <Text className={`font-inter font-weight-bold ${sizeStyles[size]} ${colorStyles[variant]}`}>
                     {value}
                 </Text>
