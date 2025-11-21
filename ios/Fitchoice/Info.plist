@@ -47,17 +47,18 @@
     </dict>
     <key>NSCameraUsageDescription</key>
     <string>Нужно для сканирования QR-кодов и загрузки фото</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your microphone</string>
+    <key>NSMotionUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your device motion</string>
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
     </array>
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>Мы будем напоминать о тренировках, чтобы вы ничего не пропустили</string>
     <key>RCTNewArchEnabled</key>
     <true/>
-    <key>UIAppFonts</key>
-    <array>
-      <string>Rimma_sans.ttf</string>
-      <string>Rimma_sans_android.ttf</string>
-    </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>
     <key>UIRequiredDeviceCapabilities</key>
@@ -72,8 +73,6 @@
     <array>
       <string>UIInterfaceOrientationPortrait</string>
       <string>UIInterfaceOrientationPortraitUpsideDown</string>
-      <string>UIInterfaceOrientationLandscapeLeft</string>
-      <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
     <key>UISupportedInterfaceOrientations~ipad</key>
     <array>

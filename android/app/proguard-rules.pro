@@ -11,15 +11,4 @@
 -keep class com.swmansion.reanimated.** { *; }
 -keep class com.facebook.react.turbomodule.** { *; }
 
-# AutoValue and JavaPoet
--keep class javax.lang.model.** { *; }
--keep class javax.tools.** { *; }
--keep class autovalue.shaded.com.squareup.javapoet.** { *; }
--keep class com.google.auto.value.** { *; }
--keep class com.google.auto.value.extension.memoized.** { *; }
--dontwarn javax.lang.model.**
--dontwarn javax.tools.**
--dontwarn autovalue.shaded.com.squareup.javapoet.**
--dontwarn com.google.auto.value.**
-
 # Add any project specific keep options here:

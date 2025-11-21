@@ -1,104 +1,102 @@
 {
-  "scheme": "acme",
-  "userInterfaceStyle": "automatic",
-  "orientation": "default",
-  "icon": "assets/images/logo_purple.png",
-  "web": {
-    "output": "static"
-  },
   "expo": {
-    "orientation": "portrait"
-  },
-  "plugins": [
-    "expo-router",
-
-    "expo-screen-orientation",
-    [
-      "expo-build-properties",
-      {
-        "android": {
-          "compileSdkVersion": 35,
-          "targetSdkVersion": 35,
-          "buildToolsVersion": "35.0.0",
-          "minSdkVersion": 24,
-          "enableProguardInReleaseBuilds": true,
-          "enableShrinkResourcesInReleaseBuilds": true,
-          "enableMinifyInReleaseBuilds": true
-        },
-        "ios": {
-          "deploymentTarget": "15.1",
-          "useFrameworks": "static"
-        }
-      }
+    "name": "Fitchoice",
+    "slug": "Fitchoice",
+    "scheme": "acme",
+    "userInterfaceStyle": "automatic",
+    "orientation": "portrait",
+    "icon": "assets/images/logo_purple.png",
+    "runtimeVersion": "1.0.0",
+    "assetBundlePatterns": [
+      "assets/fonts/*",
+      "assets/images/**/*",
+      "src/assets/**/*"
     ],
-    [
-      "expo-splash-screen",
-      {
-        "image": "src/assets/images/logo.png",
-        "imageWidth": 200,
-        "resizeMode": "contain",
+    "ios": {
+      "bundleIdentifier": "com.yzned.Fitchoice",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Нужно для сканирования QR-кодов и загрузки фото",
+        "NSUserNotificationsUsageDescription": "Мы будем напоминать о тренировках, чтобы вы ничего не пропустили",
+        "UILaunchStoryboardName": "SplashScreen"
+      }
+    },
+    "android": {
+      "package": "com.yzned.Fitchoice",
+      "adaptiveIcon": {
         "backgroundColor": "#C5F680",
-        "dark": {
-          "backgroundColor": "#BA9BF7"
+        "foregroundImage": "src/assets/images/logo.png",
+        "monochromeImage": "src/assets/images/logo.png"
+      },
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-screen-orientation",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0",
+            "minSdkVersion": 24,
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "enableMinifyInReleaseBuilds": true
+          },
+          "ios": {
+            "deploymentTarget": "15.1",
+            "useFrameworks": "static"
+          }
         }
-      }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "assets/images/logo_purple.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#C5F680",
+          "dark": {
+            "backgroundColor": "#BA9BF7"
+          }
+        }
+      ],
+      "expo-audio",
+      "expo-video",
+      [
+        "expo-notifications",
+        {
+          "icon": "src/assets/images/logo.png",
+          "color": "#C5F680"
+        }
+      ]
     ],
-    "expo-audio",
-    "expo-video",
-    [
-      "expo-notifications",
-      {
-        "icon": "src/assets/images/logo.png",
-        "color": "#C5F680"
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ba4720b8-6036-40ec-b386-49bc24d82e77"
       }
-    ]
-  ],
-  "assetBundlePatterns": [
-    "assets/fonts/*",
-    "assets/images/**/*",
-    "src/assets/**/*"
-  ],
-  "name": "Fitchoice",
-  "slug": "Fitchoice",
-  "ios": {
-    "bundleIdentifier": "com.yzned.Fitchoice",
-    "infoPlist": {
-      "NSCameraUsageDescription": "Нужно для сканирования QR-кодов и загрузки фото",
-      "NSUserNotificationsUsageDescription": "Мы будем напоминать о тренировках, чтобы вы ничего не пропустили",
-      "UILaunchStoryboardName": "SplashScreen"
     },
-    "supportsTablet": true
-  },
-  "android": {
-    "package": "com.yzned.Fitchoice",
-    "permissions": [
-      "READ_EXTERNAL_STORAGE",
-      "WRITE_EXTERNAL_STORAGE",
-      "RECORD_AUDIO",
-      "android.permission.MODIFY_AUDIO_SETTINGS"
-    ],
-    "adaptiveIcon": {
-      "backgroundColor": "#C5F680",
-      "foregroundImage": "src/assets/images/logo.png",
-      "monochromeImage": "src/assets/images/logo.png"
-    },
-    "edgeToEdgeEnabled": true,
-    "predictiveBackGestureEnabled": false
-  },
-  "experiments": {
-    "tsconfigPaths": true
-  },
-  "runtimeVersion": "1.0.0",
-  "extra": {
-    "router": {},
-    "eas": {
-      "projectId": "ba4720b8-6036-40ec-b386-49bc24d82e77"
+    "updates": {
+      "url": "https://u.expo.dev/ba4720b8-6036-40ec-b386-49bc24d82e77",
+      "fallbackToCacheTimeout": 0,
+      "checkAutomatically": "ON_LOAD",
+      "enabled": true
     }
-  },
-  "updates": {
-    "url": "https://u.expo.dev/ba4720b8-6036-40ec-b386-49bc24d82e77",
-    "fallbackToCacheTimeout": 0,
-    "checkAutomatically": "ON_LOAD",
-    "enabled": true
   }
 }
