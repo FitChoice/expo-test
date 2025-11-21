@@ -14,9 +14,21 @@ import {
 import Svg, { Circle } from 'react-native-svg'
 import { type ExpoWebGLRenderingContext } from 'expo-gl'
 
+// Polyfill for Camera.Constants which was removed in expo-camera v17
+// @tensorflow/tfjs-react-native still expects this API
+if (!(Camera as any).Constants) {
+    (Camera as any).Constants = {
+        Type: {
+            front: 1, // Front camera
+            back: 2,  // Back camera
+        },
+    }
+}
+
 // tslint:disable-next-line: variable-name
 const TensorCamera = cameraWithTensors(ExpoCamera)
 
+// Use string values for camera type
 type CameraType = 'front' | 'back'
 
 const IS_ANDROID = Platform.OS === 'android'
@@ -46,9 +58,6 @@ const OUTPUT_TENSOR_HEIGHT = OUTPUT_TENSOR_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4)
 // Whether to auto-render TensorCamera preview.
 const AUTO_RENDER = false
 
-// Whether to load model from app bundle (true) or through network (false).
-const LOAD_MODEL_FROM_BUNDLE = false
-
 export  const BodyPositionScreen: React.FC = () => {
     const cameraRef = useRef(null)
     const [tfReady, setTfReady] = useState(false)
@@ -57,6 +66,7 @@ export  const BodyPositionScreen: React.FC = () => {
     const [fps, setFps] = useState(0)
     const [orientation, setOrientation] =
 		useState<ScreenOrientation.Orientation>()
+    // Use front camera by default
     const [cameraType, setCameraType] = useState<CameraType>('front')
     // Use `useRef` so that changing it won't trigger a re-render.
     //
@@ -84,21 +94,11 @@ export  const BodyPositionScreen: React.FC = () => {
             // Wait for tfjs to initialize the backend.
             await tf.ready()
 
-            // Load movenet model.
-            // https://github.com/tensorflow/tfjs-models/tree/master/pose-detection
             const movenetModelConfig: posedetection.MoveNetModelConfig = {
                 modelType: posedetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
                 enableSmoothing: true,
             }
-            // if (LOAD_MODEL_FROM_BUNDLE) {
-            //     const modelJson = require('./offline_model/model.json')
-            //     const modelWeights1 = require('./offline_model/group1-shard1of2.bin')
-            //     const modelWeights2 = require('./offline_model/group1-shard2of2.bin')
-            //     movenetModelConfig.modelUrl = bundleResourceIO(modelJson, [
-            //         modelWeights1,
-            //         modelWeights2,
-            //     ])
-            // }
+     
             const model = await posedetection.createDetector(
                 posedetection.SupportedModels.MoveNet,
                 movenetModelConfig
@@ -124,10 +124,9 @@ export  const BodyPositionScreen: React.FC = () => {
 
     const handleCameraStream = async (
         images: IterableIterator<tf.Tensor3D>,
-        updatePreview: (() => void) | undefined,
-        gl: ExpoWebGLRenderingContext | undefined
+        updatePreview: () => void,
+        gl: ExpoWebGLRenderingContext
     ) => {
-
         const loop = async () => {
             // Get the tensor and run pose detection.
             const imageTensor = images.next().value as tf.Tensor3D
@@ -148,26 +147,15 @@ export  const BodyPositionScreen: React.FC = () => {
             }
 
             // Render camera preview manually when autorender=false.
-            if (!AUTO_RENDER && typeof updatePreview === 'function') {
-            
+            if (!AUTO_RENDER) {
                 try {
-                    // Only call updatePreview if gl context is valid
-                
-                    if (gl && gl.canvas) {
-                        console.log('updatePreview canvas', gl.canvas)
-                        updatePreview()
-                        // Check if endFrameEXP exists before calling
-                        if ('endFrameEXP' in gl && typeof gl.endFrameEXP === 'function') {
-                        
-                            gl.endFrameEXP()
-                        }
+                    updatePreview()
+                    if (gl && typeof gl.endFrameEXP === 'function') {
+                        gl.endFrameEXP()
                     }
                 } catch (error) {
                     // Silently continue - preview update is not critical
-                    // Only log if it's not the expected error about 'Type'
-                    if (error instanceof Error && !error.message.includes('Type')) {
-                        console.warn('Error updating preview:', error)
-                    }
+                    console.warn('Error updating preview:', error)
                 }
             }
 
@@ -217,28 +205,6 @@ export  const BodyPositionScreen: React.FC = () => {
                 <Text>FPS: {fps}</Text>
             </View>
         )
-    }
-
-    const renderCameraTypeSwitcher = () => {
-        return (
-            <View
-                style={styles.cameraTypeSwitcher}
-                onTouchEnd={handleSwitchCameraType}
-            >
-                <Text>
-					Switch to{' '}
-                    {cameraType === 'front' ? 'back' : 'front'} camera
-                </Text>
-            </View>
-        )
-    }
-
-    const handleSwitchCameraType = () => {
-        if (cameraType === 'front') {
-            setCameraType('back')
-        } else {
-            setCameraType('front')
-        }
     }
 
     const isPortrait = () => {
@@ -303,6 +269,10 @@ export  const BodyPositionScreen: React.FC = () => {
                     isPortrait() ? styles.containerPortrait : styles.containerLandscape
                 }
             >
+                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                {/* @ts-ignore - TensorCamera has incorrect type definitions */}
+                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                {/* @ts-ignore - TensorCamera expects type prop but types are incorrect */}
                 <TensorCamera
                     ref={cameraRef}
                     style={styles.camera}
@@ -313,11 +283,12 @@ export  const BodyPositionScreen: React.FC = () => {
                     resizeHeight={getOutputTensorHeight()}
                     resizeDepth={3}
                     rotation={getTextureRotationAngleInDegrees()}
-                    onReady={handleCameraStream} useCustomShadersToResize={false}
-                    cameraTextureWidth={0} cameraTextureHeight={0}                />
+                    onReady={handleCameraStream}
+                    useCustomShadersToResize={false}
+                    cameraTextureWidth={0}
+                    cameraTextureHeight={0}
+                />
                 {renderPose()}
-                {renderFps()}
-                {renderCameraTypeSwitcher()}
             </View>
         )
     }
