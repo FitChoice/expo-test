@@ -12,17 +12,21 @@ import { type Exercise } from '@/entities/training'
 import { ExerciseWithCounterWrapper, useVideoPlayerContext } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 import { CountdownDisplay } from './ExerciseExampleCountdownScreen'
 import { useVideoPlayer } from 'expo-video'
-import { CameraView } from 'expo-camera'
 import { VIDEO_SCREEN_HEIGHT as verticalCameraViewHeight } from '@/shared/constants/sizes'
 import { Audio } from 'expo-av'
+import { PoseCamera } from '@/widgets/pose-camera'
+import type * as posedetection from '@tensorflow-models/pose-detection'
+import type * as ScreenOrientation from 'expo-screen-orientation'
 
 interface TimerExerciseScreenProps {
 	isVertical?: boolean
 	onComplete: () => void
 	exercise: Exercise
+	model: posedetection.PoseDetector
+	orientation: ScreenOrientation.Orientation
 }
 
-function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exercise, player: ReturnType<typeof useVideoPlayer>, isVertical?: boolean }) {
+function TimerExerciseContent({ exercise, model, isVertical, orientation }: TimerExerciseScreenProps) {
     const [localCurrentSet, setLocalCurrentSet] = useState(0)
     const [cameraKey, setCameraKey] = useState(0)
     const [stepProgressHeight, setStepProgressHeight] = useState(0)
@@ -89,15 +93,15 @@ function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exer
         return () => clearInterval(interval)
     }, [exercise.sets])
 
-    useEffect(() => {
-        if (player && videoPlayerContext) {
-            const unregister = videoPlayerContext.registerPlayer(player)
-            return unregister
-        } else {
-            console.log('ExerciseExecutionScreen: cannot register - missing player or context')
-        }
-        return undefined
-    }, [player, videoPlayerContext])
+    // useEffect(() => {
+    //     if (player && videoPlayerContext) {
+    //         const unregister = videoPlayerContext.registerPlayer(player)
+    //         return unregister
+    //     } else {
+    //         console.log('ExerciseExecutionScreen: cannot register - missing player or context')
+    //     }
+    //     return undefined
+    // }, [player, videoPlayerContext])
   
     const { height: windowHeight } = useWindowDimensions()
 
@@ -107,16 +111,10 @@ function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exer
         <View className="flex-1">
             {/* Camera View with Video Overlay */}
             <View style={{ height, position: 'relative', width: '100%', overflow: 'hidden' }}>
-                {/* Camera View - Background Layer */}
-                {isFocused ? (
-                    <CameraView 
-                        key={`camera-${cameraKey}`}
-                        style={{ height, width: '100%', position: 'absolute', top: 0, left: 0 }}
-                        facing="front" 
-                    />
-                ) : (
-                    <View style={{ height, width: '100%', position: 'absolute', top: 0, left: 0, backgroundColor: 'black' }} />
-                )}
+               
+                <View>
+                    <PoseCamera model={model} orientation={orientation} />
+                </View>
 				
                 {/* Video Preview Window - Bottom Right Corner - Foreground Layer */}
                 {/* {exercise.videoUrl && player && (
@@ -278,7 +276,10 @@ function TimerExerciseContent({ exercise, player, isVertical }: { exercise: Exer
 
 export function ExerciseExecutionScreen({
     isVertical,
-    onComplete, exercise
+    onComplete,
+    exercise,
+    model,
+    orientation
 }: TimerExerciseScreenProps) {
     const player = useVideoPlayer(exercise.videoUrl || '', (player) => {
         player.loop = true
@@ -290,7 +291,13 @@ export function ExerciseExecutionScreen({
             countdownInitial={exercise?.duration }
             onComplete={onComplete}
         >
-            <TimerExerciseContent exercise={exercise} player={player}   isVertical={isVertical}/>
+            <TimerExerciseContent 
+                exercise={exercise} 
+                isVertical={isVertical}
+                model={model}
+                orientation={orientation}
+                onComplete={onComplete}
+            />
         </ExerciseWithCounterWrapper>
     )
 }

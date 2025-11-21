@@ -57,15 +57,15 @@ export const ExerciseWithCounterWrapper = ({
     const videoPlayersRef = useRef<Set<VideoPlayer>>(new Set())
 
     const tick = useCallback(() => {
-        // setCountdown((prev) => {
-        //     if (prev <= 1) {
-        //         clearInterval(timerRef.current!)
-        //         timerRef.current = null
-        //         setTimeout(() => onComplete(), 0)
-        //         return 0
-        //     }
-        //     return prev - 1
-        // })
+        setCountdown((prev) => {
+            if (prev <= 1) {
+                clearInterval(timerRef.current!)
+                timerRef.current = null
+                setTimeout(() => onComplete(), 0)
+                return 0
+            }
+            return prev - 1
+        })
     }, [onComplete])
 
     const onStop = useCallback(() => {

@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import { View } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
-import * as posedetection from '@tensorflow-models/pose-detection'
+import type * as posedetection from '@tensorflow-models/pose-detection'
 import { BodyPositionScreen } from './exercise/BodyPositionScreen'
 import { ExerciseSuccessScreen } from './exercise/ExerciseSuccessScreen'
 import { RestScreen } from './exercise/RestScreen'
@@ -17,6 +17,7 @@ import { useTrainingStore } from '@/entities/training'
 import {
     ExerciseExecutionScreen
 } from '@/widgets/training-session/ui/exercise/ExerciseExecutionScreen'
+import { ExerciseExampleCountdownScreen } from './exercise/ExerciseExampleCountdownScreen'
 
 type ExerciseStep =
 	| 'countdown'
@@ -268,25 +269,13 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             />
         )}
         
-        {currentStep === 'countdown' &&  <BodyPositionScreen
-            isVertical={isVertical}
-            //side={hasSides ? currentSideState : undefined}
-            key="position-check"
-            onComplete={handlePositionComplete}
-            model={model}
-            orientation={orientation}
+        {currentStep === 'countdown' && ( <ExerciseExampleCountdownScreen
+            exercise={currentExercise}
+            currentSet={currentSet}
+            onComplete={handleCountdownComplete}
+						isVertical={isVertical}
         />
-
-            // 	( <ExerciseExampleCountdownScreen
-            //     isVertical={isVertical}
-            //     exercise={currentExercise}
-            //     currentSet={currentSet}
-            //     onComplete={handleCountdownComplete}
-            //
-            // />
-            // )
-
-        }
+        )}
    
         {/*{currentStep === 'execution' && currentExercise.isAi && (*/}
         {/*	<AIExerciseScreen*/}
@@ -296,9 +285,11 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         {/*)}*/}
         {currentStep === 'execution' &&  (
             <ExerciseExecutionScreen
-				     isVertical={isVertical}
+                model={model}
+                orientation={orientation}
                 onComplete={handleExecutionComplete}
                 exercise={currentExercise}
+								isVertical={isVertical}
             />
         )}
         {currentStep === 'success' && (

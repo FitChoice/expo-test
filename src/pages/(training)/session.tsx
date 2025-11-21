@@ -4,12 +4,13 @@
  * Использует state machine для управления переходами между состояниями
  */
 
-import { View, ActivityIndicator, Text } from 'react-native'
+import { View, Text } from 'react-native'
 import { useTrainingStore } from '@/entities/training'
 import { OnboardingFlow, ExerciseFlow } from '@/widgets/training-session'
 import TrainingReportScreen from './report'
 import { TrainingInfo } from '@/widgets/training-session/ui/TrainingInfo'
 import { usePoseCameraSetup } from '@/widgets/pose-camera'
+import { Loader } from '@/shared/ui/Loader/Loader'
 
 export default function TrainingSessionScreen() {
     const training = useTrainingStore((state) => state.training)
@@ -19,10 +20,10 @@ export default function TrainingSessionScreen() {
     // If training data is not loaded or camera is not ready, show loading
     if (!training || !tfReady || !model || !orientation) {
         return (
-            <View className="bg-background-primary flex-1 items-center justify-center">
-                <ActivityIndicator size="large" color="#9333EA" />
-                {error && <Text className="mt-4 text-red-500">Error: {error.message}</Text>}
-            </View>
+            <>
+                {error ? <Text>{error.message}</Text>  :
+                    <Loader text="Загрузка тренировки..." />}
+            </>
         )
     }
 
