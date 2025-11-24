@@ -8,7 +8,6 @@ import { Button } from '@/shared/ui'
 import { DotsProgress } from '@/shared/ui/DotsProgress'
 import CameraIcon from '@/assets/icons/large/camera.svg'
 import { useCameraPermissions } from 'expo-camera'
-import { GradientBg } from '@/shared/ui/GradientBG'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
 
@@ -35,17 +34,14 @@ export function CameraPermissionScreen({ onNext }: CameraPermissionScreenProps) 
     }
 
     return (
-        <View className="flex-1 bg-black pb-10">
-            {/* Gradient Background */}
-            <GradientBg />
-
+        <View className="flex-1">
             {/* Close Button */}
-            <View className="absolute right-4 top-12 z-10">
+            <View className="absolute right-4  z-10">
                 <CloseBtn handlePress={handleStop} classNames="h-12 w-12 rounded-2xl" />
             </View>
 
             {/* Progress Dots */}
-            <View className="absolute left-1/2 -translate-x-1/2 top-20 z-10">
+            <View className="absolute left-1/2 -translate-x-1/2 top-10 z-10">
                 <DotsProgress total={4} current={1} variant="onboarding" />
             </View>
 

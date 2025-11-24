@@ -183,12 +183,9 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
     }, [onNext])
 
     return (
-        <View className="flex-1 bg-black">
-            {/* Gradient Background */}
-            <GradientBg />
-
+        <View className="flex-1 ">
             {/* Close Button */}
-            <View className="absolute right-4 top-12 z-10">
+					<View className="absolute right-4  z-10">
                 <CloseBtn handlePress={handleStop} classNames="h-12 w-12 rounded-2xl" />
             </View>
 

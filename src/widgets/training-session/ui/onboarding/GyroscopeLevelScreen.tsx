@@ -126,17 +126,15 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
     }
 
     return (
-        <View className="bg-background-primary flex-1 items-center">
+        <View className="flex-1 items-center">
 
-            {/* Gradient Background */}
-            <GradientBg  />
             {/* Close Button */}
-            <View className={`absolute  ${isVertical ? 'top-12 right-5' : 'top-5 right-16'} z-10`}>
+            <View className={`absolute  ${isVertical ? 'right-5' : 'top-5 right-16'} z-10`}>
                 <CloseBtn handlePress={handleStop} classNames={'h-12 w-12 rounded-2xl'} />
             </View>
 
             {/* Progress Dots */}
-            <View   className={`absolute left-1/2 -translate-x-1/2 ${isVertical ? 'top-20' : 'top-5'} z-10`}>
+            <View   className={`absolute left-1/2 -translate-x-1/2 ${isVertical ? 'top-10' : 'top-5'} z-10`}>
                 <DotsProgress total={4} current={3} variant="onboarding" />
             </View>
             {/* Content */}

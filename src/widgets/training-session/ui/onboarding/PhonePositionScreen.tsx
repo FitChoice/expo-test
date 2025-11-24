@@ -9,7 +9,6 @@ import { CameraView, useCameraPermissions } from 'expo-camera'
 import { useState, useEffect } from 'react'
 import { Button } from '@/shared/ui'
 import { DotsProgress } from '@/shared/ui/DotsProgress'
-import { GradientBg } from '@/shared/ui/GradientBG'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
 
@@ -55,22 +54,19 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
     }
 
     return (
-        <View className="bg-background-primary flex-1 ">
-
-            {/* Gradient Background */}
-            <GradientBg  />
+        <View className=" flex-1 ">
             {/* Close Button */}
-            <View className="absolute right-4 top-12 z-10">
+            <View className="absolute right-4  z-10">
                 <CloseBtn handlePress={handleStop} classNames={'h-12 w-12 rounded-2xl'} />
             </View>
 
             {/* Progress Dots */}
-            <View className="absolute left-1/2 -translate-x-1/2 top-20 z-10">
+            <View className="absolute left-1/2 -translate-x-1/2 top-10 z-10">
                 <DotsProgress total={4} current={2} variant="onboarding" />
             </View>
 
             {/* Content */}
-            <View className="flex-1 items-center justify-center px-6 mb-10">
+            <View className="flex-1 items-center justify-center px-6 mb-10 mt-20 ">
                 {/* Camera Preview */}
                 <View className=" h-96 w-full overflow-hidden rounded-3xl bg-black">
                     <CameraView
