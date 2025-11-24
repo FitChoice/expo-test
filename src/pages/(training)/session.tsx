@@ -4,14 +4,17 @@
  * Использует state machine для управления переходами между состояниями
  */
 
-import { View, Text } from 'react-native'
+import { Text } from 'react-native'
 import { useTrainingStore } from '@/entities/training'
-import { OnboardingFlow, ExerciseFlow } from '@/widgets/training-session'
 import TrainingReportScreen from './report'
-import { TrainingInfo } from '@/widgets/training-session/ui/TrainingInfo'
 import { usePoseCameraSetup } from '@/widgets/pose-camera'
 import { Loader } from '@/shared/ui/Loader/Loader'
 import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
+import {
+    TrainingAnalytics
+} from '@/widgets/training-session/ui/TrainingAnalytics'
+import { TrainingInfo } from '@/widgets/training-session/ui/TrainingInfo'
+import { ExerciseFlow, OnboardingFlow } from '@/widgets/training-session'
 import { ExerciseSuccess } from '@/widgets/training-session/ui/ExerciseSuccess'
 
 export default function TrainingSessionScreen() {
@@ -45,13 +48,14 @@ export default function TrainingSessionScreen() {
             </BackgroundLayoutNoSidePadding>
 
         case 'report':
-            return <TrainingReportScreen />
+            return <BackgroundLayoutNoSidePadding>
+	        <TrainingReportScreen />
+	    </BackgroundLayoutNoSidePadding>
 
         case 'analytics':
-            return <View
-                className="bg-background-primary flex-1 items-center justify-center">
-                <Text>Analytics</Text>
-            </View>
+            return <BackgroundLayoutNoSidePadding>
+	        <TrainingAnalytics />
+	    </BackgroundLayoutNoSidePadding>
 
         default:
             return (<BackgroundLayoutNoSidePadding>
@@ -59,10 +63,8 @@ export default function TrainingSessionScreen() {
             </BackgroundLayoutNoSidePadding>)
         }
 
-        return (<BackgroundLayoutNoSidePadding><ExerciseSuccess  />
-        </BackgroundLayoutNoSidePadding>)
     }
-		
+
     return mainContent()
 
 }

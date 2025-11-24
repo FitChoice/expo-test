@@ -46,6 +46,7 @@ interface TrainingState {
 	stop: () => Promise<void>
 	reportTraining: () => void
 	reset: () => void
+	setAnalytics: () => void
 
 	nextExercise: () => void
 	nextSet: () => void
@@ -125,6 +126,12 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
 
     finishTraining: () => {
         set({ status: 'finished' })
+    },
+
+    setAnalytics: () => {
+        set({
+            status: 'analytics',
+        })
     },
 
     stop: async () => {

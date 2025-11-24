@@ -6,9 +6,8 @@
 
 import { View, Text, TouchableOpacity } from 'react-native'
 import { router } from 'expo-router'
-import { Button, Container, MetricCard, TrainingTags } from '@/shared/ui'
+import { Button, MetricCard, TrainingTags } from '@/shared/ui'
 import { useTrainingStore } from '@/entities/training'
-import { GradientBg } from '@/shared/ui/GradientBG'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Fontisto from '@expo/vector-icons/Fontisto'
 
@@ -20,6 +19,7 @@ export default function TrainingReportScreen() {
     const averageFormQuality = useTrainingStore((state) => state.averageFormQuality)
     const totalReps = useTrainingStore((state) => state.totalReps)
     const completedExercises = useTrainingStore((state) => state.completedExercises)
+    const goToAnalytics = useTrainingStore((state) => state.setAnalytics)
     const reset = useTrainingStore((state) => state.reset)
 
     // Format time in minutes
@@ -53,9 +53,7 @@ export default function TrainingReportScreen() {
         )
     }
 
-    return ( <Container>
-
-		    <GradientBg />
+    return ( <View className="flex-1" >
 
         {/* Training Header Block */}
         <View className="w-full flex-row items-center px-4 py-10 bg-transparent">
@@ -127,11 +125,11 @@ export default function TrainingReportScreen() {
             <Button variant="tertiary" onPress={handleFinish}  className="flex-1" >
 				Закрыть
             </Button>
-            <Button variant="primary"  className="flex-1" >
+            <Button variant="primary"  onPress={goToAnalytics}  className="flex-1" >
 				Анализ ошибок
             </Button>
         </View>
 
-    </Container>
+    </View>
     )
 }
