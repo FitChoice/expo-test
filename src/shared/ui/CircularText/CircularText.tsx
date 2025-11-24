@@ -46,9 +46,13 @@ export const CircularText = ({
     const ry = height / 2
     const ellipsePath = `M ${centerX - rx},${centerY} A ${rx},${ry} 0 1,1 ${centerX + rx},${centerY} A ${rx},${ry} 0 1,1 ${centerX - rx},${centerY}`
 
+    // Вычисляем размер SVG с запасом, чтобы окружность не обрезалась
+    const svgWidth = Math.max(centerX + rx + 20, width + 40)
+    const svgHeight = Math.max(centerY + ry + 20, height + 40)
+
     return (
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-            <Svg width={305} height={217}>
+            <Svg width={svgWidth} height={svgHeight}>
                 <Defs>
                     <Path id="ellipse" d={ellipsePath} />
                     {maskRect && (

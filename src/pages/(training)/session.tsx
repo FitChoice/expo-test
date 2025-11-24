@@ -30,35 +30,37 @@ export default function TrainingSessionScreen() {
     }
 
     const mainContent = () => {
-        // Render based on current status
-        // switch (status) {
-        // case 'info':
-        //     return <TrainingInfo />
-        // case 'onboarding':
-        //     return <BackgroundLayoutNoSidePadding>
-        //         <OnboardingFlow />
-        //     </BackgroundLayoutNoSidePadding>
-				//
-        // case 'finished':
-        //     return <ExerciseSuccess  />
-				//
-        // case 'report':
-        //     return <TrainingReportScreen />
-				//
-        // case 'analytics':
-        //     return <View
-        //         className="bg-background-primary flex-1 items-center justify-center">
-        //         <Text>Analytics</Text>
-        //     </View>
-				//
-        // default:
-        //     return (<BackgroundLayoutNoSidePadding>
-        //         <ExerciseFlow model={model} orientation={orientation} />
-        //     </BackgroundLayoutNoSidePadding>)
-        // }
+        //   Render based on current status
+        switch (status) {
+        case 'info':
+            return <TrainingInfo />
+        case 'onboarding':
+            return <BackgroundLayoutNoSidePadding>
+                <OnboardingFlow />
+            </BackgroundLayoutNoSidePadding>
 
-			return (<BackgroundLayoutNoSidePadding><ExerciseSuccess  />
-			</BackgroundLayoutNoSidePadding>)
+        case 'finished':
+            return <BackgroundLayoutNoSidePadding>
+                <ExerciseSuccess  />
+            </BackgroundLayoutNoSidePadding>
+
+        case 'report':
+            return <TrainingReportScreen />
+
+        case 'analytics':
+            return <View
+                className="bg-background-primary flex-1 items-center justify-center">
+                <Text>Analytics</Text>
+            </View>
+
+        default:
+            return (<BackgroundLayoutNoSidePadding>
+                <ExerciseFlow model={model} orientation={orientation} />
+            </BackgroundLayoutNoSidePadding>)
+        }
+
+        return (<BackgroundLayoutNoSidePadding><ExerciseSuccess  />
+        </BackgroundLayoutNoSidePadding>)
     }
 		
     return mainContent()
