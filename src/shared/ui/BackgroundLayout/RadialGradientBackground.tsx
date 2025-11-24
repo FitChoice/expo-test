@@ -15,7 +15,6 @@ import Svg, {
 export const RadialGradientBackground: React.FC = () => {
     return (
         <View style={styles.container}>
-
             <Svg
                 width="100%"
                 height="100%"

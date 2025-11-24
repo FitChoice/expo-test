@@ -70,7 +70,7 @@ export const NavigationBar = () => {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: 75,
+        bottom: 10,
         left: 0,
         right: 0,
         paddingHorizontal: 20,
