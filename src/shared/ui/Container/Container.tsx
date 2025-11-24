@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react'
-import { View, type ViewProps, StyleSheet, Platform } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { BlurView } from 'expo-blur'
+import { View, type ViewProps, StyleSheet } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as ScreenOrientation from 'expo-screen-orientation'
 
 /**
  * Container компонент с безопасной областью
- * Использует SafeAreaView для учета вырезов экрана (notch, home indicator)
- * SafeAreaView имеет размытый фон, который сливается с основным фоном приложения
+ * Использует useSafeAreaInsets для учета вырезов экрана (notch, home indicator)
  * Edges меняются в зависимости от ориентации: портретная - ['top', 'bottom'], горизонтальная - ['top', 'bottom', 'left', 'right']
  */
 interface ContainerProps extends ViewProps {
 	children: React.ReactNode
 }
 
-export const Container = ({ children, className, ...props }: ContainerProps) => {
+export const Container = ({ children, className, style, ...props }: ContainerProps) => {
     const [isLandscape, setIsLandscape] = useState(false)
+    const insets = useSafeAreaInsets()
 
     useEffect(() => {
         const checkOrientation = async () => {
@@ -41,23 +40,22 @@ export const Container = ({ children, className, ...props }: ContainerProps) => 
         }
     }, [])
 
-    const edges: readonly ('top' | 'bottom' | 'left' | 'right')[] = isLandscape
-        ? (['top', 'bottom', 'left', 'right'] as const)
-        : (['top', 'bottom'] as const)
+    const paddingStyle = {
+        paddingTop: isLandscape ? insets.top : insets.top,
+        paddingBottom: isLandscape ? insets.bottom : insets.bottom,
+        paddingLeft: isLandscape ? insets.left : 0,
+        paddingRight: isLandscape ? insets.right : 0,
+    }
 
     return (
-        <SafeAreaView className="flex-1" edges={edges} style={styles.safeArea}>
-            {/* Blur фон для safe area */}
-
-            <View className={`flex-1 ${className || ''}`} {...props}>
+        <View 
+            className="flex-1" 
+            style={[{ backgroundColor: 'transparent' }, paddingStyle, style]}
+            {...props}
+        >
+            <View className={`flex-1 ${className || ''}`}>
                 {children}
             </View>
-        </SafeAreaView>
+        </View>
     )
 }
-
-const styles = StyleSheet.create({
-    safeArea: {
-        backgroundColor: 'transparent',
-    },
-})

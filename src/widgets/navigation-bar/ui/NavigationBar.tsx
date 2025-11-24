@@ -11,16 +11,13 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
  * Displays main navigation icons at the bottom of the screen
  */
 export const NavigationBar = () => {
-    const insets = useSafeAreaInsets()
+
     const router = useRouter()
 
     return (
         <View
             style={[
-                styles.container,
-                {
-                    paddingBottom: 10,
-                },
+                styles.container
             ]}
         >
             <View style={styles.navContent}>
@@ -73,7 +70,7 @@ export const NavigationBar = () => {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: 0,
+        bottom: 75,
         left: 0,
         right: 0,
         paddingHorizontal: 20,

@@ -30,20 +30,17 @@ export function StopModal({ visible, onResume, onStop }: PauseModalProps) {
                     style={StyleSheet.absoluteFill}
                     experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
                     blurReductionFactor={Platform.OS === 'android' ? 4 : undefined}
-                >
-					
-                </BlurView>
+                />
 
                 {/* Content */}
                 <View className="flex-1 justify-center items-center px-6">
-					
                     {/* Text */}
                     <View className="items-center mt-6">
                         <Text style={sharedStyles.title}>
-							Остановить
+                            Остановить
                         </Text>
                         <Text style={sharedStyles.title}>
-							тренировку?
+                            тренировку?
                         </Text>
 
                         <Text className="text-t2 text-light-text-200 mt-2">Вы сможете начать с места, где остановились</Text>
@@ -53,10 +50,10 @@ export function StopModal({ visible, onResume, onStop }: PauseModalProps) {
                 {/* Button at bottom */}
                 <View className={`${isLandscape ? 'absolute bottom-0 left-0 right-0 px-6 pb-safe-bottom flex-row gap-2 justify-center' : 'absolute bottom-0 left-0 right-0 px-6 pb-safe-bottom flex-row gap-2'}`}>
                     <Button onPress={onResume} variant="tertiary"  className={isLandscape ? 'flex-1 max-w-[200px]' : 'flex-1'} >
-						Не выходить
+                        Не выходить
                     </Button>
                     <Button onPress={onStop} variant="primary"  className={isLandscape ? 'flex-1 max-w-[200px]' : 'flex-1'} >
-						Выйти
+                        Выйти
                     </Button>
                 </View>
             </View>

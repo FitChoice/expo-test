@@ -90,7 +90,8 @@ module.exports = {
           'dark-200': '#949494',
           'dark-400': '#2E322D',
           'dark-500': '#1E1E1E',
-      
+          'dark-900': '#151515',
+
           'light': '#FFFFFF',
         },
         // Pure colors

@@ -1,10 +1,10 @@
+
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg'
 
 export const GradientBg = () => {
     return 		<Svg
         width="100%"
         height="100%"
-        style={{ position: 'absolute' }}
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
     >

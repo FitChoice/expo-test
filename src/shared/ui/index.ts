@@ -1,6 +1,7 @@
 export { Button } from './Button'
 export { BackButton } from './BackButton'
 export { Container } from './Container'
+export { SafeAreaContainer } from './SafeAreaContainer'
 export { Icon } from './Icon'
 export { Input } from './Input'
 export { AuthGuard } from './AuthGuard'

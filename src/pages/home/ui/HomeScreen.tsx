@@ -11,7 +11,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 import {
-    Icon, Button, AuthGuard, BackgroundLayoutNoSidePadding, TrainingTags,
+    Icon,
+    Button,
+    AuthGuard,
+    BackgroundLayoutNoSidePadding,
+    TrainingTags,
 } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import type { Training } from '@/entities/training'
@@ -30,9 +34,7 @@ export const HomeScreen = () => {
     return (
         <AuthGuard>
             <BackgroundLayoutNoSidePadding>
-                <View style={styles.container}>
-                    {Platform.OS === 'web' ? <WebContent /> : <MobileContent />}
-                </View>
+                {Platform.OS === 'web' ? <WebContent /> : <MobileContent />}
             </BackgroundLayoutNoSidePadding>
         </AuthGuard>
     )
@@ -42,7 +44,7 @@ export const HomeScreen = () => {
  * Mobile version according to Figma design
  */
 const MobileContent = () => {
-    const insets = useSafeAreaInsets()
+
     const router = useRouter()
     const startTraining = useTrainingStore((state) => state.startTraining)
 
@@ -136,7 +138,7 @@ const MobileContent = () => {
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
-			
+
             >
                 {/* Header with progress */}
                 <View className="pt-4">
@@ -249,7 +251,6 @@ const MobileContent = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-	
     },
     scrollView: {
         flex: 1,

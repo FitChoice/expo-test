@@ -5,6 +5,7 @@ import { PoseCamera } from '@/widgets/pose-camera'
 import { View, Text, Dimensions } from 'react-native'
 import { useState, useEffect } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
+import { useStatusBar } from '@/shared/lib'
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import type * as ScreenOrientation from 'expo-screen-orientation'
 
@@ -20,6 +21,12 @@ const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height - 180
 export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation }: BodyPositionScreenProps) => {
 
     const [showSuccess, setShowSuccess] = useState(false)
+
+    // Настройка статус-бара: светлые иконки для темного градиента
+    useStatusBar({
+        style: 'light',
+        backgroundColor: '#BA9BF7', // Цвет фона статус-бара на Android (совпадает с градиентом)
+    })
 
     useEffect(() => {
         // Reset state when component mounts
@@ -38,6 +45,7 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
             clearTimeout(completeTimer)
         }
     }, [onComplete])
+
 
     return <ExerciseWithCounterWrapper
         onComplete={onComplete}

@@ -1,12 +1,14 @@
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { Button, Switch, TrainingTags, ExerciseInfoCard } from '@/shared/ui'
+import {
+    Button, Switch, TrainingTags, ExerciseInfoCard,
+} from '@/shared/ui'
 import { useTrainingStore } from '@/entities/training'
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { GradientBg } from '@/shared/ui/GradientBG'
 import Entypo from '@expo/vector-icons/Entypo'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const trainingInfoBanner = require('@/assets/images/training_info_banner.png')
@@ -27,7 +29,9 @@ const equipmentImages = [
 ]
 
 export const TrainingInfo = () => {
-    const insets = useSafeAreaInsets()
+
+	const insets = useSafeAreaInsets()
+
     const training = useTrainingStore((state) => state.training)
     const startOnboarding = useTrainingStore((state) => state.startOnboarding)
     const [showTutorial, setShowTutorial] = useState(true)
@@ -55,13 +59,11 @@ export const TrainingInfo = () => {
         startOnboarding()
     }
 
-    return (<View className="flex-1">
+    return (   <View   className="flex-1" >
         <GradientBg />
         <ScrollView
             className="flex-1"
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 100 }}
-        >
+            showsVerticalScrollIndicator={false}>
             {/* Banner Image with Close Button */}
             <View className="relative">
                 <Image
@@ -80,7 +82,7 @@ export const TrainingInfo = () => {
             {/* Black Block with Text */}
             <View style={{ marginTop: -180 }}>
                 {/* Tags */}
-                <View className="bg-black px-6 pt-6 pb-6 mb-2 rounded-t-2xl rounded-b-2xl">
+                <View className="bg-black px-6 pt-6 pb-6 mb-2 rounded-3xl">
                     <TrainingTags
                         icon1={<MaterialCommunityIcons name="clock-time-eight" size={16} color="#FFFFFF" />}
                         title1={`${trainingDuration} минут`}
@@ -113,7 +115,7 @@ export const TrainingInfo = () => {
             </View>
 
             {/* Equipment Section */}
-            <View className="bg-black px-6 pt-6 pb-6 rounded-t-2xl rounded-b-2xl mb-2 ">
+            <View className="bg-black px-6 pt-6 pb-6 rounded-3xl mb-2 ">
                 <Text className="text-t1.1 text-white mb-4">
 						Инвентарь
                 </Text>
@@ -133,7 +135,7 @@ export const TrainingInfo = () => {
                 </ScrollView>
             </View>
 
-            <View className="bg-black px-6 pt-6 pb-6 rounded-t-2xl rounded-b-2xl">
+            <View className="bg-black px-6 pt-6 pb-6 rounded-3xl">
                 <Text className="text-t1.1 text-white mb-4">
 									3 упражнения
                 </Text>
@@ -145,7 +147,7 @@ export const TrainingInfo = () => {
         </ScrollView>
 
         {/* Start Button - Fixed at Bottom */}
-        <View className="absolute bottom-12 left-0 right-0 px-6 bg-background-primary">
+        <View className="px-6 bg-background-primary">
             <Button
                 variant="primary"
                 fullWidth

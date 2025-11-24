@@ -11,6 +11,7 @@ import TrainingReportScreen from './report'
 import { TrainingInfo } from '@/widgets/training-session/ui/TrainingInfo'
 import { usePoseCameraSetup } from '@/widgets/pose-camera'
 import { Loader } from '@/shared/ui/Loader/Loader'
+import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
 
 export default function TrainingSessionScreen() {
     const training = useTrainingStore((state) => state.training)
@@ -32,7 +33,9 @@ export default function TrainingSessionScreen() {
     case 'info':
         return  <TrainingInfo />
     case 'onboarding':
-        return <OnboardingFlow />
+        return  <BackgroundLayoutNoSidePadding>
+            <OnboardingFlow />
+        </BackgroundLayoutNoSidePadding>
 
     case 'finished':
         return <View className="bg-background-primary flex-1 items-center justify-center" ><Text>finished</Text>
