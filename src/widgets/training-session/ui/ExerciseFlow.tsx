@@ -9,7 +9,6 @@ import { View } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import { BodyPositionScreen } from './exercise/BodyPositionScreen'
-import { ExerciseSuccessScreen } from './exercise/ExerciseSuccessScreen'
 import { RestScreen } from './exercise/RestScreen'
 import { ExerciseTransitionScreen } from './exercise/ExerciseTransitionScreen'
 import { RotateScreen } from './exercise/RotateScreen'
@@ -26,7 +25,6 @@ type ExerciseStep =
 	| 'side_switch'
 	| 'rest'
 	| 'transition'
-	| 'success'
 	| 'rotate'
 
 type ExerciseFlowProps = {
@@ -44,6 +42,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const currentExerciseIndex = useTrainingStore((state) => state.currentExerciseIndex)
     const currentSet = useTrainingStore((state) => state.currentSet)
     const nextExercise = useTrainingStore((state) => state.nextExercise)
+    const finishTraining = useTrainingStore((state) => state.finishTraining)
     const stop = useTrainingStore((state) => state.stop)
 	
     const [repNumber, setRepNumber] = useState(0)
@@ -121,7 +120,8 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     // Завершили все сеты упражнения
                     const isLastExercise = currentExerciseIndex === training.exercises.length - 1
                     if (isLastExercise) {
-                        setCurrentStep('success')
+                        //  setCurrentStep('finished')
+                        finishTraining()
                     } else {
                         // Показываем отдых после завершения упражнения
                         setRestType('exercise')
@@ -177,7 +177,8 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     // Завершили все сеты упражнения
                     const isLastExercise = currentExerciseIndex === training.exercises.length - 1
                     if (isLastExercise) {
-                        setCurrentStep('success')
+                        // setCurrentStep('success')
+                        finishTraining()
                     } else {
                         // Показываем отдых после завершения упражнения
                         setRestType('exercise')
@@ -273,9 +274,11 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             exercise={currentExercise}
             currentSet={currentSet}
             onComplete={handleCountdownComplete}
-						isVertical={isVertical}
+            isVertical={isVertical}
         />
-        )}
+        )
+
+        }
    
         {/*{currentStep === 'execution' && currentExercise.isAi && (*/}
         {/*	<AIExerciseScreen*/}
@@ -289,12 +292,12 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                 orientation={orientation}
                 onComplete={handleExecutionComplete}
                 exercise={currentExercise}
-								isVertical={isVertical}
+                isVertical={isVertical}
             />
         )}
-        {currentStep === 'success' && (
-            <ExerciseSuccessScreen onComplete={handleSuccessComplete} />
-        )}
+        {/*{currentStep === 'success' && (*/}
+        {/*    <ExerciseSuccess onComplete={handleSuccessComplete} />*/}
+        {/*)}*/}
         {currentStep === 'side_switch' && (
             <BodyPositionScreen
                 key="side-switch"

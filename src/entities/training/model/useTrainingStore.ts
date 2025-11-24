@@ -50,6 +50,7 @@ interface TrainingState {
 	nextExercise: () => void
 	nextSet: () => void
 	completeSet: (setData: SetData) => void
+	finishTraining: () => void
 }
 
 const initialState = {
@@ -122,6 +123,10 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
         set({ status: 'report' })
     },
 
+    finishTraining: () => {
+        set({ status: 'finished' })
+    },
+
     stop: async () => {
         set({ status: 'idle' })
     },
@@ -151,10 +156,10 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
             completedExercises: [...completedExercises, currentExerciseIndex],
         })
 
-        // Check if training is finished
-        if (newIndex >= training.exercises.length) {
-            set({ status: 'finished' })
-        }
+        // // Check if training is finished
+        // if (newIndex >= training.exercises.length) {
+        //     set({ status: 'finished' })
+        // }
     },
 
     /**
@@ -190,6 +195,7 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
             averageFormQuality: Math.round(newAvgQuality),
             caloriesBurned: Math.round(newCalories),
         })
+			
     },
 
 }))

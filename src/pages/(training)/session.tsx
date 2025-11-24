@@ -12,6 +12,7 @@ import { TrainingInfo } from '@/widgets/training-session/ui/TrainingInfo'
 import { usePoseCameraSetup } from '@/widgets/pose-camera'
 import { Loader } from '@/shared/ui/Loader/Loader'
 import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
+import { ExerciseSuccess } from '@/widgets/training-session/ui/ExerciseSuccess'
 
 export default function TrainingSessionScreen() {
     const training = useTrainingStore((state) => state.training)
@@ -28,30 +29,38 @@ export default function TrainingSessionScreen() {
         )
     }
 
-    // Render based on current status
-    switch (status) {
-    case 'info':
-        return  <TrainingInfo />
-    case 'onboarding':
-        return  <BackgroundLayoutNoSidePadding>
-            <OnboardingFlow />
-        </BackgroundLayoutNoSidePadding>
+    const mainContent = () => {
+        // Render based on current status
+        // switch (status) {
+        // case 'info':
+        //     return <TrainingInfo />
+        // case 'onboarding':
+        //     return <BackgroundLayoutNoSidePadding>
+        //         <OnboardingFlow />
+        //     </BackgroundLayoutNoSidePadding>
+				//
+        // case 'finished':
+        //     return <ExerciseSuccess  />
+				//
+        // case 'report':
+        //     return <TrainingReportScreen />
+				//
+        // case 'analytics':
+        //     return <View
+        //         className="bg-background-primary flex-1 items-center justify-center">
+        //         <Text>Analytics</Text>
+        //     </View>
+				//
+        // default:
+        //     return (<BackgroundLayoutNoSidePadding>
+        //         <ExerciseFlow model={model} orientation={orientation} />
+        //     </BackgroundLayoutNoSidePadding>)
+        // }
 
-    case 'finished':
-        return <View className="bg-background-primary flex-1 items-center justify-center" ><Text>finished</Text>
-        </View>
-
-    case 'report':
-        return <TrainingReportScreen />
-
-    case 'analytics':
-        return <View className="bg-background-primary flex-1 items-center justify-center" >
-            <Text>Analytics</Text>
-        </View>
-
-    default:
-        return (
-            <ExerciseFlow model={model} orientation={orientation} />
-        )
+			return (<BackgroundLayoutNoSidePadding><ExerciseSuccess  />
+			</BackgroundLayoutNoSidePadding>)
     }
+		
+    return mainContent()
+
 }

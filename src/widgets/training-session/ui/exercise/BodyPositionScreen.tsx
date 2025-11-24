@@ -46,7 +46,6 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
         }
     }, [onComplete])
 
-
     return <ExerciseWithCounterWrapper
         onComplete={onComplete}
     >
