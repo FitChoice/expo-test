@@ -43,15 +43,9 @@ const IS_IOS = Platform.OS === 'ios'
 //
 // This might not cover all cases.
 
-// Для iOS: сначала определяем ширину, затем вычисляем высоту по соотношению 9:16
-// Для Android: используем старую логику (высота из экрана, ширина из высоты)
-const CAM_PREVIEW_WIDTH = IS_IOS 
-    ? Dimensions.get('window').width  // 100% ширины экрана для iOS
-    : (Dimensions.get('window').height - 180) * (3 / 4)  // Для Android как было
-
-const CAM_PREVIEW_HEIGHT = IS_IOS
-    ? CAM_PREVIEW_WIDTH * (16 / 9)  // Для iOS: высота = ширина * 16/9
-    : Dimensions.get('window').height - 180  // Для Android как было 
+// Ширина = 100% ширины экрана, высота = 60% от высоты экрана
+const CAM_PREVIEW_WIDTH = Dimensions.get('window').width
+const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height * 0.6 
 // The score threshold for pose detection results.
 const MIN_KEYPOINT_SCORE = 0.3
 
@@ -149,13 +143,17 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) =>
                 .forEach((k) => {
                     const x = k.x
                     const y = k.y
-                    const previewWidth = isPortrait() ? CAM_PREVIEW_WIDTH : CAM_PREVIEW_HEIGHT
+                    const cameraWidth = getCameraWidth()
+                    const cameraHeight = getCameraHeight()
                     const cxRaw =
-                        (x / getOutputTensorWidth()) * previewWidth
-                    const cx = IS_ANDROID ? previewWidth - cxRaw : cxRaw
+                        (x / getOutputTensorWidth()) * cameraWidth
+                    const cx = IS_ANDROID ? cameraWidth - cxRaw : cxRaw
+                    // Для iOS учитываем центрирование камеры в контейнере
+                    const yOffset = IS_IOS && isPortrait() 
+                        ? (CAM_PREVIEW_HEIGHT - cameraHeight) / 2 
+                        : 0
                     const cy =
-                        (y / getOutputTensorHeight()) *
-                        (isPortrait() ? CAM_PREVIEW_HEIGHT : CAM_PREVIEW_WIDTH)
+                        (y / getOutputTensorHeight()) * cameraHeight + yOffset
                     keypointMap.set(k.name ?? '', { x, y, cx, cy })
                 })
 
@@ -254,6 +252,23 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) =>
             : OUTPUT_TENSOR_WIDTH
     }
 
+    // Получаем реальные размеры камеры с учетом aspectRatio для iOS
+    const getCameraWidth = () => {
+        if (IS_IOS && isPortrait()) {
+            // Для iOS в портрете камера имеет aspectRatio 9/16, ширина = 100% ширины экрана
+            return CAM_PREVIEW_WIDTH
+        }
+        return isPortrait() ? CAM_PREVIEW_WIDTH : CAM_PREVIEW_HEIGHT
+    }
+
+    const getCameraHeight = () => {
+        if (IS_IOS && isPortrait()) {
+            // Для iOS в портрете камера имеет aspectRatio 9/16, высота = ширина * 16/9
+            return CAM_PREVIEW_WIDTH * (16 / 9)
+        }
+        return isPortrait() ? CAM_PREVIEW_HEIGHT : CAM_PREVIEW_WIDTH
+    }
+
     const getTextureRotationAngleInDegrees = () => {
         // On Android, the camera texture will rotate behind the scene as the phone
         // changes orientation, so we don't need to rotate it in TensorCamera.
@@ -279,6 +294,12 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) =>
 
     const shouldFlipCamera = IS_IOS && cameraType === 'front'
 
+    // Для iOS добавляем aspectRatio для правильного соотношения сторон (9:16 в портрете)
+    // Убираем height: '100%' чтобы aspectRatio работал правильно
+    const cameraStyle = IS_IOS && isPortrait()
+        ? [styles.camera, { height: undefined, aspectRatio: 9 / 16, alignSelf: 'center' }]
+        : styles.camera
+
     return (
         <View
             style={
@@ -288,13 +309,14 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) =>
             <View
                 style={[
                     styles.cameraWrapper,
+                    IS_IOS && isPortrait() && styles.cameraWrapperIOS,
                     shouldFlipCamera && { transform: [{ scaleX: -1 }] }
                 ]}
             >
                 {/* @ts-ignore - TensorCamera type issue */}
                 <TensorCamera
                     ref={cameraRef}
-                    style={styles.camera}
+                    style={cameraStyle}
                     autorender={AUTO_RENDER}
                     facing={cameraType}
                     // tensor related props
@@ -331,6 +353,11 @@ const styles = StyleSheet.create({
     cameraWrapper: {
         width: '100%',
         height: '100%',
+    },
+    cameraWrapperIOS: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
     },
     camera: {
         width: '100%',
