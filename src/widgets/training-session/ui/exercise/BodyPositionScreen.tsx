@@ -28,23 +28,23 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
         backgroundColor: '#BA9BF7', // Цвет фона статус-бара на Android (совпадает с градиентом)
     })
 
-    useEffect(() => {
-        // Reset state when component mounts
-        setShowSuccess(false)
-    
-        const successTimer = setTimeout(() => {
-            setShowSuccess(true)
-        }, 7000)
-    
-        const completeTimer = setTimeout(() => {
-            onComplete()
-        }, 8000)
-    
-        return () => {
-            clearTimeout(successTimer)
-            clearTimeout(completeTimer)
-        }
-    }, [onComplete])
+    // useEffect(() => {
+    //     // Reset state when component mounts
+    //     setShowSuccess(false)
+    //
+    //     const successTimer = setTimeout(() => {
+    //         setShowSuccess(true)
+    //     }, 7000)
+    //
+    //     const completeTimer = setTimeout(() => {
+    //         onComplete()
+    //     }, 8000)
+    //
+    //     return () => {
+    //         clearTimeout(successTimer)
+    //         clearTimeout(completeTimer)
+    //     }
+    // }, [onComplete])
 
     return <ExerciseWithCounterWrapper
         onComplete={onComplete}

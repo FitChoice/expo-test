@@ -16,7 +16,6 @@ import { useTrainingStore } from '@/entities/training'
 import {
     ExerciseExecutionScreen
 } from '@/widgets/training-session/ui/exercise/ExerciseExecutionScreen'
-import { ExerciseExampleCountdownScreen } from './exercise/ExerciseExampleCountdownScreen'
 
 type ExerciseStep =
 	| 'countdown'
@@ -270,13 +269,20 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             />
         )}
         
-        {currentStep === 'countdown' && ( <ExerciseExampleCountdownScreen
-            exercise={currentExercise}
-            currentSet={currentSet}
-            onComplete={handleCountdownComplete}
-            isVertical={isVertical}
+        {currentStep === 'countdown' &&     <BodyPositionScreen
+            key="side-switch"
+            onComplete={handleSideSwitchComplete}
+            model={model}
+            orientation={orientation}
         />
-        )
+
+            // 	( <ExerciseExampleCountdownScreen
+            //     exercise={currentExercise}
+            //     currentSet={currentSet}
+            //     onComplete={handleCountdownComplete}
+            //     isVertical={isVertical}
+            // />
+            // )
 
         }
    

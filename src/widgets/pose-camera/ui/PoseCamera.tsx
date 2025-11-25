@@ -13,6 +13,7 @@ import {
 } from '@tensorflow/tfjs-react-native'
 import Svg, { Circle, Line } from 'react-native-svg'
 import { type ExpoWebGLRenderingContext } from 'expo-gl'
+import { useKeepAwake } from 'expo-keep-awake'
 
 // Polyfill for Camera.Constants which was removed in expo-camera v17
 // @tensorflow/tfjs-react-native still expects this API
@@ -65,6 +66,7 @@ type PoseCameraProps = {
 }
 
 export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) => {
+    useKeepAwake()
     const cameraRef = useRef(null)
     const [poses, setPoses] = useState<posedetection.Pose[]>()
 
@@ -139,11 +141,12 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) =>
             pose.keypoints
                 .filter((k) => (k.score ?? 0) > MIN_KEYPOINT_SCORE)
                 .forEach((k) => {
-                    const x = flipX ? getOutputTensorWidth() - k.x : k.x
+                    const x = k.x
                     const y = k.y
-                    const cx =
-                        (x / getOutputTensorWidth()) *
-                        (isPortrait() ? CAM_PREVIEW_WIDTH : CAM_PREVIEW_HEIGHT)
+                    const previewWidth = isPortrait() ? CAM_PREVIEW_WIDTH : CAM_PREVIEW_HEIGHT
+                    const cxRaw =
+                        (x / getOutputTensorWidth()) * previewWidth
+                    const cx = IS_ANDROID ? previewWidth - cxRaw : cxRaw
                     const cy =
                         (y / getOutputTensorHeight()) *
                         (isPortrait() ? CAM_PREVIEW_HEIGHT : CAM_PREVIEW_WIDTH)
@@ -268,28 +271,37 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) =>
         }
     }
 
+    const shouldFlipCamera = IS_IOS && cameraType === 'front'
+
     return (
         <View
             style={
                 isPortrait() ? styles.containerPortrait : styles.containerLandscape
             }
         >
-            {/* @ts-ignore - TensorCamera type issue */}
-            <TensorCamera
-                ref={cameraRef}
-                style={styles.camera}
-                autorender={AUTO_RENDER}
-                facing={cameraType}
-                // tensor related props
-                resizeWidth={getOutputTensorWidth()}
-                resizeHeight={getOutputTensorHeight()}
-                resizeDepth={3}
-                rotation={getTextureRotationAngleInDegrees()}
-                onReady={handleCameraStream}
-                useCustomShadersToResize={false}
-                cameraTextureWidth={0}
-                cameraTextureHeight={0}
-            />
+            <View
+                style={[
+                    styles.cameraWrapper,
+                    shouldFlipCamera && { transform: [{ scaleX: -1 }] }
+                ]}
+            >
+                {/* @ts-ignore - TensorCamera type issue */}
+                <TensorCamera
+                    ref={cameraRef}
+                    style={styles.camera}
+                    autorender={AUTO_RENDER}
+                    facing={cameraType}
+                    // tensor related props
+                    resizeWidth={getOutputTensorWidth()}
+                    resizeHeight={getOutputTensorHeight()}
+                    resizeDepth={3}
+                    rotation={getTextureRotationAngleInDegrees()}
+                    onReady={handleCameraStream}
+                    useCustomShadersToResize={false}
+                    cameraTextureWidth={0}
+                    cameraTextureHeight={0}
+                />
+            </View>
             {renderPose()}
         </View>
     )
@@ -309,6 +321,10 @@ const styles = StyleSheet.create({
         height: CAM_PREVIEW_WIDTH,
         alignSelf: 'center',
         borderRadius: 20
+    },
+    cameraWrapper: {
+        width: '100%',
+        height: '100%',
     },
     camera: {
         width: '100%',
