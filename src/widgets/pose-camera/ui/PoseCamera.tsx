@@ -43,9 +43,15 @@ const IS_IOS = Platform.OS === 'ios'
 //
 // This might not cover all cases.
 
-const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height - 180
-// Уменьшаем ширину для более естественного соотношения сторон (примерно 3:4)
-const CAM_PREVIEW_WIDTH = CAM_PREVIEW_HEIGHT * (3 / 4) 
+// Для iOS: сначала определяем ширину, затем вычисляем высоту по соотношению 9:16
+// Для Android: используем старую логику (высота из экрана, ширина из высоты)
+const CAM_PREVIEW_WIDTH = IS_IOS 
+    ? Dimensions.get('window').width  // 100% ширины экрана для iOS
+    : (Dimensions.get('window').height - 180) * (3 / 4)  // Для Android как было
+
+const CAM_PREVIEW_HEIGHT = IS_IOS
+    ? CAM_PREVIEW_WIDTH * (16 / 9)  // Для iOS: высота = ширина * 16/9
+    : Dimensions.get('window').height - 180  // Для Android как было 
 // The score threshold for pose detection results.
 const MIN_KEYPOINT_SCORE = 0.3
 
