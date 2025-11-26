@@ -53,12 +53,14 @@ const IS_IOS = Platform.OS === 'ios'
 const SCREEN_WIDTH = Dimensions.get('window').width
 const SCREEN_HEIGHT = Dimensions.get('window').height
 
-// Ширина = 100% ширины экрана, высота = 60% от высоты экрана (для портрета)
+// Контейнер камеры: всегда 100% ширины × 60% высоты экрана
 const CAM_PREVIEW_WIDTH = SCREEN_WIDTH
 const CAM_PREVIEW_HEIGHT = SCREEN_HEIGHT * 0.6
 
-// Для ландшафта размеры будут вычисляться динамически в функции
-// Ширина = вся ширина экрана, высота = 60% от высоты экрана 
+// Aspect ratio для каждой платформы (ширина/высота)
+const IOS_ASPECT_RATIO = 9 / 16
+const ANDROID_ASPECT_RATIO = 3 / 4
+
 // The score threshold for pose detection results.
 const MIN_KEYPOINT_SCORE = 0.3
 
@@ -192,22 +194,22 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
             // Создаем карту keypoints по имени для быстрого доступа
             const keypointMap = new Map<string, { x: number; y: number; cx: number; cy: number }>()
             
+            const { cameraWidth, cameraHeight, offsetX, offsetY } = getActualCameraSize()
+            
             pose.keypoints
                 .filter((k) => (k.score ?? 0) > MIN_KEYPOINT_SCORE)
                 .forEach((k) => {
                     const x = k.x
                     const y = k.y
-                    const cameraWidth = getCameraWidth()
-                    const cameraHeight = getCameraHeight()
-                    const cxRaw =
-                        (x / getOutputTensorWidth()) * cameraWidth
-                    const cx = IS_ANDROID ? cameraWidth - cxRaw : cxRaw
-                    // Для iOS учитываем центрирование камеры в контейнере
-                    const yOffset = IS_IOS && isPortrait() 
-                        ? (CAM_PREVIEW_HEIGHT - cameraHeight) / 2 
-                        : 0
-                    const cy =
-                        (y / getOutputTensorHeight()) * cameraHeight + yOffset
+                    
+                    // Масштабируем координаты из tensor space в camera space
+                    const cxRaw = (x / getOutputTensorWidth()) * cameraWidth
+                    const cyRaw = (y / getOutputTensorHeight()) * cameraHeight
+                    
+                    // Применяем зеркалирование для Android и добавляем offsets
+                    const cx = (IS_ANDROID ? cameraWidth - cxRaw : cxRaw) + offsetX
+                    const cy = cyRaw + offsetY
+                    
                     keypointMap.set(k.name ?? '', { x, y, cx, cy })
                 })
 
@@ -322,33 +324,43 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
         return isPortrait() || IS_ANDROID ? OUTPUT_TENSOR_HEIGHT : OUTPUT_TENSOR_WIDTH
     }
 
-    // Получаем реальные размеры камеры с учетом aspectRatio для iOS
+    // Вычисляем реальные размеры камеры с учетом aspect ratio (cover behavior)
+    const getActualCameraSize = () => {
+        const containerWidth = isPortrait() ? CAM_PREVIEW_WIDTH : Dimensions.get('window').width
+        const containerHeight = isPortrait() ? CAM_PREVIEW_HEIGHT : Dimensions.get('window').height * 0.6
+        
+        const aspectRatio = IS_IOS ? IOS_ASPECT_RATIO : ANDROID_ASPECT_RATIO
+        
+        // Вычисляем размеры камеры, которая заполняет контейнер (cover behavior)
+        const cameraHeightIfFitWidth = containerWidth / aspectRatio
+        const cameraWidthIfFitHeight = containerHeight * aspectRatio
+        
+        let cameraWidth, cameraHeight, offsetX, offsetY
+        
+        if (cameraHeightIfFitWidth >= containerHeight) {
+            // Камера заполняет по ширине, обрезается по высоте
+            cameraWidth = containerWidth
+            cameraHeight = cameraHeightIfFitWidth
+            offsetX = 0
+            offsetY = (containerHeight - cameraHeight) / 2
+        } else {
+            // Камера заполняет по высоте, обрезается по ширине
+            cameraWidth = cameraWidthIfFitHeight
+            cameraHeight = containerHeight
+            offsetX = (containerWidth - cameraWidth) / 2
+            offsetY = 0
+        }
+        
+        return { cameraWidth, cameraHeight, offsetX, offsetY, containerWidth, containerHeight }
+    }
+
+    // Получаем реальные размеры камеры с учетом aspectRatio
     const getCameraWidth = () => {
-        if (IS_IOS && isPortrait()) {
-            // Для iOS в портрете камера имеет aspectRatio 9/16, ширина = 100% ширины экрана
-            return CAM_PREVIEW_WIDTH
-        }
-        if (!isPortrait()) {
-            // В ландшафте используем всю ширину экрана (в ландшафте width > height)
-            const { width } = Dimensions.get('window')
-            return width
-        }
-        return CAM_PREVIEW_WIDTH
+        return getActualCameraSize().cameraWidth
     }
 
     const getCameraHeight = () => {
-        if (IS_IOS && isPortrait()) {
-            // Для iOS в портрете камера имеет aspectRatio 9/16
-            // Но ограничиваем высоту до 60% экрана
-            const aspectHeight = CAM_PREVIEW_WIDTH * (16 / 9)
-            return Math.min(aspectHeight, CAM_PREVIEW_HEIGHT)
-        }
-        if (!isPortrait()) {
-            // В ландшафте высота = 60% от высоты экрана
-            const { height } = Dimensions.get('window')
-            return height * 0.6
-        }
-        return CAM_PREVIEW_HEIGHT
+        return getActualCameraSize().cameraHeight
     }
 
     const getTextureRotationAngleInDegrees = () => {
@@ -376,19 +388,19 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
 
     const shouldFlipCamera = IS_IOS && cameraType === 'front'
 
-    // Для iOS добавляем aspectRatio для правильного соотношения сторон в портрете
-    // В ландшафте используем фиксированную высоту (60% от высоты экрана)
-    // Убираем height: '100%' чтобы aspectRatio работал правильно
-    const cameraStyle = IS_IOS && isPortrait()
-        ? [
-            styles.camera, 
-            { 
-                aspectRatio: 9 / 16, 
-                height: undefined,
-                maxHeight: CAM_PREVIEW_HEIGHT 
-            }
-        ]
-        : styles.camera
+    // Вычисляем размеры камеры для заполнения контейнера (cover behavior)
+    const { cameraWidth, cameraHeight, offsetX, offsetY } = getActualCameraSize()
+    
+    const cameraStyle = [
+        styles.camera,
+        {
+            width: cameraWidth,
+            height: cameraHeight,
+            position: 'absolute' as const,
+            left: offsetX,
+            top: offsetY,
+        }
+    ]
 
     return (
         <View
@@ -445,18 +457,15 @@ const styles = StyleSheet.create({
     cameraWrapper: {
         width: '100%',
         height: '100%',
+        overflow: 'hidden',
     },
     cameraWrapperIOS: {
         justifyContent: 'center',
         alignItems: 'center',
-        overflow: 'hidden',
     },
     camera: {
-        width: '100%',
-        height: '100%',
         zIndex: 1,
         borderRadius: 20
-
     },
     svg: {
         width: '100%',
