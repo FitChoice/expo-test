@@ -4,21 +4,36 @@
  * Показывает обратный отсчет с возможностью пропустить
  */
 
-import { View, Text } from 'react-native'
-import { Button } from '@/shared/ui'
+import { View, Text, useWindowDimensions } from 'react-native'
+import { useEffect, useState } from 'react'
+import { Button, LargeNumberDisplay } from '@/shared/ui'
 import {
     ExerciseWithCounterWrapper
 } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
-import {
-    CountdownDisplay
-} from '@/widgets/training-session/ui/exercise/ExerciseTheoryScreen'
 
 interface RestScreenProps {
 	onComplete: () => void
-	duration?: number // seconds
+	duration: number // seconds
 }
 
 export function RestScreen({ onComplete, duration }: RestScreenProps) {
+    const { width, height } = useWindowDimensions()
+    const isVertical = height > width
+    
+    const [remainingTime, setRemainingTime] = useState(duration)
+
+    useEffect(() => {
+        if (remainingTime <= 0) {
+            onComplete()
+            return
+        }
+
+        const timer = setInterval(() => {
+            setRemainingTime(prev => prev - 1)
+        }, 1000)
+
+        return () => clearInterval(timer)
+    }, [remainingTime, onComplete])
 
     const handleSkip = () => {
         onComplete()
@@ -26,22 +41,22 @@ export function RestScreen({ onComplete, duration }: RestScreenProps) {
 
     return (
         <ExerciseWithCounterWrapper
-            onComplete={onComplete}
-            countdownInitial={duration}
             isShowActionButtons={false}
         >
-
-            <View className="flex-1 items-center justify-center padding-4 pt-5 pb-5  gap-10">
-
+            <View className="flex-1 items-center justify-center padding-4 pt-5 pb-5 gap-10">
                 <View className="mt-6 items-center">
                     <Text className="text-h1 text-brand-purple-500">Отдых</Text>
                 </View>
 
-                <CountdownDisplay />
+                <View className={isVertical ? 'mb-2 items-center' : 'items-center'}>
+                    <LargeNumberDisplay
+                        value={`${Math.floor(remainingTime / 60).toString().padStart(2, '0')}:${(remainingTime % 60).toString().padStart(2, '0')}`}
+                        size="large"
+                    />
+                </View>
 
-                <Button variant="primary" onPress={handleSkip} >Пропустить</Button>
+                <Button variant="primary" onPress={handleSkip}>Пропустить</Button>
             </View>
-
         </ExerciseWithCounterWrapper>
     )
 }

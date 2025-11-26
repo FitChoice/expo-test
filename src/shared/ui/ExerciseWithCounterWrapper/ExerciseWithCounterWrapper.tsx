@@ -37,12 +37,12 @@ export const useVideoPlayerContext = () => {
 
 export const ExerciseWithCounterWrapper = ({
     children, 
-    onComplete, 
+
     countdownInitial,
     isShowActionButtons = true,
 }: {
 	children: ReactNode
-	onComplete: () => void
+
 	countdownInitial?: number
 	isShowActionButtons?: boolean
 }) => {
@@ -50,21 +50,10 @@ export const ExerciseWithCounterWrapper = ({
     const [showPauseModal, setShowPauseModal] = useState(false)
     const [showStopModal, setShowStopModal] = useState(false)
     const [isPaused, setIsPaused] = useState(false)
-    const [countdown, setCountdown] = useState(countdownInitial ?? 0)
     const timerRef = useRef<number | null>(null)
     const videoPlayersRef = useRef<Set<VideoPlayer>>(new Set())
 
-    const tick = useCallback(() => {
-        // setCountdown((prev) => {
-        //     if (prev <= 1) {
-        //         clearInterval(timerRef.current!)
-        //         timerRef.current = null
-        //         setTimeout(() => onComplete(), 0)
-        //         return 0
-        //     }
-        //     return prev - 1
-        // })
-    }, [onComplete])
+
 
     const onStop = useCallback(() => {
         setShowStopModal(true)
@@ -83,34 +72,12 @@ export const ExerciseWithCounterWrapper = ({
         })
     }, [])
 
-    const startTimer = useCallback(() => {
-        if (timerRef.current !== null) return
-        timerRef.current = setInterval(tick, 1000) as unknown as number
-        setIsPaused(false)
-    }, [tick])
 
-    // useEffect(() => {
-    //     // Запускаем таймер при монтировании только если countdownInitial передан
-    //     if (countdownInitial !== undefined) {
-    //         startTimer()
-    //     }
-    //
-    //     return () => {
-    //         if (timerRef.current !== null) {
-    //             clearInterval(timerRef.current)
-    //             timerRef.current = null
-    //         }
-    //     }
-    // }, [startTimer, countdownInitial])
 
     const pauseTimer = useCallback(() => {
 		
         setShowPauseModal(true)
-        // if (timerRef.current !== null) {
-        //     clearInterval(timerRef.current)
-        //     timerRef.current = null
-        //     setIsPaused(true)
-        // }
+
         // Пауза видео
         videoPlayersRef.current.forEach((player) => {
 	
@@ -123,9 +90,7 @@ export const ExerciseWithCounterWrapper = ({
     }, [])
 
     const resumeTimer = useCallback(() => {
-        // if (timerRef.current === null && countdown > 0) {
-        //     startTimer()
-        // }
+
         setShowPauseModal(false)
         // Возобновление видео
         videoPlayersRef.current.forEach((player) => {
@@ -135,12 +100,10 @@ export const ExerciseWithCounterWrapper = ({
                 // Игнорируем ошибки если плеер уже уничтожен
             }
         })
-    }, [ startTimer])
+    }, [ ])
 
     const handleStopResume =  useCallback(() => {
-        // if (timerRef.current === null && countdown > 0) {
-        //     startTimer()
-        // }
+
         setShowStopModal(false)
         // Возобновление видео
         videoPlayersRef.current.forEach((player) => {

@@ -8,14 +8,12 @@ import { View, Text } from 'react-native'
 import { useEffect, useRef } from 'react'
 import { VideoView, useVideoPlayer } from 'expo-video'
 
-import { LargeNumberDisplay } from '@/shared/ui/LargeNumberDisplay'
 import { VideoProgressBar } from '@/shared/ui'
 
 import type { Exercise } from '@/entities/training/model/types'
 
 import {
     ExerciseWithCounterWrapper,
-    useCountdown,
     useVideoPlayerContext
 } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 import { VIDEO_SCREEN_HEIGHT as height } from '@/shared/constants/sizes'
@@ -25,20 +23,6 @@ interface ExerciseCountdownScreenProps {
 	currentSet: number
 	onComplete: () => void
 	isVertical?: boolean
-}
-
-export function CountdownDisplay({ isVertical }: { isVertical?: boolean }) {
-    const countdown = useCountdown()
-    const minutes = Math.floor(countdown / 60)
-    const seconds = countdown % 60
-    return (
-        <View className={isVertical !== false ? 'mb-2 items-center' : 'items-center'}>
-            <LargeNumberDisplay
-                value={`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}
-                size="large"
-            />
-        </View>
-    )
 }
 
 function ExerciseExampleCountdownContent({ 
@@ -96,7 +80,7 @@ function ExerciseExampleCountdownContent({
     return (
         <>
             {/* Video */}
-            <View style={{ height }} >
+            <View style={{ height: isVertical ? height : 250 }} >
                 {exercise.VideoTheory ? (
                     <VideoView
                         player={player}
@@ -113,7 +97,7 @@ function ExerciseExampleCountdownContent({
             {/*    <StepProgress current={0} total={5} />*/}
             {/*</View>*/}
             { !isVertical && 
-            <View className="absolute top-5 left-0 right-0 justify-center items-center px-4">
+            <View className="absolute bottom-10 left-0 right-0 justify-center items-center px-4">
                 <VideoProgressBar player={player} className="mb-2" />
                 <Text className="text-t1 text-light-text-200 text-center">{exercise.name}</Text>
             </View>
@@ -194,9 +178,7 @@ export function ExerciseTheoryScreen({
     })
 
     return (
-        <ExerciseWithCounterWrapper 
-            onComplete={onComplete}
-        >
+        <ExerciseWithCounterWrapper>
             <ExerciseExampleCountdownContent 
                 exercise={exercise} 
                 currentSet={currentSet} 

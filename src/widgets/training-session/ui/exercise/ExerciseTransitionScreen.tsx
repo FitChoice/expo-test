@@ -10,9 +10,6 @@ import type { Exercise } from '@/entities/training/model/types'
 import {
     ExerciseWithCounterWrapper
 } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
-import {
-    CountdownDisplay
-} from '@/widgets/training-session/ui/exercise/ExerciseTheoryScreen'
 
 interface ExerciseTransitionScreenProps {
 	nextExercise: Exercise
@@ -41,13 +38,11 @@ export function ExerciseTransitionScreen({
     }, [countdown, onComplete])
 
     return (	<ExerciseWithCounterWrapper
-        onComplete={onComplete}
-        countdownInitial={5}
+
     >
 
         <View className="flex-1 items-center justify-center padding-4 ">
-
-            <CountdownDisplay />
+					
             <View className="mt-6 items-center">
                 <Text className="text-h2 text-brand-green-500 text-center">	Следующее упражнение</Text>
             </View>

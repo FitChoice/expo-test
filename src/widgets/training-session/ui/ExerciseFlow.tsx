@@ -203,12 +203,6 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         }
     }
 
-    const handleSuccessComplete = () => {
-        // Завершение тренировки - можно перейти на экран результатов
-        // или вызвать stop()
-        stop()
-    }
-
     const handleSideSwitchComplete = () => {
         // После переключения стороны продолжаем выполнение на новой стороне
         //	setCurrentSideState('left')
@@ -297,6 +291,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                 onComplete={handleExecutionComplete}
                 exercise={currentExercise}
                 isVertical={isVertical}
+                exerciseId={currentExercise.id}
             />
         )}
         {/*{currentStep === 'success' && (*/}
@@ -318,7 +313,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         {currentStep === 'rest' && 
 			<RestScreen 
 			    onComplete={handleRestComplete} 
-			    duration={restType === 'rep' ? 10 : restType === 'set' ? 15 : currentExercise.rest_time} 
+			    duration={restType === 'rep' ? 10 : restType === 'set' ? 15 : currentExercise.rest_time}
 			/>}
 
         {currentStep === 'transition' && nextExerciseData && (
