@@ -378,9 +378,9 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
         case ScreenOrientation.Orientation.PORTRAIT_DOWN:
             return 180
         case ScreenOrientation.Orientation.LANDSCAPE_LEFT:
-            return cameraType === 'front' ? 90 : 270
+            return IS_ANDROID ? 90 : 270 //cameraType === 'front' ? 270 : 270
         case ScreenOrientation.Orientation.LANDSCAPE_RIGHT:
-            return cameraType === 'front' ? 270 : 90
+            return IS_ANDROID ? 270: 90//cameraType === 'front' ? 90 : 90
         default:
             return 0
         }
