@@ -38,7 +38,7 @@ type ExerciseFlowProps = {
 export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
 	  useKeepAwake()
-    const [currentStep, setCurrentStep] = useState<ExerciseStep>('position')
+    const [currentStep, setCurrentStep] = useState<ExerciseStep>('theory')
     const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
     const [restType, setRestType] = useState<'rep' | 'set' | 'exercise'>('rep')
 
@@ -47,7 +47,6 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const currentSet = useTrainingStore((state) => state.currentSet)
     const nextExercise = useTrainingStore((state) => state.nextExercise)
     const finishTraining = useTrainingStore((state) => state.finishTraining)
-  //  const stop = useTrainingStore((state) => state.stop)
 	
     const [repNumber, setRepNumber] = useState(0)
     const [setNumber, setSetNumber] = useState(0)
@@ -60,7 +59,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     if (!currentExercise) return null
 
     // Check if exercise has sides
-    const hasSides = currentExercise?.side === 'both'
+    // const hasSides = currentExercise?.side === 'both'
 
     // Проверяем ориентацию при изменении упражнения или при первом запуске
     useEffect(() => {

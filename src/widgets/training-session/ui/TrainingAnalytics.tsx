@@ -66,7 +66,7 @@ export const TrainingAnalytics = () => {
 
                     {/* Exercise Name - Bottom Left */}
                     <View className="absolute bottom-4 left-4">
-                        <Text className="text-white text-t1 font-bold">Ласточка</Text>
+                        <Text className="text-white text-t1 font-bold">Присед с резинкой</Text>
                     </View>
                 </View>
 
@@ -125,7 +125,7 @@ export const TrainingAnalytics = () => {
 
                     {/* Exercise Name - Bottom Left */}
                     <View className="absolute bottom-4 left-4">
-                        <Text className="text-white text-t1 font-bold">Бёрпи</Text>
+                        <Text className="text-white text-t1 font-bold">Отведение ноги назад с опорой на локти</Text>
                     </View>
                 </View>
 

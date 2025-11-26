@@ -89,9 +89,9 @@ export default function TrainingReportScreen() {
         <View className="w-full h-[250px] p-2">
             <MetricCard
                 icon={<MaterialCommunityIcons name="clock-time-eight" size={24} color="#689F38" />}
-                displayNumber={20}
+                displayNumber={10}
                 title={'минут'}
-                description={'Длительность тренировки'}
+                description={'Активного времени'}
 
             />
         </View>
@@ -101,9 +101,9 @@ export default function TrainingReportScreen() {
             <View className='flex-1' >
                 <MetricCard
                     icon={<MaterialCommunityIcons name="run-fast" size={24} color="#689F38"  />}
-                    displayNumber={20}
-                    title={'минут'}
-                    description={'Длительность тренировки'}
+                    displayNumber={130}
+                    title={'ккал'}
+                    description={'Каллорий сожжено'}
 
                 />
             </View>
@@ -111,9 +111,9 @@ export default function TrainingReportScreen() {
             <View className='flex-1' >
                 <MetricCard
                     icon={<Fontisto name="fire" size={24} color="#689F38"  />}
-                    displayNumber={20}
-                    title={'минут'}
-                    description={'Длительность тренировки'}
+                    displayNumber={80}
+                    title={'%'}
+                    description={'Читстота техники'}
 
                 />
             </View>

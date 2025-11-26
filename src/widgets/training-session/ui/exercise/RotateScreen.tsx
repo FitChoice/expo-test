@@ -112,7 +112,7 @@ export function RotateScreen({ isVertical, onComplete }: RotateScreenProps) {
                 // Проверяем соответствие: isVertical === true нужна portrait, isVertical === false нужна landscape
                 if ((isVertical && isPortrait) || (!isVertical && isLandscape)) {
                     hasTriggered = true
-                     onComplete()
+                    onComplete()
                 }
             } catch (err) {
                 console.warn('Error reading orientation:', err)
@@ -149,7 +149,7 @@ export function RotateScreen({ isVertical, onComplete }: RotateScreenProps) {
 
                     if ((isVertical && isPortrait) || (!isVertical && isLandscape)) {
                         if (mounted) {
-                              onComplete()
+                            onComplete()
                         }
                         if (interval) {
                             clearInterval(interval)

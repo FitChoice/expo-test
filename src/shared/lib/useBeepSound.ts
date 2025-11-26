@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Audio } from 'expo-av'
 
-const beepSound = require('@/assets/sounds/beep.mp3')
+const beepSound = require('@/assets/sounds/beep1.mp3')
 
 /**
  * Хук для воспроизведения звукового сигнала при повторениях упражнения
