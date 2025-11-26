@@ -22,6 +22,7 @@ interface TrainingState {
 	currentSet: number
 	currentReps: number
 	currentSide: ExerciseSide | null
+	showTutorial: boolean
 
 	// Timers
 	elapsedTime: number
@@ -47,6 +48,7 @@ interface TrainingState {
 	reportTraining: () => void
 	reset: () => void
 	setAnalytics: () => void
+	setShowTutorial: (val: boolean) => void
 
 	nextExercise: () => void
 	nextSet: () => void
@@ -70,6 +72,7 @@ const initialState = {
     totalReps: 0,
     averageFormQuality: 0,
     caloriesBurned: 0,
+    showTutorial: true
 }
 
 export const useTrainingStore = create<TrainingState>((set, get) => ({
@@ -138,6 +141,9 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
         set({ status: 'idle' })
     },
 
+    setShowTutorial: (val) => {
+        set({ showTutorial: val })
+    },
     /**
 	 * Reset training store to initial state
 	 */

@@ -7,7 +7,6 @@ import {
     TouchableOpacity,
 } from 'react-native'
 import { useRouter } from 'expo-router'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 import {
@@ -72,62 +71,51 @@ const MobileContent = () => {
 
     const handleOpenDemo = () => {
         const demo: Training = {
-			  'id': 295,
-			  'trainingType': 't7',
-			  'title': 'Интенсивное кардио',
-			  'description': 'Серьёзная нагрузка для опытных. Максимум пота — максимум результата.',
-			  'difficulty': 2,
-			  'experience': 60,
-			  'inventory': [
+            'id': 295,
+            'trainingType': 't7',
+            'title': 'Интенсивное кардио',
+            'description': 'Серьёзная нагрузка для опытных. Максимум пота — максимум результата.',
+            'difficulty': 2,
+            'experience': 60,
+            'inventory': [
                 1,
                 2,
                 3
-			  ],
-			  'exercises': [
-                // {
-                //     'id': 2,
-                //     'side': 'single',
-                //     'name': 'Mountain climbers',
-                //     'rest_time': 10,
-                //     'duration': 5,
-                //     'progress': 15,
-                //     'sets': 2,
-                //     'reps': 3,
-                //     'isAi': true,
-                //     'videoUrl': 'https://media.istockphoto.com/id/1168953490/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D0%BA%D1%80%D0%B0%D1%81%D0%B8%D0%B2%D0%B0%D1%8F-%D0%B8-%D0%BC%D0%BE%D0%BB%D0%BE%D0%B4%D0%B0%D1%8F-%D0%B4%D0%B5%D0%B2%D1%83%D1%88%D0%BA%D0%B0-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D1%83%D0%B5%D1%82-%D1%81%D0%BC%D0%B0%D1%80%D1%82%D1%84%D0%BE%D0%BD-%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B4%D0%BB%D1%8F-%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B8-%D1%82%D0%B0%D0%B9%D0%BC%D0%B5%D1%80-%D0%B4%D0%BB%D1%8F-%D0%B5%D0%B5.mp4?s=mp4-640x640-is&k=20&c=WnK2BGUMPiFkH_Psck7BFARdog0WVjVSIJ1cXeWQa24=',
-                //     'isVertical': true,
-                // },
+            ],
+            'exercises': [
                 {
-				  'id': 0,
-					  'side': 'single',
-				  'name': 'Бёрпи',
-				  'rest_time': 10,
-				  'duration': 5,
-				  'progress': 15,
-				  'sets': 2,
-				  'reps': 1,
-				  'isAi': false,
-				  'videoUrl': 'https://media.istockphoto.com/id/1215790847/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D1%81%D0%BF%D0%BE%D1%80%D1%82%D1%81%D0%BC%D0%B5%D0%BD%D0%BA%D0%B0-%D0%B2%D1%8B%D1%81%D1%82%D1%83%D0%BF%D0%B0%D1%8F-burpees-%D0%B8-%D0%BF%D1%80%D0%B5%D1%81%D1%81-ups.mp4?s=mp4-640x640-is&k=20&c=GvRVrCP2Et2qv3v3NC7iArJhImaY2xEE3OKntdPvSFw=',
-					  'isVertical': true,
-				  },
+                    'id': 0,
+                    'side': 'single',
+                    'name': 'Классический присед с резинкой',
+                    'rest_time': 10,
+                    'duration': 5,
+                    'progress': 15,
+                    'sets': 1,
+                    'reps': 2,
+                    'isAi': false,
+                    'VideoTheory': 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+                    'VideoPractice': 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+                    'isVertical': true,
+                },
 
                 {
-				  'id': 1,
-					  'side': 'single',
-				  'name': 'Прыжки из приседа',
-				  'rest_time': 10,
-				  'duration': 5,
-				  'progress': 15,
-				  'sets': 2,
-				  'reps': 1,
-				  'isAi': false,
-				  'videoUrl': 'https://media.istockphoto.com/id/2184393997/ru/%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/%D0%BF%D0%BE%D0%B4%D1%82%D1%8F%D0%BD%D1%83%D1%82%D0%B0%D1%8F-%D0%B4%D0%B5%D0%B2%D1%83%D1%88%D0%BA%D0%B0-%D0%B4%D0%B5%D0%BB%D0%B0%D0%B5%D1%82-%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B0-%D0%BF%D1%80%D0%B8%D1%81%D0%B5%D0%B4%D0%B0%D0%BD%D0%B8%D1%8F%D1%85-%D1%81-%D0%B2%D1%8B%D1%81%D0%BE%D0%BA%D0%B8%D0%BC%D0%B8-%D0%BF%D1%80%D1%8B%D0%B6%D0%BA%D0%B0%D0%BC%D0%B8-%D0%B2-%D0%BD%D0%B5%D0%BE%D0%BD%D0%BE%D0%B2%D0%BE%D0%B9-%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%B5.mp4?s=mp4-640x640-is&k=20&c=7j3dgWV_DpEGrH9QH8rRF9i1U84b6D5NGinAG6Lalt0=',
-					  'isVertical': true,
-				  },
+                    'id': 1,
+                    'side': 'single',
+                    'name': 'Отведение ноги назад с опорой на локти ',
+                    'rest_time': 40,
+                    'duration': 5,
+                    'progress': 15,
+                    'sets': 2,
+                    'reps': 2,
+                    'isAi': false,
+                    'VideoTheory': 'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+                    'VideoPractice': 'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20%20-%20L.mp4',
 
-			  ]
+                    'isVertical': true,
+                },
+            ]
         }
-  
+
         startTraining(demo)
         router.push({ pathname: '/(training)/session', params: { trainingId: 1 } })
 	  }

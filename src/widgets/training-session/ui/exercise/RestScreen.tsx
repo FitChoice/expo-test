@@ -11,7 +11,7 @@ import {
 } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 import {
     CountdownDisplay
-} from '@/widgets/training-session/ui/exercise/ExerciseExampleCountdownScreen'
+} from '@/widgets/training-session/ui/exercise/ExerciseTheoryScreen'
 
 interface RestScreenProps {
 	onComplete: () => void

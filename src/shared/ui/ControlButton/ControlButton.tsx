@@ -23,7 +23,7 @@ export function ControlButton({
     return (
         <TouchableOpacity
             onPress={onPress}
-            className={`items-center justify-center bg-light-text-200 rounded-2xl ${className}`}
+            className={`items-center justify-center bg-fill-200/20 rounded-2xl ${className}`}
             style={{ width: size, height: size }}
             activeOpacity={0.7}
             {...props}

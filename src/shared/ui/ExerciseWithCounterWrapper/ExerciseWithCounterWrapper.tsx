@@ -7,7 +7,6 @@ import Entypo from '@expo/vector-icons/Entypo'
 import React, {
     type ReactNode,
     useCallback,
-    useEffect,
     useMemo,
     useRef,
     useState,
@@ -95,7 +94,7 @@ export const ExerciseWithCounterWrapper = ({
     //     if (countdownInitial !== undefined) {
     //         startTimer()
     //     }
-		//
+    //
     //     return () => {
     //         if (timerRef.current !== null) {
     //             clearInterval(timerRef.current)
@@ -136,7 +135,7 @@ export const ExerciseWithCounterWrapper = ({
                 // Игнорируем ошибки если плеер уже уничтожен
             }
         })
-    }, [countdown, startTimer])
+    }, [ startTimer])
 
     const handleStopResume =  useCallback(() => {
         // if (timerRef.current === null && countdown > 0) {
@@ -151,7 +150,7 @@ export const ExerciseWithCounterWrapper = ({
                 // Игнорируем ошибки если плеер уже уничтожен
             }
         })
-    }, [countdown, startTimer])
+    }, [setShowStopModal ])
 
     const handleStopTraining = () => {
         setShowStopModal(false)
@@ -174,26 +173,24 @@ export const ExerciseWithCounterWrapper = ({
     }), [registerPlayer])
 
     return (
-        <CountdownContext.Provider value={countdown}>
-            <VideoPlayerContext.Provider value={videoPlayerContextValue}>
-                <View className="flex-1">
-                    <StopModal
-                        visible={showStopModal}
-                        onResume={handleStopResume}
-                        onStop={handleStopTraining}
+        <VideoPlayerContext.Provider value={videoPlayerContextValue}>
+            <View className="flex-1">
+                <StopModal
+                    visible={showStopModal}
+                    onResume={handleStopResume}
+                    onStop={handleStopTraining}
 
-                    />
-                    <PauseModal
-                        visible={showPauseModal}
-                        onResume={resumeTimer}
+                />
+                <PauseModal
+                    visible={showPauseModal}
+                    onResume={resumeTimer}
+                />
 
-                    />
+                {/* Gradient Background */}
+                <GreenGradient />
 
-                    {/* Gradient Background */}
-                    <GreenGradient />
-
-                    {/* Control Buttons */}
-                    {isShowActionButtons &&
+                {/* Control Buttons */}
+                {isShowActionButtons &&
 				
 				<View className="absolute left-4 right-4 top-5 z-10 flex-row justify-end gap-2 ">
 				    <ControlButton
@@ -205,11 +202,10 @@ export const ExerciseWithCounterWrapper = ({
 				        onPress={onStop}
 				    />
 				</View>
-                    }
+                }
 
-                    {children}
-                </View>
-            </VideoPlayerContext.Provider>
-        </CountdownContext.Provider>
+                {children}
+            </View>
+        </VideoPlayerContext.Provider>
     )
 }

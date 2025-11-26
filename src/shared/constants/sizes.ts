@@ -1,1 +1,1 @@
-export const VIDEO_SCREEN_HEIGHT = 500
+export const VIDEO_SCREEN_HEIGHT = 550

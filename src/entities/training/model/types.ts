@@ -46,7 +46,8 @@ export interface Exercise {
 	sets: number;
 	reps: number;
 	isAi: boolean;
-	videoUrl: string;
+	VideoTheory: string;
+	VideoPractice: string;
 	isVertical: boolean; ////TEMPORARY FIELD
 	side: 'both' | 'single'
 }

@@ -24,11 +24,11 @@ export function PauseModal({ visible, onResume }: PauseModalProps) {
             <View className="flex-1">
                 {/* Blurred gradient background */}
                 <BlurView
-                    intensity={80}
-                    tint="light"
+                    intensity={50}
+                    tint="dark"
                     style={StyleSheet.absoluteFill}
                     experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
-                    blurReductionFactor={Platform.OS === 'android' ? 4 : undefined}
+                    blurReductionFactor={Platform.OS === 'android' ? 6 : undefined}
                 >
 					
                 </BlurView>

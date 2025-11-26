@@ -34,7 +34,8 @@ export const TrainingInfo = () => {
 
     const training = useTrainingStore((state) => state.training)
     const startOnboarding = useTrainingStore((state) => state.startOnboarding)
-    const [showTutorial, setShowTutorial] = useState(true)
+    const showTutorial = useTrainingStore((state) => state.showTutorial)
+    const setShowTutorial = useTrainingStore((state) => state.setShowTutorial)
 
     // Calculate training duration in minutes
     const trainingDuration = useMemo(() => {

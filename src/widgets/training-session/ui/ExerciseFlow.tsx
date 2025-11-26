@@ -18,11 +18,11 @@ import {
 } from '@/widgets/training-session/ui/exercise/ExerciseExecutionScreen'
 import { useKeepAwake } from 'expo-keep-awake'
 import {
-	ExerciseExampleCountdownScreen
-} from '@/widgets/training-session/ui/exercise/ExerciseExampleCountdownScreen'
+    ExerciseTheoryScreen
+} from '@/widgets/training-session/ui/exercise/ExerciseTheoryScreen'
 
 type ExerciseStep =
-	| 'countdown'
+	| 'theory'
 	| 'position'
 	| 'execution'
 	| 'side_switch'
@@ -38,7 +38,7 @@ type ExerciseFlowProps = {
 export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
 	  useKeepAwake()
-    const [currentStep, setCurrentStep] = useState<ExerciseStep>('position')
+    const [currentStep, setCurrentStep] = useState<ExerciseStep>('theory')
     const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
     const [restType, setRestType] = useState<'rep' | 'set' | 'exercise'>('rep')
 
@@ -64,7 +64,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
     // Проверяем ориентацию при изменении упражнения или при первом запуске
     useEffect(() => {
-        if (currentStep === 'countdown' && currentExercise) {
+        if (currentStep === 'theory' && currentExercise) {
             const checkOrientation = async () => {
                 try {
                     const orientation = await ScreenOrientation.getOrientationAsync()
@@ -90,7 +90,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     }, [currentExerciseIndex, currentStep, currentExercise])
 
     const handleRotateComplete = () => {
-        setCurrentStep('countdown')
+        setCurrentStep('theory')
     }
 
     const handleCountdownComplete = () => {
@@ -243,14 +243,14 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                 if ((nextIsVertical && !isPortrait) || (!nextIsVertical && !isLandscape)) {
                     setCurrentStep('rotate')
                 } else {
-                    setCurrentStep('countdown')
+                    setCurrentStep('theory')
                 }
             } catch (err) {
                 console.warn('Error checking orientation:', err)
-                setCurrentStep('countdown')
+                setCurrentStep('theory')
             }
         } else {
-            setCurrentStep('countdown')
+            setCurrentStep('theory')
         }
     }
 
@@ -274,7 +274,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             />
         )}
         
-        {currentStep === 'countdown' && ( <ExerciseExampleCountdownScreen
+        {currentStep === 'theory' && ( <ExerciseTheoryScreen
             exercise={currentExercise}
             currentSet={currentSet}
             onComplete={handleCountdownComplete}
