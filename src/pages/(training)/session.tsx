@@ -36,35 +36,28 @@ export default function TrainingSessionScreen() {
         //   Render based on current status
         switch (status) {
         case 'info':
-            return <TrainingInfo />
+            return 				<TrainingInfo />
         case 'onboarding':
-            return <BackgroundLayoutNoSidePadding>
-                <OnboardingFlow />
-            </BackgroundLayoutNoSidePadding>
+            return       <OnboardingFlow />
 
         case 'finished':
-            return <BackgroundLayoutNoSidePadding>
-                <ExerciseSuccess  />
-            </BackgroundLayoutNoSidePadding>
+            return   <ExerciseSuccess  />
 
         case 'report':
-            return <BackgroundLayoutNoSidePadding>
-	        <TrainingReportScreen />
-	    </BackgroundLayoutNoSidePadding>
+            return    <TrainingReportScreen />
 
         case 'analytics':
-            return <BackgroundLayoutNoSidePadding>
-	        <TrainingAnalytics />
-	    </BackgroundLayoutNoSidePadding>
+            return    <TrainingAnalytics />
 
         default:
-            return (<BackgroundLayoutNoSidePadding>
-                <ExerciseFlow model={model} orientation={orientation} />
-            </BackgroundLayoutNoSidePadding>)
+            return   <ExerciseFlow model={model} orientation={orientation} />
+          
         }
 
     }
 
-    return mainContent()
+    return <BackgroundLayoutNoSidePadding>
+        {mainContent()}
+    </BackgroundLayoutNoSidePadding>
 
 }

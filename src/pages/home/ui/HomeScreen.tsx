@@ -83,11 +83,26 @@ const MobileContent = () => {
                 3
             ],
             'exercises': [
+           
+                {
+                    'id': 'squat',
+                    'side': 'single',
+                    'name': 'Классический присед с резинкой',
+                    'rest_time': 10,
+                    'duration': 5,
+                    'progress': 15,
+                    'sets': 2,
+                    'reps': 3,
+                    'isAi': false,
+                    'VideoTheory': 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+                    'VideoPractice': 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+                    'isVertical': true,
+                },
                 {
                     'id': 'leg_abduction_l',
                     'side': 'single',
                     'name': 'Отведение ноги назад с опорой на локти ',
-                    'rest_time': 40,
+                    'rest_time': 10,
                     'duration': 5,
                     'progress': 15,
                     'sets': 2,
@@ -97,20 +112,6 @@ const MobileContent = () => {
                     'VideoPractice': 'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20%20-%20L.mp4',
 
                     'isVertical': false,
-                },
-                {
-                    'id': 'squat',
-                    'side': 'single',
-                    'name': 'Классический присед с резинкой',
-                    'rest_time': 10,
-                    'duration': 5,
-                    'progress': 15,
-                    'sets': 2,
-                    'reps': 2,
-                    'isAi': false,
-                    'VideoTheory': 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-                    'VideoPractice': 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-                    'isVertical': true,
                 },
 
                 // {
@@ -136,7 +137,7 @@ const MobileContent = () => {
 	  }
 
     return (
-        <View style={styles.container}>
+        <View className="flex-1">
             <ScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
@@ -252,9 +253,6 @@ const MobileContent = () => {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
     scrollView: {
         flex: 1,
     },

@@ -1,11 +1,12 @@
 
 import { PoseCamera } from '@/widgets/pose-camera'
-import { View, Text, Dimensions } from 'react-native'
+import { View, Text, Dimensions, useWindowDimensions } from 'react-native'
 import { useState, useEffect, useRef } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import type * as posedetection from '@tensorflow-models/pose-detection'
-import type * as ScreenOrientation from 'expo-screen-orientation'
-
+import * as ScreenOrientation from 'expo-screen-orientation'
+import Svg, { Circle } from 'react-native-svg'
+import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
 type BodyPositionScreenProps = {
 	isVertical?: boolean,
 	onComplete: () => void,
@@ -15,7 +16,14 @@ type BodyPositionScreenProps = {
 
 export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation }: BodyPositionScreenProps) => {
 
-    const CAM_PREVIEW_HEIGHT = isVertical ? Dimensions.get('window').height * 0.6 : Dimensions.get('window').height
+    const isPortrait = () => {
+        return (
+            orientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
+			orientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
+        )
+    }
+
+    const CAM_PREVIEW_HEIGHT = isPortrait() ? Dimensions.get('window').height * 0.6 : Dimensions.get('window').height
 
     const [showSuccess, setShowSuccess] = useState(false)
     const successTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -48,6 +56,8 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
             }
         }
     }, [])
+
+    const { width } = useWindowDimensions()
 
     // Настройка статус-бара: светлые иконки для темного градиента
     // useStatusBar({
@@ -83,24 +93,42 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
             />
         </View>
 
-        {/*/!* Grid pattern background - full width and height *!/*/}
-        {/*<View className="absolute top-0 left-0 right-0 rounded-3xl " style={{ height: screenHeight }}>*/}
-        {/*    <Svg width={width} height={screenHeight} viewBox={`0 0 ${width} ${screenHeight}`}>*/}
-        {/*        /!* Grid pattern background *!/*/}
-        {/*        {Array.from({ length: Math.ceil(width / 20) }, (_, i) =>*/}
-        {/*            Array.from({ length: Math.ceil(screenHeight / 20) }, (_, j) => (*/}
-        {/*                <Circle*/}
-        {/*                    key={`grid-${i}-${j}`}*/}
-        {/*                    cx={i * 20 + 10}*/}
-        {/*                    cy={j * 20 + 10}*/}
-        {/*                    r="1.5"*/}
-        {/*                    fill="#E5E5E5"*/}
-        {/*                    opacity="0.6"*/}
-        {/*                />*/}
-        {/*            ))*/}
-        {/*        )}*/}
-        {/*    </Svg>*/}
-        {/*</View>*/}
+        {/* Grid pattern background - full width and height */}
+        <View className="absolute top-0 left-0 right-0 rounded-3xl " style={{ height: CAM_PREVIEW_HEIGHT }}>
+            <Svg width={width} height={CAM_PREVIEW_HEIGHT} viewBox={`0 0 ${width} ${CAM_PREVIEW_HEIGHT}`}>
+                {/* Grid pattern background */}
+                {Array.from({ length: Math.ceil(width / 20) }, (_, i) =>
+                    Array.from({ length: Math.ceil(CAM_PREVIEW_HEIGHT / 20) }, (_, j) => (
+                        <Circle
+                            key={`grid-${i}-${j}`}
+                            cx={i * 20 + 10}
+                            cy={j * 20 + 10}
+                            r="1.5"
+                            fill="#E5E5E5"
+                            opacity="0.6"
+                        />
+                    ))
+                )}
+            </Svg>
+        </View>
+
+        {/* Body Silhouette Overlay */}
+        {isVertical ? (
+            <View className="absolute inset-0 items-center justify-start pt-10">
+                {
+                    <BodySilhouetteDefault
+                        stroke={showSuccess ? '#8BC34A' : 'white'}
+                    />	}
+            </View>
+        ) : (
+            <View className="absolute inset-0 items-center justify-center">
+                <View style={{ transform: [{ rotate: '90deg' }] }}>
+                    <BodySilhouetteDefault
+                        stroke={showSuccess ? '#8BC34A' : 'white'}
+                    />
+                </View>
+            </View>
+        )}
 
         <LinearGradient
             colors={['#BA9BF7', '#000000']}
@@ -141,7 +169,7 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
 						контур
                 </Text>
 
-                {!showSuccess &&(<View className="mt-2 mb-2 items-center">
+                {showSuccess &&(<View className="mt-2 mb-2 items-center">
                     <Text className="text-h1 text-brand-green-500">Вперёд!</Text>
                 </View>)}
             </View>

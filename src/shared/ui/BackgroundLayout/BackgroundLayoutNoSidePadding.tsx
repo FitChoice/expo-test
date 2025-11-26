@@ -14,7 +14,7 @@ export const BackgroundLayoutNoSidePadding = ({ children }: { children: React.Re
         {/* Радиальный градиент с blur-эффектом */}
         {/*<RadialGradientBackground />*/}
 
-        <View style={[styles.gradientContainer, { width: SCREEN_WIDTH, height: SCREEN_HEIGHT }]}>
+        <View style={[styles.gradientContainer, { width: SCREEN_WIDTH}]}>
             <GradientBg />
         </View>
 
