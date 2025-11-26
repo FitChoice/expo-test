@@ -36,18 +36,9 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
             }, 2000)
             successTimerRef.current = setTimeout(() => {
                 onComplete()
-            }, 3000)
+            }, 2200)
         }
 
-				// else if (!allDetected && allKeypointsDetectedRef.current) {
-        //     // Reset if keypoints are lost
-        //     allKeypointsDetectedRef.current = false
-        //     if (successTimerRef.current) {
-        //         clearTimeout(successTimerRef.current)
-        //         successTimerRef.current = null
-        //     }
-        //     setShowSuccess(false)
-        // }
     }
 
     useEffect(() => {

@@ -50,7 +50,7 @@ export function OnboardingFlow() {
     }
 
     return (
-        <View className="flex-1">
+        <View className="flex-1 w-full">
             {currentStep === 'sound' && <SoundCheckScreen onNext={handleNextStep} />}
             {currentStep === 'camera' && <CameraPermissionScreen onNext={handleNextStep} />}
             {currentStep === 'rotate' && <RotatePhoneScreen onNext={handleNextStep} />}

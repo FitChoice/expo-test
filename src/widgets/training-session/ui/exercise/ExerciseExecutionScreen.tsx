@@ -5,15 +5,11 @@
  */
 
 import { View, Text, useWindowDimensions } from 'react-native'
-import { useState, useEffect, useRef } from 'react'
-import { useIsFocused } from '@react-navigation/native'
-import {  StepProgress } from '@/shared/ui'
+import { useState } from 'react'
 import { type Exercise } from '@/entities/training'
 import { ExerciseWithCounterWrapper, useVideoPlayerContext } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 import { CountdownDisplay } from './ExerciseTheoryScreen'
-import { useVideoPlayer } from 'expo-video'
 import { VIDEO_SCREEN_HEIGHT as verticalCameraViewHeight } from '@/shared/constants/sizes'
-import { Audio } from 'expo-av'
 import { PoseCamera } from '@/widgets/pose-camera'
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import type * as ScreenOrientation from 'expo-screen-orientation'
@@ -33,71 +29,13 @@ function TimerExerciseContent({ exercise, model, isVertical, orientation }: Time
     const [cameraKey, setCameraKey] = useState(0)
     const [stepProgressHeight, setStepProgressHeight] = useState(0)
     const videoPlayerContext = useVideoPlayerContext()
-    const isFocused = useIsFocused()
-    const soundRef = useRef<Audio.Sound | null>(null)
+    //  const isFocused = useIsFocused()
 
     const [telemetry, setTelemetry] = useState<EngineTelemetry | null>(null)
 
     const [exerciseId, setExerciseId] = useState(exerciseOptions[0]?.id ?? 'squat')
-	
-    const beepSound = require('@/assets/sounds/beep.mp3')
-    //
-    // useEffect(() => {
-    //     // Обновляем cameraKey при монтировании компонента для гарантированной инициализации камеры
-    //     setCameraKey(prev => prev + 1)
-    // }, [])
-    //
-    // useEffect(() => {
-    //     // Обновляем cameraKey при изменении exercise.id
-    //     setCameraKey(prev => prev + 1)
-    // }, [exercise.id])
+ 
 
-    useEffect(() => {
-        // Инициализация звука
-        const loadSound = async () => {
-            try {
-                await Audio.setAudioModeAsync({
-                    playsInSilentModeIOS: true,
-                    staysActiveInBackground: false,
-                })
-                // Создаем простой beep звук
-                const { sound } = await Audio.Sound.createAsync(
-                    beepSound,
-                    { shouldPlay: false, volume: 0.5 }
-                )
-                soundRef.current = sound
-            } catch (error) {
-                console.log('Error loading sound:', error)
-            }
-        }
-        loadSound()
-
-        return () => {
-            if (soundRef.current) {
-                soundRef.current.unloadAsync()
-            }
-        }
-    }, [])
-
-    // useEffect(() => {
-    //     const interval = setInterval(() => {
-    //         setLocalCurrentSet((prev) => {
-    //             if (prev >= exercise.sets) {
-    //                 return prev
-    //             }
-    //             const newValue = prev + 1
-    //             // Воспроизводим звук при увеличении счетчика
-    //             if (newValue > 0 && soundRef.current) {
-    //                 soundRef.current.replayAsync().catch((error) => {
-    //                     console.log('Error playing sound:', error)
-    //                 })
-    //             }
-    //             return newValue
-    //         })
-    //     }, 2000)
-    //
-    //     return () => clearInterval(interval)
-    // }, [exercise.sets])
 
     // useEffect(() => {
     //     if (player && videoPlayerContext) {
@@ -158,25 +96,25 @@ function TimerExerciseContent({ exercise, model, isVertical, orientation }: Time
             </View>
 
             {/* Step Progress */}
-            {isVertical ? (
-                <View  
-                    className="justify-center items-center pt-10"
-                >
-                    <View 
-                        onLayout={(e) => setStepProgressHeight(e.nativeEvent.layout.height)}
-                    >
-                        <StepProgress current={0} total={5} />
-                    </View>
-                </View>
-            ) : (
-                <View className="w-full px-4 py-4">
-                    <StepProgress current={0} total={5} />
-                </View>
-            )}
+            {/*{isVertical ? (*/}
+            {/*    <View  */}
+            {/*        className="justify-center items-center pt-10"*/}
+            {/*    >*/}
+            {/*        <View */}
+            {/*            onLayout={(e) => setStepProgressHeight(e.nativeEvent.layout.height)}*/}
+            {/*        >*/}
+            {/*            <StepProgress current={0} total={5} />*/}
+            {/*        </View>*/}
+            {/*    </View>*/}
+            {/*) : (*/}
+            {/*    <View className="w-full px-4 py-4">*/}
+            {/*        <StepProgress current={0} total={5} />*/}
+            {/*    </View>*/}
+            {/*)}*/}
 
             { !isVertical && 
             <View className="absolute top-5 left-0 right-0 justify-center items-center ">
-                <StepProgress current={0} total={5} isVertical={isVertical} />
+                {/*<StepProgress current={0} total={5} isVertical={isVertical} />*/}
                 <Text className="text-t1 text-light-text-200 text-center">{exercise.name}</Text>
             </View>
             }
@@ -189,7 +127,7 @@ function TimerExerciseContent({ exercise, model, isVertical, orientation }: Time
 
                 {isVertical ? <>
                     {/* Countdown */}
-                    <CountdownDisplay />
+                    {/*<CountdownDisplay />*/}
 
                     {/* Set Info */}
                     <View className="flex-row px-1 justify-center ">
@@ -197,16 +135,16 @@ function TimerExerciseContent({ exercise, model, isVertical, orientation }: Time
                             <Text className={`text-[64px] leading-[72px] ${
                                 telemetry?.reps === 0 
                                     ? 'text-light-text-200' 
-                                    : telemetry?.reps === exercise.sets 
+                                    : telemetry?.reps === exercise.reps 
                                         ? 'text-brand-green-500' 
                                         : 'text-light-text-200'
                             }`}>
                                 {telemetry?.reps}
                                 <Text className={`text-[32px] leading-[36px] ${
-                                    telemetry?.reps === exercise.sets 
+                                    telemetry?.reps === exercise.reps 
                                         ? 'text-brand-green-500' 
                                         : 'color-[#949494]'
-                                }`}> / {exercise.sets}</Text>
+                                }`}> / {exercise.reps}</Text>
                             </Text>
                             <Text className="text-t2 color-[#949494] mb-1">повторения</Text>
                         </View>
@@ -219,16 +157,16 @@ function TimerExerciseContent({ exercise, model, isVertical, orientation }: Time
                             <Text className={`text-[64px] leading-[72px] ${
                                 telemetry?.reps === 0 
                                     ? 'text-light-text-200' 
-                                    :  telemetry?.reps === exercise.sets 
+                                    :  telemetry?.reps === exercise.reps 
                                         ? 'text-brand-green-500' 
                                         : 'text-light-text-200'
                             }`}>
                                 { telemetry?.reps}
                                 <Text className={`text-[32px] leading-[36px] ${
-                                    telemetry?.reps === exercise.sets 
+                                    telemetry?.reps === exercise.reps 
                                         ? 'text-brand-green-500' 
                                         : 'color-[#949494]'
-                                }`}> / {exercise.sets}</Text>
+                                }`}> / {exercise.reps}</Text>
                             </Text>
                             <Text className="text-t2 color-[#949494] mb-1">повторения</Text>
                         </View>
@@ -287,16 +225,13 @@ export function ExerciseExecutionScreen({
     model,
     orientation
 }: TimerExerciseScreenProps) {
-    const player = useVideoPlayer(exercise.videoUrl || '', (player) => {
-        player.loop = true
-        player.play()
-    })
+    // const player = useVideoPlayer(exercise.VideoPractice || '', (player) => {
+    //     player.loop = true
+    //     player.play()
+    // })
 
     return (
-        <ExerciseWithCounterWrapper
-            countdownInitial={exercise?.duration }
-            onComplete={onComplete}
-        >
+        <ExerciseWithCounterWrapper   onComplete={onComplete}>
             <TimerExerciseContent 
                 exercise={exercise} 
                 isVertical={isVertical}

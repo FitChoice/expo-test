@@ -38,7 +38,7 @@ export interface ActivitiesResponseItem {
 export type ActivitiesResponse = ActivitiesResponseItem[];
 
 export interface Exercise {
-	id: number;
+	id: string;
 	name: string;
 	rest_time: number;
 	duration: number;

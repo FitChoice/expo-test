@@ -1,21 +1,20 @@
 import React from 'react'
-import { StyleSheet, Dimensions, View } from 'react-native'
+import { StyleSheet, View, useWindowDimensions } from 'react-native'
 import { SafeAreaContainer } from '@/shared/ui'
 import { GradientBg } from '@/shared/ui/GradientBG'
-
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('screen')
 
 /**
  * Компонент контентного контейнера без боковых отступов
  * Используется для создания общего фона для страниц с радиальным градиентом
  */
 export const BackgroundLayoutNoSidePadding = ({ children }: { children: React.ReactNode }) => {
+    const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions()
 
     return ( <View style={styles.container}>
         {/* Радиальный градиент с blur-эффектом */}
         {/*<RadialGradientBackground />*/}
 
-        <View style={styles.gradientContainer}>
+        <View style={[styles.gradientContainer, { width: SCREEN_WIDTH + 100, height: SCREEN_HEIGHT }]}>
             <GradientBg />
         </View>
 
@@ -41,8 +40,6 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
     },
     contentContainer: {
         flex: 1,

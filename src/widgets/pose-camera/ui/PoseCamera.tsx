@@ -19,6 +19,7 @@ import {
     type RawKeypoint,
 } from '../../../../poseflow-js'
 import { getExerciseRule } from '../../../../poseflow-js/rules'
+import { useBeepSound } from '@/shared/lib'
 
 // Polyfill for Camera.Constants which was removed in expo-camera v17
 // @tensorflow/tfjs-react-native still expects this API
@@ -77,6 +78,8 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
     onTelemetry, onAllKeypointsDetected, }) => {
     const cameraRef = useRef(null)
 	  const engineRef = useRef<ExerciseEngine | null>(null)
+    const prevRepsRef = useRef<number>(0)
+    const { playBeep } = useBeepSound()
 
     const [poses, setPoses] = useState<posedetection.Pose[]>()
 
@@ -111,6 +114,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
             engineRef.current.updateRule(rule)
         }
         engineRef.current.reset()
+        prevRepsRef.current = 0 // Сбрасываем счетчик повторений при смене упражнения
     }, [exerciseId])
 
     const handleCameraStream = async (
@@ -270,6 +274,13 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
         if (!engineRef.current || !onTelemetry) return
         const keypoints = pose?.keypoints as RawKeypoint[] | undefined
         const telemetry = engineRef.current.process(keypoints ?? [], Date.now())
+        
+        // Воспроизводим звук при увеличении количества повторений
+        if (telemetry.reps > prevRepsRef.current && telemetry.reps > 0) {
+            playBeep()
+        }
+        prevRepsRef.current = telemetry.reps
+        
         onTelemetry(telemetry)
     }
 
