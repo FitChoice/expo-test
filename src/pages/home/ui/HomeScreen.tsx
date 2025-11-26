@@ -83,20 +83,20 @@ const MobileContent = () => {
                 3
             ],
             'exercises': [
-                // {
-                //     'id': 'squat',
-                //     'side': 'single',
-                //     'name': 'Классический присед с резинкой',
-                //     'rest_time': 10,
-                //     'duration': 5,
-                //     'progress': 15,
-                //     'sets': 2,
-                //     'reps': 5,
-                //     'isAi': false,
-                //     'VideoTheory': 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-                //     'VideoPractice': 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-                //     'isVertical': true,
-                // },
+                {
+                    'id': 'squat',
+                    'side': 'single',
+                    'name': 'Классический присед с резинкой',
+                    'rest_time': 10,
+                    'duration': 5,
+                    'progress': 15,
+                    'sets': 2,
+                    'reps': 5,
+                    'isAi': false,
+                    'VideoTheory': 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+                    'VideoPractice': 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+                    'isVertical': true,
+                },
 
                 {
                     'id': 'leg_abduction_l',

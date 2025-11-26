@@ -49,9 +49,16 @@ const IS_IOS = Platform.OS === 'ios'
 //
 // This might not cover all cases.
 
-// Ширина = 100% ширины экрана, высота = 60% от высоты экрана
-const CAM_PREVIEW_WIDTH = Dimensions.get('window').width
-const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height * 0.6 
+// Размеры экрана
+const SCREEN_WIDTH = Dimensions.get('window').width
+const SCREEN_HEIGHT = Dimensions.get('window').height
+
+// Ширина = 100% ширины экрана, высота = 60% от высоты экрана (для портрета)
+const CAM_PREVIEW_WIDTH = SCREEN_WIDTH
+const CAM_PREVIEW_HEIGHT = SCREEN_HEIGHT * 0.6
+
+// Для ландшафта размеры будут вычисляться динамически в функции
+// Ширина = вся ширина экрана, высота = 60% от высоты экрана 
 // The score threshold for pose detection results.
 const MIN_KEYPOINT_SCORE = 0.3
 
@@ -60,7 +67,7 @@ const MIN_KEYPOINT_SCORE = 0.3
 // For movenet, the size here doesn't matter too much because the model will
 // preprocess the input (crop, resize, etc). For best result, use the size that
 // doesn't distort the image.
-const OUTPUT_TENSOR_WIDTH = 180
+const OUTPUT_TENSOR_WIDTH = 180//CAM_PREVIEW_WIDTH
 const OUTPUT_TENSOR_HEIGHT = OUTPUT_TENSOR_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4)
 
 // Whether to auto-render TensorCamera preview.
@@ -124,36 +131,42 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
     ) => {
         const loop = async () => {
             // Get the tensor and run pose detection.
-            const imageTensor = images.next().value as tf.Tensor3D
+            const iteratorResult = images.next()
+            
+            // Only process if we have a valid tensor
+            if (iteratorResult.value) {
+                const imageTensor = iteratorResult.value as tf.Tensor3D
 
-            try {
-                const detectedPoses = await model.estimatePoses(imageTensor, undefined, Date.now())
-                setPoses(detectedPoses)
-                emitTelemetry(detectedPoses[0])
-                
-                // Check if all 17 keypoints are detected
-                if (detectedPoses.length > 0 && detectedPoses[0]) {
-                    const pose = detectedPoses[0]
-                    const detectedKeypoints = pose.keypoints.filter(
-                        (k) => (k.score ?? 0) > MIN_KEYPOINT_SCORE
-                    )
-                    const allDetected = detectedKeypoints.length === 17
-                    onAllKeypointsDetected?.(allDetected)
-                } else {
+                try {
+                    const detectedPoses = await model.estimatePoses(imageTensor, undefined, Date.now())
+                    setPoses(detectedPoses)
+                    emitTelemetry(detectedPoses[0])
+                    
+                    // Check if all 17 keypoints are detected
+                    if (detectedPoses.length > 0 && detectedPoses[0]) {
+                        const pose = detectedPoses[0]
+                        const detectedKeypoints = pose.keypoints.filter(
+                            (k) => (k.score ?? 0) > MIN_KEYPOINT_SCORE
+                        )
+                        const allDetected = detectedKeypoints.length === 17
+                        onAllKeypointsDetected?.(allDetected)
+                    } else {
+                        onAllKeypointsDetected?.(false)
+                    }
+                } catch (error) {
+                    console.error('[PoseCameraView] Error detecting poses:', error)
                     onAllKeypointsDetected?.(false)
+                } finally {
+                    tf.dispose([imageTensor])
                 }
-            } catch (error) {
-                console.error('[PoseCameraView] Error detecting poses:', error)
-                onAllKeypointsDetected?.(false)
             }
-
-            tf.dispose([imageTensor])
 
             if (rafId.current === 0) {
                 return
             }
 
             // Render camera preview manually when autorender=false.
+            // Always update preview to keep video stream visible
             if (!AUTO_RENDER) {
                 try {
                     updatePreview()
@@ -287,7 +300,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
     const isPortrait = () => {
         return (
             orientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
-			orientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
+			      orientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
         )
     }
 
@@ -297,15 +310,16 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
         // would be stretched too much.
         //
         // Same for getOutputTensorHeight below.
-        return isPortrait() || IS_ANDROID
-            ? OUTPUT_TENSOR_WIDTH
-            : OUTPUT_TENSOR_HEIGHT
+        return OUTPUT_TENSOR_WIDTH
+        // return isPortrait() || IS_ANDROID ? OUTPUT_TENSOR_WIDTH : OUTPUT_TENSOR_HEIGHT
     }
 
     const getOutputTensorHeight = () => {
-        return isPortrait() || IS_ANDROID
-            ? OUTPUT_TENSOR_HEIGHT
-            : OUTPUT_TENSOR_WIDTH
+        // return isPortrait() //|| IS_ANDROID
+        //     ? OUTPUT_TENSOR_HEIGHT
+        //     : OUTPUT_TENSOR_WIDTH
+
+        return isPortrait() || IS_ANDROID ? OUTPUT_TENSOR_HEIGHT : OUTPUT_TENSOR_WIDTH
     }
 
     // Получаем реальные размеры камеры с учетом aspectRatio для iOS
@@ -314,23 +328,35 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
             // Для iOS в портрете камера имеет aspectRatio 9/16, ширина = 100% ширины экрана
             return CAM_PREVIEW_WIDTH
         }
-        return isPortrait() ? CAM_PREVIEW_WIDTH : CAM_PREVIEW_HEIGHT
+        if (!isPortrait()) {
+            // В ландшафте используем всю ширину экрана (в ландшафте width > height)
+            const { width } = Dimensions.get('window')
+            return width
+        }
+        return CAM_PREVIEW_WIDTH
     }
 
     const getCameraHeight = () => {
         if (IS_IOS && isPortrait()) {
-            // Для iOS в портрете камера имеет aspectRatio 9/16, высота = ширина * 16/9
-            return CAM_PREVIEW_WIDTH * (16 / 9)
+            // Для iOS в портрете камера имеет aspectRatio 9/16
+            // Но ограничиваем высоту до 60% экрана
+            const aspectHeight = CAM_PREVIEW_WIDTH * (16 / 9)
+            return Math.min(aspectHeight, CAM_PREVIEW_HEIGHT)
         }
-        return isPortrait() ? CAM_PREVIEW_HEIGHT : CAM_PREVIEW_WIDTH
+        if (!isPortrait()) {
+            // В ландшафте высота = 60% от высоты экрана
+            const { height } = Dimensions.get('window')
+            return height * 0.6
+        }
+        return CAM_PREVIEW_HEIGHT
     }
 
     const getTextureRotationAngleInDegrees = () => {
         // On Android, the camera texture will rotate behind the scene as the phone
         // changes orientation, so we don't need to rotate it in TensorCamera.
-        if (IS_ANDROID) {
-            return 0
-        }
+        // if (IS_ANDROID) {
+        //     return 0
+        // }
 
         // For iOS, the camera texture won't rotate automatically. Calculate the
         // rotation angles here which will be passed to TensorCamera to rotate it
@@ -340,9 +366,9 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
         case ScreenOrientation.Orientation.PORTRAIT_DOWN:
             return 180
         case ScreenOrientation.Orientation.LANDSCAPE_LEFT:
-            return cameraType === 'front' ? 270 : 90
-        case ScreenOrientation.Orientation.LANDSCAPE_RIGHT:
             return cameraType === 'front' ? 90 : 270
+        case ScreenOrientation.Orientation.LANDSCAPE_RIGHT:
+            return cameraType === 'front' ? 270 : 90
         default:
             return 0
         }
@@ -350,22 +376,34 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
 
     const shouldFlipCamera = IS_IOS && cameraType === 'front'
 
-    // Для iOS добавляем aspectRatio для правильного соотношения сторон (9:16 в портрете)
+    // Для iOS добавляем aspectRatio для правильного соотношения сторон в портрете
+    // В ландшафте используем фиксированную высоту (60% от высоты экрана)
     // Убираем height: '100%' чтобы aspectRatio работал правильно
     const cameraStyle = IS_IOS && isPortrait()
-        ? [styles.camera, { height: undefined, aspectRatio: 9 / 16, alignSelf: 'center' }]
+        ? [
+            styles.camera, 
+            { 
+                aspectRatio: 9 / 16, 
+                height: undefined,
+                maxHeight: CAM_PREVIEW_HEIGHT 
+            }
+        ]
         : styles.camera
 
     return (
         <View
-            style={
-                isPortrait() ? styles.containerPortrait : styles.containerLandscape
-            }
+            style={[
+                isPortrait() ? styles.containerPortrait : styles.containerLandscape,
+                !isPortrait() && {
+                    width: Dimensions.get('window').width,
+                    height: Dimensions.get('window').height * 0.6
+                }
+            ]}
         >
             <View
                 style={[
                     styles.cameraWrapper,
-                    IS_IOS && isPortrait() && styles.cameraWrapperIOS,
+                    IS_IOS && styles.cameraWrapperIOS,
                     shouldFlipCamera && { transform: [{ scaleX: -1 }] }
                 ]}
             >
@@ -401,8 +439,6 @@ const styles = StyleSheet.create({
     },
     containerLandscape: {
         position: 'relative',
-        width: CAM_PREVIEW_HEIGHT,
-        height: CAM_PREVIEW_WIDTH,
         alignSelf: 'center',
         borderRadius: 20
     },

@@ -13,9 +13,11 @@ type BodyPositionScreenProps = {
 	orientation: ScreenOrientation.Orientation
 }
 
-const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height * 0.6
+
 
 export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation }: BodyPositionScreenProps) => {
+
+    const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height * 0.6
 
     const [showSuccess, setShowSuccess] = useState(false)
     const successTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -74,7 +76,7 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
     // }, [onComplete])
 
     return <View className="flex-1" >
-        <View style={{ height: CAM_PREVIEW_HEIGHT }}>
+        <View style={{ height: CAM_PREVIEW_HEIGHT}}>
             <PoseCamera 
                 model={model} 
                 orientation={orientation} 
