@@ -327,7 +327,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
     // Вычисляем реальные размеры камеры с учетом aspect ratio (cover behavior)
     const getActualCameraSize = () => {
         const containerWidth = isPortrait() ? CAM_PREVIEW_WIDTH : Dimensions.get('window').width
-        const containerHeight = isPortrait() ? CAM_PREVIEW_HEIGHT : Dimensions.get('window').height * 0.6
+        const containerHeight = isPortrait() ? CAM_PREVIEW_HEIGHT : Dimensions.get('window').height //* 0.6
         
         const aspectRatio = IS_IOS ? IOS_ASPECT_RATIO : ANDROID_ASPECT_RATIO
         
