@@ -38,7 +38,7 @@ type ExerciseFlowProps = {
 export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
 	  useKeepAwake()
-    const [currentStep, setCurrentStep] = useState<ExerciseStep>('position')
+    const [currentStep, setCurrentStep] = useState<ExerciseStep>('theory')
     const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
     const [restType, setRestType] = useState<'rep' | 'set' | 'exercise'>('rep')
 

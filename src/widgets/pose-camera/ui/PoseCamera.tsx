@@ -329,7 +329,13 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
         const containerWidth = isPortrait() ? CAM_PREVIEW_WIDTH : Dimensions.get('window').width
         const containerHeight = isPortrait() ? CAM_PREVIEW_HEIGHT : Dimensions.get('window').height //* 0.6
         
-        const aspectRatio = IS_IOS ? IOS_ASPECT_RATIO : ANDROID_ASPECT_RATIO
+        // Для iOS в ландшафте используем обратное соотношение сторон
+        let aspectRatio
+        if (IS_IOS) {
+            aspectRatio = isPortrait() ? IOS_ASPECT_RATIO : (16 / 9)
+        } else {
+            aspectRatio = ANDROID_ASPECT_RATIO
+        }
         
         // Вычисляем размеры камеры, которая заполняет контейнер (cover behavior)
         const cameraHeightIfFitWidth = containerWidth / aspectRatio
@@ -352,15 +358,6 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
         }
         
         return { cameraWidth, cameraHeight, offsetX, offsetY, containerWidth, containerHeight }
-    }
-
-    // Получаем реальные размеры камеры с учетом aspectRatio
-    const getCameraWidth = () => {
-        return getActualCameraSize().cameraWidth
-    }
-
-    const getCameraHeight = () => {
-        return getActualCameraSize().cameraHeight
     }
 
     const getTextureRotationAngleInDegrees = () => {
