@@ -6,14 +6,19 @@ import { Camera } from 'expo-camera'
 // @ts-ignore - ExpoCamera is not exported but needed for tensorflow
 import ExpoCamera from 'expo-camera/build/ExpoCamera'
 import * as tf from '@tensorflow/tfjs'
-import * as posedetection from '@tensorflow-models/pose-detection'
+import type * as posedetection from '@tensorflow-models/pose-detection'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import {
     cameraWithTensors,
 } from '@tensorflow/tfjs-react-native'
 import Svg, { Circle, Line } from 'react-native-svg'
 import { type ExpoWebGLRenderingContext } from 'expo-gl'
-import { useKeepAwake } from 'expo-keep-awake'
+import {
+    type EngineTelemetry,
+    ExerciseEngine,
+    type RawKeypoint,
+} from '../../../../poseflow-js'
+import { getExerciseRule } from '../../../../poseflow-js/rules'
 
 // Polyfill for Camera.Constants which was removed in expo-camera v17
 // @tensorflow/tfjs-react-native still expects this API
@@ -62,12 +67,17 @@ const AUTO_RENDER = false
 
 type PoseCameraProps = {
     model: posedetection.PoseDetector
-    orientation: ScreenOrientation.Orientation
+    orientation: ScreenOrientation.Orientation,
+	exerciseId?: string
+	onTelemetry?: (telemetry: EngineTelemetry) => void
+	onAllKeypointsDetected?: (allDetected: boolean) => void
 }
 
-export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) => {
-    useKeepAwake()
+export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    exerciseId,
+    onTelemetry, onAllKeypointsDetected, }) => {
     const cameraRef = useRef(null)
+	  const engineRef = useRef<ExerciseEngine | null>(null)
+
     const [poses, setPoses] = useState<posedetection.Pose[]>()
 
     // Use front camera by default
@@ -90,6 +100,19 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) =>
         }
     }, [])
 
+    useEffect(() => {
+			
+        if (!exerciseId) return
+        // Recreate FSM stack whenever the user picks another exercise.
+        const rule = getExerciseRule(exerciseId)
+        if (!engineRef.current) {
+            engineRef.current = new ExerciseEngine(rule)
+        } else {
+            engineRef.current.updateRule(rule)
+        }
+        engineRef.current.reset()
+    }, [exerciseId])
+
     const handleCameraStream = async (
         images: IterableIterator<tf.Tensor3D>,
         updatePreview: () => void,
@@ -98,13 +121,28 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) =>
         const loop = async () => {
             // Get the tensor and run pose detection.
             const imageTensor = images.next().value as tf.Tensor3D
-         
-            const poses = await model.estimatePoses(
-                imageTensor,
-                undefined,
-                Date.now()
-            )
-            setPoses(poses)
+
+            try {
+                const detectedPoses = await model.estimatePoses(imageTensor, undefined, Date.now())
+                setPoses(detectedPoses)
+                emitTelemetry(detectedPoses[0])
+                
+                // Check if all 17 keypoints are detected
+                if (detectedPoses.length > 0 && detectedPoses[0]) {
+                    const pose = detectedPoses[0]
+                    const detectedKeypoints = pose.keypoints.filter(
+                        (k) => (k.score ?? 0) > MIN_KEYPOINT_SCORE
+                    )
+                    const allDetected = detectedKeypoints.length === 17
+                    onAllKeypointsDetected?.(allDetected)
+                } else {
+                    onAllKeypointsDetected?.(false)
+                }
+            } catch (error) {
+                console.error('[PoseCameraView] Error detecting poses:', error)
+                onAllKeypointsDetected?.(false)
+            }
+
             tf.dispose([imageTensor])
 
             if (rafId.current === 0) {
@@ -133,8 +171,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) =>
     const renderPose = () => {
         if (poses != null && poses.length > 0 && poses[0]) {
             const pose = poses[0]
-            const flipX = IS_ANDROID || cameraType === 'back'
-            
+
             // Создаем карту keypoints по имени для быстрого доступа
             const keypointMap = new Map<string, { x: number; y: number; cx: number; cy: number }>()
             
@@ -226,6 +263,14 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation }) =>
         } else {
             return <View></View>
         }
+    }
+
+    // Translate pose-detection output into the engine telemetry feed expected by the UI.
+    const emitTelemetry = (pose: posedetection.Pose | undefined) => {
+        if (!engineRef.current || !onTelemetry) return
+        const keypoints = pose?.keypoints as RawKeypoint[] | undefined
+        const telemetry = engineRef.current.process(keypoints ?? [], Date.now())
+        onTelemetry(telemetry)
     }
 
     const isPortrait = () => {

@@ -16,6 +16,10 @@ import { useTrainingStore } from '@/entities/training'
 import {
     ExerciseExecutionScreen
 } from '@/widgets/training-session/ui/exercise/ExerciseExecutionScreen'
+import { useKeepAwake } from 'expo-keep-awake'
+import {
+	ExerciseExampleCountdownScreen
+} from '@/widgets/training-session/ui/exercise/ExerciseExampleCountdownScreen'
 
 type ExerciseStep =
 	| 'countdown'
@@ -33,7 +37,8 @@ type ExerciseFlowProps = {
 
 export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
-    const [currentStep, setCurrentStep] = useState<ExerciseStep>('countdown')
+	  useKeepAwake()
+    const [currentStep, setCurrentStep] = useState<ExerciseStep>('position')
     const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
     const [restType, setRestType] = useState<'rep' | 'set' | 'exercise'>('rep')
 
@@ -269,20 +274,13 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             />
         )}
         
-        {currentStep === 'countdown' &&     <BodyPositionScreen
-            key="side-switch"
-            onComplete={handleSideSwitchComplete}
-            model={model}
-            orientation={orientation}
+        {currentStep === 'countdown' && ( <ExerciseExampleCountdownScreen
+            exercise={currentExercise}
+            currentSet={currentSet}
+            onComplete={handleCountdownComplete}
+            isVertical={isVertical}
         />
-
-            // 	( <ExerciseExampleCountdownScreen
-            //     exercise={currentExercise}
-            //     currentSet={currentSet}
-            //     onComplete={handleCountdownComplete}
-            //     isVertical={isVertical}
-            // />
-            // )
+        )
 
         }
    

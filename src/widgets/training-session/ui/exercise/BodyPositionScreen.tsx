@@ -1,11 +1,8 @@
-import {
-    ExerciseWithCounterWrapper
-} from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
+
 import { PoseCamera } from '@/widgets/pose-camera'
 import { View, Text, Dimensions } from 'react-native'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
-import { useStatusBar } from '@/shared/lib'
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import type * as ScreenOrientation from 'expo-screen-orientation'
 
@@ -16,17 +13,56 @@ type BodyPositionScreenProps = {
 	orientation: ScreenOrientation.Orientation
 }
 
-const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height - 180
+const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height * 0.6
 
 export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation }: BodyPositionScreenProps) => {
 
     const [showSuccess, setShowSuccess] = useState(false)
+    const successTimerRef = useRef<NodeJS.Timeout | null>(null)
+    const allKeypointsDetectedRef = useRef(false)
+
+    const handleAllKeypointsDetected = (allDetected: boolean) => {
+        if (allDetected && !allKeypointsDetectedRef.current) {
+            allKeypointsDetectedRef.current = true
+            
+            // Clear any existing timer
+            if (successTimerRef.current) {
+                clearTimeout(successTimerRef.current)
+            }
+            
+            // Set success after 2 seconds
+            successTimerRef.current = setTimeout(() => {
+                setShowSuccess(true)
+            }, 2000)
+            successTimerRef.current = setTimeout(() => {
+                onComplete()
+            }, 3000)
+        }
+
+				// else if (!allDetected && allKeypointsDetectedRef.current) {
+        //     // Reset if keypoints are lost
+        //     allKeypointsDetectedRef.current = false
+        //     if (successTimerRef.current) {
+        //         clearTimeout(successTimerRef.current)
+        //         successTimerRef.current = null
+        //     }
+        //     setShowSuccess(false)
+        // }
+    }
+
+    useEffect(() => {
+        return () => {
+            if (successTimerRef.current) {
+                clearTimeout(successTimerRef.current)
+            }
+        }
+    }, [])
 
     // Настройка статус-бара: светлые иконки для темного градиента
-    useStatusBar({
-        style: 'light',
-        backgroundColor: '#BA9BF7', // Цвет фона статус-бара на Android (совпадает с градиентом)
-    })
+    // useStatusBar({
+    //     style: 'light',
+    //     backgroundColor: '#BA9BF7', // Цвет фона статус-бара на Android (совпадает с градиентом)
+    // })
 
     // useEffect(() => {
     //     // Reset state when component mounts
@@ -46,11 +82,13 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
     //     }
     // }, [onComplete])
 
-    return <ExerciseWithCounterWrapper
-        onComplete={onComplete}
-    >
-        <View>
-            <PoseCamera model={model} orientation={orientation} />
+    return <View className="flex-1" >
+        <View style={{ height: CAM_PREVIEW_HEIGHT }}>
+            <PoseCamera 
+                model={model} 
+                orientation={orientation} 
+                onAllKeypointsDetected={handleAllKeypointsDetected}
+            />
         </View>
 
         {/*/!* Grid pattern background - full width and height *!/*/}
@@ -87,10 +125,10 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
             }}
         >
 
-            <Text className="text-h2 text-light-text-100 mb-2 text-center">
+            <Text className="text-h2 text-light-text-100 mb-2 text-left">
 				Примите исходное положение
             </Text>
-            <Text className="text-t2 text-light-text-200 text-center">
+            <Text className="text-t2 text-light-text-200 text-left">
 				Встаньте так, чтобы ваше тело полностью попадало в кадр и входило в
 				контур
             </Text>
@@ -99,6 +137,6 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
                 <Text className="text-h1 text-brand-green-500">Вперёд!</Text>
             </View>)}
         </LinearGradient>
+    </View>
 
-    </ExerciseWithCounterWrapper>
 }

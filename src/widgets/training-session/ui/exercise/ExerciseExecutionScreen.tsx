@@ -17,6 +17,8 @@ import { Audio } from 'expo-av'
 import { PoseCamera } from '@/widgets/pose-camera'
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import type * as ScreenOrientation from 'expo-screen-orientation'
+import type { EngineTelemetry } from '../../../../../poseflow-js'
+import { exerciseOptions } from '../../../../../poseflow-js/rules'
 
 interface TimerExerciseScreenProps {
 	isVertical?: boolean
@@ -34,17 +36,21 @@ function TimerExerciseContent({ exercise, model, isVertical, orientation }: Time
     const isFocused = useIsFocused()
     const soundRef = useRef<Audio.Sound | null>(null)
 
+    const [telemetry, setTelemetry] = useState<EngineTelemetry | null>(null)
+
+    const [exerciseId, setExerciseId] = useState(exerciseOptions[0]?.id ?? 'squat')
+	
     const beepSound = require('@/assets/sounds/beep.mp3')
-
-    useEffect(() => {
-        // Обновляем cameraKey при монтировании компонента для гарантированной инициализации камеры
-        setCameraKey(prev => prev + 1)
-    }, [])
-
-    useEffect(() => {
-        // Обновляем cameraKey при изменении exercise.id
-        setCameraKey(prev => prev + 1)
-    }, [exercise.id])
+    //
+    // useEffect(() => {
+    //     // Обновляем cameraKey при монтировании компонента для гарантированной инициализации камеры
+    //     setCameraKey(prev => prev + 1)
+    // }, [])
+    //
+    // useEffect(() => {
+    //     // Обновляем cameraKey при изменении exercise.id
+    //     setCameraKey(prev => prev + 1)
+    // }, [exercise.id])
 
     useEffect(() => {
         // Инициализация звука
@@ -73,25 +79,25 @@ function TimerExerciseContent({ exercise, model, isVertical, orientation }: Time
         }
     }, [])
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setLocalCurrentSet((prev) => {
-                if (prev >= exercise.sets) {
-                    return prev
-                }
-                const newValue = prev + 1
-                // Воспроизводим звук при увеличении счетчика
-                if (newValue > 0 && soundRef.current) {
-                    soundRef.current.replayAsync().catch((error) => {
-                        console.log('Error playing sound:', error)
-                    })
-                }
-                return newValue
-            })
-        }, 2000)
-
-        return () => clearInterval(interval)
-    }, [exercise.sets])
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         setLocalCurrentSet((prev) => {
+    //             if (prev >= exercise.sets) {
+    //                 return prev
+    //             }
+    //             const newValue = prev + 1
+    //             // Воспроизводим звук при увеличении счетчика
+    //             if (newValue > 0 && soundRef.current) {
+    //                 soundRef.current.replayAsync().catch((error) => {
+    //                     console.log('Error playing sound:', error)
+    //                 })
+    //             }
+    //             return newValue
+    //         })
+    //     }, 2000)
+    //
+    //     return () => clearInterval(interval)
+    // }, [exercise.sets])
 
     // useEffect(() => {
     //     if (player && videoPlayerContext) {
@@ -113,7 +119,7 @@ function TimerExerciseContent({ exercise, model, isVertical, orientation }: Time
             <View style={{ height, position: 'relative', width: '100%', overflow: 'hidden' }}>
                
                 <View>
-                    <PoseCamera model={model} orientation={orientation} />
+                    <PoseCamera model={model} orientation={orientation} onTelemetry={setTelemetry} exerciseId={exerciseId} />
                 </View>
 				
                 {/* Video Preview Window - Bottom Right Corner - Foreground Layer */}
@@ -189,15 +195,15 @@ function TimerExerciseContent({ exercise, model, isVertical, orientation }: Time
                     <View className="flex-row px-1 justify-center ">
                         <View className="flex-1 basis-0 items-center  ">
                             <Text className={`text-[64px] leading-[72px] ${
-                                localCurrentSet === 0 
+                                telemetry?.reps === 0 
                                     ? 'text-light-text-200' 
-                                    : localCurrentSet === exercise.sets 
+                                    : telemetry?.reps === exercise.sets 
                                         ? 'text-brand-green-500' 
                                         : 'text-light-text-200'
                             }`}>
-                                {localCurrentSet}
+                                {telemetry?.reps}
                                 <Text className={`text-[32px] leading-[36px] ${
-                                    localCurrentSet === exercise.sets 
+                                    telemetry?.reps === exercise.sets 
                                         ? 'text-brand-green-500' 
                                         : 'color-[#949494]'
                                 }`}> / {exercise.sets}</Text>
@@ -211,15 +217,15 @@ function TimerExerciseContent({ exercise, model, isVertical, orientation }: Time
 
                         <View className="flex-[0.5] basis-0 items-center bg-fill-800 rounded-3xl p-1">
                             <Text className={`text-[64px] leading-[72px] ${
-                                localCurrentSet === 0 
+                                telemetry?.reps === 0 
                                     ? 'text-light-text-200' 
-                                    : localCurrentSet === exercise.sets 
+                                    :  telemetry?.reps === exercise.sets 
                                         ? 'text-brand-green-500' 
                                         : 'text-light-text-200'
                             }`}>
-                                {localCurrentSet}
+                                { telemetry?.reps}
                                 <Text className={`text-[32px] leading-[36px] ${
-                                    localCurrentSet === exercise.sets 
+                                    telemetry?.reps === exercise.sets 
                                         ? 'text-brand-green-500' 
                                         : 'color-[#949494]'
                                 }`}> / {exercise.sets}</Text>

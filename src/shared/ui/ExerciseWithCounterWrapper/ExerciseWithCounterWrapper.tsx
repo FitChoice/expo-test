@@ -29,7 +29,6 @@ const VideoPlayerContext = createContext<VideoPlayerContextValue | null>(null)
 
 export const useVideoPlayerContext = () => {
     const context = useContext(VideoPlayerContext)
-    console.log('useVideoPlayerContext called, context:', context)
     if (!context) {
         console.warn('useVideoPlayerContext: context is null!')
         return null
@@ -91,28 +90,28 @@ export const ExerciseWithCounterWrapper = ({
         setIsPaused(false)
     }, [tick])
 
-    useEffect(() => {
-        // Запускаем таймер при монтировании только если countdownInitial передан
-        if (countdownInitial !== undefined) {
-            startTimer()
-        }
-		
-        return () => {
-            if (timerRef.current !== null) {
-                clearInterval(timerRef.current)
-                timerRef.current = null
-            }
-        }
-    }, [startTimer, countdownInitial])
+    // useEffect(() => {
+    //     // Запускаем таймер при монтировании только если countdownInitial передан
+    //     if (countdownInitial !== undefined) {
+    //         startTimer()
+    //     }
+		//
+    //     return () => {
+    //         if (timerRef.current !== null) {
+    //             clearInterval(timerRef.current)
+    //             timerRef.current = null
+    //         }
+    //     }
+    // }, [startTimer, countdownInitial])
 
     const pauseTimer = useCallback(() => {
 		
         setShowPauseModal(true)
-        if (timerRef.current !== null) {
-            clearInterval(timerRef.current)
-            timerRef.current = null
-            setIsPaused(true)
-        }
+        // if (timerRef.current !== null) {
+        //     clearInterval(timerRef.current)
+        //     timerRef.current = null
+        //     setIsPaused(true)
+        // }
         // Пауза видео
         videoPlayersRef.current.forEach((player) => {
 	
@@ -125,9 +124,9 @@ export const ExerciseWithCounterWrapper = ({
     }, [])
 
     const resumeTimer = useCallback(() => {
-        if (timerRef.current === null && countdown > 0) {
-            startTimer()
-        }
+        // if (timerRef.current === null && countdown > 0) {
+        //     startTimer()
+        // }
         setShowPauseModal(false)
         // Возобновление видео
         videoPlayersRef.current.forEach((player) => {
@@ -140,9 +139,9 @@ export const ExerciseWithCounterWrapper = ({
     }, [countdown, startTimer])
 
     const handleStopResume =  useCallback(() => {
-        if (timerRef.current === null && countdown > 0) {
-            startTimer()
-        }
+        // if (timerRef.current === null && countdown > 0) {
+        //     startTimer()
+        // }
         setShowStopModal(false)
         // Возобновление видео
         videoPlayersRef.current.forEach((player) => {
@@ -196,7 +195,7 @@ export const ExerciseWithCounterWrapper = ({
                     {/* Control Buttons */}
                     {isShowActionButtons &&
 				
-				<View className="absolute left-4 right-4 top-5 z-10 flex-row justify-end gap-2">
+				<View className="absolute left-4 right-4 top-5 z-10 flex-row justify-end gap-2 ">
 				    <ControlButton
 				        icon={<AntDesign name="pause" size={24} color="#FFFFFF" />}
 				        onPress={pauseTimer}
