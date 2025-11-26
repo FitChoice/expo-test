@@ -1,0 +1,13 @@
+{
+  "confidence_min": 0.3,
+  "smoothing_window": 5,
+  "min_keypoints": 10,
+  "stability_threshold": 0.05,
+  "quality": {
+    "rom_angle_min": 80,
+    "knee_valgus_max": 0.12,
+    "torso_lean_max": 18,
+    "symmetry_threshold": 0.7
+  }
+}
+

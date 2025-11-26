@@ -1,0 +1,20 @@
+{
+  "exercise": "hip_bridge",
+  "axis": "hip_extension_angle",
+  "states": ["Top", "Down", "Bottom", "Up"],
+  "thresholds": {
+    "down_enter": 150,
+    "bottom_enter": 140,
+    "up_enter": 165,
+    "top_enter": 175,
+    "min_dwell_ms": 0
+  },
+  "rep_on_transition": "Up->Top",
+  "hysteresis": 2,
+  "anti_yaw_max": 1.0,
+  "quality": {
+    "rom_angle_min": 30,
+    "torso_lean_max": 20
+  }
+}
+
