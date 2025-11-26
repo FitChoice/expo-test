@@ -13,11 +13,9 @@ type BodyPositionScreenProps = {
 	orientation: ScreenOrientation.Orientation
 }
 
-
-
 export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation }: BodyPositionScreenProps) => {
 
-    const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height * 0.6
+    const CAM_PREVIEW_HEIGHT = isVertical ? Dimensions.get('window').height * 0.6 : Dimensions.get('window').height
 
     const [showSuccess, setShowSuccess] = useState(false)
     const successTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -76,7 +74,8 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
     // }, [onComplete])
 
     return <View className="flex-1" >
-        <View style={{ height: CAM_PREVIEW_HEIGHT}}>
+
+        <View style={{ height: CAM_PREVIEW_HEIGHT }}>
             <PoseCamera 
                 model={model} 
                 orientation={orientation} 
@@ -130,6 +129,24 @@ export  const BodyPositionScreen = ({ isVertical, onComplete, model, orientation
                 <Text className="text-h1 text-brand-green-500">Вперёд!</Text>
             </View>)}
         </LinearGradient>
+
+        {
+
+            !isVertical && <View className="absolute z-10  bottom-0 left-0 right-0  items-center justify-center bg-black opacity-50 " >
+                <Text className="text-h2 text-light-text-100 mb-2 text-left">
+						Примите исходное положение
+                </Text>
+                <Text className="text-t2 text-light-text-200 text-left">
+						Встаньте так, чтобы ваше тело полностью попадало в кадр и входило в
+						контур
+                </Text>
+
+                {!showSuccess &&(<View className="mt-2 mb-2 items-center">
+                    <Text className="text-h1 text-brand-green-500">Вперёд!</Text>
+                </View>)}
+            </View>
+        }
+
     </View>
 
 }
