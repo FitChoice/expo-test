@@ -3,13 +3,9 @@
  * Четвертый шаг onboarding - калибровка уровня
  * Показывает текущий угол наклона телефона (вперёд-назад) и подсказку выровнять его
  */
-
+//import * as ScreenOrientation from 'expo-screen-orientation'
 import {
-    View,
-    Text,
-    Animated,
-    type StyleProp,
-    type ViewStyle,
+	View, Text, Animated, type StyleProp, type ViewStyle, Platform,
 } from 'react-native'
 import { Accelerometer } from 'expo-sensors'
 import { useState, useEffect, useRef } from 'react'
@@ -19,7 +15,8 @@ import { DotsProgress } from '@/shared/ui/DotsProgress'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
-import { GradientBg } from '@/shared/ui/GradientBG'
+
+const IS_IOS = Platform.OS === 'ios'
 
 interface GyroscopeLevelScreenProps {
 	onNext: () => void;
@@ -180,7 +177,7 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
                 </View>
 
                 <Text className={`text-h1 text-center ${isAvailable !== false && !isCalibrated ? 'text-light-text-100' : 'text-brand-green-500'} ${isVertical ? 'mt-4 mb-12' : ''}`}>
-                    { isVertical ? angle : angle - 90 }°
+                    { isVertical ? angle : IS_IOS ? angle + 180 : angle - 90 }°
                 </Text>
 		
             </View>

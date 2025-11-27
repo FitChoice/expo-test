@@ -29,7 +29,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             <View className="justify-center items-center px-6 py-8 flex-1">
                 {/* Number and Title */}
                 <View className="items-center justify-center ">
-                    <Text className="font-rimma text-[64px] leading-[72px] text-light-text-100">
+                    <Text className="font-rimma text-[50px] leading-[72px] text-light-text-100">
                         {displayNumber}
                     </Text>
                     <Text className="text-t2 text-light-text-100 mt-1">

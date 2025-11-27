@@ -10,35 +10,13 @@ import React, {
     useMemo,
     useRef,
     useState,
-    createContext,
-    useContext,
 } from 'react'
 import { router } from 'expo-router'
 import type { VideoPlayer } from 'expo-video'
-
-const CountdownContext = createContext<number>(0)
-
-export const useCountdown = () => useContext(CountdownContext)
-
-interface VideoPlayerContextValue {
-	registerPlayer: (player: VideoPlayer) => () => void
-}
-
-const VideoPlayerContext = createContext<VideoPlayerContextValue | null>(null)
-
-export const useVideoPlayerContext = () => {
-    const context = useContext(VideoPlayerContext)
-    if (!context) {
-        console.warn('useVideoPlayerContext: context is null!')
-        return null
-    }
-    return context
-}
+import { VideoPlayerContext, VideoPlayerContextValue } from '@/shared/hooks/useVideoPlayerContext'
 
 export const ExerciseWithCounterWrapper = ({
-    children, 
-
-    countdownInitial,
+    children,
     isShowActionButtons = true,
 }: {
 	children: ReactNode
@@ -52,8 +30,6 @@ export const ExerciseWithCounterWrapper = ({
     const [isPaused, setIsPaused] = useState(false)
     const timerRef = useRef<number | null>(null)
     const videoPlayersRef = useRef<Set<VideoPlayer>>(new Set())
-
-
 
     const onStop = useCallback(() => {
         setShowStopModal(true)
@@ -71,8 +47,6 @@ export const ExerciseWithCounterWrapper = ({
             }
         })
     }, [])
-
-
 
     const pauseTimer = useCallback(() => {
 		

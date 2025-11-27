@@ -290,7 +290,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                 onComplete={handleExecutionComplete}
                 exercise={currentExercise}
                 isVertical={isVertical}
-                exerciseId={currentExercise.id}
+                currentSet={currentSet}
             />
         )}
         {/*{currentStep === 'success' && (*/}

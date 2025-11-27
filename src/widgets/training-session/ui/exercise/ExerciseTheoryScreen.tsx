@@ -12,10 +12,8 @@ import { VideoProgressBar } from '@/shared/ui'
 
 import type { Exercise } from '@/entities/training/model/types'
 
-import {
-    ExerciseWithCounterWrapper,
-    useVideoPlayerContext
-} from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
+import { ExerciseWithCounterWrapper } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
+import { useVideoPlayerContext } from '@/shared/hooks/useVideoPlayerContext'
 import { VIDEO_SCREEN_HEIGHT as height } from '@/shared/constants/sizes'
 
 interface ExerciseCountdownScreenProps {
@@ -41,23 +39,11 @@ function ExerciseExampleCountdownContent({
     const hasCompletedRef = useRef(false)
 
     useEffect(() => {
-
-        if (player && videoPlayerContext) {
-
-            const unregister = videoPlayerContext.registerPlayer(player)
-            return unregister
-        } else {
-            console.log('ExerciseTheoryScreen: cannot register - missing player or context')
-        }
-        return undefined
-    }, [player, videoPlayerContext])
-
-    useEffect(() => {
         if (!player) return
 
         const checkCompletion = () => {
             if (hasCompletedRef.current) return
-            
+
             // Проверяем, что видео закончилось (currentTime близко к duration)
             if (player.duration > 0 && player.currentTime >= player.duration - 0.1) {
                 hasCompletedRef.current = true
@@ -76,6 +62,18 @@ function ExerciseExampleCountdownContent({
             clearInterval(interval)
         }
     }, [player, onComplete])
+
+    useEffect(() => {
+
+        if (player && videoPlayerContext) {
+
+            const unregister = videoPlayerContext.registerPlayer(player)
+            return unregister
+        } else {
+            console.log('ExerciseTheoryScreen: cannot register - missing player or context')
+        }
+        return undefined
+    }, [player, videoPlayerContext])
 
     return (
         <>
@@ -174,8 +172,13 @@ export function ExerciseTheoryScreen({
 }: ExerciseCountdownScreenProps) {
     const player = useVideoPlayer(exercise.VideoTheory || '', (player) => {
         player.loop = false
-        player.play()
     })
+
+    useEffect(() => {
+        if (player) {
+            player.play()
+        }
+    }, [player])
 
     return (
         <ExerciseWithCounterWrapper>
