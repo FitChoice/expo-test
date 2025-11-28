@@ -12,7 +12,6 @@ import { useState, useEffect } from 'react'
 import {
     Icon,
     Button,
-    AuthGuard,
     BackgroundLayoutNoSidePadding,
     TrainingTags,
 } from '@/shared/ui'
@@ -31,11 +30,9 @@ import Ionicons from '@expo/vector-icons/Ionicons'
  */
 export const HomeScreen = () => {
     return (
-        <AuthGuard>
-            <BackgroundLayoutNoSidePadding>
-                {Platform.OS === 'web' ? <WebContent /> : <MobileContent />}
-            </BackgroundLayoutNoSidePadding>
-        </AuthGuard>
+        <BackgroundLayoutNoSidePadding>
+            {Platform.OS === 'web' ? <WebContent /> : <MobileContent />}
+        </BackgroundLayoutNoSidePadding>
     )
 }
 
@@ -139,6 +136,10 @@ const MobileContent = () => {
         router.push({ pathname: '/(training)/session', params: { trainingId: 1 } })
 	  }
 
+    const handleOpenDiary = () => {
+        router.push('/diary')
+    }
+
     return (
         <View className="flex-1">
             <ScrollView
@@ -228,7 +229,9 @@ const MobileContent = () => {
                             </View>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.actionButton}>
+                        <TouchableOpacity style={styles.actionButton}
+                            onPress={handleOpenDiary}
+                        >
                             <View style={styles.buttonContent}>
                                 <View style={styles.buttonInfo}>
                                     <Text style={styles.buttonTitle}>Дневник</Text>
