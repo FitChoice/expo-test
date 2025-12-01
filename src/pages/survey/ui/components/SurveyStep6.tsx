@@ -39,10 +39,39 @@ export const SurveyStep6: React.FC<SurveyStep6Props> = ({ bmiCategory }) => {
                 </Text>
             </View>
 
-            <View className="h-[50%] w-full relative "  >
-                <View className="absolute left-20 right-0 -top-20 " >
-                    <RNImage source={GymnastImage} className="w-full "  />
+            <View className="h-[50%] w-full relative">
+                {/* Круговой текст вокруг изображения - верхняя половина (за изображением) */}
+                <CircularText
+                    text=" fit choice fit choice fit choice fit choice fit "
+                    width={screenWidth * 0.7}
+                    height={screenWidth * 0.4}
+                    centerX={screenWidth * 0.65}
+                    centerY={screenHeight * 0.25}
+                    fontSize={14}
+                    fill="#FFFFFF"
+                    fontWeight="400"
+                    letterSpacing="2"
+                    startOffset="0%"
+                />
+                
+                <View className="absolute left-20 right-0 -top-20">
+                    <RNImage source={GymnastImage} className="w-full" />
                 </View>
+                
+                {/* Круговой текст вокруг изображения - нижняя половина (перед изображением) */}
+                <CircularText
+                    text="hoice fit choice fit choice fit choice fit choice "
+                    width={screenWidth * 0.8}
+                    height={screenWidth * 0.4}
+                    centerX={screenWidth * 0.7}
+                    centerY={screenHeight * 0.25}
+                    fontSize={14}
+                    fill="#FFFFFF"
+                    fontWeight="400"
+                    letterSpacing="2"
+                    startOffset="0%"
+                    rotation={180}
+                />
             </View>
 
         </View>
