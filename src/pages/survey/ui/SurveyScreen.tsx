@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { View, Animated } from 'react-native'
+import { View, Animated, Platform } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as Notifications from 'expo-notifications'
-import { Button, BackButton, BackgroundLayout, BackgroundLayoutNoSidePadding, Icon } from '@/shared/ui'
+import {
+    Button, BackButton, Icon, BackgroundLayout,
+} from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation, getUserId } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { useSurveyFlow } from '@/features/survey-flow'
@@ -30,6 +32,8 @@ import type {
     Direction,
 } from '@/entities/survey'
 import { trainingApi } from '@/features/training/api'
+
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 /**
  * Страница опроса - рефакторированная версия с компонентами-шагами
@@ -67,6 +71,8 @@ export const SurveyScreen = () => {
 
     const [hasRequested, setHasRequested] = useState(false)
     const [isSubmittingData, setIsSubmittingData] = useState(false)
+
+    const insets = useSafeAreaInsets()
 
     // Используем хук для анимации клавиатуры
     const { translateY } = useKeyboardAnimation({
@@ -358,17 +364,17 @@ export const SurveyScreen = () => {
     const notShowProgress = useMemo(() => currentStep == 13 || currentStep == 14, [currentStep])
 	
     // Выбираем компонент Layout в зависимости от шага
-    const isNoPaddingLayout = currentStep === 6
-    const LayoutComponent = isNoPaddingLayout ? BackgroundLayoutNoSidePadding : BackgroundLayout
+    const isNoPaddingLayout = currentStep == 6
     const sectionPadding = isNoPaddingLayout ? { paddingHorizontal: '4%' as const } : {}
-	
+    //  const LayoutComponent = isNoPaddingLayout ? BackgroundLayoutNoSidePadding : BackgroundLayout
+
     // Для экрана загрузки и ошибки используем flex-1 для центрирования
     const isFullHeightContent = currentStep === 14 && (isSubmitting || submitError)
 	
     return (
         <View className="flex-1 bg-[#151515] ">
-            <LayoutComponent>
-                <View className={'flex-1 bg-transparent pt-[14px]'} style={{ justifyContent: 'space-between' }}>
+            <BackgroundLayout>
+                <View className={'flex-1 bg-transparent justify-between '}>
                     {/* Верхний контент */}
                     <View className={isFullHeightContent ? 'flex-1' : 'flex-shrink'}>
                         {/* Header section with back button */}
@@ -406,8 +412,15 @@ export const SurveyScreen = () => {
 
                     {/* Кнопки внизу экрана с анимацией */}
                     <Animated.View
-                        className="gap-2 pb-[50px] pt-8"
-                        style={[{ transform: [{ translateY }] }, sectionPadding]}
+                        className="gap-2  pt-8"
+                        style={[
+                            Platform.OS === 'ios' ? { transform: [{ translateY }] } : {},
+                            sectionPadding,
+                            {
+                                paddingBottom: insets.bottom + 10,
+                            }
+												
+                        ]}
                     >
                         {canProceed() && (
                             <Button
@@ -449,7 +462,7 @@ export const SurveyScreen = () => {
                         }
                     </Animated.View>
                 </View>
-            </LayoutComponent>
+            </BackgroundLayout>
         </View>
     )
 }

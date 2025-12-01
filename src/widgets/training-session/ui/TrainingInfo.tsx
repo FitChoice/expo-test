@@ -1,23 +1,30 @@
 import {
-    View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, Dimensions,
+    View,
+    Text,
+    Image,
+    ScrollView,
+    TouchableOpacity,
+    StyleSheet,
+    useWindowDimensions,
 } from 'react-native'
 import { router } from 'expo-router'
 import {
-	Switch, TrainingTags, ExerciseInfoCard, SafeAreaContainer,
+    Switch, TrainingTags, ExerciseInfoCard,
 } from '@/shared/ui'
 import { useTrainingStore } from '@/entities/training'
-import React, { useState, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Entypo from '@expo/vector-icons/Entypo'
 import { BottomActionBtn } from '@/shared/ui/BottomActionBtn/BottomActionBtn'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { GradientBg } from '@/shared/ui/GradientBG'
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('screen')
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const trainingInfoBanner = require('@/assets/images/training_info_banner.png')
 
 // Динамический импорт картинок оборудования
 const equipmentImages = [
+
     require('@/assets/images/equipment/1.png'),
     require('@/assets/images/equipment/2.png'),
     require('@/assets/images/equipment/3.png'),
@@ -32,6 +39,8 @@ const equipmentImages = [
 ]
 
 export const TrainingInfo = () => {
+    const insets = useSafeAreaInsets()
+    const {  width: SCREEN_WIDTH } = useWindowDimensions()
 
     const training = useTrainingStore((state) => state.training)
     const startOnboarding = useTrainingStore((state) => state.startOnboarding)
@@ -61,7 +70,10 @@ export const TrainingInfo = () => {
         startOnboarding()
     }
 
-    return (<SafeAreaContainer>
+    return (<View className="flex-1">
+        <View style={[styles.gradientContainer, { width: SCREEN_WIDTH }]}>
+            <GradientBg />
+        </View>
         <ScrollView
             className="flex-1"
             showsVerticalScrollIndicator={false}>
@@ -75,7 +87,8 @@ export const TrainingInfo = () => {
                 {/* Close Button - Top Right */}
                 <TouchableOpacity
                     onPress={handleClose}
-                    className="absolute right-4 top-10 h-12 w-12 items-center justify-center rounded-2xl bg-white/30">
+                    style={{ top: insets.top  }}
+                    className="absolute right-4 h-12 w-12 items-center justify-center rounded-2xl bg-white/30">
                     <Entypo name="cross" size={24} color="white" />
                 </TouchableOpacity>
             </View>
@@ -138,7 +151,7 @@ export const TrainingInfo = () => {
 
             <View className="bg-black px-6 pt-6 pb-20 rounded-3xl">
                 <Text className="text-t1.1 text-white mb-4">
-									3 упражнения
+									2 упражнения
                 </Text>
 
                 {training?.exercises.map((exercise) => (
@@ -151,8 +164,27 @@ export const TrainingInfo = () => {
 				
         <BottomActionBtn  handleClickBottomBtn={handleStart} title={'Начать'}  />
   
-    </SafeAreaContainer>
+    </View>
 
     )
 }
 
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        position: 'relative', // Для позиционирования элементов
+        zIndex: 3, // Поверх браслета и заголовка
+        overflow: 'hidden', // Для корректного отображения градиента
+    },
+    gradientContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+    },
+    contentContainer: {
+        flex: 1,
+        paddingHorizontal: 14,
+    },
+})

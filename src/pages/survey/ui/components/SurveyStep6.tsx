@@ -20,7 +20,7 @@ export const SurveyStep6: React.FC<SurveyStep6Props> = ({ bmiCategory }) => {
     }
 
     return (
-        <View  >
+        <View>
             <View className="px-4">
                 <Text style={sharedStyles.title}>ваша отправная точка</Text>	
             </View>
@@ -38,31 +38,10 @@ export const SurveyStep6: React.FC<SurveyStep6Props> = ({ bmiCategory }) => {
                     {bmiCategory.description}
                 </Text>
             </View>
-		
+
             <View className="h-[50%] w-full relative "  >
                 <View className="absolute left-20 right-0 -top-20 " >
                     <RNImage source={GymnastImage} className="w-full "  />
-
-                    {/* Слой 2: Текст перед изображением (только в области маски) */}
-                    <View className="absolute overflow-visible" style={{ left: screenWidth * -0.42 + 280,
-                        top: screenHeight * 0.05 + 300, 
-                        width: screenWidth * 4, 
-                        height: screenHeight * 0.5 }}  >
-                        <CircularText
-                            text="fit choice fit choice fit choice fit choice fit choice fit choice fit choice fit choice fit choice fit choice"
-                            width={screenWidth * 0.45}
-                            height={screenHeight * 0.2}
-                            centerX={screenWidth * 0.25}
-                            centerY={screenHeight * 0.001}
-                            fontSize={screenWidth * 0.039}
-                            fill="#FFFFFF"
-                            startOffset="0%"
-                            fontWeight="300"
-                            letterSpacing="-3%"
-                            rotation={-17.05}
-                            debug={false}
-                        />
-                    </View>
                 </View>
             </View>
 

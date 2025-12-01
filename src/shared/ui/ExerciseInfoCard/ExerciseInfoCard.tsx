@@ -16,15 +16,15 @@ export const ExerciseInfoCard: React.FC<ExerciseInfoCardProps> = ({
     return (
         <View className={'mb-2'} >
 
-            <View  className="flex-row justify-between">
+            <View  className="flex-row ">
 
-                <View className="bg-fill-700 p-2 rounded-t-xl rounded-b-xl items-center justify-center">
+                <View className="bg-fill-700 p-2 mr-6 rounded-t-xl rounded-b-xl items-center justify-center">
                     <MaterialIcons name="sports-gymnastics" size={40} color="#8BC34A" />
                 </View>
            
-                <View>
+                <View className="flex-1">
 
-                    <Text className="text-white text-t2 mb-4">
+                    <Text className="text-white text-t2-bold mb-4 text-pretty">
                         {name}
                     </Text>
 
@@ -33,7 +33,7 @@ export const ExerciseInfoCard: React.FC<ExerciseInfoCardProps> = ({
                         {/* Тег подходов */}
                         <View className="bg-gray-600/50 rounded-full px-3 py-1.5">
                             <Text className="text-white text-t4">
-                                {sets} сеты
+                                {sets} подходы
                             </Text>
                         </View>
 
@@ -54,7 +54,6 @@ export const ExerciseInfoCard: React.FC<ExerciseInfoCardProps> = ({
                 </View>
 
             </View>
-            {/* Название упражнения */}
 		
         </View>
     )

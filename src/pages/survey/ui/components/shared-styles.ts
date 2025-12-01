@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet, Platform } from 'react-native'
 
 /**
  * Общие стили для компонентов survey
@@ -6,24 +6,30 @@ import { StyleSheet } from 'react-native'
  */
 export const sharedStyles = StyleSheet.create({
     title: {
-        fontFamily: 'Rimma_sans',
-        fontWeight: '700',
+        fontFamily: Platform.select({
+            ios: 'Rimma_sans',
+            android: 'Rimma_sans_android',
+        }),
         fontSize: 24,
         lineHeight: 31.2,
         color: '#FFFFFF',
         textAlign: 'left',
     },
     titleCenter: {
-        fontFamily: 'Rimma_sans',
-        fontWeight: '700',
+        fontFamily: Platform.select({
+            ios: 'Rimma_sans',
+            android: 'Rimma_sans_android',
+        }),
         fontSize: 24,
         lineHeight: 31.2,
         color: '#FFFFFF',
         textAlign: 'center',
     },
     titleLarge: {
-        fontFamily: 'Rimma_sans',
-        fontWeight: '700',
+        fontFamily: Platform.select({
+            ios: 'Rimma_sans',
+            android: 'Rimma_sans_android',
+        }),
         fontSize: 64,
         lineHeight: 83,
         color: '#FFFFFF',

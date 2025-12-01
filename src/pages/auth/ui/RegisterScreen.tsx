@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { View, Alert, Image as RNImage, Animated, Keyboard, Text, InteractionManager } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
-import { Button, BackButton, MaskedText, BackgroundLayout, Input } from '@/shared/ui'
+import {
+    Button, BackButton, MaskedText, Input, BackgroundLayoutNoSidePadding,
+} from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { authApi } from '@/features/auth'
@@ -254,8 +256,8 @@ export const RegisterScreen = () => {
 
     return (
         <View className="bg-bg-dark-700 flex-1">
-            <BackgroundLayout>
-                <View className="flex-1 justify-between bg-transparent px-4 pt-[14px]">
+            <BackgroundLayoutNoSidePadding>
+                <View className="flex-1 justify-between bg-transparent px-4 ">
                     {/* Кнопка возврата назад */}
                     <BackButton onPress={() => router.push('/')} />
 
@@ -373,7 +375,7 @@ export const RegisterScreen = () => {
                     </View>
 
                     {/* Кнопки внизу экрана */}
-                    <View className="gap-2 pb-[50px] pt-8">
+                    <View className="gap-2 pb-1 pt-8">
                         {/* Кнопка регистрации */}
 				
                         <Button
@@ -402,7 +404,8 @@ export const RegisterScreen = () => {
                         </Text>
                     </View>
                 </View>
-            </BackgroundLayout>
+            </BackgroundLayoutNoSidePadding>
         </View>
+
     )
 }

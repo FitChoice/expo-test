@@ -38,16 +38,24 @@ export default function TrainingSessionScreen() {
         case 'info':
             return 				<TrainingInfo />
         case 'onboarding':
-            return       <OnboardingFlow />
+            return     <BackgroundLayoutNoSidePadding>
+                <OnboardingFlow />
+            </BackgroundLayoutNoSidePadding>
 
         case 'finished':
-            return   <ExerciseSuccess  />
+            return   <BackgroundLayoutNoSidePadding>
+                <ExerciseSuccess  />
+            </BackgroundLayoutNoSidePadding>
 
         case 'report':
-            return    <TrainingReportScreen />
+            return   <BackgroundLayoutNoSidePadding>
+                <TrainingReportScreen />
+            </BackgroundLayoutNoSidePadding>
 
         case 'analytics':
-            return    <TrainingAnalytics />
+            return   <BackgroundLayoutNoSidePadding>
+                <TrainingAnalytics />
+            </BackgroundLayoutNoSidePadding>
 
         default:
             return   <ExerciseFlow model={model} orientation={orientation} />
@@ -56,8 +64,6 @@ export default function TrainingSessionScreen() {
 
     }
 
-    return <BackgroundLayoutNoSidePadding>
-        {mainContent()}
-    </BackgroundLayoutNoSidePadding>
+    return mainContent()
 
 }

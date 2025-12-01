@@ -7,7 +7,9 @@ import { GradientBg } from '@/shared/ui/GradientBG'
  * Компонент контентного контейнера без боковых отступов
  * Используется для создания общего фона для страниц с радиальным градиентом
  */
-export const BackgroundLayoutNoSidePadding = ({ children }: { children: React.ReactNode }) => {
+
+type Props = { children: React.ReactNode, hasSidePadding?: boolean }
+export const BackgroundLayoutNoSidePadding = ({ children, hasSidePadding = true }: Props) => {
     const {  width: SCREEN_WIDTH } = useWindowDimensions()
 
     return ( <View style={styles.container}>
@@ -19,7 +21,7 @@ export const BackgroundLayoutNoSidePadding = ({ children }: { children: React.Re
         </View>
 
         {/* Контент */}
-        <SafeAreaContainer style={styles.contentContainer}>
+        <SafeAreaContainer style={[styles.contentContainer, hasSidePadding && styles.paddingContent]}>
             {children}
         </SafeAreaContainer>
   
@@ -30,9 +32,9 @@ export const BackgroundLayoutNoSidePadding = ({ children }: { children: React.Re
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        position: 'relative', // Для позиционирования элементов
-        zIndex: 3, // Поверх браслета и заголовка
-        overflow: 'hidden', // Для корректного отображения градиента
+        position: 'relative', 
+        zIndex: 3, 
+        overflow: 'hidden',
     },
     gradientContainer: {
         position: 'absolute',
@@ -43,6 +45,8 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         flex: 1,
-        paddingHorizontal: 14,
     },
+    paddingContent: {
+        paddingHorizontal: 14 
+    }
 })
