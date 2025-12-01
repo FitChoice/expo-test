@@ -53,9 +53,9 @@ const IS_IOS = Platform.OS === 'ios'
 const SCREEN_WIDTH = Dimensions.get('window').width
 const SCREEN_HEIGHT = Dimensions.get('window').height
 
-// Контейнер камеры: всегда 100% ширины × 60% высоты экрана
+// Контейнер камеры: всегда 100% ширины × 60% высоты экрана для iOS, 80% для Android
 const CAM_PREVIEW_WIDTH = SCREEN_WIDTH
-const CAM_PREVIEW_HEIGHT = SCREEN_HEIGHT * 0.6
+const CAM_PREVIEW_HEIGHT = IS_ANDROID ? SCREEN_HEIGHT * 0.8 : SCREEN_HEIGHT * 0.6
 
 // Aspect ratio для каждой платформы (ширина/высота)
 const IOS_ASPECT_RATIO = 9 / 16
@@ -396,6 +396,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
             position: 'absolute' as const,
             left: offsetX,
             top: offsetY,
+            backgroundColor: 'transparent',
         }
     ]
 
@@ -406,6 +407,9 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
                 !isPortrait() && {
                     width: Dimensions.get('window').width,
                     height: Dimensions.get('window').height
+                },
+                {
+                    backgroundColor: 'transparent',
                 }
             ]}
         >
@@ -444,25 +448,30 @@ const styles = StyleSheet.create({
         width: CAM_PREVIEW_WIDTH,
         height: CAM_PREVIEW_HEIGHT,
         alignSelf: 'center',
-        borderRadius: 20
+        borderRadius: 30,
+        overflow: 'hidden',
     },
     containerLandscape: {
         position: 'relative',
         alignSelf: 'center',
-        borderRadius: 20
+        borderRadius: 30,
+        overflow: 'hidden',
     },
     cameraWrapper: {
         width: '100%',
         height: '100%',
         overflow: 'hidden',
+        borderRadius: 30,
+        backgroundColor: 'transparent',
     },
     cameraWrapperIOS: {
         justifyContent: 'center',
         alignItems: 'center',
+        borderRadius: 30
     },
     camera: {
         zIndex: 1,
-        borderRadius: 20
+        borderRadius: 30
     },
     svg: {
         width: '100%',

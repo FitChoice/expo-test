@@ -13,14 +13,13 @@ import React, {
 } from 'react'
 import { router } from 'expo-router'
 import type { VideoPlayer } from 'expo-video'
-import { VideoPlayerContext, VideoPlayerContextValue } from '@/shared/hooks/useVideoPlayerContext'
+import { VideoPlayerContext, type VideoPlayerContextValue } from '@/shared/hooks/useVideoPlayerContext'
 
 export const ExerciseWithCounterWrapper = ({
     children,
     isShowActionButtons = true,
 }: {
 	children: ReactNode
-
 	countdownInitial?: number
 	isShowActionButtons?: boolean
 }) => {
@@ -129,7 +128,7 @@ export const ExerciseWithCounterWrapper = ({
                 {/* Control Buttons */}
                 {isShowActionButtons &&
 				
-				<View className="absolute left-4 right-4 top-5 z-10 flex-row justify-end gap-2 ">
+				<View className={'absolute left-4 right-4 top-10 z-10 flex-row justify-end gap-2'}>
 				    <ControlButton
 				        icon={<AntDesign name="pause" size={24} color="#FFFFFF" />}
 				        onPress={pauseTimer}

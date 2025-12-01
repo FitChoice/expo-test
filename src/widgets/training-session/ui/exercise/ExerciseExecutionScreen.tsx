@@ -4,7 +4,7 @@
  * Показывает таймер обратного отсчета без pose detection
  */
 
-import { View, Text, useWindowDimensions } from 'react-native'
+import { View, Text, useWindowDimensions, Platform } from 'react-native'
 import { useEffect, useState } from 'react'
 import { type Exercise } from '@/entities/training'
 import {
@@ -79,9 +79,9 @@ export function ExerciseExecutionScreen({
                             <View style={{
                                 position: 'absolute',
                                 right: 10,
-                                top: '53%',
-                                width: '40%',
-                                height: '40%',
+                                bottom: Platform.OS === 'ios' ? 35 : 5,
+                                width: '30%',
+                                height: '30%',
                                 overflow: 'hidden',
                                 backgroundColor: 'transparent',
                                 borderRadius: 8,
