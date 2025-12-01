@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router'
 import { authApi } from '@/features/auth'
 // Импорт изображения браслета
 import braceletImage from '../../../../assets/images/ultra-realistic-silicone.png'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 // Константы для MaskedText
 const TEXT_CONFIG = {
@@ -37,7 +38,7 @@ export const AuthScreen = () => {
     const [password, setPassword] = useState('')
     const [emailError, setEmailError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
-
+    const insets = useSafeAreaInsets()
     // Используем хук для анимации клавиатуры
     const { translateY, opacity: braceletOpacity } = useKeyboardAnimation({
         animateOpacity: true,
@@ -97,12 +98,12 @@ export const AuthScreen = () => {
     return (
         <View className="bg-bg-dark-700 flex-1">
             <BackgroundLayout>
-                <View className="flex-1 justify-between bg-transparent px-4 pt-[14px]">
+                <View className="flex-1 justify-between px-4 pt-[14px]">
                     {/* Кнопка возврата назад */}
                     <BackButton onPress={() => router.push('/')} />
 
                     {/* Основной контент */}
-                    <View className="relative z-[3] flex-1 bg-transparent">
+                    <View className="relative z-[3] flex-1 ">
                         {/* Группа с браслетом и заголовком */}
                         <Animated.View
                             style={{
@@ -164,7 +165,7 @@ export const AuthScreen = () => {
 
                         {/* Форма */}
                         <Animated.View
-                            className="absolute left-[2%] top-[40%] z-10 w-[96%] gap-4"
+                            className="absolute top-[40%] z-10 w-[100%] gap-4"
                             style={{ transform: [{ translateY }] }}
                         >
                             <Input
@@ -192,7 +193,7 @@ export const AuthScreen = () => {
                     </View>
 
                     {/* Кнопки внизу экрана */}
-                    <View className="gap-2 pb-[50px] pt-8">
+                    <View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
                         {/* Кнопка входа */}
                         <Animated.View className="w-full" style={{ transform: [{ translateY }] }}>
                             <Button

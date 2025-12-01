@@ -9,7 +9,7 @@ import {
 import { useRouter } from 'expo-router'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import { Button, CircularText, SafeAreaContainer } from '@/shared/ui'
-import { useOrientation, useStatusBar } from '@/shared/lib'
+import { useOrientation } from '@/shared/lib'
 import landingPhoto1 from '../../../../assets/images/landing-photo-1.png'
 import landingPhoto2 from '../../../../assets/images/dumbbell_purple_background.png'
 import LandingIcon from '../../../../assets/images/landing_icon.svg'
@@ -25,12 +25,6 @@ export const LandingScreen = () => {
     // Блокируем поворот экрана в портретную ориентацию
     useOrientation(ScreenOrientation.OrientationLock.PORTRAIT_UP)
 
-    // // Светлые иконки статус-бара для темного фона
-    // useStatusBar({
-    //     style: 'light',
-    //     backgroundColor: '#151515', // Цвет фона статус-бара на Android
-    // })
-
     // Адаптивные размеры круга (сохраняем пропорции от оригинального макета)
     const circleSize = Math.min(screenWidth * 0.18, screenHeight * 0.085) // ~72px на стандартном экране
     const circleOffset = circleSize * 0.4 // ~16px на стандартном экране
@@ -44,10 +38,10 @@ export const LandingScreen = () => {
     }
 
     return (
-        <View className="flex-1 bg-bg-dark-500">
+        <View className="flex-1 bg-bg-dark-900">
             <SafeAreaContainer>
                 {/* Верхний контейнер Frame 48097890 */}
-                <View className="relative  h-[60%] w-[99%] overflow-hidden rounded-[40px] bg-bg-dark-500">
+                <View className="relative  h-[60%] w-[99%] overflow-hidden rounded-[40px] bg-bg-dark-900">
 			
                     <View
                         className="absolute bg-bg-dark-400 items-center justify-center"
