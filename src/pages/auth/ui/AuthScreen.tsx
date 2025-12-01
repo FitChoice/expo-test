@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Alert, Image as RNImage, Animated } from 'react-native'
+import { View, Alert, Image as RNImage, Animated, Pressable, Text } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SecureStore from 'expo-secure-store'
 import { Button, BackButton, MaskedText, BackgroundLayout, Input } from '@/shared/ui'
@@ -189,6 +189,12 @@ export const AuthScreen = () => {
                                 variant="password"
                                 size="default"
                             />
+                            
+                            <Pressable onPress={() => router.push('/forgot-password')} className="mt-1">
+                                <Text className="text-text-primary-300 text-sm">
+                                    Забыли пароль?
+                                </Text>
+                            </Pressable>
                         </Animated.View>
                     </View>
 

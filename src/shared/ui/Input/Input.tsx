@@ -212,7 +212,7 @@ export const Input = forwardRef<TextInput, InputProps>(
                 {/* Label with optional tooltip */}
                 {label && (
                     <View className="mb-3 flex-row items-center gap-1">
-                        <Text className="font-[Onest] text-sm text-white">{label}</Text>
+                        <Text className="font-[Onest] text-sm text-light-text-200">{label}</Text>
                         {showTooltip && <SimpleIcon name="info" size={16} color="#FFFFFF" />}
                     </View>
                 )}
