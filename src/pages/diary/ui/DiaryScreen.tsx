@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'expo-router'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { SafeAreaContainer } from '@/shared/ui/SafeAreaContainer'
-import { sharedStyles } from '@/pages/survey/ui/components/shared-styles'
 import Emo1 from '@/assets/images/moods/emo1.svg'
 import Emo2 from '@/assets/images/moods/emo2.svg'
 import Emo3 from '@/assets/images/moods/emo3.svg'
@@ -99,103 +98,101 @@ export const DiaryScreen = () => {
                 <GradientHeader />
             </View>
             <SafeAreaContainer style={styles.contentContainer}>
-            {/* Header Content */}
-            <View className="pt-10 px-4 pb-14 z-10"  >
-                <View className=" items-center mb-2">
-                    <Text className="text-gray-400 text-t2 text-center">{currentDate}</Text>
+                {/* Header Content */}
+                <View className="pt-10 px-4 pb-14 z-10"  >
+                    <View className=" items-center mb-2">
+                        <Text className="text-gray-400 text-t2 text-center">{currentDate}</Text>
                     </View>
                     <CloseBtn classNames={'rounded-2xl'} handlePress={() => router.back()} />
        
-                <Text className='font-rimma text-2xl text-center text-white '>НОВАЯ ЗАПИСЬ</Text>
-            </View>
+                    <Text className='font-rimma text-2xl text-center text-white '>НОВАЯ ЗАПИСЬ</Text>
+                </View>
 
-            {/* Scrollable Content */}
-            <ScrollView className="flex-1 px-4 bg-black  pt-10" showsVerticalScrollIndicator={false}>
-                <QuestionSection
-                    title="Настроение"
-                    subtitle="Какое у вас общее настроение?"
-                    selectedValue={mood}
-                    onSelect={setMood}
-                />
+                {/* Scrollable Content */}
+                <ScrollView className="flex-1 px-4 bg-black  pt-10" showsVerticalScrollIndicator={false}>
+                    <QuestionSection
+                        title="Настроение"
+                        subtitle="Какое у вас общее настроение?"
+                        selectedValue={mood}
+                        onSelect={setMood}
+                    />
 
-                <QuestionSection
-                    title="Самочувствие"
-                    subtitle="Когда вы чувствуете себя физически?"
-                    selectedValue={wellBeing}
-                    onSelect={setWellBeing}
-                />
+                    <QuestionSection
+                        title="Самочувствие"
+                        subtitle="Когда вы чувствуете себя физически?"
+                        selectedValue={wellBeing}
+                        onSelect={setWellBeing}
+                    />
 
-                <QuestionSection
-                    title="Уровень энергии"
-                    subtitle="Сколько у вас сил сегодня?"
-                    selectedValue={energyLevel}
-                    onSelect={setEnergyLevel}
-                />
+                    <QuestionSection
+                        title="Уровень энергии"
+                        subtitle="Сколько у вас сил сегодня?"
+                        selectedValue={energyLevel}
+                        onSelect={setEnergyLevel}
+                    />
 
-                <QuestionSection
-                    title="Качество сна"
-                    subtitle="Как вы спали прошлой ночью?"
-                    selectedValue={sleepQuality}
-                    onSelect={setSleepQuality}
-                />
+                    <QuestionSection
+                        title="Качество сна"
+                        subtitle="Как вы спали прошлой ночью?"
+                        selectedValue={sleepQuality}
+                        onSelect={setSleepQuality}
+                    />
 
-                {/* Sleep Time Section */}
-                <View className="mb-6 bg-bg-dark-500 p-4" style={{ overflow: 'hidden', borderRadius: 14 }}>
+                    {/* Sleep Time Section */}
+                    <View className="mb-6 bg-bg-dark-500 p-4" style={{ overflow: 'hidden', borderRadius: 14 }}>
 
-                    <Text className="text-white text-lg font-semibold mb-1">Время сна</Text>
-                    <Text className="text-gray-400 text-sm mb-4">
+                        <Text className="text-white text-lg font-semibold mb-1">Время сна</Text>
+                        <Text className="text-gray-400 text-sm mb-4">
                         Во сколько легли и когда проснулись?
-                    </Text>
-                    <View className="flex-row justify-between">
-                        <View className="flex-1 mr-2">
-                            <Text className="text-gray-400 text-sm mb-2">Засыпание</Text>
-                            <TextInput
-                                value={sleepTime}
-                                onChangeText={setSleepTime}
-                                className="bg-[#2E322D] text-white px-4 py-3 rounded-xl"
-                                placeholder="00:00"
-                                placeholderTextColor="#666"
-                            />
-                        </View>
-                        <View className="flex-1 ml-2">
-                            <Text className="text-gray-400 text-sm mb-2">Пробуждение</Text>
-                            <TextInput
-                                value={wakeTime}
-                                onChangeText={setWakeTime}
-                                className="bg-[#2E322D] text-white px-4 py-3 rounded-xl"
-                                placeholder="07:00"
-                                placeholderTextColor="#666"
-                            />
+                        </Text>
+                        <View className="flex-row justify-between">
+                            <View className="flex-1 mr-2">
+                                <Text className="text-gray-400 text-sm mb-2">Засыпание</Text>
+                                <TextInput
+                                    value={sleepTime}
+                                    onChangeText={setSleepTime}
+                                    className="bg-[#2E322D] text-white px-4 py-3 rounded-xl"
+                                    placeholder="00:00"
+                                    placeholderTextColor="#666"
+                                />
+                            </View>
+                            <View className="flex-1 ml-2">
+                                <Text className="text-gray-400 text-sm mb-2">Пробуждение</Text>
+                                <TextInput
+                                    value={wakeTime}
+                                    onChangeText={setWakeTime}
+                                    className="bg-[#2E322D] text-white px-4 py-3 rounded-xl"
+                                    placeholder="07:00"
+                                    placeholderTextColor="#666"
+                                />
+                            </View>
                         </View>
                     </View>
-                </View>
 
-                {/* Notes Section */}
-                <View className="mb-6 bg-bg-dark-500 p-4" style={{ overflow: 'hidden', borderRadius: 14 }}>
-                    <Text className="text-white text-lg font-semibold mb-1">Заметки</Text>
-                    <Text className="text-gray-400 text-sm mb-4">
+                    {/* Notes Section */}
+                    <View className="mb-6 bg-bg-dark-500 p-4" style={{ overflow: 'hidden', borderRadius: 14 }}>
+                        <Text className="text-white text-lg font-semibold mb-1">Заметки</Text>
+                        <Text className="text-gray-400 text-sm mb-4">
                         Можете ли напишите что добавить?
-                    </Text>
-                    <TextInput
-                        value={notes}
-                        onChangeText={setNotes}
-                        className="bg-[#2E322D] text-white px-4 py-3 rounded-xl min-h-[100px]"
-                        placeholder="Сегодня я..."
-                        placeholderTextColor="#666"
-                        multiline
-                        textAlignVertical="top"
-                    />
-                    <Text className="text-gray-500 text-xs text-right mt-2">
+                        </Text>
+                        <TextInput
+                            value={notes}
+                            onChangeText={setNotes}
+                            className="bg-[#2E322D] text-white px-4 py-3 rounded-xl min-h-[100px]"
+                            placeholder="Сегодня я..."
+                            placeholderTextColor="#666"
+                            multiline
+                            textAlignVertical="top"
+                        />
+                        <Text className="text-gray-500 text-xs text-right mt-2">
                         0 / 500 символов
-                    </Text>
-                </View>
-            </ScrollView>
+                        </Text>
+                    </View>
+                </ScrollView>
             </SafeAreaContainer>
         </View>
     )
 }
-
-
 
 const styles = StyleSheet.create({
   

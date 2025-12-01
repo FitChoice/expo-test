@@ -25,11 +25,11 @@ export const LandingScreen = () => {
     // Блокируем поворот экрана в портретную ориентацию
     useOrientation(ScreenOrientation.OrientationLock.PORTRAIT_UP)
 
-    // Светлые иконки статус-бара для темного фона
-    useStatusBar({
-        style: 'light',
-        backgroundColor: '#151515', // Цвет фона статус-бара на Android
-    })
+    // // Светлые иконки статус-бара для темного фона
+    // useStatusBar({
+    //     style: 'light',
+    //     backgroundColor: '#151515', // Цвет фона статус-бара на Android
+    // })
 
     // Адаптивные размеры круга (сохраняем пропорции от оригинального макета)
     const circleSize = Math.min(screenWidth * 0.18, screenHeight * 0.085) // ~72px на стандартном экране

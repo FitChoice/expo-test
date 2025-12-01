@@ -8,13 +8,13 @@ import { GradientBg } from '@/shared/ui/GradientBG'
  * Используется для создания общего фона для страниц с радиальным градиентом
  */
 export const BackgroundLayoutNoSidePadding = ({ children }: { children: React.ReactNode }) => {
-    const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions()
+    const {  width: SCREEN_WIDTH } = useWindowDimensions()
 
     return ( <View style={styles.container}>
         {/* Радиальный градиент с blur-эффектом */}
         {/*<RadialGradientBackground />*/}
 
-        <View style={[styles.gradientContainer, { width: SCREEN_WIDTH}]}>
+        <View style={[styles.gradientContainer, { width: SCREEN_WIDTH }]}>
             <GradientBg />
         </View>
 

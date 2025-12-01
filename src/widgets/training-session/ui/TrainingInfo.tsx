@@ -2,7 +2,8 @@ import {
     View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, Dimensions,
 } from 'react-native'
 import { router } from 'expo-router'
-import { Switch, TrainingTags, ExerciseInfoCard,
+import {
+	Switch, TrainingTags, ExerciseInfoCard, SafeAreaContainer,
 } from '@/shared/ui'
 import { useTrainingStore } from '@/entities/training'
 import React, { useState, useMemo } from 'react'
@@ -60,10 +61,7 @@ export const TrainingInfo = () => {
         startOnboarding()
     }
 
-    return (   <View   className="flex-1" >
-        <View style={styles.gradientContainer}>
-            <GradientBg />
-        </View>
+    return (<SafeAreaContainer>
         <ScrollView
             className="flex-1"
             showsVerticalScrollIndicator={false}>
@@ -153,20 +151,8 @@ export const TrainingInfo = () => {
 				
         <BottomActionBtn  handleClickBottomBtn={handleStart} title={'Начать'}  />
   
-    </View>
+    </SafeAreaContainer>
 
     )
 }
 
-const styles = StyleSheet.create({
-    gradientContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
-    },
-
-})
