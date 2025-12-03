@@ -9,6 +9,7 @@ import { authApi } from '@/features/auth'
 // Импорт изображения браслета
 import braceletImage from '../../../../assets/images/ultra-realistic-silicone.png'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Loader } from '@/shared/ui/Loader/Loader'
 
 // Константы для MaskedText
 const TEXT_CONFIG = {
@@ -75,7 +76,7 @@ export const AuthScreen = () => {
         setIsLoading(true)
 
         try {
-            const result = await authApi.login({ email, password })
+            const result = await authApi.login({ email: email.toLowerCase(), password })
 
             if (result.success) {
                 // Save tokens to secure storage (user_id already saved in authApi)
@@ -93,6 +94,10 @@ export const AuthScreen = () => {
         } finally {
             setIsLoading(false)
         }
+    }
+		
+    if (isLoading) {
+        return <Loader />
     }
 
     return (
@@ -190,11 +195,13 @@ export const AuthScreen = () => {
                                 size="default"
                             />
                             
-                            <Pressable onPress={() => router.push('/forgot-password')} className="mt-1">
-                                <Text className="text-text-primary-300 text-sm">
-                                    Забыли пароль?
-                                </Text>
-                            </Pressable>
+                            <View className="flex-row justify-end">
+                                <Pressable onPress={() => router.push('/forgot-password')} className="mt-1">
+                                    <Text className="text-light-text-200 text-sm">
+																Забыли пароль?
+                                    </Text>
+                                </Pressable>
+                            </View>
                         </Animated.View>
                     </View>
 

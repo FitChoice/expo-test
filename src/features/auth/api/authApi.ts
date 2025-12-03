@@ -7,6 +7,7 @@ import { saveUserId, saveAuthToken, saveRefreshToken } from '@/shared/lib/auth'
 import type {
     SendCodeInput,
     SendCodeResponse,
+    VerifyCodeInput,
     RegistrationInput,
     LoginRequest,
     RefreshInput,
@@ -16,17 +17,6 @@ import type {
 
 // Use mocks only in development if explicitly enabled
 const MOCK_MODE = __DEV__ && process.env.EXPO_PUBLIC_USE_MOCKS === 'true'
-
-/**
- * Mock function to simulate sendCode
- */
-async function mockSendCode(_email: string): Promise<ApiResult<SendCodeResponse>> {
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    return {
-        success: true,
-        data: { message: 'Verification code sent' },
-    }
-}
 
 /**
  * Mock function to simulate registration
@@ -66,7 +56,7 @@ export const authApi = {
     /**
 	 * Send verification code to email
 	 */
-    async sendCode(email: string): Promise<ApiResult<SendCodeResponse>> {
+    async sendCode(email: string, is_reset_password?: boolean): Promise<ApiResult<SendCodeResponse>> {
         // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         if (!emailRegex.test(email)) {
@@ -76,12 +66,26 @@ export const authApi = {
             }
         }
 
-        if (MOCK_MODE) {
-            return mockSendCode(email)
+        let payload: SendCodeInput = { email }
+				
+        if (is_reset_password) {
+            payload = { email, is_reset_password: true }
         }
-        const payload: SendCodeInput = { email }
+   
         return await apiClient.post<SendCodeInput, SendCodeResponse>(
             '/auth/sendCode', 
+            payload,
+            { skipAuthHandler: true }
+        )
+    },
+
+    /**
+	 * Verify email code
+	 */
+    async verifyCode(email: string, code: number): Promise<ApiResult<void>> {
+        const payload: VerifyCodeInput = { email, code }
+        return await apiClient.post<VerifyCodeInput, void>(
+            '/auth/verifyCode',
             payload,
             { skipAuthHandler: true }
         )

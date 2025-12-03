@@ -5,10 +5,17 @@
 // SendCode request and response
 export interface SendCodeInput {
 	email: string
+	is_reset_password?: boolean
 }
 
 export interface SendCodeResponse {
 	message: string
+}
+
+// VerifyCode
+export interface VerifyCodeInput {
+	email: string
+	code: number
 }
 
 // Registration

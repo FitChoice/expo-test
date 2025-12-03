@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { View, Alert, Image as RNImage, Animated, Keyboard, Text, InteractionManager } from 'react-native'
+import {
+    View,
+    Alert,
+    Image as RNImage,
+    Animated,
+    Keyboard,
+    Text,
+    InteractionManager,
+    TouchableWithoutFeedback,
+} from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import {
     Button,
@@ -13,6 +22,7 @@ import { useRouter } from 'expo-router'
 import { authApi } from '@/features/auth'
 // Импорт изображения браслета
 import braceletImage from '../../../../assets/images/ultra-realistic-silicone.png'
+import { Loader } from '@/shared/ui/Loader/Loader'
 
 // Константы для MaskedText
 const TEXT_CONFIG = {
@@ -229,7 +239,7 @@ export const RegisterScreen = () => {
 
         try {
 		
-            const result = await authApi.sendCode(email)
+            const result = await authApi.sendCode(email.toLowerCase())
 
             if (result.success) {
                 // Переход на страницу проверки кода с email и паролем
@@ -258,137 +268,142 @@ export const RegisterScreen = () => {
         }
     }
 
+    if (isLoading) {
+        return <Loader />
+    }
+
     return (
         <View className="bg-bg-dark-700 flex-1">
             <BackgroundLayout>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View className="flex-1 justify-between bg-transparent px-4 ">
                     {/* Кнопка возврата назад */}
                     <BackButton onPress={() => router.push('/')} />
 
-                    {/* Основной контент */}
-                    <View className="relative z-[3] flex-1 bg-transparent">
-                        {/* Группа с браслетом и заголовком */}
-                        <Animated.View
-                            style={{
-                                position: 'absolute',
-                                top: '-35%',
-                                left: '42%',
-                                height: '120%',
-                                width: '110%',
-                                transform: [{ translateX: '-50%' }],
-                                alignItems: 'center',
-                                justifyContent: 'flex-start',
-                                zIndex: 1,
-                                opacity: braceletOpacity,
-                            }}
-                        >
-                            {/* Текст позади изображения */}
-                            <View
+                        {/* Основной контент */}
+                        <View className="relative z-[3] flex-1 bg-transparent">
+                            {/* Группа с браслетом и заголовком */}
+                            <Animated.View
                                 style={{
                                     position: 'absolute',
-                                    top: '45%',
-                                    left: 0,
-                                    right: 0,
-                                    height: TEXT_CONFIG.height,
+                                    top: '-35%',
+                                    left: '42%',
+                                    height: '120%',
+                                    width: '110%',
+                                    transform: [{ translateX: '-50%' }],
                                     alignItems: 'center',
-                                    justifyContent: 'center',
+                                    justifyContent: 'flex-start',
+                                    zIndex: 1,
+                                    opacity: braceletOpacity,
                                 }}
                             >
-                                <MaskedText text="регистрация" {...TEXT_CONFIG} />
-                            </View>
+                                {/* Текст позади изображения */}
+                                <View
+                                    style={{
+                                        position: 'absolute',
+                                        top: '45%',
+                                        left: 0,
+                                        right: 0,
+                                        height: TEXT_CONFIG.height,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <MaskedText text="регистрация" {...TEXT_CONFIG} />
+                                </View>
 
-                            {/* Изображение браслета */}
-                            <RNImage
-                                source={braceletImage}
-                                style={{
-                                    position: 'absolute',
-                                    top: '6%',
-                                    left: '16%',
-                                    width: '82%',
-                                    height: '85%',
-                                }}
-                                resizeMode="contain"
-                            />
+                                {/* Изображение браслета */}
+                                <RNImage
+                                    source={braceletImage}
+                                    style={{
+                                        position: 'absolute',
+                                        top: '6%',
+                                        left: '16%',
+                                        width: '82%',
+                                        height: '85%',
+                                    }}
+                                    resizeMode="contain"
+                                />
 
-                            {/* Текст перед изображением */}
-                            <View
-                                style={{
-                                    position: 'absolute',
-                                    top: '45%',
-                                    left: 0,
-                                    right: 0,
-                                    height: TEXT_CONFIG.height,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
+                                {/* Текст перед изображением */}
+                                <View
+                                    style={{
+                                        position: 'absolute',
+                                        top: '45%',
+                                        left: 0,
+                                        right: 0,
+                                        height: TEXT_CONFIG.height,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <MaskedText text="регистрация" {...TEXT_CONFIG} maskRect={MASK_RECT} />
+                                </View>
+                            </Animated.View>
+
+                            {/* Форма */}
+                            <Animated.View
+                                className="absolute left-[2%] top-[40%] z-10 w-[96%] gap-4"
+                                style={{ transform: [{ translateY }] }}
                             >
-                                <MaskedText text="регистрация" {...TEXT_CONFIG} maskRect={MASK_RECT} />
-                            </View>
-                        </Animated.View>
+                                <Input
+                                    label="Электронная почта"
+                                    placeholder="example@provider.com"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    onFocus={handleEmailFocus}
+                                    onBlur={handleEmailBlur}
+                                    keyboardType="email-address"
+                                    variant="text"
+                                    size="default"
+                                    error={emailError}
+                                />
 
-                        {/* Форма */}
-                        <Animated.View
-                            className="absolute left-[2%] top-[40%] z-10 w-[96%] gap-4"
-                            style={{ transform: [{ translateY }] }}
-                        >
-                            <Input
-                                label="Электронная почта"
-                                placeholder="example@provider.com"
-                                value={email}
-                                onChangeText={setEmail}
-                                onFocus={handleEmailFocus}
-                                onBlur={handleEmailBlur}
-                                keyboardType="email-address"
-                                variant="text"
-                                size="default"
-                                error={emailError}
-                            />
+                                <Input
+                                    label="Пароль"
+                                    placeholder="Пароль"
+                                    value={password}
+                                    onChangeText={handlePasswordChange}
+                                    onFocus={handlePasswordFocus}
+                                    onBlur={handlePasswordBlur}
+                                    variant="password"
+                                    size="default"
+                                    error={passwordError}
+                                    helperText={passwordHelperText}
+                                    forceHelperText={showPasswordHelper}
+                                    autoComplete="off"
+                                    textContentType="none"
+                                    importantForAutofill="no"
+                                />
 
-                            <Input
-                                label="Пароль"
-                                placeholder="Пароль"
-                                value={password}
-                                onChangeText={handlePasswordChange}
-                                onFocus={handlePasswordFocus}
-                                onBlur={handlePasswordBlur}
-                                variant="password"
-                                size="default"
-                                error={passwordError}
-                                helperText={passwordHelperText}
-                                forceHelperText={showPasswordHelper}
-                                autoComplete="off"
-                                textContentType="none"
-                                importantForAutofill="no"
-                            />
+                                <Input
+                                    label="Подтверждение пароля"
+                                    placeholder="Подтвердите пароль"
+                                    value={confirmPassword}
+                                    onChangeText={handleConfirmPasswordChange}
+                                    onFocus={handleConfirmPasswordFocus}
+                                    onBlur={handleConfirmPasswordBlur}
+                                    variant="password"
+                                    size="default"
+                                    error={password && confirmPassword ? confirmPasswordError : ''}
+                                    autoComplete="off"
+                                    textContentType="none"
+                                    importantForAutofill="no"
+                                />
+                            </Animated.View>
+                        </View>
 
-                            <Input
-                                label="Подтверждение пароля"
-                                placeholder="Подтвердите пароль"
-                                value={confirmPassword}
-                                onChangeText={handleConfirmPasswordChange}
-                                onFocus={handleConfirmPasswordFocus}
-                                onBlur={handleConfirmPasswordBlur}
-                                variant="password"
-                                size="default"
-                                error={password && confirmPassword ? confirmPasswordError : ''}
-                                autoComplete="off"
-                                textContentType="none"
-                                importantForAutofill="no"
-                            />
-                        </Animated.View>
-                    </View>
-
-                    {/* Кнопки внизу экрана */}
-                    <View className="gap-2 pb-1 pt-8">
-                        {/* Кнопка регистрации */}
+                        {/* Кнопки внизу экрана */}
+                        <View className="gap-2 pb-1 pt-8">
+                            {/* Кнопка регистрации */}
 				
-                        <Button
-                            variant="primary"
-                            size="l"
-                            fullWidth
-                            onPress={handleSubmit}
-                            disabled={
-                                !email ||
+                            <Button
+                                variant="primary"
+                                size="l"
+                                fullWidth
+                                onPress={handleSubmit}
+                                disabled={
+                                    !email ||
 								!password ||
 								!confirmPassword ||
 								!!passwordError ||
@@ -396,18 +411,20 @@ export const RegisterScreen = () => {
 								showPasswordHelper ||
 								(password && confirmPassword && !!confirmPasswordError) ||
 								isLoading
-                            }
-                            className="h-14"
-                        >
-                            {isLoading ? 'Отправка...' : 'Зарегистрироваться'}
-                        </Button>
+                                }
+                                className="h-14"
+                            >
+                                {isLoading ? 'Отправка...' : 'Зарегистрироваться'}
+                            </Button>
 
-                        {/* Текст с соглашениями */}
-                        <Text className="text-center text-xs text-light-text-500 px-4 leading-4">
+                            {/* Текст с соглашениями */}
+                            <Text className="text-center text-xs text-light-text-500 px-4 leading-4">
 						Продолжая регистрацию, вы соглашаетесь с Пользовательским соглашением, Политикой конфиденциальности, Политикой возвратов и даёте Согласие на обработку персональных данных
-                        </Text>
-                    </View>
+                            </Text>
+                        </View>
+                  
                 </View>
+                </TouchableWithoutFeedback>
             </BackgroundLayout>
         </View>
 
