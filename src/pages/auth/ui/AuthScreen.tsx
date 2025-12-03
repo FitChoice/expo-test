@@ -1,5 +1,14 @@
 import React, { useState } from 'react'
-import { View, Alert, Image as RNImage, Animated, Pressable, Text } from 'react-native'
+import {
+	View,
+	Alert,
+	Image as RNImage,
+	Animated,
+	Pressable,
+	Text,
+	Keyboard,
+	TouchableWithoutFeedback,
+} from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SecureStore from 'expo-secure-store'
 import { Button, BackButton, MaskedText, BackgroundLayout, Input } from '@/shared/ui'
@@ -103,125 +112,127 @@ export const AuthScreen = () => {
     return (
         <View className="bg-bg-dark-700 flex-1">
             <BackgroundLayout>
-                <View className="flex-1 justify-between px-4 pt-[14px]">
-                    {/* Кнопка возврата назад */}
-                    <BackButton onPress={() => router.push('/')} />
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View className="flex-1 justify-between px-4 pt-[14px]">
+                        {/* Кнопка возврата назад */}
+                        <BackButton onPress={() => router.push('/')} />
 
-                    {/* Основной контент */}
-                    <View className="relative z-[3] flex-1 ">
-                        {/* Группа с браслетом и заголовком */}
-                        <Animated.View
-                            style={{
-                                position: 'absolute',
-                                top: '-35%',
-                                left: '42%',
-                                height: '120%',
-                                width: '110%',
-                                transform: [{ translateX: '-50%' }],
-                                alignItems: 'center',
-                                justifyContent: 'flex-start',
-                                zIndex: 1,
-                                opacity: braceletOpacity,
-                            }}
-                        >
-                            {/* Текст позади изображения */}
-                            <View
+                        {/* Основной контент */}
+                        <View className="relative z-[3] flex-1 ">
+                            {/* Группа с браслетом и заголовком */}
+                            <Animated.View
                                 style={{
                                     position: 'absolute',
-                                    top: '45%',
-                                    left: 0,
-                                    right: 0,
-                                    height: TEXT_CONFIG.height,
+                                    top: '-35%',
+                                    left: '42%',
+                                    height: '120%',
+                                    width: '110%',
+                                    transform: [{ translateX: '-50%' }],
                                     alignItems: 'center',
-                                    justifyContent: 'center',
+                                    justifyContent: 'flex-start',
+                                    zIndex: 1,
+                                    opacity: braceletOpacity,
                                 }}
                             >
-                                <MaskedText text="вход в аккаунт" {...TEXT_CONFIG} />
-                            </View>
+                                {/* Текст позади изображения */}
+                                <View
+                                    style={{
+                                        position: 'absolute',
+                                        top: '45%',
+                                        left: 0,
+                                        right: 0,
+                                        height: TEXT_CONFIG.height,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <MaskedText text="вход в аккаунт" {...TEXT_CONFIG} />
+                                </View>
 
-                            {/* Изображение браслета */}
-                            <RNImage
-                                source={braceletImage}
-                                style={{
-                                    position: 'absolute',
-                                    top: '6%',
-                                    left: '16%',
-                                    width: '82%',
-                                    height: '85%',
-                                }}
-                                resizeMode="contain"
-                            />
+                                {/* Изображение браслета */}
+                                <RNImage
+                                    source={braceletImage}
+                                    style={{
+                                        position: 'absolute',
+                                        top: '6%',
+                                        left: '16%',
+                                        width: '82%',
+                                        height: '85%',
+                                    }}
+                                    resizeMode="contain"
+                                />
 
-                            {/* Текст перед изображением */}
-                            <View
-                                style={{
-                                    position: 'absolute',
-                                    top: '45%',
-                                    left: 0,
-                                    right: 0,
-                                    height: TEXT_CONFIG.height,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
+                                {/* Текст перед изображением */}
+                                <View
+                                    style={{
+                                        position: 'absolute',
+                                        top: '45%',
+                                        left: 0,
+                                        right: 0,
+                                        height: TEXT_CONFIG.height,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <MaskedText text="вход в аккаунт" {...TEXT_CONFIG} maskRect={MASK_RECT} />
+                                </View>
+                            </Animated.View>
+
+                            {/* Форма */}
+                            <Animated.View
+                                className="absolute top-[40%] z-10 w-[100%] gap-4"
+                                style={{ transform: [{ translateY }] }}
                             >
-                                <MaskedText text="вход в аккаунт" {...TEXT_CONFIG} maskRect={MASK_RECT} />
-                            </View>
-                        </Animated.View>
+                                <Input
+                                    label="Электронная почта"
+                                    placeholder="example@provider.com"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    onFocus={handleEmailFocus}
+                                    onBlur={handleEmailBlur}
+                                    keyboardType="email-address"
+                                    variant="text"
+                                    size="default"
+                                    error={emailError}
+                                />
 
-                        {/* Форма */}
-                        <Animated.View
-                            className="absolute top-[40%] z-10 w-[100%] gap-4"
-                            style={{ transform: [{ translateY }] }}
-                        >
-                            <Input
-                                label="Электронная почта"
-                                placeholder="example@provider.com"
-                                value={email}
-                                onChangeText={setEmail}
-                                onFocus={handleEmailFocus}
-                                onBlur={handleEmailBlur}
-                                keyboardType="email-address"
-                                variant="text"
-                                size="default"
-                                error={emailError}
-                            />
-
-                            <Input
-                                label="Пароль"
-                                placeholder="Пароль"
-                                value={password}
-                                onChangeText={setPassword}
-                                variant="password"
-                                size="default"
-                            />
+                                <Input
+                                    label="Пароль"
+                                    placeholder="Пароль"
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    variant="password"
+                                    size="default"
+                                />
                             
-                            <View className="flex-row justify-end">
-                                <Pressable onPress={() => router.push('/forgot-password')} className="mt-1">
-                                    <Text className="text-light-text-200 text-sm">
+                                <View className="flex-row justify-end">
+                                    <Pressable onPress={() => router.push('/forgot-password')} className="mt-1">
+                                        <Text className="text-light-text-200 text-sm">
 																Забыли пароль?
-                                    </Text>
-                                </Pressable>
-                            </View>
-                        </Animated.View>
-                    </View>
+                                        </Text>
+                                    </Pressable>
+                                </View>
+                            </Animated.View>
+                        </View>
 
-                    {/* Кнопки внизу экрана */}
-                    <View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
-                        {/* Кнопка входа */}
-                        <Animated.View className="w-full" style={{ transform: [{ translateY }] }}>
-                            <Button
-                                variant="primary"
-                                size="l"
-                                fullWidth
-                                onPress={handleSubmit}
-                                disabled={!email || !password || !!emailError || isLoading}
-                                className="h-14"
-                            >
-                                {isLoading ? 'Вход...' : 'Войти'}
-                            </Button>
-                        </Animated.View>
+                        {/* Кнопки внизу экрана */}
+                        <View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
+                            {/* Кнопка входа */}
+                            <Animated.View className="w-full" style={{ transform: [{ translateY }] }}>
+                                <Button
+                                    variant="primary"
+                                    size="l"
+                                    fullWidth
+                                    onPress={handleSubmit}
+                                    disabled={!email || !password || !!emailError || isLoading}
+                                    className="h-14"
+                                >
+                                    {isLoading ? 'Вход...' : 'Войти'}
+                                </Button>
+                            </Animated.View>
+                        </View>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </BackgroundLayout>
         </View>
     )

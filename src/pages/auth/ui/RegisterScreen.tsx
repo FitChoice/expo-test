@@ -275,10 +275,10 @@ export const RegisterScreen = () => {
     return (
         <View className="bg-bg-dark-700 flex-1">
             <BackgroundLayout>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View className="flex-1 justify-between bg-transparent px-4 ">
-                    {/* Кнопка возврата назад */}
-                    <BackButton onPress={() => router.push('/')} />
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View className="flex-1 justify-between bg-transparent px-4 ">
+                        {/* Кнопка возврата назад */}
+                        <BackButton onPress={() => router.push('/')} />
 
                         {/* Основной контент */}
                         <View className="relative z-[3] flex-1 bg-transparent">
@@ -423,7 +423,7 @@ export const RegisterScreen = () => {
                             </Text>
                         </View>
                   
-                </View>
+                    </View>
                 </TouchableWithoutFeedback>
             </BackgroundLayout>
         </View>
