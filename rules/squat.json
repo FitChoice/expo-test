@@ -1,0 +1,21 @@
+{
+  "exercise": "squat",
+  "axis": "squat_knee_angle_inv",
+  "states": ["Top", "Down", "Bottom", "Up"],
+  "thresholds": {
+    "down_enter": 30,
+    "bottom_enter": 17,
+    "up_enter": 95,
+    "top_enter": 100,
+    "min_dwell_ms": 0
+  },
+  "rep_on_transition": "Up->Top",
+  "hysteresis": 1,
+  "anti_yaw_max": 1.0,
+  "quality": {
+    "rom_angle_min": 80,
+    "knee_valgus_max": 0.12,
+    "torso_lean_max": 18
+  }
+}
+

@@ -2,13 +2,13 @@
 
 # dependencies
 node_modules/
-
+temp-docs/
 # Expo
 .expo/
 dist/
 web-build/
 expo-env.d.ts
-migrate.md
+
 # Native
 *.orig.*
 *.jks
@@ -16,9 +16,12 @@ migrate.md
 *.p12
 *.key
 *.mobileprovision
-migrate.md
+
 # Metro
 .metro-health-check*
+
+/ios
+/android
 
 # debug
 npm-debug.*
@@ -35,4 +38,27 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# backup files
+*.bak
+*.backup
+*~
+
+# iOS
+ios/build/
+ios/Pods/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+
+# Android
+android/app/build/
+android/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+
+# Example app (if exists)
 app-example
+.cursor/
+
+# Cursor
+.cursor/

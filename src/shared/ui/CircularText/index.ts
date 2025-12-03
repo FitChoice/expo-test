@@ -1,0 +1,1 @@
+export { CircularText } from './CircularText'

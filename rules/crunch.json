@@ -1,0 +1,20 @@
+{
+  "exercise": "crunch",
+  "axis": "crunch_angle",
+  "states": ["Top", "Down", "Bottom", "Up"],
+  "thresholds": {
+    "down_enter": 97,
+    "bottom_enter": 88,
+    "up_enter": 105,
+    "top_enter": 110,
+    "min_dwell_ms": 0
+  },
+  "rep_on_transition": "Up->Top",
+  "hysteresis": 3,
+  "anti_yaw_max": 1.0,
+  "quality": {
+    "rom_angle_min": 30,
+    "torso_lean_max": 20
+  }
+}
+

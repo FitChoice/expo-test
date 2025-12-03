@@ -1,0 +1,20 @@
+{
+  "exercise": "leg_abduction_r",
+  "axis": "leg_abduction_distance_r",
+  "states": ["Top", "Down", "Bottom", "Up"],
+  "thresholds": {
+    "down_enter": 0.54,
+    "bottom_enter": 0.48,
+    "up_enter": 0.64,
+    "top_enter": 0.83,
+    "min_dwell_ms": 0
+  },
+  "rep_on_transition": "Up->Top",
+  "hysteresis": 0.05,
+  "anti_yaw_max": 1.0,
+  "quality": {
+    "rom_angle_min": 0.20,
+    "torso_lean_max": 20
+  }
+}
+

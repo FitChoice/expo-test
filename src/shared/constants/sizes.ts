@@ -1,0 +1,1 @@
+export const VIDEO_SCREEN_HEIGHT = 550
