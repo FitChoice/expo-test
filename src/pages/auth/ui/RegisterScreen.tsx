@@ -10,13 +10,7 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
-import {
-    Button,
-    BackButton,
-    MaskedText,
-    Input,
-    BackgroundLayout,
-} from '@/shared/ui'
+import { Button, BackButton, MaskedText, Input, BackgroundLayout } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { authApi } from '@/features/auth'
@@ -223,7 +217,7 @@ export const RegisterScreen = () => {
 
     const handleSubmit = async () => {
         // Dismiss keyboard to prevent system password save dialog from interfering
-		
+
         Keyboard.dismiss()
 
         // Валидация перед отправкой
@@ -238,12 +232,11 @@ export const RegisterScreen = () => {
         setIsLoading(true)
 
         try {
-		
             const result = await authApi.sendCode(email.toLowerCase())
 
             if (result.success) {
                 // Переход на страницу проверки кода с email и паролем
-			
+
                 // Используем InteractionManager чтобы убедиться, что навигация происходит после всех взаимодействий
                 InteractionManager.runAfterInteractions(() => {
                     router.push({
@@ -276,7 +269,7 @@ export const RegisterScreen = () => {
         <View className="bg-bg-dark-700 flex-1">
             <BackgroundLayout>
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <View className="flex-1 justify-between bg-transparent px-4 ">
+                    <View className="flex-1 justify-between bg-transparent px-4">
                         {/* Кнопка возврата назад */}
                         <BackButton onPress={() => router.push('/')} />
 
@@ -396,7 +389,7 @@ export const RegisterScreen = () => {
                         {/* Кнопки внизу экрана */}
                         <View className="gap-2 pb-1 pt-8">
                             {/* Кнопка регистрации */}
-				
+
                             <Button
                                 variant="primary"
                                 size="l"
@@ -404,13 +397,13 @@ export const RegisterScreen = () => {
                                 onPress={handleSubmit}
                                 disabled={
                                     !email ||
-								!password ||
-								!confirmPassword ||
-								!!passwordError ||
-								!!emailError ||
-								showPasswordHelper ||
-								(password && confirmPassword && !!confirmPasswordError) ||
-								isLoading
+									!password ||
+									!confirmPassword ||
+									!!passwordError ||
+									!!emailError ||
+									showPasswordHelper ||
+									(password && confirmPassword && !!confirmPasswordError) ||
+									isLoading
                                 }
                                 className="h-14"
                             >
@@ -418,15 +411,15 @@ export const RegisterScreen = () => {
                             </Button>
 
                             {/* Текст с соглашениями */}
-                            <Text className="text-center text-xs text-light-text-500 px-4 leading-4">
-						Продолжая регистрацию, вы соглашаетесь с Пользовательским соглашением, Политикой конфиденциальности, Политикой возвратов и даёте Согласие на обработку персональных данных
+                            <Text className="px-4 text-center text-xs leading-4 text-light-text-500">
+								Продолжая регистрацию, вы соглашаетесь с Пользовательским соглашением,
+								Политикой конфиденциальности, Политикой возвратов и даёте Согласие на
+								обработку персональных данных
                             </Text>
                         </View>
-                  
                     </View>
                 </TouchableWithoutFeedback>
             </BackgroundLayout>
         </View>
-
     )
 }

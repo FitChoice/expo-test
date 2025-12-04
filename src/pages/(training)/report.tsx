@@ -53,83 +53,79 @@ export default function TrainingReportScreen() {
         )
     }
 
-    return ( <View className="flex-1" >
+    return (
+        <View className="flex-1">
+            {/* Training Header Block */}
+            <View className="w-full flex-row items-center bg-transparent px-4 py-10">
+                {/* Icon Circle */}
+                <View className="mr-3 h-12 w-12 items-center justify-center rounded-full bg-purple-500">
+                    <MaterialCommunityIcons name="dumbbell" size={24} color="#FFFFFF" />
+                </View>
 
-        {/* Training Header Block */}
-        <View className="w-full flex-row items-center px-4 py-10 bg-transparent">
-            {/* Icon Circle */}
-            <View className="h-12 w-12 rounded-full bg-purple-500 items-center justify-center mr-3">
-                <MaterialCommunityIcons name="dumbbell" size={24} color="#FFFFFF" />
+                {/* Content */}
+                <View className="flex-1">
+                    <Text className="mb-2 text-t2 text-white">
+                        {training.title || 'Силовая тренировка'}
+                    </Text>
+
+                    {/* Tags */}
+                    <TrainingTags
+                        icon1={null}
+                        title1={formatDate(new Date())}
+                        icon2={<MaterialCommunityIcons name="bow-arrow" size={16} color="#FFFFFF" />}
+                        title2={`+${experienceGained} опыта`}
+                    />
+                </View>
+
+                {/* Close Button */}
+                <TouchableOpacity
+                    className="ml-3 h-10 w-10 items-center justify-center rounded-lg bg-green-800/30"
+                    onPress={handleFinish}
+                >
+                    <MaterialCommunityIcons name="close" size={20} color="#FFFFFF" />
+                </TouchableOpacity>
             </View>
 
-            {/* Content */}
-            <View className="flex-1">
-                <Text className="text-white text-t2 mb-2">
-                    {training.title || 'Силовая тренировка'}
-                </Text>
-					
-                {/* Tags */}
-                <TrainingTags
-                    icon1={null}
-                    title1={formatDate(new Date())}
-                    icon2={<MaterialCommunityIcons name="bow-arrow" size={16} color="#FFFFFF" />}
-                    title2={`+${experienceGained} опыта`}
-                />
-            </View>
-
-            {/* Close Button */}
-            <TouchableOpacity 
-                className="h-10 w-10 rounded-lg bg-green-800/30 items-center justify-center ml-3"
-                onPress={handleFinish}
-            >
-                <MaterialCommunityIcons name="close" size={20} color="#FFFFFF" />
-            </TouchableOpacity>
-        </View>
-
-        <View className="w-full h-[250px] p-2">
-            <MetricCard
-                icon={<MaterialCommunityIcons name="clock-time-eight" size={24} color="#689F38" />}
-                displayNumber={10}
-                title={'минут'}
-                description={'Активного времени'}
-
-            />
-        </View>
-
-        <View className='flex-row flex-1 w-full px-2 gap-2'>
-
-            <View className='flex-1' >
+            <View className="h-[250px] w-full p-2">
                 <MetricCard
-                    icon={<MaterialCommunityIcons name="run-fast" size={24} color="#689F38"  />}
-                    displayNumber={130}
-                    title={'ккал'}
-                    description={'Каллорий сожжено'}
-
+                    icon={
+                        <MaterialCommunityIcons name="clock-time-eight" size={24} color="#689F38" />
+                    }
+                    displayNumber={10}
+                    title={'минут'}
+                    description={'Активного времени'}
                 />
             </View>
 
-            <View className='flex-1' >
-                <MetricCard
-                    icon={<Fontisto name="fire" size={24} color="#689F38"  />}
-                    displayNumber={80}
-                    title={'%'}
-                    description={'Читстота техники'}
+            <View className="w-full flex-1 flex-row gap-2 px-2">
+                <View className="flex-1">
+                    <MetricCard
+                        icon={<MaterialCommunityIcons name="run-fast" size={24} color="#689F38" />}
+                        displayNumber={130}
+                        title={'ккал'}
+                        description={'Каллорий сожжено'}
+                    />
+                </View>
 
-                />
+                <View className="flex-1">
+                    <MetricCard
+                        icon={<Fontisto name="fire" size={24} color="#689F38" />}
+                        displayNumber={80}
+                        title={'%'}
+                        description={'Читстота техники'}
+                    />
+                </View>
             </View>
 
+            {/* Button at bottom */}
+            <View className="flex-row gap-2 py-2">
+                <Button variant="tertiary" onPress={handleFinish} className="flex-1">
+					Закрыть
+                </Button>
+                <Button variant="primary" onPress={goToAnalytics} className="flex-1">
+					Анализ ошибок
+                </Button>
+            </View>
         </View>
-
-        {/* Button at bottom */}
-        <View className=" flex-row gap-2 py-2">
-            <Button variant="tertiary" onPress={handleFinish}  className="flex-1" >
-				Закрыть
-            </Button>
-            <Button variant="primary"  onPress={goToAnalytics}  className="flex-1" >
-				Анализ ошибок
-            </Button>
-        </View>
-
-    </View>
     )
 }

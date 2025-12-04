@@ -206,7 +206,11 @@ const ProfileContent = () => {
                                 if (passwordError) setPasswordError('')
                             }}
                             placeholder="Введите текущий пароль"
-                            error={passwordError && passwordError.includes('текущий') ? passwordError : undefined}
+                            error={
+                                passwordError && passwordError.includes('текущий')
+                                    ? passwordError
+                                    : undefined
+                            }
                         />
 
                         <Input
@@ -218,7 +222,12 @@ const ProfileContent = () => {
                                 if (passwordError) setPasswordError('')
                             }}
                             placeholder="Введите новый пароль"
-                            error={passwordError && (passwordError.includes('новый') || passwordError.includes('8 символов')) ? passwordError : undefined}
+                            error={
+                                passwordError &&
+								(passwordError.includes('новый') || passwordError.includes('8 символов'))
+                                    ? passwordError
+                                    : undefined
+                            }
                         />
 
                         <Input
@@ -230,7 +239,13 @@ const ProfileContent = () => {
                                 if (passwordError) setPasswordError('')
                             }}
                             placeholder="Подтвердите новый пароль"
-                            error={passwordError && (passwordError.includes('Подтвердите') || passwordError.includes('совпадают')) ? passwordError : undefined}
+                            error={
+                                passwordError &&
+								(passwordError.includes('Подтвердите') ||
+									passwordError.includes('совпадают'))
+                                    ? passwordError
+                                    : undefined
+                            }
                         />
 
                         <View style={styles.formButtons}>

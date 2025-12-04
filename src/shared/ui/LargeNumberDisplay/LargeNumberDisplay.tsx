@@ -4,12 +4,7 @@
  */
 
 import { Text, View, type ViewProps } from 'react-native'
-import { useEffect } from 'react'
-import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withSpring,
-} from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 
 export interface LargeNumberDisplayProps extends ViewProps {
 	/** Отображаемое значение */
@@ -30,7 +25,6 @@ export function LargeNumberDisplay({
     className,
     ...props
 }: LargeNumberDisplayProps) {
-
     const sizeStyles = {
         large: 'text-[64px] leading-[72px]',
         xlarge: 'text-[80px] leading-[88px]',
@@ -44,8 +38,10 @@ export function LargeNumberDisplay({
 
     return (
         <View {...props} className={`items-center ${className || ''}`}>
-            <Animated.View >
-                <Text className={`font-inter font-weight-bold ${sizeStyles[size]} ${colorStyles[variant]}`}>
+            <Animated.View>
+                <Text
+                    className={`font-inter font-weight-bold ${sizeStyles[size]} ${colorStyles[variant]}`}
+                >
                     {value}
                 </Text>
             </Animated.View>

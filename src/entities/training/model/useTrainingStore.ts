@@ -40,7 +40,7 @@ interface TrainingState {
 	caloriesBurned: number
 
 	// Actions
-	startOnboarding : () => void
+	startOnboarding: () => void
 	startTraining: (training: Training) => void
 	resumeTraining: (state: SavedWorkoutState) => void
 	resume: () => void
@@ -72,7 +72,7 @@ const initialState = {
     totalReps: 0,
     averageFormQuality: 0,
     caloriesBurned: 0,
-    showTutorial: true
+    showTutorial: true,
 }
 
 export const useTrainingStore = create<TrainingState>((set, get) => ({
@@ -165,7 +165,8 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
             currentExerciseIndex: newIndex,
             currentSet: 1,
             currentReps: 0,
-            currentSide: exerciseSide === 'single' ? null : (exerciseSide as ExerciseSide | null),
+            currentSide:
+				exerciseSide === 'single' ? null : (exerciseSide as ExerciseSide | null),
             completedExercises: [...completedExercises, currentExerciseIndex],
         })
 
@@ -208,7 +209,5 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
             averageFormQuality: Math.round(newAvgQuality),
             caloriesBurned: Math.round(newCalories),
         })
-			
     },
-
 }))

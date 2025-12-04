@@ -16,17 +16,17 @@ export const TrainingTags: React.FC<TrainingTagsProps> = ({
 }) => {
     return (
         <View className={`flex-row gap-2 ${className || ''}`} {...props}>
-            <View className={`bg-gray-500/50 rounded-full px-3 py-1 ${icon1 ? 'flex-row items-center' : ''}`}>
+            <View
+                className={`rounded-full bg-gray-500/50 px-3 py-1 ${icon1 ? 'flex-row items-center' : ''}`}
+            >
                 {icon1 && icon1}
-                <Text className={`text-white text-t4 ${icon1 ? 'ml-1' : ''}`}>
-                    {title1}
-                </Text>
+                <Text className={`text-t4 text-white ${icon1 ? 'ml-1' : ''}`}>{title1}</Text>
             </View>
-            <View className={`bg-gray-500/50 rounded-lg px-3 py-1 ${icon2 ? 'flex-row items-center' : ''}`}>
+            <View
+                className={`rounded-lg bg-gray-500/50 px-3 py-1 ${icon2 ? 'flex-row items-center' : ''}`}
+            >
                 {icon2 && icon2}
-                <Text className={`text-white text-t4 ${icon2 ? 'ml-1' : ''}`}>
-                    {title2}
-                </Text>
+                <Text className={`text-t4 text-white ${icon2 ? 'ml-1' : ''}`}>{title2}</Text>
             </View>
         </View>
     )

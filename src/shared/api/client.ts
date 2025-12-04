@@ -64,7 +64,7 @@ class ApiClient {
 
             // Read response body as text first (can only be read once)
             const responseText = await response.text()
-		
+
             // Try to parse as JSON if content-type indicates JSON
             const contentType = response.headers.get('content-type')
             const hasJsonContent = contentType?.includes('application/json')
@@ -90,9 +90,9 @@ class ApiClient {
                 }
 
                 const errorMessage =
-				responseData && typeof responseData === 'object' && 'error' in responseData
-				    ? String(responseData.error)
-				    : responseText || `Ошибка сервера: ${response.status}`
+					responseData && typeof responseData === 'object' && 'error' in responseData
+					    ? String(responseData.error)
+					    : responseText || `Ошибка сервера: ${response.status}`
 
                 return {
                     success: false,
@@ -144,7 +144,7 @@ class ApiClient {
 
             // Read response body as text first (can only be read once)
             const responseText = await response.text()
-		
+
             // Try to parse as JSON if content-type indicates JSON
             const contentType = response.headers.get('content-type')
             const hasJsonContent = contentType?.includes('application/json')
@@ -170,9 +170,9 @@ class ApiClient {
                 }
 
                 const errorMessage =
-				responseData && typeof responseData === 'object' && 'error' in responseData
-				    ? String(responseData.error)
-				    : responseText || `Ошибка сервера: ${response.status}`
+					responseData && typeof responseData === 'object' && 'error' in responseData
+					    ? String(responseData.error)
+					    : responseText || `Ошибка сервера: ${response.status}`
 
                 return {
                     success: false,
@@ -224,7 +224,7 @@ class ApiClient {
 
             // Read response body as text first (can only be read once)
             const responseText = await response.text()
-		
+
             // Try to parse as JSON if content-type indicates JSON
             const contentType = response.headers.get('content-type')
             const hasJsonContent = contentType?.includes('application/json')
@@ -250,9 +250,9 @@ class ApiClient {
                 }
 
                 const errorMessage =
-				responseData && typeof responseData === 'object' && 'error' in responseData
-				    ? String(responseData.error)
-				    : responseText || `Ошибка сервера: ${response.status}`
+					responseData && typeof responseData === 'object' && 'error' in responseData
+					    ? String(responseData.error)
+					    : responseText || `Ошибка сервера: ${response.status}`
 
                 return {
                     success: false,
@@ -302,7 +302,7 @@ class ApiClient {
 
             // Read response body as text first (can only be read once)
             const responseText = await response.text()
-			
+
             // Try to parse as JSON if content-type indicates JSON
             const contentType = response.headers.get('content-type')
             const hasJsonContent = contentType?.includes('application/json')
@@ -349,6 +349,96 @@ class ApiClient {
     }
 
     /**
+	 * Upload file with progress callback
+	 * Uses XMLHttpRequest for progress tracking
+	 */
+    async upload<TResponse>(
+        endpoint: string,
+        file: {
+			uri: string
+			name: string
+			type: string
+		},
+        options?: {
+			onProgress?: (progress: number) => void
+			additionalFields?: Record<string, string>
+		}
+    ): Promise<ApiResult<TResponse>> {
+        const authHeaders = await this.getAuthHeaders()
+
+        return new Promise((resolve) => {
+            const xhr = new XMLHttpRequest()
+
+            // Track upload progress
+            if (options?.onProgress) {
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percent = Math.round((event.loaded / event.total) * 100)
+                        options.onProgress?.(percent)
+                    }
+                }
+            }
+
+            xhr.onload = async () => {
+                // Handle 401
+                if (xhr.status === 401) {
+                    await this.handleUnauthorized()
+                    resolve({ success: false, error: 'Unauthorized' })
+                    return
+                }
+
+                try {
+                    const response = JSON.parse(xhr.responseText) as TResponse
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        resolve({ success: true, data: response })
+                    } else {
+                        const errorResponse = response as unknown as { error?: string }
+                        resolve({
+                            success: false,
+                            error: errorResponse.error ?? `Ошибка сервера: ${xhr.status}`,
+                        })
+                    }
+                } catch {
+                    resolve({ success: false, error: `Ошибка сервера: ${xhr.status}` })
+                }
+            }
+
+            xhr.onerror = () => {
+                resolve({ success: false, error: 'Ошибка сети' })
+            }
+
+            xhr.ontimeout = () => {
+                resolve({ success: false, error: 'Превышено время ожидания' })
+            }
+
+            const formData = new FormData()
+            formData.append('file', {
+                uri: file.uri,
+                name: file.name,
+                type: file.type,
+            } as unknown as Blob)
+
+            // Add additional fields if any
+            if (options?.additionalFields) {
+                for (const [key, value] of Object.entries(options.additionalFields)) {
+                    formData.append(key, value)
+                }
+            }
+
+            xhr.open('POST', `${this.baseUrl}${endpoint}`)
+
+            // Set auth header
+            const authToken = authHeaders.Authorization
+            if (authToken) {
+                xhr.setRequestHeader('Authorization', authToken)
+            }
+
+            xhr.timeout = 60000 // 60 seconds
+            xhr.send(formData)
+        })
+    }
+
+    /**
 	 * Perform GET request
 	 */
     async get<TResponse>(endpoint: string): Promise<ApiResult<TResponse>> {
@@ -388,8 +478,8 @@ class ApiClient {
                 }
             } else {
                 // For successful responses, non-JSON content is acceptable (e.g., 204 No Content, plain text success)
-                // Only log as error for non-successful responses
-                if (!response.ok) {
+                // Only log as error for non-successful responses (except 404 which is expected for missing resources)
+                if (!response.ok && response.status !== 404) {
                     const text = await response.text()
                     console.error('Non-JSON response for error status:', text)
                 }

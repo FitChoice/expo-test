@@ -10,7 +10,7 @@ export interface StepProgressProps extends ViewProps {
 	current: number
 	/** Общее количество шагов */
 	total: number
-    isVertical?: boolean
+	isVertical?: boolean
 }
 
 export function StepProgress({
@@ -21,7 +21,10 @@ export function StepProgress({
     ...props
 }: StepProgressProps) {
     return (
-        <View {...props} className={`flex-row items-center gap-1 ${isVertical ? ' w-full' : 'w-1/2'}`}>
+        <View
+            {...props}
+            className={`flex-row items-center gap-1 ${isVertical ? 'w-full' : 'w-1/2'}`}
+        >
             {Array.from({ length: total }).map((_, index) => {
                 const isActive = index === current
 
@@ -44,12 +47,7 @@ export function StepProgress({
                 // }
 
                 // Неактивные шаги - белые полупрозрачные прямоугольники с закругленными краями
-                return (
-                    <View
-                        key={index}
-                        className="h-1.5 flex-1 rounded-full bg-white/30"
-                    />
-                )
+                return <View key={index} className="h-1.5 flex-1 rounded-full bg-white/30" />
             })}
         </View>
     )

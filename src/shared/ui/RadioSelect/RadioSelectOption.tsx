@@ -10,7 +10,7 @@ interface RadioSelectOptionProps {
 	disabled: boolean
 	onPress: () => void
 	onPressIn: () => void
-	onPressOut: () => void,
+	onPressOut: () => void
 	isNeedCheckbox?: boolean
 }
 
@@ -22,7 +22,7 @@ export const RadioSelectOption: React.FC<RadioSelectOptionProps> = ({
     isSelected,
     disabled,
     onPress,
-    isNeedCheckbox
+    isNeedCheckbox,
 }) => {
     return (
         <GlowButton

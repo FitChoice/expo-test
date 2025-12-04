@@ -28,7 +28,7 @@ export const SurveyStep11: React.FC<SurveyStep11Props> = ({
                 <RadioSelect
                     options={[
                         { value: '0', label: 'Силовые тренировки', icon: <Dumbbell /> },
-                        { value: '1', label: 'Кардио', icon:  <Cardio /> },
+                        { value: '1', label: 'Кардио', icon: <Cardio /> },
                         { value: '2', label: 'Растяжка', icon: <Stretching /> },
                         { value: '3', label: 'Здоровая спина', icon: <Posture /> },
                     ]}

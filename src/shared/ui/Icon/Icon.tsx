@@ -74,6 +74,15 @@ import GoalHabit from './assets/goal-habit.svg'
 import GoalPleasure from './assets/goal-pleasure.svg'
 import GoalTechnique from './assets/goal-technique.svg'
 import GoalStamina from './assets/goal-stamina.svg'
+import Microphone from './assets/microphone.svg'
+import Send from './assets/send.svg'
+import Paperclip from './assets/paperclip.svg'
+import Play from './assets/play.svg'
+import PauseSolid from './assets/pause-solid.svg'
+import Stop from './assets/stop.svg'
+import AiAssistant from './assets/ai-assistant.svg'
+import AiChat from './assets/ai-chat.svg'
+import Lock from './assets/lock.svg'
 
 interface IconProps {
 	name: IconName
@@ -160,12 +169,21 @@ const iconMap: Record<
     additional: Additional,
     diary: Diary,
     back: Back,
-    dumbbell:Dumbbell,
+    dumbbell: Dumbbell,
     'goal-dumbbell': GoalDumbbell,
-    'goal-habit' : GoalHabit,
-    'goal-pleasure' : GoalPleasure,
-	 'goal-technique': GoalTechnique,
-    'goal-stamina' : GoalStamina,
+    'goal-habit': GoalHabit,
+    'goal-pleasure': GoalPleasure,
+    'goal-technique': GoalTechnique,
+    'goal-stamina': GoalStamina,
+    microphone: Microphone,
+    send: Send,
+    paperclip: Paperclip,
+    play: Play,
+    'pause-solid': PauseSolid,
+    stop: Stop,
+    'ai-assistant': AiAssistant,
+    'ai-chat': AiChat,
+    lock: Lock,
 }
 
 // Компонент иконок

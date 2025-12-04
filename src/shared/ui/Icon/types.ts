@@ -89,3 +89,13 @@ export type IconName =
 	| 'additional'
 	| 'diary'
 	| 'back'
+	// Чат
+	| 'microphone'
+	| 'send'
+	| 'paperclip'
+	| 'play'
+	| 'pause-solid'
+	| 'stop'
+	| 'ai-assistant'
+	| 'ai-chat'
+	| 'lock'

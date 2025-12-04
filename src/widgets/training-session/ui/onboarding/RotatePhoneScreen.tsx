@@ -2,7 +2,6 @@ import { View, Text, Animated, Easing, Alert } from 'react-native'
 
 import { useEffect, useRef } from 'react'
 import * as ScreenOrientation from 'expo-screen-orientation'
-import { GradientBg } from '@/shared/ui/GradientBG'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
 import RotatePhoneIcon from 'src/assets/images/rotate_phone_image.svg'
@@ -12,10 +11,9 @@ interface RotatePhoneScreenProps {
 }
 
 export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
-
     const orientationChangedRef = useRef(false)
     const hasShownAlertRef = useRef(false)
-	
+
     const handleStop = () => {
         router.back()
     }
@@ -46,17 +44,17 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
         // Сбрасываем refs при монтировании
         orientationChangedRef.current = false
         hasShownAlertRef.current = false
-		
+
         let checkTimeout: ReturnType<typeof setTimeout> | null = null
         let subscription: { remove: () => void } | null = null
 
         const checkRotationLock = async () => {
             try {
                 await ScreenOrientation.unlockAsync()
-				
+
                 // Получаем начальную ориентацию
                 const initialOrientation = await ScreenOrientation.getOrientationAsync()
-				
+
                 // Слушаем изменения ориентации
                 subscription = ScreenOrientation.addOrientationChangeListener(() => {
                     orientationChangedRef.current = true
@@ -69,13 +67,13 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
                         subscription = null
                     }
                 })
-				
+
                 // Проверяем через 3 секунды, изменилась ли ориентация
                 // Если нет и мы все еще в портретной ориентации, возможно поворот заблокирован
                 checkTimeout = setTimeout(async () => {
                     try {
                         const currentOrientation = await ScreenOrientation.getOrientationAsync()
-						
+
                         if (
                             !orientationChangedRef.current &&
 							currentOrientation === initialOrientation &&
@@ -166,7 +164,8 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
                             clearInterval(interval)
                         }
                     }
-                } catch (err) { console.warn('Error reading orientation:', err)
+                } catch (err) {
+                    console.warn('Error reading orientation:', err)
                     // Если ошибка — напр. из-за permissions или unmount
                 }
             }, 300)
@@ -183,14 +182,14 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
     }, [onNext])
 
     return (
-        <View className="flex-1 ">
+        <View className="flex-1">
             {/* Close Button */}
-					<View className="absolute right-4  z-10">
+            <View className="absolute right-4 z-10">
                 <CloseBtn handlePress={handleStop} classNames="h-12 w-12 rounded-2xl" />
             </View>
 
             {/* Content */}
-            <View className="flex-1 justify-center items-center gap-10">
+            <View className="flex-1 items-center justify-center gap-10">
                 <Animated.View
                     //style={{ opacity }}
                 >
@@ -198,7 +197,7 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
                 </Animated.View>
 
                 {/* Description */}
-                <Text className="text-h2 text-light-text-200 text-center leading-6 mb-20">
+                <Text className="mb-20 text-center text-h2 leading-6 text-light-text-200">
 					Поверните телефон горизонтально
                 </Text>
             </View>

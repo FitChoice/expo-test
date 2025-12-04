@@ -23,15 +23,15 @@ interface ExerciseCountdownScreenProps {
 	isVertical?: boolean
 }
 
-function ExerciseExampleCountdownContent({ 
+function ExerciseExampleCountdownContent({
     exercise,
     player,
     isVertical,
-    onComplete
-}: { 
+    onComplete,
+}: {
 	exercise: Exercise
 	currentSet: number
-	player: ReturnType<typeof useVideoPlayer>,
+	player: ReturnType<typeof useVideoPlayer>
 	isVertical?: boolean
 	onComplete: () => void
 }) {
@@ -64,9 +64,7 @@ function ExerciseExampleCountdownContent({
     }, [player, onComplete])
 
     useEffect(() => {
-
         if (player && videoPlayerContext) {
-
             const unregister = videoPlayerContext.registerPlayer(player)
             return unregister
         } else {
@@ -78,7 +76,7 @@ function ExerciseExampleCountdownContent({
     return (
         <>
             {/* Video */}
-            <View style={{ height: isVertical ? height : 250 }} >
+            <View style={{ height: isVertical ? height : 250 }}>
                 {exercise.VideoTheory ? (
                     <VideoView
                         player={player}
@@ -90,28 +88,32 @@ function ExerciseExampleCountdownContent({
                     <View className="bg-brand-dark-300 flex-1" />
                 )}
             </View>
-          
+
             {/*<View className="w-full px-4 py-4 justify-center items-center ">*/}
             {/*    <StepProgress current={0} total={5} />*/}
             {/*</View>*/}
-            { !isVertical && 
-            <View className="absolute bottom-10 left-0 right-0 justify-center items-center px-4">
-                <VideoProgressBar player={player} className="mb-2" />
-                <Text className="text-t1 text-light-text-200 text-center">{exercise.name}</Text>
-            </View>
-            }
+            {!isVertical && (
+                <View className="absolute bottom-10 left-0 right-0 items-center justify-center px-4">
+                    <VideoProgressBar player={player} className="mb-2" />
+                    <Text className="text-center text-t1 text-light-text-200">{exercise.name}</Text>
+                </View>
+            )}
 
             {/* Exercise Info */}
             <View className="p-5">
                 {/* Exercise Name */}
-                { isVertical ? (
+                {isVertical ? (
                     <>
-                        <Text className="text-t1 text-light-text-200 text-center mb-2">{exercise.name}</Text>
+                        <Text className="mb-2 text-center text-t1 text-light-text-200">
+                            {exercise.name}
+                        </Text>
                         <View className="px-4">
                             <VideoProgressBar player={player} />
                         </View>
                     </>
-                ) : <></>}
+                ) : (
+                    <></>
+                )}
 
                 {/*{isVertical ? (*/}
                 {/*    <>*/}
@@ -168,7 +170,7 @@ export function ExerciseTheoryScreen({
     exercise,
     currentSet,
     onComplete,
-    isVertical
+    isVertical,
 }: ExerciseCountdownScreenProps) {
     const player = useVideoPlayer(exercise.VideoTheory || '', (player) => {
         player.loop = false
@@ -182,9 +184,9 @@ export function ExerciseTheoryScreen({
 
     return (
         <ExerciseWithCounterWrapper>
-            <ExerciseExampleCountdownContent 
-                exercise={exercise} 
-                currentSet={currentSet} 
+            <ExerciseExampleCountdownContent
+                exercise={exercise}
+                currentSet={currentSet}
                 player={player}
                 isVertical={isVertical}
                 onComplete={onComplete}

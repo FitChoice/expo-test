@@ -6,9 +6,7 @@ import { LogBox } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 
 // Подавляем предупреждение о deprecated SafeAreaView из expo-router
-LogBox.ignoreLogs([
-    'SafeAreaView has been deprecated',
-])
+LogBox.ignoreLogs(['SafeAreaView has been deprecated'])
 
 export default function Layout() {
     return (

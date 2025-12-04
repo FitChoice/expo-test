@@ -26,7 +26,7 @@ export const CheckboxSelectOption: React.FC<CheckboxSelectOptionProps> = ({
     iconSize,
     textStyle,
     onPress,
-    isNeedCheckbox
+    isNeedCheckbox,
 }) => {
     return (
         <GlowButton
@@ -39,7 +39,7 @@ export const CheckboxSelectOption: React.FC<CheckboxSelectOptionProps> = ({
         >
             {/* Иконка если есть */}
             {option.icon && (
-                <View style={[styles.iconContainer, { width: iconSize, height: iconSize }]} >
+                <View style={[styles.iconContainer, { width: iconSize, height: iconSize }]}>
                     {option.icon}
                 </View>
             )}
@@ -48,7 +48,6 @@ export const CheckboxSelectOption: React.FC<CheckboxSelectOptionProps> = ({
             <Text
                 className={`${textStyle} text-t3`}
                 style={[styles.optionText, { color: disabled ? '#C1C1C1' : '#FFFFFF' }]}
-
             >
                 {option.label}
             </Text>
@@ -65,7 +64,7 @@ const styles = StyleSheet.create({
     contentContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 18	,
+        gap: 18,
     },
     iconContainer: {
         //	borderRadius: 99,

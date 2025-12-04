@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, type ViewProps, StyleSheet } from 'react-native'
+import { View, type ViewProps } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as ScreenOrientation from 'expo-screen-orientation'
 
@@ -48,14 +48,12 @@ export const Container = ({ children, className, style, ...props }: ContainerPro
     }
 
     return (
-        <View 
-            className="flex-1" 
+        <View
+            className="flex-1"
             style={[{ backgroundColor: 'transparent' }, paddingStyle, style]}
             {...props}
         >
-            <View className={`flex-1 ${className || ''}`}>
-                {children}
-            </View>
+            <View className={`flex-1 ${className || ''}`}>{children}</View>
         </View>
     )
 }

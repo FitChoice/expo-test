@@ -31,23 +31,15 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         <TouchableOpacity
             onPress={handlePress}
             disabled={disabled}
-            className={`rounded-full items-center justify-center ${
-                checked
-                    ? 'bg-[#C5F680]'
-                    : 'bg-transparent border-2 border-white'
+            className={`items-center justify-center rounded-full ${
+                checked ? 'bg-[#C5F680]' : 'border-2 border-white bg-transparent'
             } ${disabled ? 'opacity-50' : ''} ${className}`}
             style={{
                 width: currentSize.size,
                 height: currentSize.size,
             }}
         >
-            {checked && (
-                <Icon
-                    name="check"
-                    size={currentSize.icon}
-                    color="#161616"
-                />
-            )}
+            {checked && <Icon name="check" size={currentSize.icon} color="#161616" />}
         </TouchableOpacity>
     )
 }

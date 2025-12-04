@@ -172,12 +172,10 @@ export function RotateScreen({ isVertical, onComplete }: RotateScreenProps) {
     }, [onComplete, isVertical])
 
     return (
-        <View className="flex-1 justify-center items-center gap-10">
+        <View className="flex-1 items-center justify-center gap-10">
             <RotatePhoneIcon />
-            <Text className="text-h2 text-light-text-200 text-center leading-6 mb-20">
-                {isVertical
-                    ? 'Поверните телефон вертикально'
-                    : 'Поверните телефон горизонтально'}
+            <Text className="mb-20 text-center text-h2 leading-6 text-light-text-200">
+                {isVertical ? 'Поверните телефон вертикально' : 'Поверните телефон горизонтально'}
             </Text>
         </View>
     )

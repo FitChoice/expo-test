@@ -9,12 +9,7 @@ import {
 import { useRouter } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
-import {
-    Icon,
-    Button,
-    BackgroundLayoutNoSidePadding,
-    TrainingTags,
-} from '@/shared/ui'
+import { Icon, Button, BackgroundLayoutNoSidePadding, TrainingTags } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import type { Training } from '@/entities/training'
 import { useTrainingStore } from '@/entities/training'
@@ -40,7 +35,6 @@ export const HomeScreen = () => {
  * Mobile version according to Figma design
  */
 const MobileContent = () => {
-
     const router = useRouter()
     const startTraining = useTrainingStore((state) => state.startTraining)
 
@@ -68,50 +62,51 @@ const MobileContent = () => {
 
     const handleOpenDemo = () => {
         const demo: Training = {
-            'id': 295,
-            'trainingType': 't7',
-            'title': 'Ноги и Ягодицы + Пресс',
-            'description': 'Создай своё лучшее тело от ягодиц до кубиков! Каждое приседание и подъем — это шаг к подтянутой фигуре и уверенности в себе. Заверши сессию укреплением кора и почувствуй, как твоё тело становится сильнее и гармоничнее.',
-            'difficulty': 2,
-            'experience': 60,
-            'inventory': [
-                1,
-                2,
-                3
-            ],
-            'exercises': [
-
+            id: 295,
+            trainingType: 't7',
+            title: 'Ноги и Ягодицы + Пресс',
+            description:
+				'Создай своё лучшее тело от ягодиц до кубиков! Каждое приседание и подъем — это шаг к подтянутой фигуре и уверенности в себе. Заверши сессию укреплением кора и почувствуй, как твоё тело становится сильнее и гармоничнее.',
+            difficulty: 2,
+            experience: 60,
+            inventory: [1, 2, 3],
+            exercises: [
                 {
-                    'id': 'squat',
-                    'side': 'single',
-                    'name': 'Классический присед с резинкой',
-                    'rest_time': 10,
-                    'duration': 5,
-                    'progress': 15,
-                    'sets': 2,
-                    'reps': 2,
-                    'isAi': false,
-                    'VideoTheory': 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-                    'VideoPractice': 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0.mp4',
+                    id: 'squat',
+                    side: 'single',
+                    name: 'Классический присед с резинкой',
+                    rest_time: 10,
+                    duration: 5,
+                    progress: 15,
+                    sets: 2,
+                    reps: 2,
+                    isAi: false,
+                    VideoTheory:
+						'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+                    VideoPractice:
+						'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0.mp4',
 
-                    'isVertical': true,
+                    isVertical: true,
                 },
 
                 {
-                    'id': 'leg_abduction_l',
-                    'side': 'single',
-                    'name': 'Отведение ноги назад с опорой на локти ',
-                    'rest_time': 10,
-                    'duration': 5,
-                    'progress': 15,
-                    'sets': 2,
-                    'reps': 2,
-                    'isAi': false,
-                    'VideoTheory': 'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-                    'VideoPractice': 'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20%20-%20L.mp4',
-                    'VideoPracticeSecond': 'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20-%20R.mp4',
+                    id: 'leg_abduction_l',
+                    side: 'single',
+                    name: 'Отведение ноги назад с опорой на локти ',
+                    rest_time: 10,
+                    duration: 5,
+                    progress: 15,
+                    sets: 2,
+                    reps: 2,
+                    isAi: false,
+                    VideoTheory:
+						'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+                    VideoPractice:
+						'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20%20-%20L.mp4',
+                    VideoPracticeSecond:
+						'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20-%20R.mp4',
 
-                    'isVertical': false,
+                    isVertical: false,
                 },
 
                 // {
@@ -129,12 +124,12 @@ const MobileContent = () => {
                 //
                 //     'isVertical': false,
                 // },
-            ]
+            ],
         }
 
         startTraining(demo)
         router.push({ pathname: '/(training)/session', params: { trainingId: 1 } })
-	  }
+    }
 
     const handleOpenDiary = () => {
         router.push('/diary')
@@ -146,21 +141,30 @@ const MobileContent = () => {
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
-
             >
                 {/* Header with progress */}
                 <View className="pt-4">
                     <View style={styles.progressSection}>
                         <View style={styles.progressItem}>
                             <View style={styles.progressIcon}>
-                                <Ionicons name="barbell-outline" size={56} color="white" style={styles.topIcon} />
+                                <Ionicons
+                                    name="barbell-outline"
+                                    size={56}
+                                    color="white"
+                                    style={styles.topIcon}
+                                />
                             </View>
                             <Text style={styles.progressText}>1 / 12</Text>
                         </View>
                         <Text style={styles.monthText}>Месяц 1</Text>
                         <View style={styles.progressItem}>
                             <View style={styles.progressIcon}>
-                                <MaterialCommunityIcons name="bow-arrow" size={56} color="white" style={styles.topIconBow}  />
+                                <MaterialCommunityIcons
+                                    name="bow-arrow"
+                                    size={56}
+                                    color="white"
+                                    style={styles.topIconBow}
+                                />
                             </View>
                             <Text style={styles.progressText}>40</Text>
                         </View>
@@ -192,7 +196,6 @@ const MobileContent = () => {
 
                 {/* Main Content Card */}
                 <View style={styles.mainCard}>
-
                     <View style={{ marginBottom: 65 }}>
                         {/* Progress Tag - moved to top */}
                         <View style={styles.progressTag}>
@@ -203,23 +206,22 @@ const MobileContent = () => {
                         <View style={styles.cardHeader}>
                             <Text style={styles.dayTitle}>День 1</Text>
                             <Text style={styles.dayDescription}>
-							Самое время начать{'\n'}Первая тренировка уже ждёт тебя
+								Самое время начать{'\n'}Первая тренировка уже ждёт тебя
                             </Text>
                         </View>
-
                     </View>
                     {/* Action Buttons */}
                     <View style={styles.actionButtons}>
-                        <TouchableOpacity style={styles.actionButton}
-                            onPress={handleOpenDemo}
-                        >
+                        <TouchableOpacity style={styles.actionButton} onPress={handleOpenDemo}>
                             <View style={styles.buttonContent}>
                                 <View style={styles.buttonInfo}>
                                     <Text style={styles.buttonTitle}>Тренировка</Text>
                                     <TrainingTags
                                         icon1={<MaterialIcons name="timer" size={16} color="white" />}
                                         title1={'40 минут'}
-                                        icon2={<MaterialCommunityIcons name="bow-arrow" size={16} color="white"  />}
+                                        icon2={
+                                            <MaterialCommunityIcons name="bow-arrow" size={16} color="white" />
+                                        }
                                         title2={'+20 опыта'}
                                     />
                                 </View>
@@ -229,16 +231,16 @@ const MobileContent = () => {
                             </View>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.actionButton}
-                            onPress={handleOpenDiary}
-                        >
+                        <TouchableOpacity style={styles.actionButton} onPress={handleOpenDiary}>
                             <View style={styles.buttonContent}>
                                 <View style={styles.buttonInfo}>
                                     <Text style={styles.buttonTitle}>Дневник</Text>
                                     <TrainingTags
                                         icon1={<MaterialIcons name="timer" size={16} color="white" />}
                                         title1={'40 минут'}
-                                        icon2={<MaterialCommunityIcons name="bow-arrow" size={16} color="white"  />}
+                                        icon2={
+                                            <MaterialCommunityIcons name="bow-arrow" size={16} color="white" />
+                                        }
                                         title2={'+20 опыта'}
                                     />
                                 </View>
@@ -254,7 +256,6 @@ const MobileContent = () => {
             {/* Navigation Bar */}
             <NavigationBar />
         </View>
-
     )
 }
 
@@ -465,7 +466,6 @@ const styles = StyleSheet.create({
     },
     topIconBow: {
         opacity: 0.2,
-		
     },
 })
 

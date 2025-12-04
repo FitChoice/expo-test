@@ -2,9 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { View, Animated, Platform } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as Notifications from 'expo-notifications'
-import {
-    Button, BackButton, Icon, BackgroundLayout,
-} from '@/shared/ui'
+import { Button, BackButton, Icon, BackgroundLayout } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation, getUserId } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { useSurveyFlow } from '@/features/survey-flow'
@@ -26,11 +24,7 @@ import {
     SurveyStepLoading,
     SurveyStepError,
 } from './components'
-import type {
-    Gender,
-    Frequency,
-    Direction,
-} from '@/entities/survey'
+import type { Gender, Frequency, Direction } from '@/entities/survey'
 import { trainingApi } from '@/features/training/api'
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -143,9 +137,9 @@ export const SurveyScreen = () => {
 
             // После успешной отправки опроса создаем план тренировок
             const planResult = await trainingApi.buildTrainingPlan(userId, {
-                time: new Date().toISOString()
+                time: new Date().toISOString(),
             })
-			
+
             if (!planResult.success) {
                 setSubmitError(planResult.error || 'Ошибка создания плана тренировок')
                 setIsSubmitting(false)
@@ -156,7 +150,8 @@ export const SurveyScreen = () => {
             // План успешно создан - данные уже отправлены, остаемся на шаге 14
         } catch (error) {
             console.error('Submit data error:', error)
-            const errorMessage = error instanceof Error ? error.message : 'Произошла непредвиденная ошибка'
+            const errorMessage =
+				error instanceof Error ? error.message : 'Произошла непредвиденная ошибка'
             setSubmitError(errorMessage)
         } finally {
             setIsSubmitting(false)
@@ -194,7 +189,7 @@ export const SurveyScreen = () => {
                 console.log('Notifications unavailable:', error)
             }
         }
-		
+
         // Переходим на шаг 14 и запускаем отправку данных
         nextStep()
         submitData()
@@ -314,12 +309,20 @@ export const SurveyScreen = () => {
             if (isSubmitting) {
                 return <SurveyStepLoading />
             }
-				
+
             if (submitError) {
-                return <SurveyStepError error={submitError} onRetry={handleRetry} onBack={prevStep} />
+                return (
+                    <SurveyStepError
+                        error={submitError}
+                        onRetry={handleRetry}
+                        onBack={prevStep}
+                    />
+                )
             }
-			
-            return <SurveyStep14 userName={surveyData.name} gender={surveyData.gender || 'male'} />
+
+            return (
+                <SurveyStep14 userName={surveyData.name} gender={surveyData.gender || 'male'} />
+            )
 
         default:
             return <SurveyStep1 name={surveyData.name} onNameChange={updateName} />
@@ -361,8 +364,11 @@ export const SurveyScreen = () => {
         }
     }
 
-    const notShowProgress = useMemo(() => currentStep == 13 || currentStep == 14, [currentStep])
-	
+    const notShowProgress = useMemo(
+        () => currentStep == 13 || currentStep == 14,
+        [currentStep]
+    )
+
     // Выбираем компонент Layout в зависимости от шага
     const isNoPaddingLayout = currentStep == 6
     const sectionPadding = isNoPaddingLayout ? { paddingHorizontal: '4%' as const } : {}
@@ -370,56 +376,59 @@ export const SurveyScreen = () => {
 
     // Для экрана загрузки и ошибки используем flex-1 для центрирования
     const isFullHeightContent = currentStep === 14 && (isSubmitting || submitError)
-	
+
     return (
-        <View className="flex-1 bg-[#151515] ">
+        <View className="flex-1 bg-[#151515]">
             <BackgroundLayout>
-                <View className={'flex-1 bg-transparent justify-between '}>
+                <View className={'flex-1 justify-between bg-transparent'}>
                     {/* Верхний контент */}
                     <View className={isFullHeightContent ? 'flex-1' : 'flex-shrink'}>
                         {/* Header section with back button */}
-                        {
-                            !notShowProgress &&
-							<View className="mb-2" style={sectionPadding}>
-							    <BackButton
-							        onPress={handleBack}
-							        color="#989898"
-							        variant="transparent"
-							        position="relative"
-							    />
-							</View>
-                        }
+                        {!notShowProgress && (
+                            <View className="mb-2" style={sectionPadding}>
+                                <BackButton
+                                    onPress={handleBack}
+                                    color="#989898"
+                                    variant="transparent"
+                                    position="relative"
+                                />
+                            </View>
+                        )}
 
                         {/* Content section with progress bar and main content */}
-                        <View className="mb-6 bg-transparent" style={sectionPadding} >
+                        <View className="mb-6 bg-transparent" style={sectionPadding}>
                             {/* Индикатор прогресса */}
-                            {
-                                !notShowProgress && <View className="mb-6 h-2 w-full rounded-lg bg-fill-800">
+                            {!notShowProgress && (
+                                <View className="mb-6 h-2 w-full rounded-lg bg-fill-800">
                                     <View
-								
                                         className="h-2 rounded-lg bg-[#A172FF]"
                                         style={{ width: getProgressWidth() }}
-								
                                     />
                                 </View>
-                            }
-					
+                            )}
                         </View>
 
                         {/* Основной контент */}
-                        <View className={isFullHeightContent ? 'w-full flex-1 bg-transparent' : 'w-full gap-6 bg-transparent'}>{renderCurrentStep()}</View>
+                        <View
+                            className={
+                                isFullHeightContent
+                                    ? 'w-full flex-1 bg-transparent'
+                                    : 'w-full gap-6 bg-transparent'
+                            }
+                        >
+                            {renderCurrentStep()}
+                        </View>
                     </View>
 
                     {/* Кнопки внизу экрана с анимацией */}
                     <Animated.View
-                        className="gap-2  pt-8"
+                        className="gap-2 pt-8"
                         style={[
                             Platform.OS === 'ios' ? { transform: [{ translateY }] } : {},
                             sectionPadding,
                             {
                                 paddingBottom: insets.bottom + 10,
-                            }
-												
+                            },
                         ]}
                     >
                         {canProceed() && (
@@ -441,25 +450,22 @@ export const SurveyScreen = () => {
                                 fullWidth
                                 onPress={async () => {
                                     handleNext()
-			
                                 }}
                                 className="h-[56px]"
                             >
-							Не сейчас
+								Не сейчас
                             </Button>
-                        ): null}
+                        ) : null}
 
-                        {
-                            currentStep == 14 && !isSubmitting && !submitError && (
-                                <Button
-                                    iconLeft={<Icon name="dumbbell" />}
-                                    variant={'secondary'}
-                                    onPress={() => router.push('/home')}
-                                >
+                        {currentStep == 14 && !isSubmitting && !submitError && (
+                            <Button
+                                iconLeft={<Icon name="dumbbell" />}
+                                variant={'secondary'}
+                                onPress={() => router.push('/home')}
+                            >
 								Перейти к тренировкам
-                                </Button>
-                            )
-                        }
+                            </Button>
+                        )}
                     </Animated.View>
                 </View>
             </BackgroundLayout>

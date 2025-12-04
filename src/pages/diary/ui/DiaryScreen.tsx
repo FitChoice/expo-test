@@ -1,4 +1,11 @@
-import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet } from 'react-native'
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    TextInput,
+    ScrollView,
+    StyleSheet,
+} from 'react-native'
 import { GradientHeader } from '@/shared/ui/GradientBG'
 import { useState } from 'react'
 import { useRouter } from 'expo-router'
@@ -11,9 +18,9 @@ import Emo4 from '@/assets/images/moods/emo4.svg'
 import Emo5 from '@/assets/images/moods/emo5.svg'
 
 interface RatingOption {
-    id: number
-    Icon: React.ComponentType<any>
-    color: string
+	id: number
+	Icon: React.ComponentType<any>
+	color: string
 }
 
 const ratingOptions: RatingOption[] = [
@@ -25,26 +32,31 @@ const ratingOptions: RatingOption[] = [
 ]
 
 interface QuestionSectionProps {
-    title: string
-    subtitle: string
-    selectedValue: number | null
-    onSelect: (value: number) => void
+	title: string
+	subtitle: string
+	selectedValue: number | null
+	onSelect: (value: number) => void
 }
 
-const QuestionSection = ({ title, subtitle, selectedValue, onSelect }: QuestionSectionProps) => {
+const QuestionSection = ({
+    title,
+    subtitle,
+    selectedValue,
+    onSelect,
+}: QuestionSectionProps) => {
     return (
-        <View className="mb-2 bg-bg-dark-500 p-4" style={{ overflow: 'hidden', borderRadius: 14 }}>
-            <Text className="text-white text-t1.1 font-semibold mb-1">{title}</Text>
-            <Text className="text-gray-400 text-t3 mb-4">{subtitle}</Text>
+        <View
+            className="mb-2 bg-bg-dark-500 p-4"
+            style={{ overflow: 'hidden', borderRadius: 14 }}
+        >
+            <Text className="mb-1 text-t1.1 font-semibold text-white">{title}</Text>
+            <Text className="mb-4 text-t3 text-gray-400">{subtitle}</Text>
             <View className="flex-row justify-between">
                 {ratingOptions.map((option) => {
                     const Icon = option.Icon
                     const isSelected = selectedValue === option.id
                     return (
-                        <TouchableOpacity
-                            key={option.id}
-                            onPress={() => onSelect(option.id)}
-                        >
+                        <TouchableOpacity key={option.id} onPress={() => onSelect(option.id)}>
                             <View
                                 style={{
                                     borderRadius: 27,
@@ -94,22 +106,28 @@ export const DiaryScreen = () => {
     return (
         <View className="flex-1 bg-black">
             {/* Header with gradient */}
-            <View className="absolute top-0 left-0 right-0 z-0" style={{ overflow: 'hidden', borderRadius: 34 }}>
+            <View
+                className="absolute left-0 right-0 top-0 z-0"
+                style={{ overflow: 'hidden', borderRadius: 34 }}
+            >
                 <GradientHeader />
             </View>
             <SafeAreaContainer style={styles.contentContainer}>
                 {/* Header Content */}
-                <View className="pt-10 px-4 pb-14 z-10"  >
-                    <View className=" items-center mb-2">
-                        <Text className="text-gray-400 text-t2 text-center">{currentDate}</Text>
+                <View className="z-10 px-4 pb-14 pt-10">
+                    <View className="mb-2 items-center">
+                        <Text className="text-center text-t2 text-gray-400">{currentDate}</Text>
                     </View>
                     <CloseBtn classNames={'rounded-2xl'} handlePress={() => router.back()} />
-       
-                    <Text className='font-rimma text-2xl text-center text-white '>НОВАЯ ЗАПИСЬ</Text>
+
+                    <Text className="text-center font-rimma text-2xl text-white">НОВАЯ ЗАПИСЬ</Text>
                 </View>
 
                 {/* Scrollable Content */}
-                <ScrollView className="flex-1 px-4 bg-black  pt-10" showsVerticalScrollIndicator={false}>
+                <ScrollView
+                    className="flex-1 bg-black px-4 pt-10"
+                    showsVerticalScrollIndicator={false}
+                >
                     <QuestionSection
                         title="Настроение"
                         subtitle="Какое у вас общее настроение?"
@@ -139,29 +157,31 @@ export const DiaryScreen = () => {
                     />
 
                     {/* Sleep Time Section */}
-                    <View className="mb-6 bg-bg-dark-500 p-4" style={{ overflow: 'hidden', borderRadius: 14 }}>
-
-                        <Text className="text-white text-lg font-semibold mb-1">Время сна</Text>
-                        <Text className="text-gray-400 text-sm mb-4">
-                        Во сколько легли и когда проснулись?
+                    <View
+                        className="mb-6 bg-bg-dark-500 p-4"
+                        style={{ overflow: 'hidden', borderRadius: 14 }}
+                    >
+                        <Text className="mb-1 text-lg font-semibold text-white">Время сна</Text>
+                        <Text className="mb-4 text-sm text-gray-400">
+							Во сколько легли и когда проснулись?
                         </Text>
                         <View className="flex-row justify-between">
-                            <View className="flex-1 mr-2">
-                                <Text className="text-gray-400 text-sm mb-2">Засыпание</Text>
+                            <View className="mr-2 flex-1">
+                                <Text className="mb-2 text-sm text-gray-400">Засыпание</Text>
                                 <TextInput
                                     value={sleepTime}
                                     onChangeText={setSleepTime}
-                                    className="bg-[#2E322D] text-white px-4 py-3 rounded-xl"
+                                    className="rounded-xl bg-[#2E322D] px-4 py-3 text-white"
                                     placeholder="00:00"
                                     placeholderTextColor="#666"
                                 />
                             </View>
-                            <View className="flex-1 ml-2">
-                                <Text className="text-gray-400 text-sm mb-2">Пробуждение</Text>
+                            <View className="ml-2 flex-1">
+                                <Text className="mb-2 text-sm text-gray-400">Пробуждение</Text>
                                 <TextInput
                                     value={wakeTime}
                                     onChangeText={setWakeTime}
-                                    className="bg-[#2E322D] text-white px-4 py-3 rounded-xl"
+                                    className="rounded-xl bg-[#2E322D] px-4 py-3 text-white"
                                     placeholder="07:00"
                                     placeholderTextColor="#666"
                                 />
@@ -170,22 +190,25 @@ export const DiaryScreen = () => {
                     </View>
 
                     {/* Notes Section */}
-                    <View className="mb-6 bg-bg-dark-500 p-4" style={{ overflow: 'hidden', borderRadius: 14 }}>
-                        <Text className="text-white text-lg font-semibold mb-1">Заметки</Text>
-                        <Text className="text-gray-400 text-sm mb-4">
-                        Можете ли напишите что добавить?
+                    <View
+                        className="mb-6 bg-bg-dark-500 p-4"
+                        style={{ overflow: 'hidden', borderRadius: 14 }}
+                    >
+                        <Text className="mb-1 text-lg font-semibold text-white">Заметки</Text>
+                        <Text className="mb-4 text-sm text-gray-400">
+							Можете ли напишите что добавить?
                         </Text>
                         <TextInput
                             value={notes}
                             onChangeText={setNotes}
-                            className="bg-[#2E322D] text-white px-4 py-3 rounded-xl min-h-[100px]"
+                            className="min-h-[100px] rounded-xl bg-[#2E322D] px-4 py-3 text-white"
                             placeholder="Сегодня я..."
                             placeholderTextColor="#666"
                             multiline
                             textAlignVertical="top"
                         />
-                        <Text className="text-gray-500 text-xs text-right mt-2">
-                        0 / 500 символов
+                        <Text className="mt-2 text-right text-xs text-gray-500">
+							0 / 500 символов
                         </Text>
                     </View>
                 </ScrollView>
@@ -195,7 +218,6 @@ export const DiaryScreen = () => {
 }
 
 const styles = StyleSheet.create({
-  
     contentContainer: {
         flex: 1,
         paddingHorizontal: 14,
