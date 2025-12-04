@@ -1,8 +1,8 @@
 /**
  * AudioPlayer - плеер для аудио-сообщений
- * Точное соответствие макету:
- * - User: тёмный фон, без аватара
- * - Assistant: белый круглый аватар слева, зелёный прогресс при воспроизведении
+ * Точное соответствие макету 8:
+ * - Assistant: тёмный фон, play кнопка, серый slider, время справа (без аватара!)
+ * - User: белый круглый аватар слева, зелёный play/pause при воспроизведении, зелёный slider
  */
 
 import React from 'react'
@@ -11,13 +11,13 @@ import type { Attachment } from '@/entities/chat'
 import { Icon } from '@/shared/ui'
 
 interface AudioPlayerProps {
-	attachment: Attachment
-	isActive: boolean
-	isPlaying: boolean
-	playbackPosition: number // 0-1
-	onPlay: () => void
-	onPause: () => void
-	isUserMessage: boolean
+    attachment: Attachment
+    isActive: boolean
+    isPlaying: boolean
+    playbackPosition: number // 0-1
+    onPlay: () => void
+    onPause: () => void
+    isUserMessage: boolean
 }
 
 /**
@@ -44,76 +44,86 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     const progressWidth = isActive ? playbackPosition * 100 : 0
 
     if (isUserMessage) {
-        // User audio - тёмный фон, минималистичный стиль
+        // User audio (макет 8, нижнее сообщение):
+        // - Белый круглый аватар слева
+        // - Зелёный play/pause при воспроизведении
+        // - Зелёный slider
         return (
             <View
-                className="mb-2 flex-row items-center self-end rounded-2xl bg-fill-700 p-4"
-                style={{ minWidth: 180 }}
+                className="mb-2 flex-row items-center self-end rounded-2xl bg-fill-800 p-3"
+                style={{ minWidth: 240 }}
             >
-                {/* Play/Pause button */}
+                {/* White avatar - круглый белый круг */}
+                <View className="mr-3 h-11 w-11 rounded-full bg-white" />
+
+                {/* Play/Pause button - зелёный при воспроизведении */}
                 <Pressable
                     onPress={isPlaying ? onPause : onPlay}
-                    className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-fill-500"
+                    className={`mr-3 h-9 w-9 items-center justify-center rounded-full ${
+                        isActive ? 'bg-brand-green-500' : 'bg-fill-500'
+                    }`}
                 >
-                    <Icon name={isPlaying ? 'pause-solid' : 'play'} size={18} color="#FFFFFF" />
+                    <Icon
+                        name={isPlaying ? 'pause-solid' : 'play'}
+                        size={16}
+                        color={isActive ? '#0A0A0A' : '#FFFFFF'}
+                    />
                 </Pressable>
 
-                {/* Progress bar */}
+                {/* Progress bar - зелёный */}
                 <View className="mr-3 flex-1">
                     <View className="h-1 overflow-hidden rounded-full bg-fill-500">
                         <View
-                            className="h-full rounded-full bg-light-text-200"
+                            className="h-full rounded-full bg-brand-green-500"
                             style={{ width: `${progressWidth}%` }}
                         />
                     </View>
                 </View>
 
                 {/* Duration */}
-                <Text className="min-w-[32px] text-right font-rimma text-t4 text-light-text-200">
-                    {formatDuration(duration)}
+                <Text
+                    className="min-w-[32px] text-right text-light-text-200"
+                    style={{ fontFamily: 'Inter', fontWeight: '400', fontSize: 13 }}
+                >
+                    {formatDuration(isActive ? currentTime : duration)}
                 </Text>
             </View>
         )
     }
 
-    // Assistant audio - с аватаром, зелёный прогресс при воспроизведении
+    // Assistant audio (макет 8, верхнее сообщение):
+    // - Тёмный фон, БЕЗ аватара
+    // - Простая белая кнопка play
+    // - Серый slider
     return (
         <View
-            className="mb-2 flex-row items-center self-start rounded-2xl bg-fill-800 p-3"
-            style={{ minWidth: 220 }}
+            className="mb-2 flex-row items-center self-start rounded-2xl bg-fill-700 p-4"
+            style={{ minWidth: 200 }}
         >
-            {/* Avatar */}
-            <View className="mr-3 h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-light-text-100">
-                {/* Placeholder - белый круг как в макете */}
-            </View>
-
-            {/* Play/Pause button */}
+            {/* Play/Pause button - тёмный фон */}
             <Pressable
                 onPress={isPlaying ? onPause : onPlay}
-                className={`mr-3 h-10 w-10 items-center justify-center rounded-full ${
-                    isPlaying ? 'bg-brand-green-500' : 'bg-fill-500'
-                }`}
+                className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-fill-500"
             >
-                <Icon
-                    name={isPlaying ? 'pause-solid' : 'play'}
-                    size={18}
-                    color={isPlaying ? '#0A0A0A' : '#FFFFFF'}
-                />
+                <Icon name={isPlaying ? 'pause-solid' : 'play'} size={18} color="#FFFFFF" />
             </Pressable>
 
-            {/* Progress bar + time */}
-            <View className="flex-1">
+            {/* Progress bar - серый */}
+            <View className="mr-3 flex-1">
                 <View className="h-1 overflow-hidden rounded-full bg-fill-500">
                     <View
-                        className={`h-full rounded-full ${isPlaying ? 'bg-brand-green-500' : 'bg-light-text-200'}`}
+                        className="h-full rounded-full bg-light-text-300"
                         style={{ width: `${progressWidth}%` }}
                     />
                 </View>
             </View>
 
-            {/* Time */}
-            <Text className="ml-3 min-w-[32px] text-right font-rimma text-t4 text-light-text-200">
-                {formatDuration(isActive ? currentTime : duration)}
+            {/* Duration */}
+            <Text
+                className="min-w-[32px] text-right text-light-text-200"
+                style={{ fontFamily: 'Inter', fontWeight: '400', fontSize: 13 }}
+            >
+                {formatDuration(duration)}
             </Text>
         </View>
     )

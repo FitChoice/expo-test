@@ -1,10 +1,18 @@
 /**
  * MessageInput - поле ввода сообщения
- * Точное соответствие макету: запись, вложения, текст
+ * Точное соответствие макету: запись с long press и swipe up для lock
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react'
-import { View, TextInput, Pressable, Text, Keyboard, Animated } from 'react-native'
+import React, { useState, useCallback, useMemo, useRef } from 'react'
+import {
+    View,
+    TextInput,
+    Pressable,
+    Text,
+    Keyboard,
+    Animated,
+    PanResponder,
+} from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Icon } from '@/shared/ui'
 import { AttachmentPicker } from './AttachmentPicker'
@@ -39,6 +47,9 @@ const formatRecordingDuration = (ms: number): string => {
     return `${minutes}:${seconds.toString().padStart(2, '0')},${centiseconds.toString().padStart(2, '0')}`
 }
 
+// Порог свайпа вверх для блокировки (px)
+const LOCK_SWIPE_THRESHOLD = 50
+
 export const MessageInput: React.FC<MessageInputProps> = ({
     onSend,
     isRecording,
@@ -55,17 +66,36 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const insets = useSafeAreaInsets()
     const [text, setText] = useState('')
     const [showAttachmentPicker, setShowAttachmentPicker] = useState(false)
+    const [isRecordingLocked, setIsRecordingLocked] = useState(false)
 
-    // Animation for recording state
-    const recordingScale = useMemo(() => new Animated.Value(1), [])
+    // Анимация для swipe up
+    const swipeY = useRef(new Animated.Value(0)).current
 
-    useEffect(() => {
-        Animated.spring(recordingScale, {
-            toValue: isRecording ? 1.15 : 1,
-            useNativeDriver: true,
-            friction: 8,
-        }).start()
-    }, [isRecording, recordingScale])
+    // PanResponder для swipe up (блокировка записи)
+    const panResponder = useMemo(
+        () =>
+            PanResponder.create({
+                onStartShouldSetPanResponder: () => isRecording && !isRecordingLocked,
+                onMoveShouldSetPanResponder: (_, gestureState) =>
+                    isRecording && !isRecordingLocked && gestureState.dy < -10,
+                onPanResponderMove: (_, gestureState) => {
+                    if (gestureState.dy < 0) {
+                        swipeY.setValue(gestureState.dy)
+                    }
+                },
+                onPanResponderRelease: (_, gestureState) => {
+                    if (gestureState.dy < -LOCK_SWIPE_THRESHOLD) {
+                        // Заблокировать запись
+                        setIsRecordingLocked(true)
+                    }
+                    Animated.spring(swipeY, {
+                        toValue: 0,
+                        useNativeDriver: true,
+                    }).start()
+                },
+            }),
+        [isRecording, isRecordingLocked, swipeY]
+    )
 
     const hasContent = text.trim().length > 0 || pendingAttachments.length > 0
     const canSend = hasContent && !isRecording && !disabled
@@ -78,13 +108,32 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         Keyboard.dismiss()
     }, [canSend, onSend, text])
 
-    const handleMicPress = useCallback(() => {
-        if (isRecording) {
-            onStopRecording()
-        } else {
+    // Long press для начала записи
+    const handleMicLongPress = useCallback(() => {
+        if (!isRecording && !disabled) {
+            setIsRecordingLocked(false)
             onStartRecording()
         }
-    }, [isRecording, onStartRecording, onStopRecording])
+    }, [isRecording, disabled, onStartRecording])
+
+    // Отпускание кнопки - остановка записи (если не заблокировано)
+    const handleMicPressOut = useCallback(() => {
+        if (isRecording && !isRecordingLocked) {
+            onStopRecording()
+        }
+    }, [isRecording, isRecordingLocked, onStopRecording])
+
+    // Отправка заблокированной записи
+    const handleSendRecording = useCallback(() => {
+        setIsRecordingLocked(false)
+        onStopRecording()
+    }, [onStopRecording])
+
+    // Отмена записи
+    const handleCancelRecording = useCallback(() => {
+        setIsRecordingLocked(false)
+        onCancelRecording()
+    }, [onCancelRecording])
 
     const toggleAttachmentPicker = useCallback(() => {
         setShowAttachmentPicker((prev) => !prev)
@@ -126,62 +175,152 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 />
             )}
 
-            {/* Input container - опущен на 3px */}
-            <View className="flex-row items-center px-3 pb-2 pt-3">
-                {isRecording ? (
-                    // Recording mode
-                    <View className="h-12 flex-1 flex-row items-center">
-                        {/* Recording indicator + time */}
-                        <View className="flex-row items-center">
-                            <View className="mr-2 h-2.5 w-2.5 rounded-full bg-feedback-negative-900" />
-                            <Text
-                                className="text-light-text-100"
-                                style={{ fontFamily: 'Inter', fontWeight: '400', fontSize: 15 }}
-                            >
-                                {formatRecordingDuration(recordingDuration)}
-                            </Text>
-                        </View>
-
-                        {/* Cancel text */}
-                        <Pressable
-                            onPress={onCancelRecording}
-                            className="flex-1 flex-row items-center justify-center"
+            {/* Lock/Pause indicator - показывается при записи, над input bar */}
+            {isRecording && (
+                <View className="absolute right-4" style={{ bottom: 80 + insets.bottom }}>
+                    {isRecordingLocked ? (
+                        // Pause indicator (заблокировано) - просто визуальный индикатор
+                        <View
+                            className="items-center justify-center rounded-2xl"
+                            style={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                width: 52,
+                                height: 52,
+                            }}
                         >
-                            <Text
-                                className="text-light-text-200"
-                                style={{ fontFamily: 'Inter', fontWeight: '400', fontSize: 15 }}
+                            <Icon name="pause-solid" size={24} color="#FFFFFF" />
+                        </View>
+                    ) : (
+                        // Lock indicator (можно свайпнуть вверх)
+                        <Animated.View
+                            style={{
+                                transform: [
+                                    {
+                                        translateY: swipeY.interpolate({
+                                            inputRange: [-100, 0],
+                                            outputRange: [-30, 0],
+                                            extrapolate: 'clamp',
+                                        }),
+                                    },
+                                ],
+                            }}
+                        >
+                            <View
+                                className="items-center rounded-2xl"
+                                style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    width: 52,
+                                    paddingVertical: 10,
+                                }}
                             >
-                                Отмена
-                            </Text>
-                        </Pressable>
-
-                        {/* Right side icons: lock + chevron + mic button */}
-                        <View className="flex-row items-center">
-                            <View className="mr-2 items-center">
-                                <Icon name="lock" size={18} color="#BEBEC0" />
+                                <Icon name="lock" size={22} color="#FFFFFF" />
                                 <Icon
                                     name="chevron-up"
-                                    size={14}
-                                    color="#BEBEC0"
-                                    style={{ marginTop: -4 }}
+                                    size={18}
+                                    color="#FFFFFF"
+                                    style={{ marginTop: 4 }}
                                 />
                             </View>
+                        </Animated.View>
+                    )}
+                </View>
+            )}
 
-                            {/* Stop recording button */}
-                            <Animated.View style={{ transform: [{ scale: recordingScale }] }}>
-                                <Pressable
-                                    onPress={handleMicPress}
-                                    className="h-12 w-12 items-center justify-center rounded-full bg-brand-green-500"
+            {/* Input container */}
+            <View className="flex-row items-center px-3 pb-2 pt-3">
+                {isRecording ? (
+                    isRecordingLocked ? (
+                        // Заблокированная запись (макет 7)
+                        <View className="h-14 flex-1 flex-row items-center">
+                            {/* Recording indicator + time */}
+                            <View className="flex-row items-center">
+                                <View className="mr-2 h-3 w-3 rounded-full bg-feedback-negative-900" />
+                                <Text
+                                    className="text-light-text-100"
+                                    style={{ fontFamily: 'Inter', fontWeight: '400', fontSize: 15 }}
                                 >
-                                    <Icon name="microphone" size={24} color="#0A0A0A" />
+                                    {formatRecordingDuration(recordingDuration)}
+                                </Text>
+                            </View>
+
+                            {/* Cancel text */}
+                            <Pressable
+                                onPress={handleCancelRecording}
+                                className="flex-1 flex-row items-center justify-center"
+                            >
+                                <Text
+                                    className="text-brand-green-500"
+                                    style={{ fontFamily: 'Inter', fontWeight: '500', fontSize: 15 }}
+                                >
+                                    Отмена
+                                </Text>
+                            </Pressable>
+
+                            {/* Send recording button - большая зелёная кнопка */}
+                            <Pressable
+                                onPress={handleSendRecording}
+                                className="items-center justify-center rounded-full bg-brand-green-500"
+                                style={{ width: 56, height: 56 }}
+                            >
+                                <Icon name="chevron-up" size={28} color="#0A0A0A" />
+                            </Pressable>
+                        </View>
+                    ) : (
+                        // Обычная запись (макет 6) - удержание кнопки
+                        <View className="h-14 flex-1 flex-row items-center" {...panResponder.panHandlers}>
+                            {/* Recording indicator + time */}
+                            <View className="flex-row items-center">
+                                <View className="mr-2 h-3 w-3 rounded-full bg-feedback-negative-900" />
+                                <Text
+                                    className="text-light-text-100"
+                                    style={{ fontFamily: 'Inter', fontWeight: '400', fontSize: 15 }}
+                                >
+                                    {formatRecordingDuration(recordingDuration)}
+                                </Text>
+                            </View>
+
+                            {/* "< Влево - отмена" */}
+                            <Pressable
+                                onPress={handleCancelRecording}
+                                className="flex-1 flex-row items-center justify-center"
+                            >
+                                <Icon name="chevron-left" size={16} color="#BEBEC0" />
+                                <Text
+                                    className="ml-1 text-light-text-200"
+                                    style={{ fontFamily: 'Inter', fontWeight: '400', fontSize: 15 }}
+                                >
+                                    Влево - отмена
+                                </Text>
+                            </Pressable>
+
+                            {/* Mic button - большая зелёная кнопка, отпускание = отправка */}
+                            <Animated.View
+                                style={{
+                                    transform: [
+                                        {
+                                            translateY: swipeY.interpolate({
+                                                inputRange: [-100, 0],
+                                                outputRange: [-20, 0],
+                                                extrapolate: 'clamp',
+                                            }),
+                                        },
+                                    ],
+                                }}
+                            >
+                                <Pressable
+                                    onPressOut={handleMicPressOut}
+                                    className="items-center justify-center rounded-full bg-brand-green-500"
+                                    style={{ width: 56, height: 56 }}
+                                >
+                                    <Icon name="microphone" size={28} color="#0A0A0A" />
                                 </Pressable>
                             </Animated.View>
                         </View>
-                    </View>
+                    )
                 ) : (
                     // Normal mode
                     <>
-                        {/* Attachment button - скруглённый квадрат, как поле ввода */}
+                        {/* Attachment button */}
                         <Pressable
                             onPress={toggleAttachmentPicker}
                             className="h-12 w-12 items-center justify-center rounded-2xl"
@@ -210,7 +349,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             />
                         </View>
 
-                        {/* Send or Mic button - скруглённый квадрат */}
+                        {/* Send or Mic button */}
                         {canSend ? (
                             <Pressable
                                 onPress={handleSend}
@@ -220,7 +359,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             </Pressable>
                         ) : (
                             <Pressable
-                                onPress={handleMicPress}
+                                onLongPress={handleMicLongPress}
+                                delayLongPress={150}
                                 className="h-12 w-12 items-center justify-center rounded-2xl"
                                 style={{ backgroundColor: '#2B2B2B' }}
                                 disabled={disabled}

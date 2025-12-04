@@ -1,6 +1,6 @@
 # Fitchoice Mobile App
 
-Мобильное приложение для фитнес-тренировок с анализом позы на базе **Expo + React Native**.
+Мобильное приложение для фитнес-тренировок с анализом позы и ИИ-ассистентом на базе **Expo + React Native**.
 
 ## 📦 Быстрый старт
 
@@ -30,9 +30,9 @@ make check      # Полная проверка (prettier + eslint + typescript)
 src/
 ├── app/              # Инициализация, провайдеры, роутинг
 ├── pages/            # Страницы (композиция features + entities)
-├── widgets/          # Составные блоки (header, footer, pose-camera)
-├── features/         # Бизнес-фичи (auth, survey-flow, user)
-├── entities/         # Бизнес-сущности (survey, pose)
+├── widgets/          # Составные блоки (header, chat, pose-camera)
+├── features/         # Бизнес-фичи (auth, survey-flow, chat, training)
+├── entities/         # Бизнес-сущности (survey, pose, chat, training)
 └── shared/           # Переиспользуемый код (ui, api, lib, config)
 ```
 
@@ -40,7 +40,8 @@ src/
 
 - `entities` → только `shared`
 - `features` → `entities` + `shared`
-- `pages` → `features` + `entities` + `shared`
+- `widgets` → `entities` + `shared` (чистые UI хуки)
+- `pages` → `features` + `widgets` + `entities` + `shared`
 - `app` → все слои
 
 ---
@@ -51,7 +52,7 @@ src/
 
 - **`_layout.tsx`** — корневой layout (Expo Router + ErrorBoundary)
 - **`_providers/`** — глобальные провайдеры (SafeArea, TanStack Query, FontLoader)
-- **Роуты**: landing, auth, register, verification, survey, home
+- **Роуты**: landing, auth, register, verification, survey, home, chat, training
 
 ### Pages
 
@@ -59,64 +60,100 @@ src/
 - `auth/`, `register/`, `verification/` — Аутентификация
 - `survey/` — Многошаговый опрос (14 шагов)
 - `home/` — Главный экран
+- `chat/` — ИИ-ассистент чат
 - `pose/` — Анализ позы (MediaPipe)
+- `training/` — Тренировки
 
 ### Features
 
 **`auth/`**
-
 - API: `sendCode`, `registration`, `login`, `refresh`
 
 **`survey-flow/`**
-
 - Zustand store для управления опросом
 - UI state: `currentStep`, `totalSteps` (14 шагов)
 - Данные: `surveyData` (имя, пол, возраст, цели, рост/вес, ИМТ)
-- Методы: `updateName`, `updateGender`, `calculateBMI`, `nextStep`, `submitSurvey`
+
+**`chat/`**
+- `chatApi` — API для истории, отправки сообщений, загрузки файлов, SSE стриминга
+- `useChatHistory` — TanStack Query infinite scroll для истории
+- `useSendMessage` — мутация отправки с optimistic updates
+- `useStreamResponse` — стриминг AI ответов через SSE
+- `useChatStore` — Zustand для pending attachments
+- `useAttachmentUpload` — загрузка файлов с прогрессом
+
+**`training/`**
+- API: `getTrainingPlan`, `getTrainingProgram`
+- Store: управление тренировочной сессией
 
 **`user/`**
+- API: `updateUser`, `buildTrainingPlan`
 
-- API: `updateUser`, `buildTrainingPlan`, `getTrainingProgram`
+### Widgets
+
+**`chat/`**
+- `ChatHeader` — шапка с градиентом, blur, BackButton
+- `MessageList` — FlashList с infinite scroll
+- `MessageBubble` — пузыри сообщений (user/assistant)
+- `MessageInput` — ввод текста, запись аудио, вложения
+- `AudioPlayer` — воспроизведение голосовых
+- `AttachmentPicker` — popup выбора файлов
+- `TypingIndicator` — анимация печати AI
+- `useAudioRecorder` — запись аудио (expo-av)
+- `useAudioPlayer` — воспроизведение аудио
+- `useFilePicker` — выбор изображений/документов
+
+**`training-session/`**
+- Управление тренировкой, анализ ошибок
+
+**`navigation-bar/`**
+- Нижняя навигация
 
 ### Entities
 
-**`survey/`**
+**`chat/`**
+- `types.ts` — `Message`, `Attachment`, `MessageRole`, `AttachmentType`
+- `mappers.ts` — маппинг DTO ↔ Domain entities
+- `WELCOME_MESSAGE` — приветственное сообщение
 
-- `types.ts` — типы (`Gender`, `Goal`, `Direction`, `SurveyData`, `BMICategory`)
+**`survey/`**
+- `types.ts` — `Gender`, `Goal`, `Direction`, `SurveyData`, `BMICategory`
 - `calculator.ts` — `calculateBMI`, `getBMICategory`
-- `validator.ts` — `validateSurveyData`
-- `constants.ts` — опции для селектов (пол, возраст, цели, направления)
+- `constants.ts` — опции для селектов
 
 **`pose/`**
-
 - `analyzer.ts` — анализ позы (валидация landmarks, расчет углов)
-- `types.ts` — типы для pose data
+
+**`training/`**
+- Типы и модели тренировок
 
 ### Shared
 
 **`api/`**
-
 - `ApiClient` — централизованный HTTP клиент
+- Методы: `get`, `post`, `put`, `delete`, `upload`
 - Автоматическая авторизация (Bearer token из `expo-secure-store`)
 - Обработка 401 → logout + редирект на `/auth`
+- `types.ts` — API DTO типы
 
 **`ui/`** — UI Kit компоненты:
-
 - `Button` — варианты (primary, secondary, ghost), размеры (xs, s, l)
-- `GlowButton` — кнопка с анимированной подсветкой (для RadioSelect/CheckboxSelect)
+- `GlowButton` — кнопка с анимированной подсветкой
 - `Input` — варианты (text, password, dropdown, textarea)
 - `RadioSelect`, `CheckboxSelect` — выбор опций
 - `BackButton` — кнопка "назад" с safe area support
-- `Icon` — 65 SVG иконок
+- `Icon` — 70+ SVG иконок (включая chat иконки)
+- `GradientBG/` — градиентные фоны (GradientHeader, GradientBg)
+- `BackgroundLayout` — layout с фоновым градиентом
 - `AuthGuard`, `ErrorBoundary`, `QueryBoundary`
 
 **`lib/`**
-
 - `useFonts` — загрузка кастомных шрифтов
 - `useOrientation` — блокировка ориентации экрана
+- `formatters.ts` — `formatDuration`, `formatFileSize`
+- `utils.ts` — `generateId`
 
 **`config/`**
-
 - `env` — переменные окружения (`API_URL`, `isDevelopment`)
 
 ---
@@ -135,14 +172,11 @@ src/
 **Кастомные шрифты:**
 
 - `font-rimma`, `font-rimma-bold`
+- `Inter` — для основного текста
 
 **Safe area:**
 
 - `pt-safe-top`, `pb-safe-bottom`, `pl-safe-left`, `pr-safe-right`
-
-**Breakpoints:**
-
-- xs: 320px, sm: 375px, md: 414px, lg: 768px, xl: 1024px
 
 ---
 
@@ -159,7 +193,10 @@ src/
 | **Client State**    | Zustand 5                         |
 | **Анимации**        | React Native Reanimated 4         |
 | **Computer Vision** | MediaPipe (pose detection)        |
+| **Audio**           | expo-av (recording/playback)      |
+| **Media**           | expo-image-picker, expo-document-picker |
 | **Secure Storage**  | expo-secure-store (tokens)        |
+| **Lists**           | @shopify/flash-list               |
 
 ---
 
@@ -198,7 +235,8 @@ Strict mode включен (`tsconfig.json`):
 ```bash
 # Проверки кода
 pnpm run type-check     # TypeScript
-pnpm run lint           # ESLint (max-warnings: 10)
+pnpm run lint           # ESLint
+pnpm run lint:fix       # ESLint с автофиксом
 pnpm run format         # Prettier
 pnpm run check          # Полная проверка
 
@@ -213,17 +251,20 @@ pnpm web                # Web
 
 ```bash
 make check      # Полная проверка кода
+make lint-fix   # Автофикс линтинга
 make start      # Запуск dev сервера
 make android    # Android
 make ios        # iOS
+make install    # Установка всех зависимостей (pnpm + pods)
+make rebuild    # Полная пересборка
 ```
 
 ### Качество кода
 
-- ✅ TypeScript strict mode (0 errors)
-- ✅ ESLint max-warnings: 0
+- ✅ TypeScript strict mode
+- ✅ ESLint
 - ✅ Prettier для единого стиля
-- ✅ 100% FSD compliance
+- ✅ FSD architecture
 
 ---
 
@@ -244,98 +285,6 @@ pnpm exec eas-cli build --platform android
 
 ---
 
-## 📖 Примеры использования
-
-### Работа с API
-
-```typescript
-import { authApi } from '@/features/auth'
-import { userApi } from '@/features/user'
-
-// Аутентификация
-const result = await authApi.sendCode(email)
-if (result.success) {
-	console.log(result.data) // TokenResponse
-} else {
-	console.error(result.error)
-}
-
-// Работа с пользователем
-const program = await userApi.getTrainingProgram(userId)
-```
-
-### Работа с state (Zustand)
-
-```typescript
-import { useSurveyFlow } from '@/features/survey-flow'
-
-const {
-	surveyData,
-	currentStep,
-	updateName,
-	updateGender,
-	calculateBMI,
-	nextStep,
-	submitSurvey,
-} = useSurveyFlow()
-
-updateName('Иван')
-updateGender('male')
-calculateBMI()
-nextStep()
-```
-
-### Работа с типами
-
-```typescript
-import type { Gender, Goal, SurveyData } from '@/entities/survey'
-import { calculateBMI, GENDER_OPTIONS, GOAL_OPTIONS } from '@/entities/survey'
-
-const gender: Gender = 'male'
-const goals: Goal[] = ['strength', 'flexibility']
-const bmi = calculateBMI(180, 75) // 23.15
-```
-
-### UI компоненты
-
-```tsx
-import { Button, Input, RadioSelect, Icon } from '@/shared/ui'
-
-// Кнопка
-<Button variant="primary" size="l" iconLeft={<Icon name="check" />}>
-  Сохранить
-</Button>
-
-// Input
-<Input
-  variant="text"
-  label="Email"
-  value={email}
-  onChangeText={setEmail}
-  error={emailError}
-/>
-
-// RadioSelect
-<RadioSelect
-  options={GENDER_OPTIONS}
-  value={gender}
-  onChange={(value) => setGender(value as Gender)}
-/>
-```
-
-### Стилизация с NativeWind
-
-```tsx
-<View className="flex-1 bg-fill-100 pt-safe-top">
-	<Text className="font-rimma text-xl text-light-text-900">Fitchoice</Text>
-	<Button className="mt-4" variant="primary">
-		Начать
-	</Button>
-</View>
-```
-
----
-
 ## 📱 Платформы
 
 - ✅ **iOS**: `com.yzned.Fitchoice`
@@ -344,34 +293,8 @@ import { Button, Input, RadioSelect, Icon } from '@/shared/ui'
 
 ### Permissions
 
-**iOS**: Camera (pose detection)  
-**Android**: CAMERA, READ/WRITE_EXTERNAL_STORAGE, RECORD_AUDIO
-
----
-
-## 📝 TODO
-
-### Высокий приоритет
-
-- **AuthGuard**: Реализовать проверку токена и редирект на `/auth`
-  - Файл: `src/shared/ui/AuthGuard/AuthGuard.tsx`
-  - Сейчас: просто возвращает `children`
-
-- **Survey Submission**: Отправка данных опроса на сервер
-  - Файл: `src/features/survey-flow/model/useSurveyFlow.ts`
-  - Сейчас: только `console.warn`
-
-### Средний приоритет
-
-- **ErrorBoundary**: Интегрировать Sentry для отслеживания ошибок
-- **Testing**: Добавить unit/integration/e2e тесты
-
----
-
-## 📄 Документация
-
-- `swagger.yaml` — OpenAPI спецификация backend API
-- `refactor.md` — история архитектурных изменений
+**iOS**: Camera, Microphone, Photo Library  
+**Android**: CAMERA, READ/WRITE_EXTERNAL_STORAGE, RECORD_AUDIO, MODIFY_AUDIO_SETTINGS
 
 ---
 

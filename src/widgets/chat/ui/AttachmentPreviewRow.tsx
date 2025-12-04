@@ -1,6 +1,9 @@
 /**
  * AttachmentPreviewRow - превью вложений перед отправкой
- * Точное соответствие макету: маленькие квадратные превью
+ * Точное соответствие макету 10:
+ * - Квадратные превью изображений ~56x56
+ * - X кнопка в правом верхнем углу (маленький серый круг)
+ * - "Ошибка" красным текстом на тёмном overlay
  */
 
 import React from 'react'
@@ -9,8 +12,8 @@ import type { Attachment } from '@/entities/chat'
 import { Icon } from '@/shared/ui'
 
 interface AttachmentPreviewRowProps {
-	attachments: Attachment[]
-	onRemove: (id: string) => void
+    attachments: Attachment[]
+    onRemove: (id: string) => void
 }
 
 export const AttachmentPreviewRow: React.FC<AttachmentPreviewRowProps> = ({
@@ -20,7 +23,7 @@ export const AttachmentPreviewRow: React.FC<AttachmentPreviewRowProps> = ({
     if (attachments.length === 0) return null
 
     return (
-        <View className="px-4 pb-2">
+        <View className="px-3 pb-2">
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -39,8 +42,8 @@ export const AttachmentPreviewRow: React.FC<AttachmentPreviewRowProps> = ({
 }
 
 interface AttachmentPreviewItemProps {
-	attachment: Attachment
-	onRemove: () => void
+    attachment: Attachment
+    onRemove: () => void
 }
 
 const AttachmentPreviewItem: React.FC<AttachmentPreviewItemProps> = ({
@@ -52,12 +55,13 @@ const AttachmentPreviewItem: React.FC<AttachmentPreviewItemProps> = ({
     const isError = attachment.uploadStatus === 'error'
 
     if (isImage) {
-        // Image preview - маленький квадрат 56x56 как в макете
+        // Image preview - квадрат 56x56 как в макете 10
         return (
             <View className="relative">
                 <Image
                     source={{ uri: attachment.localUri }}
-                    className="h-14 w-14 rounded-xl"
+                    className="rounded-xl"
+                    style={{ width: 56, height: 56 }}
                     resizeMode="cover"
                 />
 
@@ -68,73 +72,87 @@ const AttachmentPreviewItem: React.FC<AttachmentPreviewItemProps> = ({
                     </View>
                 )}
 
-                {/* Error overlay */}
+                {/* Error overlay - как в макете 10 "Ошибка" */}
                 {isError && (
-                    <View className="absolute inset-0 items-center justify-center rounded-xl bg-black/60">
-                        <Text className="font-rimma text-[10px] text-feedback-negative-900">
-							Ошибка
+                    <View className="absolute inset-0 items-center justify-center rounded-xl bg-black/70">
+                        <Text
+                            className="text-feedback-negative-900"
+                            style={{ fontFamily: 'Inter', fontWeight: '400', fontSize: 10 }}
+                        >
+                            Ошибка
                         </Text>
                     </View>
                 )}
 
-                {/* Remove button - маленький X в углу */}
+                {/* Remove button - маленький X в углу (как в макете) */}
                 <Pressable
                     onPress={onRemove}
-                    className="absolute -right-1 -top-1 h-5 w-5 items-center justify-center rounded-full bg-fill-700"
+                    className="absolute -right-1 -top-1 h-5 w-5 items-center justify-center rounded-full bg-fill-600"
                     hitSlop={8}
                 >
-                    <Icon name="close" size={12} color="#FFFFFF" />
+                    <Icon name="close" size={10} color="#FFFFFF" />
                 </Pressable>
             </View>
         )
     }
 
-    // File preview - компактная карточка как в макете
+    // File preview - компактная карточка как в макете 12
     return (
         <View
-            className="flex-row items-center rounded-xl bg-fill-800 px-3 py-2"
-            style={{ minWidth: 160, maxWidth: 200 }}
+            className="flex-row items-center rounded-xl bg-fill-800"
+            style={{ minWidth: 180, maxWidth: 220, paddingHorizontal: 12, paddingVertical: 10 }}
         >
             {/* File icon */}
             <View
-                className={`mr-2 h-8 w-8 items-center justify-center rounded-lg ${
-                    isError ? 'bg-feedback-negative-900' : 'bg-brand-purple-500'
-                }`}
+                className="mr-2 h-8 w-8 items-center justify-center rounded-lg"
+                style={{ backgroundColor: isError ? '#FF453A' : '#8E8E93' }}
             >
                 <Icon name="file" size={16} color="#FFFFFF" />
             </View>
 
             {/* File info */}
             <View className="mr-2 flex-1">
-                <Text className="font-rimma text-t4 text-light-text-100" numberOfLines={1}>
+                <Text
+                    className="text-light-text-100"
+                    numberOfLines={1}
+                    style={{ fontFamily: 'Inter', fontWeight: '400', fontSize: 13 }}
+                >
                     {attachment.name}
                 </Text>
 
-                {/* Status */}
+                {/* Status - как в макете 12 "Загружается" с progress */}
                 {isUploading && (
-                    <View className="mt-0.5 flex-row items-center">
+                    <View className="mt-1 flex-row items-center">
+                        <Text
+                            className="mr-2 text-light-text-200"
+                            style={{ fontFamily: 'Inter', fontWeight: '400', fontSize: 11 }}
+                        >
+                            Загружается
+                        </Text>
                         <View className="h-0.5 flex-1 overflow-hidden rounded-full bg-fill-500">
                             <View
                                 className="h-full rounded-full bg-brand-green-500"
                                 style={{ width: `${attachment.uploadProgress}%` }}
                             />
                         </View>
-                        <Text className="ml-2 font-rimma text-[10px] text-light-text-200">
-							Загружается
-                        </Text>
                     </View>
                 )}
 
                 {attachment.uploadStatus === 'completed' && (
-                    <View className="mt-0.5 flex-row items-center">
-                        <Text className="font-rimma text-[10px] text-brand-green-500">Загружено</Text>
-                        <Icon name="check" size={10} color="#8BC34A" style={{ marginLeft: 2 }} />
-                    </View>
+                    <Text
+                        className="mt-0.5 text-brand-green-500"
+                        style={{ fontFamily: 'Inter', fontWeight: '400', fontSize: 11 }}
+                    >
+                        Загружено
+                    </Text>
                 )}
 
                 {isError && (
-                    <Text className="mt-0.5 font-rimma text-[10px] text-feedback-negative-900">
-						Ошибка
+                    <Text
+                        className="mt-0.5 text-feedback-negative-900"
+                        style={{ fontFamily: 'Inter', fontWeight: '400', fontSize: 11 }}
+                    >
+                        Ошибка
                     </Text>
                 )}
             </View>
