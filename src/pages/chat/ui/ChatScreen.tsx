@@ -1,6 +1,7 @@
 /**
  * ChatScreen - основной экран чата с ИИ-ассистентом
  * Composition Root: связывает чистые UI хуки с бизнес-логикой
+ * Поддерживает Mock режим для тестирования без бэкенда
  */
 
 import React, { useCallback, useMemo } from 'react'
@@ -15,34 +16,56 @@ import {
 } from '@/widgets/chat'
 import {
     useChatHistory,
-    useSendMessage,
     useStreamResponse,
     useChatStore,
     useAttachmentUpload,
+    useMockStreamResponse,
+    useMockUploadFile,
 } from '@/features/chat'
 import { WELCOME_MESSAGE, getAttachmentTypeFromMime, type Message } from '@/entities/chat'
 
 export const ChatScreen: React.FC = () => {
-    // Server state
+    // Get mock mode state
+    const {
+        isMockMode,
+        mockMessages,
+        pendingAttachments,
+        removePendingAttachment,
+        clearPendingAttachments,
+        addPendingAttachment,
+        updateAttachmentProgress,
+        markAttachmentUploaded,
+    } = useChatStore()
+
+    // === Real Mode Hooks ===
     const {
         data: chatData,
-        isLoading,
+        isLoading: isLoadingReal,
         isFetchingNextPage,
         hasNextPage,
         fetchNextPage,
     } = useChatHistory()
 
-    const sendMessage = useSendMessage()
-    const { streamingContent, isStreaming, startStream } = useStreamResponse()
+    const {
+        streamingContent: realStreamingContent,
+        isStreaming: isRealStreaming,
+        startStream: startRealStream,
+    } = useStreamResponse()
 
-    // Client state (только pendingAttachments)
-    const { pendingAttachments, removePendingAttachment, clearPendingAttachments } =
-		useChatStore()
+    // Real upload hook
+    const { uploadAttachment: uploadRealAttachment, isUploading: isRealUploading } =
+        useAttachmentUpload()
 
-    // Upload hook из features (бизнес-логика)
-    const { uploadAttachment, isUploading } = useAttachmentUpload()
+    // === Mock Mode Hooks ===
+    const {
+        streamingContent: mockStreamingContent,
+        isStreaming: isMockStreaming,
+        startStream: startMockStream,
+    } = useMockStreamResponse()
 
-    // UI Media hooks (чистые, без бизнес-логики)
+    const { uploadFile: mockUploadFile } = useMockUploadFile()
+
+    // === UI Media Hooks (используются в обоих режимах) ===
     const {
         isRecording,
         recordingDuration,
@@ -61,16 +84,63 @@ export const ChatScreen: React.FC = () => {
 
     const { pickImages, pickDocuments } = useFilePicker()
 
-    // Combine server messages with welcome message
+    // === Computed values based on mode ===
+    const isLoading = isMockMode ? false : isLoadingReal
+    const isStreaming = isMockMode ? isMockStreaming : isRealStreaming
+    const streamingContent = isMockMode ? mockStreamingContent : realStreamingContent
+    const isUploading = isMockMode ? false : isRealUploading
+
+    // Messages: mock или real
     const messages = useMemo<Message[]>(() => {
+        if (isMockMode) {
+            return mockMessages
+        }
         const serverMessages = chatData?.messages ?? []
         if (serverMessages.length === 0) {
             return [WELCOME_MESSAGE]
         }
         return serverMessages
-    }, [chatData?.messages])
+    }, [isMockMode, mockMessages, chatData?.messages])
 
-    // === Handlers - связывают UI с бизнес-логикой ===
+    // === Upload handler (разный для mock и real) ===
+    const uploadAttachment = useCallback(
+        (params: {
+            type: 'image' | 'audio' | 'video' | 'file'
+            localUri: string
+            name: string
+            mimeType: string
+            size?: number
+            duration?: number
+            width?: number
+            height?: number
+        }) => {
+            if (isMockMode) {
+                // В mock режиме: добавляем вложение и эмулируем загрузку
+                const attachmentId = `att_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+                addPendingAttachment({
+                    id: attachmentId,
+                    type: params.type,
+                    localUri: params.localUri,
+                    name: params.name,
+                    mimeType: params.mimeType,
+                    size: params.size ?? 0,
+                    duration: params.duration,
+                    width: params.width,
+                    height: params.height,
+                    uploadProgress: 0,
+                    uploadStatus: 'uploading',
+                })
+                // Эмулируем прогресс загрузки
+                mockUploadFile(attachmentId, params.localUri)
+            } else {
+                // Real mode: используем настоящую загрузку
+                uploadRealAttachment(params)
+            }
+        },
+        [isMockMode, addPendingAttachment, mockUploadFile, uploadRealAttachment]
+    )
+
+    // === Handlers ===
 
     const handleSend = useCallback(
         async (text: string) => {
@@ -79,28 +149,49 @@ export const ChatScreen: React.FC = () => {
             const attachments = [...pendingAttachments]
             clearPendingAttachments()
 
-            await startStream(text, attachments)
+            if (isMockMode) {
+                await startMockStream(text, attachments)
+            } else {
+                await startRealStream(text, attachments)
+            }
         },
-        [clearPendingAttachments, pendingAttachments, startStream]
+        [
+            clearPendingAttachments,
+            isMockMode,
+            pendingAttachments,
+            startMockStream,
+            startRealStream,
+        ]
     )
 
     const handleStopRecording = useCallback(async () => {
         const result = await stopRecording()
         if (result) {
-            // Связываем результат записи с загрузкой
-            uploadAttachment({
-                type: 'audio',
+            // Голосовое сообщение отправляется сразу (стандартный UX)
+            const voiceAttachment = {
+                id: `att_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+                type: 'audio' as const,
                 localUri: result.uri,
+                remoteUrl: result.uri, // В mock режиме используем localUri
                 name: `voice_${Date.now()}.m4a`,
                 mimeType: 'audio/m4a',
+                size: 0,
                 duration: result.durationMs,
-            })
+                uploadProgress: 100,
+                uploadStatus: 'completed' as const,
+            }
+
+            // Сразу отправляем
+            if (isMockMode) {
+                await startMockStream('', [voiceAttachment])
+            } else {
+                await startRealStream('', [voiceAttachment])
+            }
         }
-    }, [stopRecording, uploadAttachment])
+    }, [stopRecording, isMockMode, startMockStream, startRealStream])
 
     const handlePickImage = useCallback(async () => {
         const files = await pickImages()
-        // Связываем выбранные файлы с загрузкой
         for (const file of files) {
             uploadAttachment({
                 type: getAttachmentTypeFromMime(file.mimeType),
@@ -128,10 +219,10 @@ export const ChatScreen: React.FC = () => {
     }, [pickDocuments, uploadAttachment])
 
     const handleLoadMore = useCallback(() => {
-        if (hasNextPage) {
+        if (!isMockMode && hasNextPage) {
             fetchNextPage()
         }
-    }, [fetchNextPage, hasNextPage])
+    }, [fetchNextPage, hasNextPage, isMockMode])
 
     const handlePlayAudio = useCallback(
         (id: string, uri: string) => {
@@ -157,7 +248,7 @@ export const ChatScreen: React.FC = () => {
                     messages={messages}
                     isLoading={isLoading}
                     isLoadingMore={isFetchingNextPage}
-                    hasMore={hasNextPage ?? false}
+                    hasMore={isMockMode ? false : (hasNextPage ?? false)}
                     onLoadMore={handleLoadMore}
                     isTyping={isStreaming && !streamingContent}
                     streamingContent={streamingContent}
@@ -179,7 +270,7 @@ export const ChatScreen: React.FC = () => {
                     onRemoveAttachment={removePendingAttachment}
                     onPickImage={handlePickImage}
                     onPickDocument={handlePickDocument}
-                    disabled={sendMessage.isPending || isStreaming || isUploading}
+                    disabled={isStreaming || isUploading}
                 />
             </KeyboardAvoidingView>
         </View>

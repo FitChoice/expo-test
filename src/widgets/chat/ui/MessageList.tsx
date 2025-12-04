@@ -1,8 +1,9 @@
 /**
  * MessageList - список сообщений с использованием FlashList
+ * Стандартный порядок: старые сверху, новые снизу
  */
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useRef, useEffect } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { FlashList } from '@shopify/flash-list'
 import type { Message } from '@/entities/chat'
@@ -10,19 +11,19 @@ import { MessageBubble } from './MessageBubble'
 import { TypingIndicator } from './TypingIndicator'
 
 interface MessageListProps {
-	messages: Message[]
-	isLoading: boolean
-	isLoadingMore: boolean
-	hasMore: boolean
-	onLoadMore: () => void
-	isTyping: boolean
-	streamingContent?: string
-	// Audio player state
-	currentPlayingId?: string | null
-	isPlaying?: boolean
-	playbackPosition?: number
-	onPlayAudio?: (id: string, uri: string) => void
-	onPauseAudio?: () => void
+    messages: Message[]
+    isLoading: boolean
+    isLoadingMore: boolean
+    hasMore: boolean
+    onLoadMore: () => void
+    isTyping: boolean
+    streamingContent?: string
+    // Audio player state
+    currentPlayingId?: string | null
+    isPlaying?: boolean
+    playbackPosition?: number
+    onPlayAudio?: (id: string, uri: string) => void
+    onPauseAudio?: () => void
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -39,9 +40,17 @@ export const MessageList: React.FC<MessageListProps> = ({
     onPlayAudio,
     onPauseAudio,
 }) => {
-    // FlashList inverted: новые сообщения внизу
-    // Так что данные нужно реверснуть
-    const reversedMessages = [...messages].reverse()
+    const listRef = useRef<FlashList<Message>>(null)
+
+    // Автоскролл к новым сообщениям
+    useEffect(() => {
+        if (messages.length > 0 && listRef.current) {
+            // Небольшая задержка для рендера
+            setTimeout(() => {
+                listRef.current?.scrollToEnd({ animated: true })
+            }, 100)
+        }
+    }, [messages.length])
 
     const renderItem = useCallback(
         ({ item }: { item: Message }) => (
@@ -59,14 +68,15 @@ export const MessageList: React.FC<MessageListProps> = ({
 
     const keyExtractor = useCallback((item: Message) => item.id, [])
 
-    const handleEndReached = useCallback(() => {
+    const handleStartReached = useCallback(() => {
+        // Загрузка старых сообщений при скролле вверх
         if (hasMore && !isLoadingMore) {
             onLoadMore()
         }
     }, [hasMore, isLoadingMore, onLoadMore])
 
-    const renderFooter = useCallback(() => {
-        // В inverted списке footer - это верх (старые сообщения)
+    const renderHeader = useCallback(() => {
+        // Header сверху - загрузка старых сообщений
         if (isLoadingMore) {
             return (
                 <View className="items-center py-4">
@@ -77,11 +87,11 @@ export const MessageList: React.FC<MessageListProps> = ({
         return null
     }, [isLoadingMore])
 
-    const renderHeader = useCallback(() => {
-        // В inverted списке header - это низ (новые сообщения + typing)
+    const renderFooter = useCallback(() => {
+        // Footer снизу - typing indicator
         if (isTyping || streamingContent) {
             return (
-                <View className="mb-4">
+                <View className="mt-4">
                     <TypingIndicator content={streamingContent} />
                 </View>
             )
@@ -99,18 +109,16 @@ export const MessageList: React.FC<MessageListProps> = ({
 
     return (
         <FlashList<Message>
-            data={reversedMessages}
+            ref={listRef}
+            data={messages}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
             contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16 }}
-            onEndReached={handleEndReached}
-            onEndReachedThreshold={0.3}
-            ListFooterComponent={renderFooter}
+            onStartReached={handleStartReached}
+            onStartReachedThreshold={0.3}
             ListHeaderComponent={renderHeader}
+            ListFooterComponent={renderFooter}
             showsVerticalScrollIndicator={false}
-            maintainVisibleContentPosition={{
-                startRenderingFromBottom: true,
-            }}
         />
     )
 }

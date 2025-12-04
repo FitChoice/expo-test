@@ -8,16 +8,16 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { Audio } from 'expo-av'
 
 export interface RecordingResult {
-	uri: string
-	durationMs: number
+    uri: string
+    durationMs: number
 }
 
 interface UseAudioRecorderReturn {
-	isRecording: boolean
-	recordingDuration: number
-	startRecording: () => Promise<void>
-	stopRecording: () => Promise<RecordingResult | null>
-	cancelRecording: () => Promise<void>
+    isRecording: boolean
+    recordingDuration: number
+    startRecording: () => Promise<void>
+    stopRecording: () => Promise<RecordingResult | null>
+    cancelRecording: () => Promise<void>
 }
 
 export const useAudioRecorder = (): UseAudioRecorderReturn => {
@@ -26,6 +26,8 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
 
     const recordingRef = useRef<Audio.Recording | null>(null)
     const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+    // Сохраняем последнюю известную длительность
+    const lastDurationRef = useRef<number>(0)
 
     // Cleanup on unmount
     useEffect(() => {
@@ -44,7 +46,8 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
             // Request permissions
             const { status } = await Audio.requestPermissionsAsync()
             if (status !== 'granted') {
-                throw new Error('Нет разрешения на запись')
+                console.error('Нет разрешения на запись')
+                return
             }
 
             // Configure audio mode
@@ -60,16 +63,18 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
             await recording.startAsync()
 
             recordingRef.current = recording
+            lastDurationRef.current = 0
             setIsRecording(true)
             setRecordingDuration(0)
 
             // Update duration every 100ms
             durationIntervalRef.current = setInterval(() => {
-                recording.getStatusAsync().then((status) => {
-                    if (status.isRecording) {
-                        setRecordingDuration(status.durationMillis)
+                recording.getStatusAsync().then((recordingStatus) => {
+                    if (recordingStatus.isRecording && recordingStatus.durationMillis) {
+                        lastDurationRef.current = recordingStatus.durationMillis
+                        setRecordingDuration(recordingStatus.durationMillis)
                     }
-                })
+                }).catch(() => {})
             }, 100)
         } catch (error) {
             console.error('Failed to start recording:', error)
@@ -78,7 +83,10 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
     }, [])
 
     const stopRecording = useCallback(async (): Promise<RecordingResult | null> => {
-        if (!recordingRef.current) return null
+        if (!recordingRef.current) {
+            console.log('No recording to stop')
+            return null
+        }
 
         // Stop duration updates
         if (durationIntervalRef.current) {
@@ -86,27 +94,35 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
             durationIntervalRef.current = null
         }
 
+        // Сохраняем duration до остановки
+        const finalDuration = lastDurationRef.current
+
         try {
-            await recordingRef.current.stopAndUnloadAsync()
-            const uri = recordingRef.current.getURI()
-            const status = await recordingRef.current.getStatusAsync()
+            const recording = recordingRef.current
+            recordingRef.current = null
+
+            await recording.stopAndUnloadAsync()
+            const uri = recording.getURI()
 
             // Reset audio mode
             await Audio.setAudioModeAsync({
                 allowsRecordingIOS: false,
             })
 
-            recordingRef.current = null
             setIsRecording(false)
             setRecordingDuration(0)
 
-            // Return result only if recording is long enough
-            if (uri && status.durationMillis && status.durationMillis > 500) {
+            console.log('Recording stopped, uri:', uri, 'duration:', finalDuration)
+
+            // Return result only if recording is long enough (> 300ms)
+            if (uri && finalDuration > 300) {
                 return {
                     uri,
-                    durationMs: status.durationMillis,
+                    durationMs: finalDuration,
                 }
             }
+
+            console.log('Recording too short or no URI')
             return null
         } catch (error) {
             console.error('Failed to stop recording:', error)
@@ -126,14 +142,16 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
         }
 
         try {
-            await recordingRef.current.stopAndUnloadAsync()
+            const recording = recordingRef.current
+            recordingRef.current = null
+
+            await recording.stopAndUnloadAsync()
             await Audio.setAudioModeAsync({
                 allowsRecordingIOS: false,
             })
         } catch (error) {
             console.error('Failed to cancel recording:', error)
         } finally {
-            recordingRef.current = null
             setIsRecording(false)
             setRecordingDuration(0)
         }
