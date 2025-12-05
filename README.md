@@ -30,17 +30,17 @@ make check      # Полная проверка (prettier + eslint + typescript)
 src/
 ├── app/              # Инициализация, провайдеры, роутинг
 ├── pages/            # Страницы (композиция features + entities)
-├── widgets/          # Составные блоки (header, chat, pose-camera)
-├── features/         # Бизнес-фичи (auth, survey-flow, chat, training)
+├── widgets/          # Составные блоки (header, chat, pose-camera, profile)
+├── features/         # Бизнес-фичи (auth, survey-flow, chat, training, user)
 ├── entities/         # Бизнес-сущности (survey, pose, chat, training)
-└── shared/           # Переиспользуемый код (ui, api, lib, config)
+└── shared/           # Переиспользуемый код (ui, api, lib, config, constants)
 ```
 
 **Правила изоляции:**
 
 - `entities` → только `shared`
 - `features` → `entities` + `shared`
-- `widgets` → `entities` + `shared` (чистые UI хуки)
+- `widgets` → `entities` + `shared` (чистые UI компоненты)
 - `pages` → `features` + `widgets` + `entities` + `shared`
 - `app` → все слои
 
@@ -52,17 +52,24 @@ src/
 
 - **`_layout.tsx`** — корневой layout (Expo Router + ErrorBoundary)
 - **`_providers/`** — глобальные провайдеры (SafeArea, TanStack Query, FontLoader)
-- **Роуты**: landing, auth, register, verification, survey, home, chat, training
+- **Роуты**: landing, auth, register, forgot-password, verification, survey, home, chat, diary, stats, profile, settings, change-password, privacy-policy, terms, training
 
 ### Pages
 
 - `landing/` — Onboarding screen
-- `auth/`, `register/`, `verification/` — Аутентификация
+- `auth/`, `register/`, `forgot-password/`, `verification/` — Аутентификация
 - `survey/` — Многошаговый опрос (14 шагов)
 - `home/` — Главный экран
 - `chat/` — ИИ-ассистент чат
-- `pose/` — Анализ позы (MediaPipe)
-- `training/` — Тренировки
+- `diary/` — Дневник тренировок
+- `stats/` — Статистика пользователя
+- `profile/` — Модуль профиля пользователя:
+  - `ProfileScreen` — главный экран (аватар, уровень, опыт, редактирование имени)
+  - `SettingsScreen` — настройки (уведомления, аккаунт, FAQ, контакты)
+  - `ChangePasswordScreen` — смена пароля с валидацией
+  - `PrivacyPolicyScreen` — политика конфиденциальности
+  - `TermsOfServiceScreen` — пользовательское соглашение
+- `(training)/` — Тренировки (сессия, отчёт)
 
 ### Features
 
@@ -76,18 +83,16 @@ src/
 
 **`chat/`**
 - `chatApi` — API для истории, отправки сообщений, загрузки файлов, SSE стриминга
-- `useChatHistory` — TanStack Query infinite scroll для истории
-- `useSendMessage` — мутация отправки с optimistic updates
-- `useStreamResponse` — стриминг AI ответов через SSE
+- `useChatQueries` — TanStack Query infinite scroll для истории
 - `useChatStore` — Zustand для pending attachments
 - `useAttachmentUpload` — загрузка файлов с прогрессом
 
 **`training/`**
 - API: `getTrainingPlan`, `getTrainingProgram`
-- Store: управление тренировочной сессией
 
 **`user/`**
-- API: `updateUser`, `buildTrainingPlan`
+- API: `getProfile`, `updateUser`, `updateAvatar`, `deleteUser`, `changePassword`, `updatePassword`, `getNotifications`, `updateNotifications`, `logout`
+- Типы: `UserProfile`, `NotificationSettings`, `UpdateProfileInput`
 
 ### Widgets
 
@@ -103,29 +108,43 @@ src/
 - `useAudioPlayer` — воспроизведение аудио
 - `useFilePicker` — выбор изображений/документов
 
-**`training-session/`**
-- Управление тренировкой, анализ ошибок
+**`profile/`**
+- `ProfileHeader` — шапка профиля (аватар, имя, email, уровень, опыт, progress bar)
+- `SettingsSection` — секция настроек с заголовком
+- `FAQAccordion` — аккордеон вопросов с анимацией expand/collapse
 
-**`navigation-bar/`**
-- Нижняя навигация
+**`training-session/`**
+- `OnboardingFlow` — онбординг перед тренировкой (камера, гироскоп, позиция телефона)
+- `ExerciseFlow` — управление упражнениями
+- `TrainingInfo`, `TrainingAnalytics` — информация и аналитика
+- Экраны упражнений: теория, выполнение, отдых, переходы, смена стороны
+
+**`pose-camera/`**
+- `PoseCamera` — компонент камеры с анализом позы
+- `usePoseCameraSetup` — инициализация камеры
+
+**`navigation-bar/`**, **`header/`**, **`footer/`**
+- Навигационные компоненты
 
 ### Entities
 
 **`chat/`**
 - `types.ts` — `Message`, `Attachment`, `MessageRole`, `AttachmentType`
 - `mappers.ts` — маппинг DTO ↔ Domain entities
-- `WELCOME_MESSAGE` — приветственное сообщение
 
 **`survey/`**
 - `types.ts` — `Gender`, `Goal`, `Direction`, `SurveyData`, `BMICategory`
 - `calculator.ts` — `calculateBMI`, `getBMICategory`
+- `validator.ts` — валидация данных опроса
 - `constants.ts` — опции для селектов
 
 **`pose/`**
 - `analyzer.ts` — анализ позы (валидация landmarks, расчет углов)
+- `types.ts` — типы для pose detection
 
 **`training/`**
-- Типы и модели тренировок
+- `types.ts` — типы тренировок
+- `useTrainingStore.ts` — Zustand store тренировочной сессии
 
 ### Shared
 
@@ -134,27 +153,73 @@ src/
 - Методы: `get`, `post`, `put`, `delete`, `upload`
 - Автоматическая авторизация (Bearer token из `expo-secure-store`)
 - Обработка 401 → logout + редирект на `/auth`
-- `types.ts` — API DTO типы
 
 **`ui/`** — UI Kit компоненты:
-- `Button` — варианты (primary, secondary, ghost), размеры (xs, s, l)
+- `Button` — варианты (primary, secondary, tertiary, ghost), размеры (xs, s, l)
 - `GlowButton` — кнопка с анимированной подсветкой
 - `Input` — варианты (text, password, dropdown, textarea)
-- `RadioSelect`, `CheckboxSelect` — выбор опций
-- `BackButton` — кнопка "назад" с safe area support
-- `Icon` — 70+ SVG иконок (включая chat иконки)
-- `GradientBG/` — градиентные фоны (GradientHeader, GradientBg)
-- `BackgroundLayout` — layout с фоновым градиентом
-- `AuthGuard`, `ErrorBoundary`, `QueryBoundary`
+- `RadioSelect`, `CheckboxSelect`, `Checkbox`, `Switch` — выбор опций
+- `BackButton`, `CloseBtn`, `CircleIconButton`, `ControlButton` — кнопки
+- `Icon` — 80+ SVG иконок
+- `Chip`, `InfoTag`, `TrainingTags` — теги и метки
+- `GradientBG/`, `BackgroundLayout/`, `RadialGradientBackground` — фоны
+- `AuthGuard`, `ErrorBoundary`, `QueryBoundary` — обёртки
+- `Container`, `SafeAreaContainer` — layout контейнеры
+- `Loader`, `DotsProgress`, `StepProgress` — индикаторы
+- `ExerciseInfoCard`, `FeatureCard`, `MetricCard`, `StatCard` — карточки
+- `VideoProgressBar`, `LargeNumberDisplay`, `CircularText`, `MaskedText` — специализированные
+- `ConfirmModal` — модальное окно подтверждения с blur backdrop
+- `Toast` — уведомления с анимацией (success/error)
+- `SettingsItem` — элемент настроек с разделителем
+- `Avatar` — аватар пользователя с edit overlay
+- `ProgressBar` — индикатор прогресса
 
 **`lib/`**
 - `useFonts` — загрузка кастомных шрифтов
 - `useOrientation` — блокировка ориентации экрана
+- `useKeyboardAnimation` — анимация при появлении клавиатуры
+- `useStatusBar` — управление статус баром
+- `useBeepSound` — воспроизведение звуков
 - `formatters.ts` — `formatDuration`, `formatFileSize`
 - `utils.ts` — `generateId`
+- `auth.ts` — утилиты авторизации (`getUserId`, `saveUserId`, `clearAuthData`, `getAuthToken`, `saveAuthToken`)
+
+**`constants/`**
+- `profile.ts` — FAQ, контакты поддержки, версия приложения, тексты политик
 
 **`config/`**
 - `env` — переменные окружения (`API_URL`, `isDevelopment`)
+
+**`hooks/`**
+- `useVideoPlayerContext` — контекст видеоплеера
+
+---
+
+## 🏋️ PoseFlow-JS Engine
+
+Движок анализа упражнений с FSM для подсчёта повторений:
+
+```
+poseflow-js/
+├── ExerciseEngine.ts    # Главный класс движка
+├── normalizer.ts        # Нормализация keypoints
+├── smoothers.ts         # Сглаживание данных
+├── features/            # Вычисление признаков
+│   ├── angles.ts        # Углы суставов
+│   ├── axes.ts          # Оси тела
+│   ├── heights.ts       # Высоты точек
+│   └── symmetryYaw.ts   # Симметрия позы
+├── fsm/                 # Конечный автомат
+│   └── RepCounterFSM.ts # FSM подсчёта повторений
+├── rules/               # Правила упражнений (JSON)
+└── utils/               # Утилиты для keypoints
+```
+
+**Поддерживаемые упражнения:**
+- squat, squat_assisted, squat_calf_raise
+- crunch, hip_bridge
+- leg_abduction (L/R)
+- quadruped_hip_extension (L/R)
 
 ---
 
@@ -162,17 +227,25 @@ src/
 
 Используется **NativeWind 4** (Tailwind CSS для React Native).
 
+**Типографика:**
+
+- `text-h1` (48px), `text-h2` (24px)
+- `text-t1` (24px), `text-t1.1` (20px)
+- `text-t2` (16px), `text-t2-bold`
+- `text-t3` (14px), `text-t3-regular`
+- `text-t4` (12px), `text-t4-medium`
+
 **Кастомная палитра:**
 
 - Brand: `brand-green-500/900`, `brand-purple-300/500/900`
-- Fill: `fill-100` через `fill-900`
+- Fill: `fill-100` → `fill-900`
 - Text: `light-text-100/200/500/900`
-- Feedback: `feedback-negative-900`, `feedback-positive-900`
+- Background: `bg-dark-200/400/500/900`, `bg-light`
+- Feedback: `feedback-negative-900`, `feedback-positive-900`, `feedback-info-900`
 
 **Кастомные шрифты:**
 
 - `font-rimma`, `font-rimma-bold`
-- `Inter` — для основного текста
 
 **Safe area:**
 
@@ -186,17 +259,18 @@ src/
 | ------------------- | --------------------------------- |
 | **Core**            | React Native 0.81.5, React 19.1.0 |
 | **Framework**       | Expo SDK 54                       |
-| **Язык**            | TypeScript 5.9 (strict mode)      |
-| **Стилизация**      | NativeWind 4 (Tailwind CSS)       |
+| **Язык**            | TypeScript 5.9.3 (strict mode)    |
+| **Стилизация**      | NativeWind 4.2.1 (Tailwind CSS)   |
 | **Роутинг**         | Expo Router 6 (file-based)        |
-| **Server State**    | TanStack Query 5                  |
-| **Client State**    | Zustand 5                         |
-| **Анимации**        | React Native Reanimated 4         |
+| **Server State**    | TanStack Query 5.90               |
+| **Client State**    | Zustand 5.0.8                     |
+| **Анимации**        | React Native Reanimated 4.1       |
 | **Computer Vision** | MediaPipe (pose detection)        |
-| **Audio**           | expo-av (recording/playback)      |
+| **Audio/Video**     | expo-av, expo-audio, expo-video   |
 | **Media**           | expo-image-picker, expo-document-picker |
 | **Secure Storage**  | expo-secure-store (tokens)        |
 | **Lists**           | @shopify/flash-list               |
+| **Package Manager** | pnpm 10.19.0                      |
 
 ---
 
@@ -230,45 +304,69 @@ Strict mode включен (`tsconfig.json`):
 
 ## 🛠️ Разработка
 
-### Скрипты
+### Скрипты (pnpm)
 
 ```bash
-# Проверки кода
+pnpm start              # Dev сервер
+pnpm android            # Android
+pnpm ios                # iOS
+pnpm web                # Web
+
 pnpm run type-check     # TypeScript
 pnpm run lint           # ESLint
 pnpm run lint:fix       # ESLint с автофиксом
 pnpm run format         # Prettier
 pnpm run check          # Полная проверка
-
-# Запуск
-pnpm start              # Dev сервер
-pnpm android            # Android
-pnpm ios                # iOS
-pnpm web                # Web
 ```
 
 ### Makefile команды
 
 ```bash
+make start      # Запуск dev сервера
+make ios        # iOS
+make android    # Android
+make web        # Web
+
 make check      # Полная проверка кода
 make lint-fix   # Автофикс линтинга
-make start      # Запуск dev сервера
-make android    # Android
-make ios        # iOS
+make format     # Форматирование
+
 make install    # Установка всех зависимостей (pnpm + pods)
+make pods       # Только iOS pods
+make prebuild   # Пересоздание нативных проектов
 make rebuild    # Полная пересборка
+make clean      # Полная очистка
+
+make doctor     # Диагностика (expo-doctor)
+make fix        # Автофикс зависимостей
 ```
 
 ### Качество кода
 
 - ✅ TypeScript strict mode
-- ✅ ESLint
-- ✅ Prettier для единого стиля
+- ✅ ESLint 9 с плагинами (react, react-hooks, security, unused-imports)
+- ✅ Prettier с tailwindcss плагином
 - ✅ FSD architecture
 
 ---
 
 ## 🚀 Сборка
+
+### EAS Build
+
+```bash
+pnpm run build:preview:ios          # iOS preview
+pnpm run build:preview:android      # Android preview
+pnpm run build:preview:all          # iOS + Android
+pnpm run build:preview:ios-testflight  # TestFlight
+```
+
+### EAS Update (OTA)
+
+```bash
+pnpm run update:preview     # Preview branch
+pnpm run update:production  # Production branch
+```
 
 ### Web Deploy
 
@@ -276,24 +374,23 @@ make rebuild    # Полная пересборка
 pnpm run deploy  # export + EAS deploy
 ```
 
-### Native Builds
+### Local Android APK
 
 ```bash
-pnpm exec eas-cli build --platform ios
-pnpm exec eas-cli build --platform android
+make build-android  # Production APK
 ```
 
 ---
 
 ## 📱 Платформы
 
-- ✅ **iOS**: `com.yzned.Fitchoice`
-- ✅ **Android**: `com.yzned.Fitchoice`
+- ✅ **iOS**: `com.yzned.Fitchoice` (deployment target: 15.1)
+- ✅ **Android**: `com.yzned.Fitchoice` (minSdk: 24, targetSdk: 35)
 - ✅ **Web**: static export
 
 ### Permissions
 
-**iOS**: Camera, Microphone, Photo Library  
+**iOS**: Camera, Microphone, Photo Library, Notifications  
 **Android**: CAMERA, READ/WRITE_EXTERNAL_STORAGE, RECORD_AUDIO, MODIFY_AUDIO_SETTINGS
 
 ---

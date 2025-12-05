@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 import { Icon, Button, BackgroundLayoutNoSidePadding, TrainingTags } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
+import { useNavbarLayout } from '@/shared/lib'
 import type { Training } from '@/entities/training'
 import { useTrainingStore } from '@/entities/training'
 import { trainingApi } from '@/features/training/api'
@@ -37,6 +38,7 @@ export const HomeScreen = () => {
 const MobileContent = () => {
     const router = useRouter()
     const startTraining = useTrainingStore((state) => state.startTraining)
+    const { contentPaddingBottom } = useNavbarLayout()
 
     const [userId, setUserId] = useState<number | null>(null)
 
@@ -139,7 +141,7 @@ const MobileContent = () => {
         <View className="flex-1">
             <ScrollView
                 style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={[styles.scrollContent, { paddingBottom: contentPaddingBottom }]}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Header with progress */}

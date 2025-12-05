@@ -14,6 +14,8 @@ import {
     useAudioPlayer,
     useFilePicker,
 } from '@/widgets/chat'
+import { NavigationBar } from '@/widgets/navigation-bar'
+import { useNavbarLayout } from '@/shared/lib'
 import {
     useChatHistory,
     useStreamResponse,
@@ -235,6 +237,7 @@ export const ChatScreen: React.FC = () => {
         pauseAudio()
     }, [pauseAudio])
 
+
     return (
         <View className="flex-1 bg-fill-900">
             <ChatHeader />
@@ -259,19 +262,21 @@ export const ChatScreen: React.FC = () => {
                     onPauseAudio={handlePauseAudio}
                 />
 
-                <MessageInput
-                    onSend={handleSend}
-                    isRecording={isRecording}
-                    recordingDuration={recordingDuration}
-                    onStartRecording={startRecording}
-                    onStopRecording={handleStopRecording}
-                    onCancelRecording={cancelRecording}
-                    pendingAttachments={pendingAttachments}
-                    onRemoveAttachment={removePendingAttachment}
-                    onPickImage={handlePickImage}
-                    onPickDocument={handlePickDocument}
-                    disabled={isStreaming || isUploading}
-                />
+                <View>
+                    <MessageInput
+                        onSend={handleSend}
+                        isRecording={isRecording}
+                        recordingDuration={recordingDuration}
+                        onStartRecording={startRecording}
+                        onStopRecording={handleStopRecording}
+                        onCancelRecording={cancelRecording}
+                        pendingAttachments={pendingAttachments}
+                        onRemoveAttachment={removePendingAttachment}
+                        onPickImage={handlePickImage}
+                        onPickDocument={handlePickDocument}
+                        disabled={isStreaming || isUploading}
+                    />
+                </View>
             </KeyboardAvoidingView>
         </View>
     )

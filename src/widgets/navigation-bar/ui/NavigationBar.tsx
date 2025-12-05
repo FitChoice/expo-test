@@ -1,59 +1,79 @@
 import { View, TouchableOpacity, StyleSheet } from 'react-native'
-import { useRouter } from 'expo-router'
+import { useRouter, usePathname } from 'expo-router'
+import { useNavbarLayout } from '@/shared/lib'
 import { Icon } from '@/shared/ui'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Fontisto from '@expo/vector-icons/Fontisto'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 
+type NavItem = {
+    route: string
+    label: string
+    matchRoutes: string[] // routes that should activate this tab
+}
+
+const NAV_ITEMS: NavItem[] = [
+    { route: '/home', label: 'Главная', matchRoutes: ['/home'] },
+    { route: '/chat', label: 'Чат', matchRoutes: ['/chat'] },
+    { route: '/stats', label: 'Статистика', matchRoutes: ['/stats'] },
+    { route: '/profile', label: 'Профиль', matchRoutes: ['/profile', '/settings', '/change-password', '/privacy-policy', '/terms'] },
+]
+
 /**
  * Bottom navigation bar widget
  * Displays main navigation icons at the bottom of the screen
+ * Automatically highlights active tab based on current route
  */
 export const NavigationBar = () => {
     const router = useRouter()
+    const pathname = usePathname()
+    const { navbarBottom } = useNavbarLayout()
+
+    const isActive = (item: NavItem) => {
+        return item.matchRoutes.some(route => pathname.startsWith(route))
+    }
+
+    const renderIcon = (route: string, active: boolean) => {
+        const color = active ? '#000000' : '#FFFFFF'
+        const size = 32
+
+        switch (route) {
+        case '/home':
+            return <Icon name="house" size={size} color={color} />
+        case '/chat':
+            return <MaterialCommunityIcons name="message-processing" size={size} color={color} />
+        case '/stats':
+            return <Fontisto name="pie-chart-2" size={size} color={color} />
+        case '/profile':
+            return <FontAwesome6 name="user-large" size={size} color={color} />
+        default:
+            return null
+        }
+    }
 
     return (
-        <View style={[styles.container]}>
+        <View style={[styles.container, { bottom: navbarBottom }]}>
             <View style={styles.navContent}>
-                <TouchableOpacity
-                    style={styles.navButton}
-                    onPress={() => router.push('/home')}
-                    accessibilityRole="button"
-                    accessibilityLabel="Главная"
-                >
-                    <View style={styles.activeButton}>
-                        <Icon name="house" size={32} />
-                    </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.navButton}
-                    onPress={() => router.push('/chat')}
-                    accessibilityRole="button"
-                    accessibilityLabel="Чат"
-                >
-                    <MaterialCommunityIcons name="message-processing" size={32} color="white" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.navButton}
-                    onPress={() => {
-                        // TODO: Add logout/profile navigation
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel="Выход"
-                >
-                    <Fontisto name="pie-chart-2" size={32} color="white" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.navButton}
-                    onPress={() => router.push('/profile')}
-                    accessibilityRole="button"
-                    accessibilityLabel="Профиль"
-                >
-                    <FontAwesome6 name="user-large" size={32} color="white" />
-                </TouchableOpacity>
+                {NAV_ITEMS.map((item) => {
+                    const active = isActive(item)
+                    return (
+                        <TouchableOpacity
+                            key={item.route}
+                            style={styles.navButton}
+                            onPress={() => router.push(item.route as any)}
+                            accessibilityRole="button"
+                            accessibilityLabel={item.label}
+                        >
+                            {active ? (
+                                <View style={styles.activeButton}>
+                                    {renderIcon(item.route, true)}
+                                </View>
+                            ) : (
+                                renderIcon(item.route, false)
+                            )}
+                        </TouchableOpacity>
+                    )
+                })}
             </View>
         </View>
     )
@@ -62,7 +82,6 @@ export const NavigationBar = () => {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: 10,
         left: 0,
         right: 0,
         paddingHorizontal: 20,

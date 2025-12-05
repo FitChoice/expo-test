@@ -2,11 +2,10 @@ import React from 'react'
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BackgroundLayout, Icon, BackButton } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { userApi } from '@/features/user'
-import { getUserId } from '@/shared/lib'
+import { getUserId, useNavbarLayout } from '@/shared/lib'
 import type { TrainingResponse } from '@/shared/api/types'
 
 /**
@@ -14,7 +13,7 @@ import type { TrainingResponse } from '@/shared/api/types'
  */
 export default function TrainingListScreen() {
     const router = useRouter()
-    const insets = useSafeAreaInsets()
+    const { contentPaddingBottom } = useNavbarLayout()
 
     // Получаем userId
     const { data: userId, isLoading: isLoadingUserId } = useQuery({
@@ -100,7 +99,7 @@ export default function TrainingListScreen() {
 
                     <ScrollView
                         showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{ paddingBottom: 120 }}
+                        contentContainerStyle={{ paddingBottom: contentPaddingBottom }}
                     >
                         {/* Title */}
                         <View className="mb-6">

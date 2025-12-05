@@ -1,1 +1,5 @@
 export { ProfileScreen } from './ui/ProfileScreen'
+export { SettingsScreen } from './ui/SettingsScreen'
+export { ChangePasswordScreen } from './ui/ChangePasswordScreen'
+export { PrivacyPolicyScreen } from './ui/PrivacyPolicyScreen'
+export { TermsOfServiceScreen } from './ui/TermsOfServiceScreen'

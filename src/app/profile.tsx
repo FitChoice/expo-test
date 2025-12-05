@@ -1,13 +1,9 @@
-import { AuthGuard } from '@/shared/ui'
 import { ProfileScreen } from '@/pages/profile'
 
 /**
  * Profile page route (protected)
+ * AuthGuard is already inside ProfileScreen
  */
 export default function ProfilePage() {
-    return (
-        <AuthGuard>
-            <ProfileScreen />
-        </AuthGuard>
-    )
+    return <ProfileScreen />
 }

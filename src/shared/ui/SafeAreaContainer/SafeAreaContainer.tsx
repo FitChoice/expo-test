@@ -1,21 +1,49 @@
 import React from 'react'
-import { type ViewProps, StatusBar } from 'react-native'
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
+import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native'
+import { SafeAreaView, type Edge } from 'react-native-safe-area-context'
 
 /**
  * SafeAreaContainer - контейнер с отступами для системных элементов
- * Автоматически добавляет padding сверху (status bar) и снизу (navigation bar на Android)
- * Фон прозрачный, чтобы сохранялся фон приложения
+ *
+ * По умолчанию применяет safe area для top, left, right.
+ * Bottom НЕ включен по умолчанию, т.к. NavigationBar сам учитывает safe area.
+ *
+ * @param edges - какие края учитывать (по умолчанию: ['top', 'left', 'right'])
+ * @param style - дополнительные стили
+ *
+ * @example
+ * // Стандартное использование (без bottom для экранов с NavigationBar)
+ * <SafeAreaContainer>
+ *   <Content />
+ *   <NavigationBar />
+ * </SafeAreaContainer>
+ *
+ * @example
+ * // Полный safe area (для экранов без NavigationBar)
+ * <SafeAreaContainer edges={['top', 'right', 'bottom', 'left']}>
+ *   <Content />
+ * </SafeAreaContainer>
  */
-interface SafeAreaContainerProps extends ViewProps {
-	children: React.ReactNode
+interface SafeAreaContainerProps {
+    children: React.ReactNode
+    edges?: Edge[]
+    style?: StyleProp<ViewStyle>
 }
 
-export const SafeAreaContainer = ({ children }: SafeAreaContainerProps) => {
+export const SafeAreaContainer = ({
+    children,
+    edges = ['top', 'left', 'right'],
+    style,
+}: SafeAreaContainerProps) => {
     return (
-        <SafeAreaProvider>
-            <StatusBar barStyle="light-content" />
-            <SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView>
-        </SafeAreaProvider>
+        <SafeAreaView edges={edges} style={[styles.container, style]}>
+            {children}
+        </SafeAreaView>
     )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+})
