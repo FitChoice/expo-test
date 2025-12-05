@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-    View,
-    Text,
-    ScrollView,
-    TouchableOpacity,
-    ActivityIndicator,
-} from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -23,10 +17,7 @@ export default function TrainingListScreen() {
     const insets = useSafeAreaInsets()
 
     // Получаем userId
-    const {
-        data: userId,
-        isLoading: isLoadingUserId,
-    } = useQuery({
+    const { data: userId, isLoading: isLoadingUserId } = useQuery({
         queryKey: ['userId'],
         queryFn: getUserId,
         staleTime: Infinity,
@@ -63,7 +54,7 @@ export default function TrainingListScreen() {
             <BackgroundLayout>
                 <View className="flex-1 items-center justify-center">
                     <ActivityIndicator size="large" color="#A172FF" />
-                    <Text className="mt-4 text-body-regular text-text-secondary">
+                    <Text className="text-body-regular text-text-secondary mt-4">
 						Загружаем ваши тренировки...
                     </Text>
                 </View>
@@ -73,19 +64,18 @@ export default function TrainingListScreen() {
 
     if (error) {
         return (
-
             <BackgroundLayout>
                 <View className="flex-1 items-center justify-center px-6">
                     <Icon name="alert-circle" size={48} color="#FF4444" />
-                    <Text className="mt-4 text-t2 text-text-primary text-center">
+                    <Text className="text-text-primary mt-4 text-center text-t2">
 						Ошибка загрузки
                     </Text>
-                    <Text className="mt-2 text-body-regular text-text-secondary text-center">
+                    <Text className="text-body-regular text-text-secondary mt-2 text-center">
 						Не удалось загрузить список тренировок
                     </Text>
                     <TouchableOpacity
                         onPress={() => refetch()}
-                        className="mt-6 bg-brand-purple-500 px-6 py-3 rounded-2xl"
+                        className="mt-6 rounded-2xl bg-brand-purple-500 px-6 py-3"
                     >
                         <Text className="text-body-medium text-white">Попробовать снова</Text>
                     </TouchableOpacity>
@@ -97,9 +87,9 @@ export default function TrainingListScreen() {
     return (
         <View className="flex-1 bg-[#151515]">
             <BackgroundLayout>
-                <View className="flex-1" >
+                <View className="flex-1">
                     {/* Header */}
-                    <View >
+                    <View>
                         <BackButton
                             onPress={handleBack}
                             color="#989898"
@@ -114,9 +104,7 @@ export default function TrainingListScreen() {
                     >
                         {/* Title */}
                         <View className="mb-6">
-                            <Text className="font-rimma text-h3 text-white mb-2">
-								Ваши тренировки
-                            </Text>
+                            <Text className="text-h3 mb-2 font-rimma text-white">Ваши тренировки</Text>
                             <Text className="text-body-regular text-text-secondary">
                                 {trainings.length} {getTrainingWord(trainings.length)} доступно
                             </Text>
@@ -126,10 +114,10 @@ export default function TrainingListScreen() {
                         {trainings.length === 0 ? (
                             <View className="items-center justify-center py-20">
                                 <Icon name="barbell" size={64} color="rgba(255, 255, 255, 0.1)" />
-                                <Text className="mt-4 text-t2 text-text-secondary">
+                                <Text className="text-text-secondary mt-4 text-t2">
 									Тренировок пока нет
                                 </Text>
-                                <Text className="mt-2 text-body-regular text-text-tertiary text-center">
+                                <Text className="text-body-regular text-text-tertiary mt-2 text-center">
 									Завершите опрос, чтобы получить{'\n'}персональный план тренировок
                                 </Text>
                             </View>
@@ -178,19 +166,19 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, index, onPress })
     }, 0)
 
     const totalActivities = training.activities.length
-    const completedActivities = training.activities.filter(activity =>
-        activity.progress.every(p => p === 1)
+    const completedActivities = training.activities.filter((activity) =>
+        activity.progress.every((p) => p === 1)
     ).length
 
     return (
         <TouchableOpacity
             onPress={onPress}
-            className="bg-fill-800 rounded-3xl p-5 active:opacity-80"
+            className="rounded-3xl bg-fill-800 p-5 active:opacity-80"
             activeOpacity={0.8}
         >
-            <View className="flex-row items-center justify-between mb-4">
+            <View className="mb-4 flex-row items-center justify-between">
                 <View className="flex-1">
-                    <Text className="font-rimma text-t2 text-white mb-1">
+                    <Text className="mb-1 font-rimma text-t2 text-white">
 						Тренировка {index + 1}
                     </Text>
                     <Text className="text-caption-regular text-text-secondary">
@@ -199,9 +187,13 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, index, onPress })
                 </View>
 
                 {/* Progress indicator */}
-                <View className="flex-row items-center gap-2 bg-fill-600 px-3 py-2 rounded-full">
+                <View className="bg-fill-600 flex-row items-center gap-2 rounded-full px-3 py-2">
                     <Icon
-                        name={completedActivities === totalActivities ? 'check-circle' : 'clock-time-eight'}
+                        name={
+                            completedActivities === totalActivities
+                                ? 'check-circle'
+                                : 'clock-time-eight'
+                        }
                         size={16}
                         color={completedActivities === totalActivities ? '#00CF1B' : '#A172FF'}
                     />
@@ -214,24 +206,19 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, index, onPress })
             {/* Activities */}
             <View className="gap-2">
                 {training.activities.map((activity, activityIndex) => {
-                    const isCompleted = activity.progress.every(p => p === 1)
+                    const isCompleted = activity.progress.every((p) => p === 1)
 
                     return (
-                        <View
-                            key={activityIndex}
-                            className="flex-row items-center gap-3 py-2"
-                        >
+                        <View key={activityIndex} className="flex-row items-center gap-3 py-2">
                             <View
-                                className={`w-2 h-2 rounded-full ${
+                                className={`h-2 w-2 rounded-full ${
                                     isCompleted ? 'bg-green-500' : 'bg-brand-purple-500'
                                 }`}
                             />
-                            <Text className="flex-1 text-body-regular text-text-primary">
+                            <Text className="text-body-regular text-text-primary flex-1">
                                 {activity.type}
                             </Text>
-                            {isCompleted && (
-                                <Icon name="check" size={16} color="#00CF1B" />
-                            )}
+                            {isCompleted && <Icon name="check" size={16} color="#00CF1B" />}
                         </View>
                     )
                 })}

@@ -1,5 +1,12 @@
 import React, { useState } from 'react'
-import { View, Text, Animated, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native'
+import {
+    View,
+    Text,
+    Animated,
+    Alert,
+    TouchableWithoutFeedback,
+    Keyboard,
+} from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import { Button, BackButton, BackgroundLayout, Input } from '@/shared/ui'
 import { useOrientation } from '@/shared/lib'
@@ -48,7 +55,6 @@ export const ForgotPasswordScreen = () => {
     }
 
     const handleSubmitEmail = async () => {
-
         setIsLoading(true)
 
         try {
@@ -69,7 +75,6 @@ export const ForgotPasswordScreen = () => {
     }
 
     const handleSubmitEmailCode = async () => {
-			
         setIsLoading(true)
 
         try {
@@ -90,7 +95,6 @@ export const ForgotPasswordScreen = () => {
     }
 
     const handleCreateNewPassword = async () => {
-
         setIsLoading(true)
 
         try {
@@ -111,7 +115,6 @@ export const ForgotPasswordScreen = () => {
         } finally {
             setIsLoading(false)
         }
-
     }
 
     // Проверка надежности пароля
@@ -236,198 +239,192 @@ export const ForgotPasswordScreen = () => {
     }
 
     const renderContent = () => {
-
         switch (currentStep) {
-				 case 'enter_email':
-					 return <>
+        case 'enter_email':
+            return (
+                <>
+                    <View className="flex-1 justify-start pt-40">
+                        <Animated.View className="gap-20">
+                            <View className="gap-3">
+                                <Text style={sharedStyles.titleCenter}>
+										ВВЕДИТЕ ПОЧТУ,{'\n'}С КОТОРОЙ{'\n'}РЕГИСТРИРОВАЛИСЬ
+                                </Text>
+                                <Text className="text-center text-t2 text-light-text-200">
+										И мы вышлем код подтверждения
+                                </Text>
+                            </View>
 
-						 <View className="flex-1 justify-start pt-40">
-							 <Animated.View
-								 className="gap-20"
-							 >
-								 <View className="gap-3">
-									 <Text style={sharedStyles.titleCenter}  >
-										 ВВЕДИТЕ ПОЧТУ,{'\n'}С КОТОРОЙ{'\n'}РЕГИСТРИРОВАЛИСЬ
-									 </Text>
-									 <Text className="text-light-text-200 text-t2 text-center">
-										 И мы вышлем код подтверждения
-									 </Text>
-								 </View>
+                            <Input
+                                label="Электронная почта"
+                                placeholder="example@provider.com"
+                                value={email}
+                                onChangeText={setEmail}
+                                onBlur={handleEmailBlur}
+                                keyboardType="email-address"
+                                variant="text"
+                                size="default"
+                                error={emailError}
+                            />
+                        </Animated.View>
+                    </View>
 
-								 <Input
-									 label="Электронная почта"
-									 placeholder="example@provider.com"
-									 value={email}
-									 onChangeText={setEmail}
-									 onBlur={handleEmailBlur}
-									 keyboardType="email-address"
-									 variant="text"
-									 size="default"
-									 error={emailError}
-								 />
-							 </Animated.View>
-						 </View>
+                    <View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
+                        <Animated.View className="w-full">
+                            <Button
+                                variant="primary"
+                                size="l"
+                                fullWidth
+                                onPress={handleSubmitEmail}
+                                disabled={!email || !!emailError}
+                                className="h-14"
+                            >
+									Отправить
+                            </Button>
+                        </Animated.View>
 
-						 <View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
-							 <Animated.View className="w-full">
-								 <Button
-									 variant="primary"
-									 size="l"
-									 fullWidth
-									 onPress={handleSubmitEmail}
-									 disabled={!email || !!emailError}
-									 className="h-14"
-								 >
-									 Отправить
-								 </Button>
-							 </Animated.View>
+                        <Button
+                            variant="secondary"
+                            size="l"
+                            fullWidth
+                            onPress={() => router.back()}
+                            className="h-14"
+                        >
+								Назад
+                        </Button>
+                    </View>
+                </>
+            )
 
-							 <Button
-								 variant="secondary"
-								 size="l"
-								 fullWidth
-								 onPress={() => router.back()}
-								 className="h-14"
-							 >
-								 Назад
-							 </Button>
-						 </View>
-					 </>
+        case 'enter_code':
+            return (
+                <>
+                    <View className="flex-1 justify-start pt-40">
+                        <Animated.View className="gap-20">
+                            <View className="gap-3">
+                                <Text style={sharedStyles.titleCenter}>ВВЕДИТЕ КОД ПОДТВЕРЖДЕНИЯ</Text>
+                                <Text className="text-center text-t2 text-light-text-200">
+										На вашу почту отправлен код подтверждения
+                                </Text>
+                            </View>
 
-				 case 'enter_code':
-					 return <>
+                            <Input
+                                label="Код"
+                                placeholder="1234"
+                                value={emailCode}
+                                onChangeText={setEmailCode}
+                                keyboardType="number-pad"
+                                variant="text"
+                                size="default"
+                                error={emailError}
+                            />
+                        </Animated.View>
+                    </View>
 
-						 <View className="flex-1 justify-start pt-40">
-							 <Animated.View
-								 className="gap-20"
-							 >
-								 <View className="gap-3">
-									 <Text style={sharedStyles.titleCenter}  >
-										 ВВЕДИТЕ КОД ПОДТВЕРЖДЕНИЯ
-									 </Text>
-									 <Text className="text-light-text-200 text-t2 text-center">
-										 На вашу почту отправлен код подтверждения
-									 </Text>
-								 </View>
+                    <View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
+                        <Animated.View className="w-full">
+                            <Button
+                                variant="primary"
+                                size="l"
+                                fullWidth
+                                onPress={handleSubmitEmailCode}
+                                disabled={!email || !!emailError}
+                                className="h-14"
+                            >
+									Отправить
+                            </Button>
+                        </Animated.View>
 
-								 <Input
-									 label="Код"
-									 placeholder="1234"
-									 value={emailCode}
-									 onChangeText={setEmailCode}
-									 keyboardType="number-pad"
-									 variant="text"
-									 size="default"
-									 error={emailError}
-								 />
-							 </Animated.View>
-						 </View>
+                        <Button
+                            variant="secondary"
+                            size="l"
+                            fullWidth
+                            onPress={() => router.back()}
+                            className="h-14"
+                        >
+								Назад
+                        </Button>
+                    </View>
+                </>
+            )
 
-						 <View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
-							 <Animated.View className="w-full" >
-								 <Button
-									 variant="primary"
-									 size="l"
-									 fullWidth
-									 onPress={handleSubmitEmailCode}
-									 disabled={!email || !!emailError}
-									 className="h-14"
-								 >
-									 Отправить
-								 </Button>
-							 </Animated.View>
+        case 'new_password':
+            return (
+                <>
+                    <View className="flex-1 justify-start pt-40">
+                        <Animated.View className="gap-20">
+                            <View className="gap-3">
+                                <Text style={sharedStyles.titleCenter} className="uppercase">
+										Придумайте новый пароль
+                                </Text>
+                            </View>
 
-							 <Button
-								 variant="secondary"
-								 size="l"
-								 fullWidth
-								 onPress={() => router.back()}
-								 className="h-14"
-							 >
-								 Назад
-							 </Button>
-						 </View>
-					 </>
+                            <Input
+                                label="Пароль"
+                                placeholder="Пароль"
+                                value={password}
+                                onChangeText={handlePasswordChange}
+                                onFocus={handlePasswordFocus}
+                                onBlur={handlePasswordBlur}
+                                variant="password"
+                                size="default"
+                                error={passwordError}
+                                helperText={passwordHelperText}
+                                forceHelperText={showPasswordHelper}
+                                autoComplete="off"
+                                textContentType="none"
+                                importantForAutofill="no"
+                            />
 
-				 case 'new_password':
-					 return <>
+                            <Input
+                                label="Подтверждение пароля"
+                                placeholder="Подтвердите пароль"
+                                value={confirmPassword}
+                                onChangeText={handleConfirmPasswordChange}
+                                onFocus={handleConfirmPasswordFocus}
+                                onBlur={handleConfirmPasswordBlur}
+                                variant="password"
+                                size="default"
+                                error={password && confirmPassword ? confirmPasswordError : ''}
+                                autoComplete="off"
+                                textContentType="none"
+                                importantForAutofill="no"
+                            />
+                        </Animated.View>
+                    </View>
 
-						 <View className="flex-1 justify-start pt-40">
-							 <Animated.View
-								 className="gap-20"
-							 >
-								 <View className="gap-3">
-									 <Text style={sharedStyles.titleCenter} className="uppercase"  >
-									Придумайте новый пароль
-									 </Text>
-
-								 </View>
-
-								 <Input
-									 label="Пароль"
-									 placeholder="Пароль"
-									 value={password}
-									 onChangeText={handlePasswordChange}
-									 onFocus={handlePasswordFocus}
-									 onBlur={handlePasswordBlur}
-									 variant="password"
-									 size="default"
-									 error={passwordError}
-									 helperText={passwordHelperText}
-									 forceHelperText={showPasswordHelper}
-									 autoComplete="off"
-									 textContentType="none"
-									 importantForAutofill="no"
-								 />
-
-								 <Input
-									 label="Подтверждение пароля"
-									 placeholder="Подтвердите пароль"
-									 value={confirmPassword}
-									 onChangeText={handleConfirmPasswordChange}
-									 onFocus={handleConfirmPasswordFocus}
-									 onBlur={handleConfirmPasswordBlur}
-									 variant="password"
-									 size="default"
-									 error={password && confirmPassword ? confirmPasswordError : ''}
-									 autoComplete="off"
-									 textContentType="none"
-									 importantForAutofill="no"
-								 />
-							 </Animated.View>
-						 </View>
-
-						 <View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
-							 <Animated.View className="w-full">
-								 <Button
-									 variant="primary"
-									 size="l"
-									 fullWidth
-									 onPress={handleCreateNewPassword}
-									 disabled={!password ||
-										 !confirmPassword ||
-										 !!passwordError ||
-										 showPasswordHelper ||
+                    <View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
+                        <Animated.View className="w-full">
+                            <Button
+                                variant="primary"
+                                size="l"
+                                fullWidth
+                                onPress={handleCreateNewPassword}
+                                disabled={
+                                    !password ||
+										!confirmPassword ||
+										!!passwordError ||
+										showPasswordHelper ||
 										Boolean(password && confirmPassword && !!confirmPasswordError)
-								 }
-									 className="h-14"
-								 >
-									 Созранить
-								 </Button>
-							 </Animated.View>
+                                }
+                                className="h-14"
+                            >
+									Созранить
+                            </Button>
+                        </Animated.View>
 
-							 <Button
-								 variant="secondary"
-								 size="l"
-								 fullWidth
-								 onPress={() => router.back()}
-								 className="h-14"
-							 >
-								 Назад
-							 </Button>
-						 </View>
-					 </>
-			 }
+                        <Button
+                            variant="secondary"
+                            size="l"
+                            fullWidth
+                            onPress={() => router.back()}
+                            className="h-14"
+                        >
+								Назад
+                        </Button>
+                    </View>
+                </>
+            )
+        }
     }
 
     return (

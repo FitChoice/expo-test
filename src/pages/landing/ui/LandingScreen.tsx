@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-    View,
-    Text,
-    Image as RNImage,
-    useWindowDimensions,
-    Platform,
-} from 'react-native'
+import { View, Text, Image as RNImage, useWindowDimensions, Platform } from 'react-native'
 import { useRouter } from 'expo-router'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import { Button, CircularText, SafeAreaContainer } from '@/shared/ui'
@@ -41,10 +35,9 @@ export const LandingScreen = () => {
         <View className="flex-1 bg-bg-dark-900">
             <SafeAreaContainer>
                 {/* Верхний контейнер Frame 48097890 */}
-                <View className="relative  h-[60%] w-[99%] overflow-hidden rounded-[40px] bg-bg-dark-900">
-			
+                <View className="relative h-[60%] w-[99%] overflow-hidden rounded-[40px] bg-bg-dark-900">
                     <View
-                        className="absolute bg-bg-dark-400 items-center justify-center"
+                        className="absolute items-center justify-center bg-bg-dark-400"
                         style={{
                             width: circleSize,
                             height: circleSize,
@@ -78,7 +71,11 @@ export const LandingScreen = () => {
                         </View>
 
                         {/*/!* Основная фотокарточка IMG_3254 2 *!/*/}
-                        <RNImage source={landingPhoto1} className="h-full w-full" resizeMode="cover" />
+                        <RNImage
+                            source={landingPhoto1}
+                            className="h-full w-full"
+                            resizeMode="cover"
+                        />
 
                         {/* Слой 2: Текст перед изображением (только в области маски) */}
                         <View className="absolute left-[-42%] top-[22%] h-[45%] w-[90%]">
@@ -116,7 +113,7 @@ export const LandingScreen = () => {
                                 }),
                             }}
                         >
-						Время
+							Время
                         </Text>
                         <Text
                             className="text-[34px] leading-[35px] text-white"
@@ -127,7 +124,7 @@ export const LandingScreen = () => {
                                 }),
                             }}
                         >
-												действовать
+							действовать
                         </Text>
                     </View>
                 </View>
@@ -136,23 +133,26 @@ export const LandingScreen = () => {
                 <View className="relative mx-[3.6%] mb-[3.6%] h-[38.6%] w-[92.8%] rounded-[40px] bg-[#4B4B4B]">
                     {/* Фотокарточка Group 310 */}
                     <View className="absolute left-0 top-0 h-full w-full overflow-hidden rounded-[40px]">
-				
-                        <RNImage source={landingPhoto2} className="h-full w-full" resizeMode="cover" />
+                        <RNImage
+                            source={landingPhoto2}
+                            className="h-full w-full"
+                            resizeMode="cover"
+                        />
                     </View>
 
                     {/* Кнопки Frame 48097895 */}
-                    <View className="absolute  bottom-[8%]  w-full px-2">
+                    <View className="absolute bottom-[8%] w-full px-2">
                         <View className="gap-2">
                             <Button
                                 variant="primary"
                                 size="l"
                                 fullWidth
-                                onPress={ () =>   router.push('/home')}
+                                onPress={() => router.push('/home')}
                                 accessibilityRole="button"
                                 accessibilityLabel="Зарегистрироваться"
                                 accessibilityHint="Создать новый аккаунт в приложении"
                             >
-												Home
+								Home
                             </Button>
                             <Button
                                 variant="primary"
@@ -163,7 +163,7 @@ export const LandingScreen = () => {
                                 accessibilityLabel="Зарегистрироваться"
                                 accessibilityHint="Создать новый аккаунт в приложении"
                             >
-							Зарегистрироваться
+								Зарегистрироваться
                             </Button>
                             <Button
                                 variant="secondary"
@@ -174,14 +174,12 @@ export const LandingScreen = () => {
                                 accessibilityLabel="Войти в аккаунт"
                                 accessibilityHint="Войти в существующий аккаунт"
                             >
-							Войти
+								Войти
                             </Button>
-
                         </View>
                     </View>
                 </View>
             </SafeAreaContainer>
         </View>
-
     )
 }

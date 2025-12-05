@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
-import { StatusBar as RNStatusBar, Platform, Appearance, type ColorSchemeName } from 'react-native'
+import {
+    StatusBar as RNStatusBar,
+    Platform,
+    Appearance,
+    type ColorSchemeName,
+} from 'react-native'
 
 type StatusBarStyle = 'light' | 'dark' | 'auto'
 
@@ -36,7 +41,9 @@ export const useStatusBar = ({
     animated = true,
 }: UseStatusBarOptions = {}) => {
     // Используем Appearance API для получения темы
-    const [systemColorScheme, setSystemColorScheme] = useState<ColorSchemeName>(Appearance.getColorScheme())
+    const [systemColorScheme, setSystemColorScheme] = useState<ColorSchemeName>(
+        Appearance.getColorScheme()
+    )
 
     useEffect(() => {
         const subscription = Appearance.addChangeListener(({ colorScheme }) => {

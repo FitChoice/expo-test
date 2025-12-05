@@ -10,9 +10,7 @@ import TrainingReportScreen from './report'
 import { usePoseCameraSetup } from '@/widgets/pose-camera'
 import { Loader } from '@/shared/ui/Loader/Loader'
 import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
-import {
-    TrainingAnalytics
-} from '@/widgets/training-session/ui/TrainingAnalytics'
+import { TrainingAnalytics } from '@/widgets/training-session/ui/TrainingAnalytics'
 import { TrainingInfo } from '@/widgets/training-session/ui/TrainingInfo'
 import { ExerciseFlow, OnboardingFlow } from '@/widgets/training-session'
 import { ExerciseSuccess } from '@/widgets/training-session/ui/ExerciseSuccess'
@@ -26,8 +24,7 @@ export default function TrainingSessionScreen() {
     if (!training || !tfReady || !model || !orientation) {
         return (
             <>
-                {error ? <Text>{error.message}</Text>  :
-                    <Loader text="Загрузка тренировки..." />}
+                {error ? <Text>{error.message}</Text> : <Loader text="Загрузка тренировки..." />}
             </>
         )
     }
@@ -36,34 +33,39 @@ export default function TrainingSessionScreen() {
         //   Render based on current status
         switch (status) {
         case 'info':
-            return 	<TrainingInfo />
+            return <TrainingInfo />
         case 'onboarding':
-            return     <BackgroundLayoutNoSidePadding>
-                <OnboardingFlow />
-            </BackgroundLayoutNoSidePadding>
+            return (
+                <BackgroundLayoutNoSidePadding>
+                    <OnboardingFlow />
+                </BackgroundLayoutNoSidePadding>
+            )
 
         case 'finished':
-            return   <BackgroundLayoutNoSidePadding>
-                <ExerciseSuccess  />
-            </BackgroundLayoutNoSidePadding>
+            return (
+                <BackgroundLayoutNoSidePadding>
+                    <ExerciseSuccess />
+                </BackgroundLayoutNoSidePadding>
+            )
 
         case 'report':
-            return   <BackgroundLayoutNoSidePadding>
-                <TrainingReportScreen />
-            </BackgroundLayoutNoSidePadding>
+            return (
+                <BackgroundLayoutNoSidePadding>
+                    <TrainingReportScreen />
+                </BackgroundLayoutNoSidePadding>
+            )
 
         case 'analytics':
-            return   <BackgroundLayoutNoSidePadding>
-                <TrainingAnalytics />
-            </BackgroundLayoutNoSidePadding>
+            return (
+                <BackgroundLayoutNoSidePadding>
+                    <TrainingAnalytics />
+                </BackgroundLayoutNoSidePadding>
+            )
 
         default:
-            return   <ExerciseFlow model={model} orientation={orientation} />
-          
+            return <ExerciseFlow model={model} orientation={orientation} />
         }
-
     }
 
     return mainContent()
-
 }

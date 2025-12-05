@@ -1,5 +1,4 @@
 import { View, TouchableOpacity, StyleSheet } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { Icon } from '@/shared/ui'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
@@ -11,15 +10,10 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
  * Displays main navigation icons at the bottom of the screen
  */
 export const NavigationBar = () => {
-
     const router = useRouter()
 
     return (
-        <View
-            style={[
-                styles.container
-            ]}
-        >
+        <View style={[styles.container]}>
             <View style={styles.navContent}>
                 <TouchableOpacity
                     style={styles.navButton}
@@ -34,9 +28,7 @@ export const NavigationBar = () => {
 
                 <TouchableOpacity
                     style={styles.navButton}
-                    onPress={() => {
-                        // TODO: Add chat navigation
-                    }}
+                    onPress={() => router.push('/chat')}
                     accessibilityRole="button"
                     accessibilityLabel="Чат"
                 >
@@ -60,7 +52,7 @@ export const NavigationBar = () => {
                     accessibilityRole="button"
                     accessibilityLabel="Профиль"
                 >
-                    <FontAwesome6 name="user-large" size={32} color="white"  />
+                    <FontAwesome6 name="user-large" size={32} color="white" />
                 </TouchableOpacity>
             </View>
         </View>

@@ -49,12 +49,7 @@ export function DotsProgress({
                     else dotColor = 'bg-brand-dark-300'
                 }
 
-                return (
-                    <View
-                        key={index}
-                        className={`${dotSize} rounded-full ${dotColor}`}
-                    />
-                )
+                return <View key={index} className={`${dotSize} rounded-full ${dotColor}`} />
             })}
         </View>
     )

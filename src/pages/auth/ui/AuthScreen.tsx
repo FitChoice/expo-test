@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import {
-	View,
-	Alert,
-	Image as RNImage,
-	Animated,
-	Pressable,
-	Text,
-	Keyboard,
-	TouchableWithoutFeedback,
+    View,
+    Alert,
+    Image as RNImage,
+    Animated,
+    Pressable,
+    Text,
+    Keyboard,
+    TouchableWithoutFeedback,
 } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SecureStore from 'expo-secure-store'
@@ -91,7 +91,7 @@ export const AuthScreen = () => {
                 // Save tokens to secure storage (user_id already saved in authApi)
                 await SecureStore.setItemAsync('auth_token', result.data.access_token)
                 await SecureStore.setItemAsync('refresh_token', result.data.refresh_token)
-				
+
                 // Navigate to home
                 router.push('/home')
             } else {
@@ -104,7 +104,7 @@ export const AuthScreen = () => {
             setIsLoading(false)
         }
     }
-		
+
     if (isLoading) {
         return <Loader />
     }
@@ -118,7 +118,7 @@ export const AuthScreen = () => {
                         <BackButton onPress={() => router.push('/')} />
 
                         {/* Основной контент */}
-                        <View className="relative z-[3] flex-1 ">
+                        <View className="relative z-[3] flex-1">
                             {/* Группа с браслетом и заголовком */}
                             <Animated.View
                                 style={{
@@ -174,7 +174,11 @@ export const AuthScreen = () => {
                                         justifyContent: 'center',
                                     }}
                                 >
-                                    <MaskedText text="вход в аккаунт" {...TEXT_CONFIG} maskRect={MASK_RECT} />
+                                    <MaskedText
+                                        text="вход в аккаунт"
+                                        {...TEXT_CONFIG}
+                                        maskRect={MASK_RECT}
+                                    />
                                 </View>
                             </Animated.View>
 
@@ -204,12 +208,13 @@ export const AuthScreen = () => {
                                     variant="password"
                                     size="default"
                                 />
-                            
+
                                 <View className="flex-row justify-end">
-                                    <Pressable onPress={() => router.push('/forgot-password')} className="mt-1">
-                                        <Text className="text-light-text-200 text-sm">
-																Забыли пароль?
-                                        </Text>
+                                    <Pressable
+                                        onPress={() => router.push('/forgot-password')}
+                                        className="mt-1"
+                                    >
+                                        <Text className="text-sm text-light-text-200">Забыли пароль?</Text>
                                     </Pressable>
                                 </View>
                             </Animated.View>

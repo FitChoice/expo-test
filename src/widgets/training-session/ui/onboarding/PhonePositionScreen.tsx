@@ -35,18 +35,14 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
 
     if (!permission?.granted) {
         return (
-            <View className="flex-1 justify-center items-center bg-background-primary px-6">
-                <Text className="text-h2 font-bold text-light-text-100 mb-4 text-center">
+            <View className="bg-background-primary flex-1 items-center justify-center px-6">
+                <Text className="mb-4 text-center text-h2 font-bold text-light-text-100">
 					Требуется доступ к камере
                 </Text>
-                <Text className="text-t2 text-light-text-500 text-center mb-6">
+                <Text className="mb-6 text-center text-t2 text-light-text-500">
 					Чтобы продолжить, разрешите доступ к камере
                 </Text>
-                <Button
-                    variant="primary"
-                    onPress={permission?.request}
-                    className="w-full"
-                >
+                <Button variant="primary" onPress={permission?.request} className="w-full">
 					Разрешить доступ
                 </Button>
             </View>
@@ -54,21 +50,21 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
     }
 
     return (
-        <View className=" flex-1 ">
+        <View className="flex-1">
             {/* Close Button */}
-            <View className="absolute right-4  z-10">
+            <View className="absolute right-4 z-10">
                 <CloseBtn handlePress={handleStop} classNames={'h-12 w-12 rounded-2xl'} />
             </View>
 
             {/* Progress Dots */}
-            <View className="absolute left-1/2 -translate-x-1/2 top-10 z-10">
+            <View className="absolute left-1/2 top-10 z-10 -translate-x-1/2">
                 <DotsProgress total={4} current={2} variant="onboarding" />
             </View>
 
             {/* Content */}
-            <View className="flex-1 items-center justify-center px-6 mb-10 mt-20 ">
+            <View className="mb-10 mt-20 flex-1 items-center justify-center px-6">
                 {/* Camera Preview */}
-                <View className=" h-96 w-full overflow-hidden rounded-3xl bg-black">
+                <View className="h-96 w-full overflow-hidden rounded-3xl bg-black">
                     <CameraView
                         facing="front"
                         className="flex-1"
@@ -77,12 +73,12 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
                 </View>
 
                 {/* Title */}
-                <Text className="text-h2 font-bold text-light-text-100 mb-3 text-left">
+                <Text className="mb-3 text-left text-h2 font-bold text-light-text-100">
 					Поставьте телефон вертикально
                 </Text>
 
                 {/* Description */}
-                <Text className="text-t2 text-light-text-500 text-left leading-6 mb-20">
+                <Text className="mb-20 text-left text-t2 leading-6 text-light-text-500">
 					Поверните телефон на 90°, снизьте наклона его в стену, чтобы камера хорошо
 					распознала движения
                 </Text>

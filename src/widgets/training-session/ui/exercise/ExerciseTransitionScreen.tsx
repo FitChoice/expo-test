@@ -7,9 +7,7 @@
 import { View, Text } from 'react-native'
 import { useState, useEffect } from 'react'
 import type { Exercise } from '@/entities/training/model/types'
-import {
-    ExerciseWithCounterWrapper
-} from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
+import { ExerciseWithCounterWrapper } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 
 interface ExerciseTransitionScreenProps {
 	nextExercise: Exercise
@@ -37,30 +35,27 @@ export function ExerciseTransitionScreen({
         return () => clearInterval(timer)
     }, [countdown, onComplete])
 
-    return (	<ExerciseWithCounterWrapper
+    return (
+        <ExerciseWithCounterWrapper>
+            <View className="padding-4 flex-1 items-center justify-center">
+                <View className="mt-6 items-center">
+                    <Text className="text-center text-h2 text-brand-green-500">
+                        {' '}
+						Следующее упражнение
+                    </Text>
+                </View>
 
-    >
+                {/* Exercise Name */}
+                <Text className="mb-12 text-center text-h2 text-light-text-100">
+                    {nextExercise.name}
+                </Text>
 
-        <View className="flex-1 items-center justify-center padding-4 ">
-					
-            <View className="mt-6 items-center">
-                <Text className="text-h2 text-brand-green-500 text-center">	Следующее упражнение</Text>
+                {/* Info */}
+                <Text className="mt-6 text-h2 text-light-text-100">
+                    {nextExercise.sets} × {nextExercise.reps || nextExercise.duration}{' '}
+                    {nextExercise.reps ? 'повт.' : 'сек'}
+                </Text>
             </View>
-
-            {/* Exercise Name */}
-            <Text className="text-h2 text-light-text-100 mb-12 text-center">
-                {nextExercise.name}
-            </Text>
-
-            {/* Info */}
-            <Text className="text-h2 text-light-text-100 mt-6">
-                {nextExercise.sets} × {nextExercise.reps || nextExercise.duration}{' '}
-                {nextExercise.reps ? 'повт.' : 'сек'}
-            </Text>
-
-        </View>
-
-    </ExerciseWithCounterWrapper>
-
+        </ExerciseWithCounterWrapper>
     )
 }

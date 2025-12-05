@@ -56,7 +56,10 @@ export const authApi = {
     /**
 	 * Send verification code to email
 	 */
-    async sendCode(email: string, is_reset_password?: boolean): Promise<ApiResult<SendCodeResponse>> {
+    async sendCode(
+        email: string,
+        is_reset_password?: boolean
+    ): Promise<ApiResult<SendCodeResponse>> {
         // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         if (!emailRegex.test(email)) {
@@ -67,13 +70,13 @@ export const authApi = {
         }
 
         let payload: SendCodeInput = { email }
-				
+
         if (is_reset_password) {
             payload = { email, is_reset_password: true }
         }
-   
+
         return await apiClient.post<SendCodeInput, SendCodeResponse>(
-            '/auth/sendCode', 
+            '/auth/sendCode',
             payload,
             { skipAuthHandler: true }
         )
@@ -84,11 +87,9 @@ export const authApi = {
 	 */
     async verifyCode(email: string, code: number): Promise<ApiResult<void>> {
         const payload: VerifyCodeInput = { email, code }
-        return await apiClient.post<VerifyCodeInput, void>(
-            '/auth/verifyCode',
-            payload,
-            { skipAuthHandler: true }
-        )
+        return await apiClient.post<VerifyCodeInput, void>('/auth/verifyCode', payload, {
+            skipAuthHandler: true,
+        })
     },
 
     /**
@@ -96,17 +97,17 @@ export const authApi = {
 	 */
     async registration(data: RegistrationInput): Promise<ApiResult<TokenResponse>> {
         let result: ApiResult<TokenResponse>
-		
+
         if (MOCK_MODE) {
             result = await mockRegistration(data)
         } else {
             result = await apiClient.post<RegistrationInput, TokenResponse>(
-                '/auth/registration', 
+                '/auth/registration',
                 data,
                 { skipAuthHandler: true }
             )
         }
-		
+
         // Save user_id and tokens to SecureStore on successful registration
         if (result.success && result.data) {
             if (result.data.id) {
@@ -119,7 +120,7 @@ export const authApi = {
                 await saveRefreshToken(result.data.refresh_token)
             }
         }
-		
+
         return result
     },
 
@@ -128,17 +129,15 @@ export const authApi = {
 	 */
     async login(data: LoginRequest): Promise<ApiResult<TokenResponse>> {
         let result: ApiResult<TokenResponse>
-		
+
         if (MOCK_MODE) {
             result = await mockLogin(data)
         } else {
-            result = await apiClient.post<LoginRequest, TokenResponse>(
-                '/auth/login', 
-                data,
-                { skipAuthHandler: true }
-            )
+            result = await apiClient.post<LoginRequest, TokenResponse>('/auth/login', data, {
+                skipAuthHandler: true,
+            })
         }
-		
+
         // Save user_id and tokens to SecureStore on successful login
         if (result.success && result.data) {
             if (result.data.id) {
@@ -151,7 +150,7 @@ export const authApi = {
                 await saveRefreshToken(result.data.refresh_token)
             }
         }
-		
+
         return result
     },
 
@@ -161,11 +160,11 @@ export const authApi = {
     async refresh(refreshToken: string): Promise<ApiResult<TokenResponse>> {
         const payload: RefreshInput = { refresh_token: refreshToken }
         const result = await apiClient.post<RefreshInput, TokenResponse>(
-            '/auth/refresh', 
+            '/auth/refresh',
             payload,
             { skipAuthHandler: true }
         )
-		
+
         // Save tokens to SecureStore on successful refresh
         if (result.success && result.data) {
             if (result.data.access_token) {
@@ -175,7 +174,7 @@ export const authApi = {
                 await saveRefreshToken(result.data.refresh_token)
             }
         }
-		
+
         return result
     },
 }

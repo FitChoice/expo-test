@@ -17,36 +17,35 @@ interface TrainingReport {
 }
 
 export interface Exercise {
-	id: number;
-	name: string;
-	rest_time: number;
-	duration: number;
-	progress: number;
-	sets: number;
-	reps: number;
-	isAi: boolean;
-	videoUrl: string;
+	id: number
+	name: string
+	rest_time: number
+	duration: number
+	progress: number
+	sets: number
+	reps: number
+	isAi: boolean
+	videoUrl: string
 }
 
 export interface TrainingInfo {
-	id: number;
-	trainingType: string;
-	title: string;
-	description: string;
-	difficulty: number;
-	experience: number;
-	inventory: number[];
-	exercises: Exercise[];
+	id: number
+	trainingType: string
+	title: string
+	description: string
+	difficulty: number
+	experience: number
+	inventory: number[]
+	exercises: Exercise[]
 }
 
 interface CompleteTrainingInput {
-	'report_active_time': number,
-	'report_cals': number,
-	'report_duration': number,
-	'report_technique_quality': number,
-	'time': string, ////ISO
-	'training_id': number
-
+	report_active_time: number
+	report_cals: number
+	report_duration: number
+	report_technique_quality: number
+	time: string ////ISO
+	training_id: number
 }
 
 interface CompleteTrainingResponse {
@@ -55,9 +54,9 @@ interface CompleteTrainingResponse {
 }
 
 interface ExecuteExerciseInput {
-	'id':number,
-	'reps': number,
-	'training_id': number
+	id: number
+	reps: number
+	training_id: number
 }
 
 interface ExecuteExerciseResponse {

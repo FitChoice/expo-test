@@ -8,9 +8,7 @@ import ExpoCamera from 'expo-camera/build/ExpoCamera'
 import * as tf from '@tensorflow/tfjs'
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import * as ScreenOrientation from 'expo-screen-orientation'
-import {
-    cameraWithTensors,
-} from '@tensorflow/tfjs-react-native'
+import { cameraWithTensors } from '@tensorflow/tfjs-react-native'
 import Svg, { Circle, Line } from 'react-native-svg'
 import { type ExpoWebGLRenderingContext } from 'expo-gl'
 import {
@@ -24,10 +22,10 @@ import { useBeepSound } from '@/shared/lib'
 // Polyfill for Camera.Constants which was removed in expo-camera v17
 // @tensorflow/tfjs-react-native still expects this API
 if (!(Camera as any).Constants) {
-    (Camera as any).Constants = {
+    ;(Camera as any).Constants = {
         Type: {
             front: 1, // Front camera
-            back: 2,  // Back camera
+            back: 2, // Back camera
         },
     }
 }
@@ -69,24 +67,29 @@ const MIN_KEYPOINT_SCORE = 0.3
 // For movenet, the size here doesn't matter too much because the model will
 // preprocess the input (crop, resize, etc). For best result, use the size that
 // doesn't distort the image.
-const OUTPUT_TENSOR_WIDTH = 180//CAM_PREVIEW_WIDTH
+const OUTPUT_TENSOR_WIDTH = 180 //CAM_PREVIEW_WIDTH
 const OUTPUT_TENSOR_HEIGHT = OUTPUT_TENSOR_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4)
 
 // Whether to auto-render TensorCamera preview.
 const AUTO_RENDER = false
 
 type PoseCameraProps = {
-    model: posedetection.PoseDetector
-    orientation: ScreenOrientation.Orientation,
+	model: posedetection.PoseDetector
+	orientation: ScreenOrientation.Orientation
 	exerciseId?: string
 	onTelemetry?: (telemetry: EngineTelemetry) => void
 	onAllKeypointsDetected?: (allDetected: boolean) => void
 }
 
-export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    exerciseId,
-    onTelemetry, onAllKeypointsDetected, }) => {
+export const PoseCamera: React.FC<PoseCameraProps> = ({
+    model,
+    orientation,
+    exerciseId,
+    onTelemetry,
+    onAllKeypointsDetected,
+}) => {
     const cameraRef = useRef(null)
-	  const engineRef = useRef<ExerciseEngine | null>(null)
+    const engineRef = useRef<ExerciseEngine | null>(null)
     const prevRepsRef = useRef<number>(0)
     const { playBeep } = useBeepSound()
 
@@ -113,7 +116,6 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
     }, [])
 
     useEffect(() => {
-			
         if (!exerciseId) return
         // Recreate FSM stack whenever the user picks another exercise.
         const rule = getExerciseRule(exerciseId)
@@ -134,16 +136,20 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
         const loop = async () => {
             // Get the tensor and run pose detection.
             const iteratorResult = images.next()
-            
+
             // Only process if we have a valid tensor
             if (iteratorResult.value) {
                 const imageTensor = iteratorResult.value as tf.Tensor3D
 
                 try {
-                    const detectedPoses = await model.estimatePoses(imageTensor, undefined, Date.now())
+                    const detectedPoses = await model.estimatePoses(
+                        imageTensor,
+                        undefined,
+                        Date.now()
+                    )
                     setPoses(detectedPoses)
                     emitTelemetry(detectedPoses[0])
-                    
+
                     // Check if all 17 keypoints are detected
                     if (detectedPoses.length > 0 && detectedPoses[0]) {
                         const pose = detectedPoses[0]
@@ -192,24 +198,27 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
             const pose = poses[0]
 
             // Создаем карту keypoints по имени для быстрого доступа
-            const keypointMap = new Map<string, { x: number; y: number; cx: number; cy: number }>()
-            
+            const keypointMap = new Map<
+				string,
+				{ x: number; y: number; cx: number; cy: number }
+			>()
+
             const { cameraWidth, cameraHeight, offsetX, offsetY } = getActualCameraSize()
-            
+
             pose.keypoints
                 .filter((k) => (k.score ?? 0) > MIN_KEYPOINT_SCORE)
                 .forEach((k) => {
                     const x = k.x
                     const y = k.y
-                    
+
                     // Масштабируем координаты из tensor space в camera space
                     const cxRaw = (x / getOutputTensorWidth()) * cameraWidth
                     const cyRaw = (y / getOutputTensorHeight()) * cameraHeight
-                    
+
                     // Применяем зеркалирование для Android и добавляем offsets
                     const cx = (IS_ANDROID ? cameraWidth - cxRaw : cxRaw) + offsetX
                     const cy = cyRaw + offsetY
-                    
+
                     keypointMap.set(k.name ?? '', { x, y, cx, cy })
                 })
 
@@ -242,7 +251,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
                 .map(([startName, endName]) => {
                     const start = keypointMap.get(startName)
                     const end = keypointMap.get(endName)
-                    
+
                     if (start && end) {
                         return (
                             <Line
@@ -251,8 +260,8 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
                                 y1={start.cy}
                                 x2={end.cx}
                                 y2={end.cy}
-                                stroke='white'
-                                strokeWidth='2'
+                                stroke="white"
+                                strokeWidth="2"
                             />
                         )
                     }
@@ -266,10 +275,10 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
                     key={`skeletonkp_${name}`}
                     cx={coords.cx}
                     cy={coords.cy}
-                    r='4'
-                    strokeWidth='2'
-                    fill='#00AA00'
-                    stroke='white'
+                    r="4"
+                    strokeWidth="2"
+                    fill="#00AA00"
+                    stroke="white"
                 />
             ))
 
@@ -289,20 +298,20 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
         if (!engineRef.current || !onTelemetry) return
         const keypoints = pose?.keypoints as RawKeypoint[] | undefined
         const telemetry = engineRef.current.process(keypoints ?? [], Date.now())
-        
+
         // Воспроизводим звук при увеличении количества повторений
         if (telemetry.reps > prevRepsRef.current && telemetry.reps > 0) {
             playBeep()
         }
         prevRepsRef.current = telemetry.reps
-        
+
         onTelemetry(telemetry)
     }
 
     const isPortrait = () => {
         return (
             orientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
-			      orientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
+			orientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
         )
     }
 
@@ -326,23 +335,27 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
 
     // Вычисляем реальные размеры камеры с учетом aspect ratio (cover behavior)
     const getActualCameraSize = () => {
-        const containerWidth = isPortrait() ? CAM_PREVIEW_WIDTH : Dimensions.get('window').width
-        const containerHeight = isPortrait() ? CAM_PREVIEW_HEIGHT : Dimensions.get('window').height
-        
+        const containerWidth = isPortrait()
+            ? CAM_PREVIEW_WIDTH
+            : Dimensions.get('window').width
+        const containerHeight = isPortrait()
+            ? CAM_PREVIEW_HEIGHT
+            : Dimensions.get('window').height
+
         // Для ландшафта используем обратное соотношение сторон
         let aspectRatio
         if (IS_IOS) {
-            aspectRatio = isPortrait() ? IOS_ASPECT_RATIO : (16 / 9)
+            aspectRatio = isPortrait() ? IOS_ASPECT_RATIO : 16 / 9
         } else {
-            aspectRatio = isPortrait() ? ANDROID_ASPECT_RATIO : (16 / 9)
+            aspectRatio = isPortrait() ? ANDROID_ASPECT_RATIO : 16 / 9
         }
-        
+
         // Вычисляем размеры камеры, которая заполняет контейнер (cover behavior)
         const cameraHeightIfFitWidth = containerWidth / aspectRatio
         const cameraWidthIfFitHeight = containerHeight * aspectRatio
-        
+
         let cameraWidth, cameraHeight, offsetX, offsetY
-        
+
         if (cameraHeightIfFitWidth >= containerHeight) {
             // Камера заполняет по ширине, обрезается по высоте
             cameraWidth = containerWidth
@@ -356,8 +369,15 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
             offsetX = (containerWidth - cameraWidth) / 2
             offsetY = 0
         }
-        
-        return { cameraWidth, cameraHeight, offsetX, offsetY, containerWidth, containerHeight }
+
+        return {
+            cameraWidth,
+            cameraHeight,
+            offsetX,
+            offsetY,
+            containerWidth,
+            containerHeight,
+        }
     }
 
     const getTextureRotationAngleInDegrees = () => {
@@ -377,7 +397,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
         case ScreenOrientation.Orientation.LANDSCAPE_LEFT:
             return IS_ANDROID ? 90 : 270 //cameraType === 'front' ? 270 : 270
         case ScreenOrientation.Orientation.LANDSCAPE_RIGHT:
-            return IS_ANDROID ? 270: 90//cameraType === 'front' ? 90 : 90
+            return IS_ANDROID ? 270 : 90 //cameraType === 'front' ? 90 : 90
         default:
             return 0
         }
@@ -387,7 +407,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
 
     // Вычисляем размеры камеры для заполнения контейнера (cover behavior)
     const { cameraWidth, cameraHeight, offsetX, offsetY } = getActualCameraSize()
-    
+
     const cameraStyle = [
         styles.camera,
         {
@@ -397,7 +417,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
             left: offsetX,
             top: offsetY,
             backgroundColor: 'transparent',
-        }
+        },
     ]
 
     return (
@@ -406,18 +426,18 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({ model, orientation,    e
                 isPortrait() ? styles.containerPortrait : styles.containerLandscape,
                 !isPortrait() && {
                     width: Dimensions.get('window').width,
-                    height: Dimensions.get('window').height
+                    height: Dimensions.get('window').height,
                 },
                 {
                     backgroundColor: 'transparent',
-                }
+                },
             ]}
         >
             <View
                 style={[
                     styles.cameraWrapper,
                     IS_IOS && styles.cameraWrapperIOS,
-                    shouldFlipCamera && { transform: [{ scaleX: -1 }] }
+                    shouldFlipCamera && { transform: [{ scaleX: -1 }] },
                 ]}
             >
                 {/* @ts-ignore - TensorCamera type issue */}
@@ -467,11 +487,11 @@ const styles = StyleSheet.create({
     cameraWrapperIOS: {
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 30
+        borderRadius: 30,
     },
     camera: {
         zIndex: 1,
-        borderRadius: 30
+        borderRadius: 30,
     },
     svg: {
         width: '100%',
@@ -490,5 +510,4 @@ const styles = StyleSheet.create({
         padding: 8,
         zIndex: 20,
     },
-
 })

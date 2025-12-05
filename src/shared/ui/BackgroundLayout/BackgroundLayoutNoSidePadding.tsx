@@ -8,32 +8,37 @@ import { GradientBg } from '@/shared/ui/GradientBG'
  * Используется для создания общего фона для страниц с радиальным градиентом
  */
 
-type Props = { children: React.ReactNode, hasSidePadding?: boolean }
-export const BackgroundLayoutNoSidePadding = ({ children, hasSidePadding = true }: Props) => {
-    const {  width: SCREEN_WIDTH } = useWindowDimensions()
+type Props = { children: React.ReactNode; hasSidePadding?: boolean }
+export const BackgroundLayoutNoSidePadding = ({
+    children,
+    hasSidePadding = true,
+}: Props) => {
+    const { width: SCREEN_WIDTH } = useWindowDimensions()
 
-    return ( <View style={styles.container}>
-        {/* Радиальный градиент с blur-эффектом */}
-        {/*<RadialGradientBackground />*/}
+    return (
+        <View style={styles.container}>
+            {/* Радиальный градиент с blur-эффектом */}
+            {/*<RadialGradientBackground />*/}
 
-        <View style={[styles.gradientContainer, { width: SCREEN_WIDTH }]}>
-            <GradientBg />
+            <View style={[styles.gradientContainer, { width: SCREEN_WIDTH }]}>
+                <GradientBg />
+            </View>
+
+            {/* Контент */}
+            <SafeAreaContainer
+                style={[styles.contentContainer, hasSidePadding && styles.paddingContent]}
+            >
+                {children}
+            </SafeAreaContainer>
         </View>
-
-        {/* Контент */}
-        <SafeAreaContainer style={[styles.contentContainer, hasSidePadding && styles.paddingContent]}>
-            {children}
-        </SafeAreaContainer>
-  
-    </View>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        position: 'relative', 
-        zIndex: 3, 
+        position: 'relative',
+        zIndex: 3,
         overflow: 'hidden',
     },
     gradientContainer: {
@@ -47,6 +52,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     paddingContent: {
-        paddingHorizontal: 14 
-    }
+        paddingHorizontal: 14,
+    },
 })

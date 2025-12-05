@@ -20,9 +20,9 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({ icon, text }) => {
                 className="h-26 w-26 items-center justify-center"
                 style={{ padding: 8, borderRadius: 8 }}
             >
-                <Icon name={icon} size={30}  color="#FFFFFF"  />
+                <Icon name={icon} size={30} color="#FFFFFF" />
             </LinearGradient>
-            <Text className="flex-1 font-inter text-t2 font-normal leading-[19.2px] text-light-text-100">
+            <Text className="font-inter flex-1 text-t2 font-normal leading-[19.2px] text-light-text-100">
                 {text}
             </Text>
         </View>

@@ -37,12 +37,12 @@ export const SurveyStep13: React.FC = () => {
     // }, [hasRequested])
 
     return (
-		
         <View className="position-relative">
-            <View className="mt-20 items-center justify-center ">
-
-                <View className="h-[495px] w-[275px] items-center rounded-[27px] bg-[#2F2F2F] pt-10 border-8 border-fill-900">
-                    <Text style={sharedStyles.titleLarge} className="mb-5">13:20</Text>
+            <View className="mt-20 items-center justify-center">
+                <View className="h-[495px] w-[275px] items-center rounded-[27px] border-8 border-fill-900 bg-[#2F2F2F] pt-10">
+                    <Text style={sharedStyles.titleLarge} className="mb-5">
+						13:20
+                    </Text>
                     <View className="w-[341px] items-start gap-0 rounded-2xl bg-[#1E1E1E] px-4 py-3">
                         <View className="w-full flex-row items-center justify-between">
                             <View className="flex-row items-center gap-3">
@@ -64,9 +64,8 @@ export const SurveyStep13: React.FC = () => {
                         </View>
                     </View>
                 </View>
-			
             </View>
-		
+
             <View className="absolute bottom-0 left-0 right-0">
                 <MaskedView
                     style={{ height: 180 }}
@@ -83,19 +82,23 @@ export const SurveyStep13: React.FC = () => {
                     }
                 >
                     <View style={{ flex: 1 }}>
-                        <BlurView intensity={40} tint="dark" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
-			
+                        <BlurView
+                            intensity={40}
+                            tint="dark"
+                            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                        />
+
                         <View className="flex-1 items-center justify-center px-6">
-                            <Text style={sharedStyles.titleCenter} className='mb-4'>Включим уведомления?</Text>
-                            <Text className="font-inter text-light-text-200 text-center font-normal leading-[19.2px]">
-					Мы будем напоминать о тренировках, чтобы вы ничего не пропустили
+                            <Text style={sharedStyles.titleCenter} className="mb-4">
+								Включим уведомления?
+                            </Text>
+                            <Text className="font-inter text-center font-normal leading-[19.2px] text-light-text-200">
+								Мы будем напоминать о тренировках, чтобы вы ничего не пропустили
                             </Text>
                         </View>
                     </View>
                 </MaskedView>
             </View>
-	
         </View>
-
     )
 }

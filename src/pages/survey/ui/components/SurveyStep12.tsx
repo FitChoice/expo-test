@@ -23,13 +23,12 @@ export const SurveyStep12: React.FC<SurveyStep12Props> = ({
     additionalDirection,
     onAdditionalDirectionsChange,
 }) => {
-
     const availableDirections = useMemo(() => {
         const allDirections = [
-            { value: '0' , label: 'Силовые тренировки', icon: <Dumbbell /> },
-            { value: '1', label: 'Кардио', icon:  <Cardio /> },
+            { value: '0', label: 'Силовые тренировки', icon: <Dumbbell /> },
+            { value: '1', label: 'Кардио', icon: <Cardio /> },
             { value: '2', label: 'Растяжка', icon: <Stretching /> },
-            { value: '3' , label: 'Здоровая спина', icon: <Posture /> },
+            { value: '3', label: 'Здоровая спина', icon: <Posture /> },
         ]
 
         return allDirections.filter((dir) => dir.value !== mainDirection)

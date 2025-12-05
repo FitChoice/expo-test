@@ -6,5 +6,5 @@
 import { View } from 'react-native'
 
 export default function TrainingEntryScreen() {
-   return (<View />)
+    return <View />
 }

@@ -32,11 +32,12 @@ function surveyDataToApiFormat(data: SurveyData): UpdateUserMetadataInput {
     // train_days может быть уже числом (если пришло из useSurveyFlow) или массивом
     const trainingDaysMasks = data.train_days as unknown as number[] | number
     let trainDaysMask: number | undefined
-	
+
     if (Array.isArray(trainingDaysMasks)) {
-        trainDaysMask = trainingDaysMasks.reduce((mask, dayMask) => {
-            return mask | dayMask
-        }, 0) || undefined
+        trainDaysMask =
+			trainingDaysMasks.reduce((mask, dayMask) => {
+			    return mask | dayMask
+			}, 0) || undefined
     } else if (typeof trainingDaysMasks === 'number') {
         trainDaysMask = trainingDaysMasks || undefined
     }
@@ -45,11 +46,12 @@ function surveyDataToApiFormat(data: SurveyData): UpdateUserMetadataInput {
     // train_goals может быть уже числом (если пришло из useSurveyFlow) или массивом
     const goalsMasks = data.train_goals as unknown as number[] | number
     let goalsMask: number | undefined
-	
+
     if (Array.isArray(goalsMasks)) {
-        goalsMask = goalsMasks.reduce((mask, goalMask) => {
-            return mask | goalMask
-        }, 0) || undefined
+        goalsMask =
+			goalsMasks.reduce((mask, goalMask) => {
+			    return mask | goalMask
+			}, 0) || undefined
     } else if (typeof goalsMasks === 'number') {
         goalsMask = goalsMasks || undefined
     }
@@ -88,10 +90,10 @@ export const surveyApi = {
 
         // Проверяем goals - может быть массивом или числом
         const goalsMasks = data.train_goals as unknown as number[] | number
-        const hasGoals = Array.isArray(goalsMasks) 
-            ? goalsMasks.length > 0 
+        const hasGoals = Array.isArray(goalsMasks)
+            ? goalsMasks.length > 0
             : typeof goalsMasks === 'number' && goalsMasks > 0
-		
+
         if (!hasGoals) {
             return {
                 success: false,
@@ -115,9 +117,7 @@ export const surveyApi = {
     /**
 	 * Get user metadata
 	 */
-    async getUserMetadata(
-        userId: number
-    ): Promise<ApiResult<UpdateUserMetadataInput>> {
+    async getUserMetadata(userId: number): Promise<ApiResult<UpdateUserMetadataInput>> {
         return apiClient.get(`/user/${userId}`)
     },
 }

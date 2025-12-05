@@ -12,7 +12,11 @@ interface SurveyStepErrorProps {
 /**
  * Экран ошибки отправки данных опроса
  */
-export const SurveyStepError: React.FC<SurveyStepErrorProps> = ({ error, onRetry, onBack }) => {
+export const SurveyStepError: React.FC<SurveyStepErrorProps> = ({
+    error,
+    onRetry,
+    onBack,
+}) => {
     return (
         <View className="flex-1 items-center justify-center gap-16 bg-transparent px-4">
             <View className="items-center gap-2 bg-transparent">

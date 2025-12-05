@@ -9,18 +9,13 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
  */
 interface SafeAreaContainerProps extends ViewProps {
 	children: React.ReactNode
-
 }
 
-export const SafeAreaContainer = ({ 
-    children,
-}: SafeAreaContainerProps) => {
-
-    return (<SafeAreaProvider>
-        <StatusBar barStyle="light-content" />
-        <SafeAreaView  style={{ flex: 1 }}>
-            {children}
-        </SafeAreaView>
-    </SafeAreaProvider>
+export const SafeAreaContainer = ({ children }: SafeAreaContainerProps) => {
+    return (
+        <SafeAreaProvider>
+            <StatusBar barStyle="light-content" />
+            <SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView>
+        </SafeAreaProvider>
     )
 }

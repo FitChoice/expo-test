@@ -28,7 +28,6 @@ export function OnboardingFlow() {
             setCurrentStep('camera')
             break
         case 'camera': {
-
             if (firstExercise && !firstExercise.isVertical) {
                 setCurrentStep('rotate')
             } else {
@@ -50,12 +49,17 @@ export function OnboardingFlow() {
     }
 
     return (
-        <View className="flex-1 w-full">
+        <View className="w-full flex-1">
             {currentStep === 'sound' && <SoundCheckScreen onNext={handleNextStep} />}
             {currentStep === 'camera' && <CameraPermissionScreen onNext={handleNextStep} />}
             {currentStep === 'rotate' && <RotatePhoneScreen onNext={handleNextStep} />}
             {currentStep === 'position' && <PhonePositionScreen onNext={handleNextStep} />}
-            {currentStep === 'gyroscope' && <GyroscopeLevelScreen onNext={handleNextStep}  isVertical={firstExercise?.isVertical ?? false} />}
+            {currentStep === 'gyroscope' && (
+                <GyroscopeLevelScreen
+                    onNext={handleNextStep}
+                    isVertical={firstExercise?.isVertical ?? false}
+                />
+            )}
         </View>
     )
 }

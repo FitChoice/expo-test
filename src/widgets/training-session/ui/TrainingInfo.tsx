@@ -8,9 +8,7 @@ import {
     useWindowDimensions,
 } from 'react-native'
 import { router } from 'expo-router'
-import {
-    Switch, TrainingTags, ExerciseInfoCard,
-} from '@/shared/ui'
+import { Switch, TrainingTags, ExerciseInfoCard } from '@/shared/ui'
 import { useTrainingStore } from '@/entities/training'
 import React, { useMemo } from 'react'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
@@ -24,7 +22,6 @@ const trainingInfoBanner = require('@/assets/images/training_info_banner.png')
 
 // Динамический импорт картинок оборудования
 const equipmentImages = [
-
     require('@/assets/images/equipment/1.png'),
     require('@/assets/images/equipment/2.png'),
     require('@/assets/images/equipment/3.png'),
@@ -40,7 +37,7 @@ const equipmentImages = [
 
 export const TrainingInfo = () => {
     const insets = useSafeAreaInsets()
-    const {  width: SCREEN_WIDTH } = useWindowDimensions()
+    const { width: SCREEN_WIDTH } = useWindowDimensions()
 
     const training = useTrainingStore((state) => state.training)
     const startOnboarding = useTrainingStore((state) => state.startOnboarding)
@@ -70,102 +67,93 @@ export const TrainingInfo = () => {
         startOnboarding()
     }
 
-    return (<View className="flex-1">
-        <View style={[styles.gradientContainer, { width: SCREEN_WIDTH }]}>
-            <GradientBg />
-        </View>
-        <ScrollView
-            className="flex-1"
-            showsVerticalScrollIndicator={false}>
-            {/* Banner Image with Close Button */}
-            <View className="relative">
-                <Image
-                    source={trainingInfoBanner}
-                    className="w-full"
-                    resizeMode="cover"
-                />
-                {/* Close Button - Top Right */}
-                <TouchableOpacity
-                    onPress={handleClose}
-                    style={{ top: insets.top  }}
-                    className="absolute right-4 h-12 w-12 items-center justify-center rounded-2xl bg-white/30">
-                    <Entypo name="cross" size={24} color="white" />
-                </TouchableOpacity>
+    return (
+        <View className="flex-1">
+            <View style={[styles.gradientContainer, { width: SCREEN_WIDTH }]}>
+                <GradientBg />
             </View>
+            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+                {/* Banner Image with Close Button */}
+                <View className="relative">
+                    <Image source={trainingInfoBanner} className="w-full" resizeMode="cover" />
+                    {/* Close Button - Top Right */}
+                    <TouchableOpacity
+                        onPress={handleClose}
+                        style={{ top: insets.top }}
+                        className="absolute right-4 h-12 w-12 items-center justify-center rounded-2xl bg-white/30"
+                    >
+                        <Entypo name="cross" size={24} color="white" />
+                    </TouchableOpacity>
+                </View>
 
-            {/* Black Block with Text */}
-            <View style={{ marginTop: -180 }}>
-                {/* Tags */}
-                <View className="bg-black px-6 pt-6 pb-6 mb-2 rounded-3xl">
-                    <TrainingTags
-                        icon1={<MaterialCommunityIcons name="clock-time-eight" size={16} color="#FFFFFF" />}
-                        title1={`${trainingDuration} минут`}
-                        icon2={<MaterialCommunityIcons name="bow-arrow" size={16} color="#FFFFFF" />}
-                        title2={`+${experienceGained} опыта`}
-                        className="mb-4"
-                    />
-
-                    <Text className="text-h2 text-white mb-4">
-                        {training?.title || 'Подвижность верхнего отдела позвоночника'}
-                    </Text>
-                    <Text className="text-t2 text-light-text-500 leading-6 mb-6">
-
-                        {
-                            training?.description || 'Сделай тест и узнай свой уровень. Камера зафиксирует движения, а ИИ подскажет ошибки и подсчитает повторения. В конце ты получишь свой стартовый уровень и персональные рекомендации для тренировок. Всего несколько минут — и ты готов начать!'
-                        }
-                    </Text>
-
-                    {/* Switch Section */}
-                    <View className="flex-row items-center justify-between">
-                        <Text className="text-t3 text-white">
-							Обучение перед упражнением
-                        </Text>
-                        <Switch
-                            checked={showTutorial}
-                            onChange={setShowTutorial}
+                {/* Black Block with Text */}
+                <View style={{ marginTop: -180 }}>
+                    {/* Tags */}
+                    <View className="mb-2 rounded-3xl bg-black px-6 pb-6 pt-6">
+                        <TrainingTags
+                            icon1={
+                                <MaterialCommunityIcons
+                                    name="clock-time-eight"
+                                    size={16}
+                                    color="#FFFFFF"
+                                />
+                            }
+                            title1={`${trainingDuration} минут`}
+                            icon2={
+                                <MaterialCommunityIcons name="bow-arrow" size={16} color="#FFFFFF" />
+                            }
+                            title2={`+${experienceGained} опыта`}
+                            className="mb-4"
                         />
+
+                        <Text className="mb-4 text-h2 text-white">
+                            {training?.title || 'Подвижность верхнего отдела позвоночника'}
+                        </Text>
+                        <Text className="mb-6 text-t2 leading-6 text-light-text-500">
+                            {training?.description ||
+								'Сделай тест и узнай свой уровень. Камера зафиксирует движения, а ИИ подскажет ошибки и подсчитает повторения. В конце ты получишь свой стартовый уровень и персональные рекомендации для тренировок. Всего несколько минут — и ты готов начать!'}
+                        </Text>
+
+                        {/* Switch Section */}
+                        <View className="flex-row items-center justify-between">
+                            <Text className="text-t3 text-white">Обучение перед упражнением</Text>
+                            <Switch checked={showTutorial} onChange={setShowTutorial} />
+                        </View>
                     </View>
                 </View>
-            </View>
 
-            {/* Equipment Section */}
-            <View className="bg-black px-6 pt-6 pb-6 rounded-3xl mb-2 ">
-                <Text className="text-t1.1 text-white mb-4">
-						Инвентарь
-                </Text>
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ gap: 16 }}
-                >
-                    {training?.inventory.map((image, index) => (
-                        <Image
-                            key={index}
-                            source={equipmentImages[image]}
-                            className="w-16 h-16"
-                            resizeMode="contain"
-                        />
+                {/* Equipment Section */}
+                <View className="mb-2 rounded-3xl bg-black px-6 pb-6 pt-6">
+                    <Text className="mb-4 text-t1.1 text-white">Инвентарь</Text>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ gap: 16 }}
+                    >
+                        {training?.inventory.map((image, index) => (
+                            <Image
+                                key={index}
+                                source={equipmentImages[image]}
+                                className="h-16 w-16"
+                                resizeMode="contain"
+                            />
+                        ))}
+                    </ScrollView>
+                </View>
+
+                <View className="rounded-3xl bg-black px-6 pb-20 pt-6">
+                    <Text className="mb-4 text-t1.1 text-white">2 упражнения</Text>
+
+                    {training?.exercises.map((exercise) => (
+                        <ExerciseInfoCard key={exercise.id} exercise={exercise} />
                     ))}
-                </ScrollView>
-            </View>
+                </View>
+            </ScrollView>
 
-            <View className="bg-black px-6 pt-6 pb-20 rounded-3xl">
-                <Text className="text-t1.1 text-white mb-4">
-									2 упражнения
-                </Text>
+            {/* Start Button - Fixed at Bottom */}
 
-                {training?.exercises.map((exercise) => (
-                    <ExerciseInfoCard key={exercise.id} exercise={exercise}/>))}
-
-            </View>
-        </ScrollView>
-
-        {/* Start Button - Fixed at Bottom */}
-				
-        <BottomActionBtn  handleClickBottomBtn={handleStart} title={'Начать'}  />
-  
-    </View>
-
+            <BottomActionBtn handleClickBottomBtn={handleStart} title={'Начать'} />
+        </View>
     )
 }
 

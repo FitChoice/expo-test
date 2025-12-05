@@ -97,7 +97,12 @@ export function AIExerciseScreen({ onComplete, onPause, onStop }: AIExerciseScre
                                     strokeWidth="3"
                                     opacity="0.7"
                                 />
-                                <Path d="M100 70 L100 200" stroke="#C5F680" strokeWidth="3" opacity="0.7" />
+                                <Path
+                                    d="M100 70 L100 200"
+                                    stroke="#C5F680"
+                                    strokeWidth="3"
+                                    opacity="0.7"
+                                />
                                 <Path
                                     d="M100 100 L50 150 M100 100 L150 150"
                                     stroke="#C5F680"

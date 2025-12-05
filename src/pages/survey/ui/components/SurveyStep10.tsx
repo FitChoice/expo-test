@@ -27,7 +27,6 @@ export const SurveyStep10: React.FC<SurveyStep10Props> = ({
     onGoalsChange,
     maxGoals = 3,
 }) => {
-
     return (
         <>
             <View className="gap-4 bg-transparent">
@@ -36,7 +35,7 @@ export const SurveyStep10: React.FC<SurveyStep10Props> = ({
 					Выберите до {maxGoals}-х целей
                 </Text>
             </View>
-            <ScrollView 
+            <ScrollView
                 showsVerticalScrollIndicator={false}
                 nestedScrollEnabled={true}
                 bounces={false}
@@ -46,13 +45,33 @@ export const SurveyStep10: React.FC<SurveyStep10Props> = ({
                     isNeedCheckbox={true}
                     options={[
                         { value: 'posture', label: 'Улучшить осанку', icon: <GoalPosture /> },
-                        { value: 'pain_relief', label: 'Избавиться от боли',  icon: <GoalPainRelief />  },
-                        { value: 'flexibility', label: 'Повысить гибкость',  icon: <GoalFlexibility />  },
-                        { value: 'strength', label: 'Укрепить тело и мышцы',  icon: <GoalStrength />  },
-                        { value: 'weight_loss', label: 'Сбросить вес и подтянуть фигуру',  icon: <GoalWeightLoss />  },
-                        { value: 'stress_relief', label: 'Снизить стресс и напряжение',  icon: <GoalStressRelief />  },
-                        { value: 'energy', label: 'Повысить уровень энергии',  icon: <GoalEnergy />  },
-                        { value: 'wellness', label: 'Улучшить общее самочувствие',  icon: <GoalWellness />  },
+                        {
+                            value: 'pain_relief',
+                            label: 'Избавиться от боли',
+                            icon: <GoalPainRelief />,
+                        },
+                        {
+                            value: 'flexibility',
+                            label: 'Повысить гибкость',
+                            icon: <GoalFlexibility />,
+                        },
+                        { value: 'strength', label: 'Укрепить тело и мышцы', icon: <GoalStrength /> },
+                        {
+                            value: 'weight_loss',
+                            label: 'Сбросить вес и подтянуть фигуру',
+                            icon: <GoalWeightLoss />,
+                        },
+                        {
+                            value: 'stress_relief',
+                            label: 'Снизить стресс и напряжение',
+                            icon: <GoalStressRelief />,
+                        },
+                        { value: 'energy', label: 'Повысить уровень энергии', icon: <GoalEnergy /> },
+                        {
+                            value: 'wellness',
+                            label: 'Улучшить общее самочувствие',
+                            icon: <GoalWellness />,
+                        },
                     ]}
                     value={goals}
                     onChange={(value) => onGoalsChange(value as Goal[])}

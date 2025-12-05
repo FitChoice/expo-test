@@ -64,7 +64,7 @@ export const VerificationScreen = () => {
 
     const handleSubmit = async () => {
         if (code.length !== 6 || !email || !password) return
-		
+
         try {
             const result = await authApi.registration({
                 code: Number(code),
@@ -80,7 +80,8 @@ export const VerificationScreen = () => {
                 Alert.alert('Ошибка', result.error || 'Неверный код')
             }
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Не удалось подтвердить код'
+            const errorMessage =
+				error instanceof Error ? error.message : 'Не удалось подтвердить код'
             Alert.alert('Ошибка', errorMessage)
         }
     }

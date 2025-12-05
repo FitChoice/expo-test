@@ -1,14 +1,8 @@
-
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg'
 
 export const GradientHeader = () => {
     return (
-        <Svg
-            width="100%"
-            height={180}
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-        >
+        <Svg width="100%" height={180} viewBox="0 0 100 100" preserveAspectRatio="none">
             <Defs>
                 {/* Зеленый градиент - верхний правый */}
                 <RadialGradient
@@ -48,4 +42,3 @@ export const GradientHeader = () => {
         </Svg>
     )
 }
-

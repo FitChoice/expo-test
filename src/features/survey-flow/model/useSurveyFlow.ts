@@ -360,7 +360,8 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
             return { success: true }
         } catch (error) {
             console.error('Error in submitSurvey:', error)
-            const errorMessage = error instanceof Error ? error.message : 'Ошибка при отправке опроса'
+            const errorMessage =
+				error instanceof Error ? error.message : 'Ошибка при отправке опроса'
             return { success: false, error: errorMessage }
         }
     },

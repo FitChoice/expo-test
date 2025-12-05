@@ -70,7 +70,6 @@ export const Button = forwardRef<View, ButtonProps>(
                 .replace('[', '')
                 .replace(']', '')
 
-
             return cloneElement(icon as React.ReactElement<{ size?: number; color?: string }>, {
                 size: sizeStyle.icon,
                 color: iconColor.startsWith('#') ? iconColor : 'white',

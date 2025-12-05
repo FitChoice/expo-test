@@ -19,7 +19,7 @@ export const CheckboxSelect: React.FC<CheckboxSelectProps> = ({
     minSelected,
     disabled = false,
     className = '',
-    isNeedCheckbox
+    isNeedCheckbox,
 }) => {
     const sizeStyle = checkboxSelectSizeStyles[size]
 

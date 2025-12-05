@@ -74,7 +74,6 @@ export const RadialGradientBackground: React.FC = () => {
                 <Rect x="0" y="0" width="100" height="100" fill="url(#greenGradient)" />
                 <Rect x="0" y="0" width="100" height="100" fill="url(#purpleGradient)" />
             </Svg>
-    
         </View>
     )
 }

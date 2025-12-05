@@ -4,15 +4,11 @@
  */
 
 import { View, Text, useWindowDimensions } from 'react-native'
-import React, {  useState } from 'react'
+import React, { useState } from 'react'
 
 import { Button, CircularText } from '@/shared/ui'
 import { sharedStyles } from '@/pages/survey/ui/components/shared-styles'
-import {
-
-    Image as RNImage,
-
-} from 'react-native'
+import { Image as RNImage } from 'react-native'
 import landingPhoto1 from 'src/assets/images/girl_success_screen.png'
 import { useTrainingStore } from '@/entities/training'
 
@@ -31,15 +27,12 @@ const motivationalMessages = [
 ]
 
 export function ExerciseSuccess() {
-	
     const reportTraining = useTrainingStore((state) => state.reportTraining)
 
     const { width: screenWidth, height: screenHeight } = useWindowDimensions()
 
     const [displayMessage] = useState(
-        () =>
-
-            motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)]
+        () => motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)]
     )
 
     const handleGoToReportPage = () => {
@@ -47,17 +40,16 @@ export function ExerciseSuccess() {
     }
 
     return (
-
-        <View className="flex-1 items-center justify-between padding-4 pt-20 pb-5  gap-10">
-
+        <View className="padding-4 flex-1 items-center justify-between gap-10 pb-5 pt-20">
             <View className="flex items-start gap-10">
+                <Text style={sharedStyles.titleCenter}>{displayMessage}</Text>
 
-                <Text style={sharedStyles.titleCenter}>{displayMessage }</Text>
+                <Text className="text-h2 text-light-text-200">Давайте посмотрим отчёт</Text>
 
-                <Text className="text-h2 text-light-text-200" >Давайте посмотрим отчёт</Text>
-
-
-                <View className="absolute top-40 h-[500] w-[100%] " style={{ left: -screenWidth * 0.1 }}>
+                <View
+                    className="absolute top-40 h-[500] w-[100%]"
+                    style={{ left: -screenWidth * 0.1 }}
+                >
                     {/* Декоративные элементы - круговой текст (позади изображения) */}
                     <View className="absolute right-0 top-[22%] h-[54%] w-[108%]">
                         <CircularText
@@ -103,11 +95,11 @@ export function ExerciseSuccess() {
                         />
                     </View>
                 </View>
-
             </View>
 
-            <Button  variant="primary" onPress={handleGoToReportPage} className="w-full" >Далее</Button>
+            <Button variant="primary" onPress={handleGoToReportPage} className="w-full">
+				Далее
+            </Button>
         </View>
-     
     )
 }

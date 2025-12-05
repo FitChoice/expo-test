@@ -3,7 +3,14 @@
 export type ExerciseType = 'ai' | 'timer'
 export type ExerciseSide = 'left' | 'right' | 'both'
 export type WorkoutCategory = 'strength' | 'cardio' | 'flexibility' | 'mobility'
-export type TrainingStatus = 'idle' | 'info'| 'onboarding' | 'running' | 'finished'| 'report' | 'analytics'
+export type TrainingStatus =
+	| 'idle'
+	| 'info'
+	| 'onboarding'
+	| 'running'
+	| 'finished'
+	| 'report'
+	| 'analytics'
 
 export const equipment = {
     1: '/src/assets/images/equipment/1.png',
@@ -20,57 +27,55 @@ export const equipment = {
 }
 
 export interface Activity {
-	duration: number;
-	experience: number;
-	id: number;
-	progress: number[];
-	type: string;
-  }
-  
+	duration: number
+	experience: number
+	id: number
+	progress: number[]
+	type: string
+}
+
 export interface ActivitiesResponseItem {
-	activities: Activity[];
-	date: string;
-	id: number;
-	period_id: number;
-	user_id: number;
-  }
-  
-export type ActivitiesResponse = ActivitiesResponseItem[];
+	activities: Activity[]
+	date: string
+	id: number
+	period_id: number
+	user_id: number
+}
+
+export type ActivitiesResponse = ActivitiesResponseItem[]
 
 export interface Exercise {
-	id: string;
-	name: string;
-	rest_time: number;
-	duration: number;
-	progress: number;
-	sets: number;
-	reps: number;
-	isAi: boolean;
-	VideoTheory: string;
-	VideoPractice: string;
-	VideoPracticeSecond?: string;
-	isVertical: boolean; ////TEMPORARY FIELD
+	id: string
+	name: string
+	rest_time: number
+	duration: number
+	progress: number
+	sets: number
+	reps: number
+	isAi: boolean
+	VideoTheory: string
+	VideoPractice: string
+	VideoPracticeSecond?: string
+	isVertical: boolean ////TEMPORARY FIELD
 	side: 'both' | 'single'
 }
-  
+
 export interface Training {
-	id: number;
-	trainingType: string;
-	title: string;
-	description: string;
-	difficulty: number;
-	experience: number;
-	inventory: number[];
-	exercises: Exercise[];
+	id: number
+	trainingType: string
+	title: string
+	description: string
+	difficulty: number
+	experience: number
+	inventory: number[]
+	exercises: Exercise[]
 }
 
 export interface Report {
-
-		report_active_time: number,
-		report_cals: number,
-		report_duration: number,
-		report_technique_quality: number
-	  
+	report_active_time: number
+	report_cals: number
+	report_duration: number
+	report_technique_quality: number
 }
 
 /**

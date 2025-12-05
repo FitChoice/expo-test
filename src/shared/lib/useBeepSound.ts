@@ -18,10 +18,10 @@ export const useBeepSound = () => {
                     playsInSilentModeIOS: true,
                     staysActiveInBackground: false,
                 })
-                const { sound } = await Audio.Sound.createAsync(
-                    beepSound,
-                    { shouldPlay: false, volume: 0.5 }
-                )
+                const { sound } = await Audio.Sound.createAsync(beepSound, {
+                    shouldPlay: false,
+                    volume: 0.5,
+                })
                 soundRef.current = sound
             } catch (error) {
                 console.log('Error loading sound:', error)
@@ -46,10 +46,3 @@ export const useBeepSound = () => {
 
     return { playBeep }
 }
-
-
-
-
-
-
-
