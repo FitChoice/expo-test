@@ -11,29 +11,25 @@ import {
     Text,
     StyleSheet,
     Image,
+    Alert,
 } from 'react-native'
 import { useRouter } from 'expo-router'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import * as ImagePicker from 'expo-image-picker'
-import {
-    AuthGuard,
-    Toast,
-} from '@/shared/ui'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Toast } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { ProfileHeader } from '@/widgets/profile'
 import { userApi } from '@/features/user/api'
+import { useProfileQuery } from '@/features/user/hooks/useProfileQuery'
 import { getUserId, useNavbarLayout } from '@/shared/lib'
+import { pickAvatarImage, type AvatarPickSource } from '@/shared/lib/media/pickAvatarImage'
 import { Feather } from '@expo/vector-icons'
-
-const boySample = require('../../../../assets/images/profile_girl_sample.png')
+import boySample from '../../../../assets/images/profile_girl_sample.png'
 
 export const ProfileScreen = () => {
     return (
-        <AuthGuard>
-            <View style={styles.container}>
-                <ProfileContent />
-            </View>
-        </AuthGuard>
+        <View style={styles.container}>
+            <ProfileContent />
+        </View>
     )
 }
 
@@ -66,16 +62,7 @@ const ProfileContent = () => {
     }, [])
 
     // Fetch profile data
-    const { data: profile, isLoading } = useQuery({
-        queryKey: ['profile', userId],
-        queryFn: async () => {
-            if (!userId) throw new Error('User ID required')
-            const result = await userApi.getProfile(userId.toString())
-            if (!result.success) throw new Error(result.error)
-            return result.data
-        },
-        enabled: !!userId,
-    })
+    const { data: profile, isLoading } = useProfileQuery(userId)
 
     // Update profile mutation
     const updateProfileMutation = useMutation({
@@ -112,52 +99,59 @@ const ProfileContent = () => {
        
     }
 
-    const handleAvatarPress = async () => {
-        if (!isEditMode) {
-            handleEditStart()
-            return
-        }
+    const pickAndUploadAvatar = async (source: AvatarPickSource) => {
+        const result = await pickAvatarImage(source)
 
-        const permissionResult =
-			await ImagePicker.requestMediaLibraryPermissionsAsync()
-        if (!permissionResult.granted) {
+        if (result.status === 'denied') {
             setToast({
                 visible: true,
-                message: 'Нужен доступ к галерее',
+                message: 'Нужен доступ к фото/камере',
                 variant: 'error',
             })
             return
         }
 
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.8,
-        })
+        if (result.status !== 'picked') return
 
-        const pickedAsset = result.assets?.[0]
-
-        if (!result.canceled && userId && pickedAsset) {
-            const uploadResult = await userApi.updateAvatar(
-                userId.toString(),
-                pickedAsset.uri
-            )
-            if (uploadResult.success) {
-                queryClient.invalidateQueries({ queryKey: ['profile', userId] })
-                setToast({
-                    visible: true,
-                    message: 'Аватар обновлен',
-                    variant: 'success',
-                })
-            } else {
-                setToast({
-                    visible: true,
-                    message: 'Ошибка загрузки аватара',
-                    variant: 'error',
-                })
-            }
+        if (!userId) {
+            setToast({
+                visible: true,
+                message: 'Не найден пользователь',
+                variant: 'error',
+            })
+            return
         }
+
+        const uploadResult = await userApi.updateAvatar(
+            userId.toString(),
+            result.asset.uri
+        )
+        if (uploadResult.success) {
+            queryClient.invalidateQueries({ queryKey: ['profile', userId] })
+            setToast({
+                visible: true,
+                message: 'Аватар обновлен',
+                variant: 'success',
+            })
+        } else {
+            setToast({
+                visible: true,
+                message: 'Ошибка загрузки аватара',
+                variant: 'error',
+            })
+        }
+    }
+
+    const handleAvatarPress = () => {
+        if (!isEditMode) {
+            handleEditStart()
+            return
+        }
+        Alert.alert('Изменить фото', 'Выберите источник', [
+            { text: 'Камера', onPress: () => pickAndUploadAvatar('camera') },
+            { text: 'Галерея', onPress: () => pickAndUploadAvatar('library') },
+            { text: 'Отмена', style: 'cancel' },
+        ])
     }
 
     // Loading state
