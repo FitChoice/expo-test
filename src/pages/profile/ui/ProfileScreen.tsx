@@ -4,27 +4,35 @@
  */
 
 import { useState, useEffect } from 'react'
-import { View, ScrollView, TouchableOpacity, Text } from 'react-native'
+import {
+    View,
+    ScrollView,
+    TouchableOpacity,
+    Text,
+    StyleSheet,
+    Image,
+} from 'react-native'
 import { useRouter } from 'expo-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as ImagePicker from 'expo-image-picker'
 import {
-    BackgroundLayout,
     AuthGuard,
     Toast,
-    Icon,
 } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { ProfileHeader } from '@/widgets/profile'
 import { userApi } from '@/features/user/api'
 import { getUserId, useNavbarLayout } from '@/shared/lib'
+import { Feather } from '@expo/vector-icons'
+
+const boySample = require('../../../../assets/images/profile_girl_sample.png')
 
 export const ProfileScreen = () => {
     return (
         <AuthGuard>
-            <BackgroundLayout>
+            <View style={styles.container}>
                 <ProfileContent />
-            </BackgroundLayout>
+            </View>
         </AuthGuard>
     )
 }
@@ -37,7 +45,7 @@ const ProfileContent = () => {
     // Local UI state
     const [userId, setUserId] = useState<number | null>(null)
     const [isEditMode, setIsEditMode] = useState(false)
-    const [editedName, setEditedName] = useState('')
+
     const [toast, setToast] = useState<{
 		visible: boolean
 		message: string
@@ -95,19 +103,13 @@ const ProfileContent = () => {
 
     // Handlers
     const handleEditStart = () => {
-        setEditedName(profile?.name || '')
+   
         setIsEditMode(true)
-    }
-
-    const handleSave = () => {
-        if (editedName.trim()) {
-            updateProfileMutation.mutate(editedName.trim())
-        }
     }
 
     const handleCancel = () => {
         setIsEditMode(false)
-        setEditedName('')
+       
     }
 
     const handleAvatarPress = async () => {
@@ -134,10 +136,12 @@ const ProfileContent = () => {
             quality: 0.8,
         })
 
-        if (!result.canceled && userId) {
+        const pickedAsset = result.assets?.[0]
+
+        if (!result.canceled && userId && pickedAsset) {
             const uploadResult = await userApi.updateAvatar(
                 userId.toString(),
-                result.assets[0].uri
+                pickedAsset.uri
             )
             if (uploadResult.success) {
                 queryClient.invalidateQueries({ queryKey: ['profile', userId] })
@@ -176,7 +180,10 @@ const ProfileContent = () => {
 
             <ScrollView
                 className="flex-1 px-5"
-                contentContainerStyle={{ paddingTop: 60, paddingBottom: contentPaddingBottom }}
+                contentContainerStyle={{
+                    paddingTop: 48,
+                    paddingBottom: contentPaddingBottom,
+                }}
                 showsVerticalScrollIndicator={false}
             >
                 <ProfileHeader
@@ -187,11 +194,7 @@ const ProfileContent = () => {
                     experience={profile.experience}
                     experienceToNextLevel={profile.experienceToNextLevel}
                     isEditMode={isEditMode}
-                    editedName={editedName}
-                    onNameChange={isEditMode ? setEditedName : handleEditStart}
                     onAvatarPress={handleAvatarPress}
-                    onSettingsPress={() => router.push('/settings')}
-                    onSave={handleSave}
                     onCancel={handleCancel}
                     isSaving={updateProfileMutation.isPending}
                 />
@@ -199,13 +202,30 @@ const ProfileContent = () => {
                 {/* CTA Banner */}
                 <TouchableOpacity
                     onPress={() => router.push('/survey')}
-                    className="mt-8 flex-row items-center justify-between rounded-[32px] bg-dark-500 p-6"
-                    activeOpacity={0.7}
+                    className="mt-8 overflow-hidden rounded-[24px] bg-[#1E1E1E]"
+                    activeOpacity={0.85}
+                    style={{ minHeight: 150, padding: 20 }}
                 >
-                    <Text className="flex-1 text-t2-bold text-white">
-						Изменить программу тренировок
-                    </Text>
-                    <Icon name="chevron-right" size={24} color="#FFFFFF" />
+                    <View className="flex-1 pr-16">
+                        <Text className="text-[16px] font-semibold text-white">
+                            Изменить программу тренировок
+                        </Text>
+                        <View className="mt-5 h-12 w-12 items-center justify-center rounded-full bg-[#A96CF5]">
+                            <Feather name="chevrons-right" size={24} color="white" />
+                        </View>
+                    </View>
+
+                    <Image
+                        source={boySample}
+                        style={{
+                            position: 'absolute',
+                            right: -8,
+                            bottom: -6,
+                            width: 160,
+                            height: 160,
+                            resizeMode: 'contain',
+                        }}
+                    />
                 </TouchableOpacity>
             </ScrollView>
 
@@ -213,3 +233,15 @@ const ProfileContent = () => {
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#151515', // BG/Dark 500 BG - контентный контейнер
+        ///borderRadius: 32,
+
+        position: 'relative', // Для позиционирования элементов
+        zIndex: 3, // Поверх браслета и заголовка
+        overflow: 'hidden', // Для корректного отображения градиента
+    },
+})
