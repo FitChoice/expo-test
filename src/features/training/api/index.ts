@@ -1,2 +1,2 @@
 export { trainingApi } from './trainingApi'
-export type { TrainingPlan, Activity } from './trainingApi'
+export type { TrainingPlan, TrainingPlanTraining, Activity } from './trainingApi'

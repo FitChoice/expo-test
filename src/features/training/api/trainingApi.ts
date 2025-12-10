@@ -20,6 +20,9 @@ export type TrainingPlanTraining = {
 	period_id: number,
 }
 
+export type TrainingPlanTrainingResponse = {
+
+}
 // Types for training responses
 export type TrainingPlan = {
 	data: TrainingPlanTraining[]

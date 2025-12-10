@@ -8,19 +8,28 @@ import {
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon, Button, BackgroundLayoutNoSidePadding, TrainingTags } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { useNavbarLayout } from '@/shared/lib'
-import type { Training } from '@/entities/training'
-import { useTrainingStore } from '@/entities/training'
-import { trainingApi, type TrainingPlan } from '@/features/training/api'
+import {
+    type Activity,
+    trainingApi,
+    type TrainingPlan,
+} from '@/features/training/api'
 import { getUserId } from '@/shared/lib/auth'
 import type { ApiResult } from '@/shared/api/types'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { Loader } from '@/shared/ui/Loader/Loader'
+
+import MorningExercise from '@/assets/images/morning_ex.svg'
+import Stretching from '@/assets/images/stretching.svg'
+import Barbell	 from '@/assets/images/barbell.svg'
+
+import { Feather } from '@expo/vector-icons'
 
 /**
  * Home screen - main page according to Figma design
@@ -38,10 +47,23 @@ export const HomeScreen = () => {
  */
 const MobileContent = () => {
     const router = useRouter()
-    const startTraining = useTrainingStore((state) => state.startTraining)
+    //  const startTraining = useTrainingStore((state) => state.startTraining)
     const { contentPaddingBottom } = useNavbarLayout()
 
     const [userId, setUserId] = useState<number | null>(null)
+    const [selectedDayIdx, setSelectedDayIdx] = useState(1)
+    const [selectedDateInternal, setSelectedDateInternal] = useState<string>(() => new Date().toISOString().slice(0, 10))
+    const [ selectedDayTraining, setSelectedDayTraining ] = useState<Activity[]>([])
+
+    useEffect(() => {
+        const trainingByDay = trainingDays?.data?.find((day) => day.date.slice(0, 10) == selectedDateInternal)
+
+        setSelectedDayTraining(trainingByDay?.activities ?? [])
+    }, [selectedDateInternal])
+   
+    const [calendarWidth, setCalendarWidth] = useState(0)
+    const scrollRef = useRef<ScrollView>(null)
+    const itemLayoutsRef = useRef<Record<string, { x: number; width: number }>>({})
 
     // Get user ID on mount
     useEffect(() => {
@@ -61,111 +83,174 @@ const MobileContent = () => {
         []
     )
 
-
+    const getDateKey = (value?: string | Date | null) => {
+        if (!value) return ''
+        const dateObj = typeof value === 'string' ? new Date(value) : value
+        if (Number.isNaN(dateObj.getTime())) return ''
+        return dateObj.toISOString().slice(0, 10)
+    }
     // Fetch training plan when userId is available
-    const { data: trainingDays } = useQuery<
+    const { data: trainingDays, isLoading } = useQuery<
         ApiResult<TrainingPlan>,
-        Error,
-        TrainingPlan
+        Error
     >({
         queryKey: ['trainingPlan', userId],
         queryFn: async () => {
             if (!userId) throw new Error('User ID is required')
             return await trainingApi.getTrainingPlan(userId)
         },
+        // select: (result) => {
+        //     if (!result?.success) return []
+        //     return result.data?.data ?? []
+
+        // },
+        // placeholderData: (previousData) => previousData,
+        staleTime: 5 * 60 * 1000,
         enabled: !!userId,
         retry: false,
     })
 
+    console.log('trainingDays')
+    console.log(trainingDays)
+	
     const calendarDays = useMemo(() => {
         return trainingDays?.data?.map((day, index) => {
             const parsedDate = day.date ? new Date(day.date) : null
             const isValidDate = parsedDate && !Number.isNaN(parsedDate.getTime())
             const safeDate = isValidDate ? parsedDate : null
+            const dateKey = getDateKey(safeDate)
 
             return {
                 key: String(day.id ?? day.date ?? index),
                 id: day.id,
+                dateKey,
                 dayNumber: safeDate ? String(safeDate.getDate()) : '--',
                 dayName: safeDate ? weekDayFormatter.format(safeDate).replace('.', '') : '',
             }
         })
-    }, [trainingDays, weekDayFormatter])
+    }, [trainingDays?.data, weekDayFormatter])
 
+    const resolvedSelectedDate = useMemo(() => {
+        if (!calendarDays?.length) return selectedDateInternal
 
-    const handleOpenDemo = () => {
-        const demo: Training = {
-            id: 295,
-            trainingType: 't7',
-            title: 'Ноги и Ягодицы + Пресс',
-            description:
-				'Создай своё лучшее тело от ягодиц до кубиков! Каждое приседание и подъем — это шаг к подтянутой фигуре и уверенности в себе. Заверши сессию укреплением кора и почувствуй, как твоё тело становится сильнее и гармоничнее.',
-            difficulty: 2,
-            experience: 60,
-            inventory: [1, 2, 3],
-            exercises: [
-                {
-                    id: 'squat',
-                    side: 'single',
-                    name: 'Классический присед с резинкой',
-                    rest_time: 10,
-                    duration: 5,
-                    progress: 15,
-                    sets: 2,
-                    reps: 2,
-                    isAi: false,
-                    VideoTheory:
-						'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-                    VideoPractice:
-						'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0.mp4',
+        const hasExplicit = calendarDays.some((day) => day.dateKey === selectedDateInternal)
+        if (hasExplicit) return selectedDateInternal
 
-                    isVertical: true,
-                },
+        const todayKey = getDateKey(new Date())
+        const hasToday = calendarDays.some((day) => day.dateKey === todayKey)
+        if (hasToday) return todayKey
 
-                {
-                    id: 'leg_abduction_l',
-                    side: 'single',
-                    name: 'Отведение ноги назад с опорой на локти ',
-                    rest_time: 10,
-                    duration: 5,
-                    progress: 15,
-                    sets: 2,
-                    reps: 2,
-                    isAi: false,
-                    VideoTheory:
-						'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-                    VideoPractice:
-						'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20%20-%20L.mp4',
-                    VideoPracticeSecond:
-						'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20-%20R.mp4',
+        return calendarDays[0]?.dateKey ?? selectedDateInternal
+    }, [calendarDays, selectedDateInternal])
 
-                    isVertical: false,
-                },
+    const scrollToDate = (dateKey: string) => {
+        if (!dateKey || !calendarWidth) return
+        const layout = itemLayoutsRef.current[dateKey]
+        if (!layout || !scrollRef.current) return
 
-                // {
-                //     'id': 'leg_abduction_r',
-                //     'side': 'both',
-                //     'name': 'Отведение ноги назад с опорой на локти ',
-                //     'rest_time': 40,
-                //     'duration': 5,
-                //     'progress': 15,
-                //     'sets': 2,
-                //     'reps': 5,
-                //     'isAi': false,
-                //     'VideoTheory': 'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-                //     'VideoPractice': 'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20%20-%20L.mp4',
-                //
-                //     'isVertical': false,
-                // },
-            ],
-        }
+        const offset = Math.max(0, layout.x - calendarWidth / 2 + layout.width / 2)
+        scrollRef.current.scrollTo({ x: offset, animated: true })
+    }
 
-        startTraining(demo)
-        router.push({ pathname: '/(training)/session', params: { trainingId: 1 } })
+    useEffect(() => {
+        scrollToDate(resolvedSelectedDate)
+    }, [resolvedSelectedDate, calendarWidth, calendarDays])
+
+    const handleOpenDemo = (trainingId: number) => {
+        // const demo: Training = {
+        //     id: 295,
+        //     trainingType: 't7',
+        //     title: 'Ноги и Ягодицы + Пресс',
+        //     description:
+        // 'Создай своё лучшее тело от ягодиц до кубиков! Каждое приседание и подъем — это шаг к подтянутой фигуре и уверенности в себе. Заверши сессию укреплением кора и почувствуй, как твоё тело становится сильнее и гармоничнее.',
+        //     difficulty: 2,
+        //     experience: 60,
+        //     inventory: [1, 2, 3],
+        //     exercises: [
+        //         {
+        //             id: 'squat',
+        //             side: 'single',
+        //             name: 'Классический присед с резинкой',
+        //             rest_time: 10,
+        //             duration: 5,
+        //             progress: 15,
+        //             sets: 2,
+        //             reps: 2,
+        //             isAi: false,
+        //             VideoTheory:
+        // 		'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+        //             VideoPractice:
+        // 		'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0.mp4',
+        //
+        //             isVertical: true,
+        //         },
+        //
+        //         {
+        //             id: 'leg_abduction_l',
+        //             side: 'single',
+        //             name: 'Отведение ноги назад с опорой на локти ',
+        //             rest_time: 10,
+        //             duration: 5,
+        //             progress: 15,
+        //             sets: 2,
+        //             reps: 2,
+        //             isAi: false,
+        //             VideoTheory:
+        // 		'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+        //             VideoPractice:
+        // 		'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20%20-%20L.mp4',
+        //             VideoPracticeSecond:
+        // 		'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20-%20R.mp4',
+        //
+        //             isVertical: false,
+        //         },
+        //
+        //         // {
+        //         //     'id': 'leg_abduction_r',
+        //         //     'side': 'both',
+        //         //     'name': 'Отведение ноги назад с опорой на локти ',
+        //         //     'rest_time': 40,
+        //         //     'duration': 5,
+        //         //     'progress': 15,
+        //         //     'sets': 2,
+        //         //     'reps': 5,
+        //         //     'isAi': false,
+        //         //     'VideoTheory': 'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+        //         //     'VideoPractice': 'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20%20-%20L.mp4',
+        //         //
+        //         //     'isVertical': false,
+        //         // },
+        //     ],
+        // }
+        //
+        // startTraining(demo)
+        router.push({ pathname: '/(training)/session', params: { trainingId } })
     }
 
     const handleOpenDiary = () => {
         router.push('/diary')
+    }
+
+    const getTrainingTitle = (activity: Activity) => {
+        return activity.Type.includes('t') ? 'Тренировка' :
+            activity.Type.includes('w') ? 'Зарядка' :
+                'Дополнительная тренировка'
+    }
+
+    const isFinishedTraining = (activity: Activity) => !activity?.Progress.includes(0)
+
+    const getTrainingIcon = (activity: Activity): Element => {
+
+        if (isFinishedTraining(activity)) {
+            return <Feather name="check" size={24} color="black" />
+        }
+        return activity?.Type.includes('t') ?  <Barbell/> :
+            activity?.Type.includes('w') ? <MorningExercise /> :
+                <Stretching />
+    }
+
+    if (isLoading )  {
+        return <Loader text="Загрузка тренировочного плана" />
     }
 
     return (
@@ -209,22 +294,46 @@ const MobileContent = () => {
                     <View style={styles.calendarContainer}>
                         {/* Calendar days */}
                         <ScrollView
+                            ref={scrollRef}
                             horizontal
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={styles.calendarDays}
+                            onLayout={(event) => setCalendarWidth(event.nativeEvent.layout.width)}
                         >
-                            {calendarDays?.map((day) => (
-                                <View key={day.key} style={styles.calendarDay}>
-                                    <View style={styles.dayCard}>
-                                        <Icon name="barbell" size={16} color="#FFFFFF" />
-                                        <View style={styles.dayInfo}>
-                                            <Text style={styles.dayNumber}>{day.dayNumber}</Text>
-                                            <Text style={styles.dayName}>{day.dayName}</Text>
+                            {calendarDays?.map((day, idx) => {
+                                const isSelected = day.dateKey === resolvedSelectedDate
+                                return (
+                                    <TouchableOpacity
+                                        key={day.key}
+                                        style={styles.calendarDay}
+                                        activeOpacity={0.8}
+                                        onLayout={(event) => {
+                                            const { x, width } = event.nativeEvent.layout
+                                            if (day.dateKey) {
+                                                itemLayoutsRef.current[day.dateKey] = { x, width }
+                                                if (isSelected) {
+                                                    scrollToDate(day.dateKey)
+                                                }
+                                            }
+                                        }}
+                                        onPress={() => {
+                                            if (day.dateKey) {
+                                                setSelectedDateInternal(day.dateKey)
+                                                setSelectedDayIdx(idx + 1)
+                                            }
+                                        }}
+                                    >
+                                        <View style={[styles.dayCard, isSelected && styles.dayCardSelected]}>
+                                            <Icon name="barbell" size={16} color="#FFFFFF" />
+                                            <View style={styles.dayInfo}>
+                                                <Text style={styles.dayNumber}>{day.dayNumber}</Text>
+                                                <Text style={styles.dayName}>{day.dayName}</Text>
+                                            </View>
                                         </View>
-                                    </View>
-                                    <View style={styles.dayDot} />
-                                </View>
-                            ))}
+                                        <View style={[styles.dayDot, isSelected && styles.dayDotSelected]} />
+                                    </TouchableOpacity>
+                                )
+                            })}
                         </ScrollView>
                     </View>
                 </View>
@@ -239,7 +348,7 @@ const MobileContent = () => {
                         </View>
 
                         <View style={styles.cardHeader}>
-                            <Text style={styles.dayTitle}>День 1</Text>
+                            <Text style={styles.dayTitle}>День {selectedDayIdx}</Text>
                             <Text style={styles.dayDescription}>
 								Самое время начать{'\n'}Первая тренировка уже ждёт тебя
                             </Text>
@@ -247,24 +356,27 @@ const MobileContent = () => {
                     </View>
                     {/* Action Buttons */}
                     <View style={styles.actionButtons}>
-                        <TouchableOpacity style={styles.actionButton} onPress={handleOpenDemo}>
-                            <View style={styles.buttonContent}>
-                                <View style={styles.buttonInfo}>
-                                    <Text style={styles.buttonTitle}>Тренировка</Text>
-                                    <TrainingTags
-                                        icon1={<MaterialIcons name="timer" size={16} color="white" />}
-                                        title1={'40 минут'}
-                                        icon2={
-                                            <MaterialCommunityIcons name="bow-arrow" size={16} color="white" />
-                                        }
-                                        title2={'+20 опыта'}
-                                    />
+                        {
+                            selectedDayTraining.map((training) =>  <TouchableOpacity key={training.ID}  style={styles.actionButton} onPress={() => handleOpenDemo(training.ID)}>
+                                <View style={styles.buttonContent}>
+                                    <View style={styles.buttonInfo}>
+                                        <Text style={styles.buttonTitle}>{getTrainingTitle(training)}</Text>
+                                        <TrainingTags
+                                            icon1={<MaterialIcons name="timer" size={16} color="white" />}
+                                            title1={`${training.Duration} мин.`}
+                                            icon2={
+                                                <MaterialCommunityIcons name="bow-arrow" size={16} color="white" />
+                                            }
+                                            title2={`+${training.Experience} опыт`}
+                                        />
+                                    </View>
+                                    <View style={[styles.buttonIcon, isFinishedTraining(training) ? { backgroundColor: '#aaec4d' } : { backgroundColor: '#a172ff' } ]}>
+                                        {/*<Icon name="barbell" size={32} color="white" />*/}
+                                        {getTrainingIcon(training)}
+                                    </View>
                                 </View>
-                                <View style={styles.buttonIcon}>
-                                    <Icon name="barbell" size={32} color="white" />
-                                </View>
-                            </View>
-                        </TouchableOpacity>
+                            </TouchableOpacity>)
+                        }
 
                         <TouchableOpacity style={styles.actionButton} onPress={handleOpenDiary}>
                             <View style={styles.buttonContent}>
@@ -279,7 +391,7 @@ const MobileContent = () => {
                                         title2={'+20 опыта'}
                                     />
                                 </View>
-                                <View style={styles.buttonIcon}>
+                                <View style={[styles.buttonIcon, { backgroundColor: '#a172ff' } ]} >
                                     <Icon name="diary" size={32} color="#A172FF" />
                                 </View>
                             </View>
@@ -356,7 +468,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         gap: 16,
-        paddingHorizontal: 49,
+        paddingHorizontal: 10,
     },
     calendarDay: {
         alignItems: 'center',
@@ -370,6 +482,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 8,
         minWidth: 60,
+    },
+    dayCardSelected: {
+        borderWidth: 1,
+        borderColor: 'white',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
     },
     dayInfo: {
         alignItems: 'center',
@@ -393,6 +510,9 @@ const styles = StyleSheet.create({
         height: 8,
         borderRadius: 4,
         backgroundColor: '#6E6E6E',
+    },
+    dayDotSelected: {
+        backgroundColor: '#aaec4d',
     },
     mainCard: {
         backgroundColor: 'black',
@@ -472,7 +592,6 @@ const styles = StyleSheet.create({
     buttonIcon: {
         width: 64,
         height: 64,
-        backgroundColor: '#A172FF',
         borderRadius: 99,
         justifyContent: 'center',
         alignItems: 'center',
