@@ -7,10 +7,12 @@ import {
     StyleSheet,
 } from 'react-native'
 import { GradientHeader } from '@/shared/ui/GradientBG'
-import { useState } from 'react'
-import { useRouter } from 'expo-router'
+import React, { useEffect, useRef, useState } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { SafeAreaContainer } from '@/shared/ui/SafeAreaContainer'
+import { dairyApi } from '@/features/dairy/api'
+import type { DiaryInput } from '@/features/dairy/api'
 import Emo1 from '@/assets/images/moods/emo1.svg'
 import Emo2 from '@/assets/images/moods/emo2.svg'
 import Emo3 from '@/assets/images/moods/emo3.svg'
@@ -30,6 +32,40 @@ const ratingOptions: RatingOption[] = [
     { id: 4, Icon: Emo4, color: '#6B7280' },
     { id: 5, Icon: Emo5, color: '#10B981' },
 ]
+
+const formatTimeInput = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 4)
+    let hours = digits.slice(0, 2)
+    let minutes = digits.slice(2, 4)
+
+    if (hours.length === 2) {
+        const hoursNum = Number(hours)
+        if (!Number.isNaN(hoursNum) && hoursNum > 23) {
+            hours = '23'
+        }
+    }
+
+    if (minutes.length === 2) {
+        const minutesNum = Number(minutes)
+        if (!Number.isNaN(minutesNum) && minutesNum > 59) {
+            minutes = '59'
+        }
+    }
+
+    if (digits.length <= 2) {
+        return hours
+    }
+
+    return `${hours}:${minutes}`
+}
+
+const normalizeTimeForSubmit = (value: string) => {
+    const digits = value.replace(/\D/g, '').padEnd(4, '0').slice(0, 4)
+    const hoursNum = Math.min(Number(digits.slice(0, 2)) || 0, 23)
+    const minutesNum = Math.min(Number(digits.slice(2, 4)) || 0, 59)
+
+    return `${String(hoursNum).padStart(2, '0')}:${String(minutesNum).padStart(2, '0')}`
+}
 
 interface QuestionSectionProps {
 	title: string
@@ -89,6 +125,8 @@ const QuestionSection = ({
 
 export const DiaryScreen = () => {
     const router = useRouter()
+    const { scheduleId } = useLocalSearchParams<{ scheduleId?: string }>()
+    const resolvedScheduleId = Number.isFinite(Number(scheduleId)) ? Number(scheduleId) : 0
     const [mood, setMood] = useState<number | null>(null)
     const [wellBeing, setWellBeing] = useState<number | null>(null)
     const [energyLevel, setEnergyLevel] = useState<number | null>(null)
@@ -96,6 +134,40 @@ export const DiaryScreen = () => {
     const [sleepTime, setSleepTime] = useState('00:00')
     const [wakeTime, setWakeTime] = useState('07:00')
     const [notes, setNotes] = useState('')
+
+    const diaryPayloadRef = useRef<DiaryInput>({
+        schedule_id: resolvedScheduleId,
+        diary_energy_level: energyLevel ?? 0,
+        diary_mood: mood ?? 0,
+        diary_note: notes,
+        diary_sleep_quality: sleepQuality ?? 0,
+        diary_sleep_time: normalizeTimeForSubmit(sleepTime),
+        diary_wake_time: normalizeTimeForSubmit(wakeTime),
+        diary_wellbeing: wellBeing ?? 0,
+    })
+
+    useEffect(() => {
+        diaryPayloadRef.current = {
+            schedule_id: resolvedScheduleId,
+            diary_energy_level: energyLevel ?? 0,
+            diary_mood: mood ?? 0,
+            diary_note: notes,
+            diary_sleep_quality: sleepQuality ?? 0,
+            diary_sleep_time: normalizeTimeForSubmit(sleepTime),
+            diary_wake_time: normalizeTimeForSubmit(wakeTime),
+            diary_wellbeing: wellBeing ?? 0,
+        }
+    }, [energyLevel, mood, notes, resolvedScheduleId, sleepQuality, sleepTime, wakeTime, wellBeing])
+
+    useEffect(() => {
+        return () => {
+            const payload = diaryPayloadRef.current
+
+            void dairyApi.upsertDiary(payload).catch(() => undefined)
+        }
+    }, [])
+
+
 
     const currentDate = new Date().toLocaleDateString('ru-RU', {
         day: 'numeric',
@@ -170,8 +242,10 @@ export const DiaryScreen = () => {
                                 <Text className="mb-2 text-sm text-gray-400">Засыпание</Text>
                                 <TextInput
                                     value={sleepTime}
-                                    onChangeText={setSleepTime}
+                                    onChangeText={(value) => setSleepTime(formatTimeInput(value))}
                                     className="rounded-xl bg-[#2E322D] px-4 py-3 text-white"
+                                    keyboardType="number-pad"
+                                    maxLength={5}
                                     placeholder="00:00"
                                     placeholderTextColor="#666"
                                 />
@@ -180,8 +254,10 @@ export const DiaryScreen = () => {
                                 <Text className="mb-2 text-sm text-gray-400">Пробуждение</Text>
                                 <TextInput
                                     value={wakeTime}
-                                    onChangeText={setWakeTime}
+                                    onChangeText={(value) => setWakeTime(formatTimeInput(value))}
                                     className="rounded-xl bg-[#2E322D] px-4 py-3 text-white"
+                                    keyboardType="number-pad"
+                                    maxLength={5}
                                     placeholder="07:00"
                                     placeholderTextColor="#666"
                                 />

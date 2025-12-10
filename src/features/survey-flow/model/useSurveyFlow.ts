@@ -14,6 +14,7 @@ import {
     type AgeGroup,
 } from '@/entities/survey'
 import { surveyApi } from '../api'
+import { userApi } from '@/features/user'
 
 // Битовая маска дней недели: 1=Пн, 2=Вт, 4=Ср, 8=Чт, 16=Пт, 32=Сб, 64=Вс
 const DAY_MASKS: Record<DayOfWeek, number> = {
@@ -351,7 +352,7 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
                 train_goals: masksToGoalsNumber(trainGoalsMasks) as any,
             }
 
-            const result = await surveyApi.submitSurvey(userId, dataToSend as SurveyData)
+            const result = await userApi.updateUser(userId, dataToSend as SurveyData)
 
             if (!result.success) {
                 return { success: false, error: result.error }

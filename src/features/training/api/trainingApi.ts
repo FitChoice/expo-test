@@ -5,10 +5,20 @@
 import { apiClient } from '@/shared/api'
 import type { ApiResult } from '@/shared/api/types'
 
+type Activity = {
+	Duration:number,
+	Experience: number,
+	ID: number,
+	Progress: number[],
+	Type: string,
+}
+
 // Types for training responses
 interface TrainingPlan {
-	// TODO: Define based on actual API response
-	[key: string]: unknown
+	activities: Activity[],
+	date: string,
+	id: number,
+	period_id: number,
 }
 
 interface TrainingReport {

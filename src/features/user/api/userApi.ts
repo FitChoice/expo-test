@@ -29,10 +29,10 @@ export const userApi = {
 	 * Update user data
 	 */
     async updateUser(
-        userId: string,
+        userId: number,
         data: UpdateProfileInput
     ): Promise<ApiResult<UserProfile>> {
-        return apiClient.post(`/user/update/${userId}`, data)
+        return apiClient.patch(`/user/update/${userId}`, data)
     },
 
     /**

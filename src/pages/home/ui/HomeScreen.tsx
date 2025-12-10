@@ -62,6 +62,7 @@ const MobileContent = () => {
         retry: false,
     })
 
+
     const handleOpenDemo = () => {
         const demo: Training = {
             id: 295,

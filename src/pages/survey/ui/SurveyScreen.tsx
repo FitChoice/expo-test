@@ -102,6 +102,7 @@ export const SurveyScreen = () => {
 
     const submitData = async () => {
         // Защита от повторных вызовов
+			
         if (isSubmittingData) {
             return
         }
@@ -136,6 +137,7 @@ export const SurveyScreen = () => {
             }
 
             // После успешной отправки опроса создаем план тренировок
+
             const planResult = await trainingApi.buildTrainingPlan(userId, {
                 time: new Date().toISOString(),
             })
