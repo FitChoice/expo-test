@@ -8,14 +8,15 @@ import {
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Icon, Button, BackgroundLayoutNoSidePadding, TrainingTags } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { useNavbarLayout } from '@/shared/lib'
 import type { Training } from '@/entities/training'
 import { useTrainingStore } from '@/entities/training'
-import { trainingApi } from '@/features/training/api'
+import { trainingApi, type TrainingPlan } from '@/features/training/api'
 import { getUserId } from '@/shared/lib/auth'
+import type { ApiResult } from '@/shared/api/types'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
@@ -51,8 +52,22 @@ const MobileContent = () => {
         fetchUserId()
     }, [])
 
+    const weekDayFormatter = useMemo(
+        () =>
+            new Intl.DateTimeFormat('ru-RU', {
+                weekday: 'short',
+                timeZone: 'UTC',
+            }),
+        []
+    )
+
+
     // Fetch training plan when userId is available
-    const { data: trainingPlan } = useQuery({
+    const { data: trainingDays } = useQuery<
+        ApiResult<TrainingPlan>,
+        Error,
+        TrainingPlan
+    >({
         queryKey: ['trainingPlan', userId],
         queryFn: async () => {
             if (!userId) throw new Error('User ID is required')
@@ -61,6 +76,21 @@ const MobileContent = () => {
         enabled: !!userId,
         retry: false,
     })
+
+    const calendarDays = useMemo(() => {
+        return trainingDays?.data?.map((day, index) => {
+            const parsedDate = day.date ? new Date(day.date) : null
+            const isValidDate = parsedDate && !Number.isNaN(parsedDate.getTime())
+            const safeDate = isValidDate ? parsedDate : null
+
+            return {
+                key: String(day.id ?? day.date ?? index),
+                id: day.id,
+                dayNumber: safeDate ? String(safeDate.getDate()) : '--',
+                dayName: safeDate ? weekDayFormatter.format(safeDate).replace('.', '') : '',
+            }
+        })
+    }, [trainingDays, weekDayFormatter])
 
 
     const handleOpenDemo = () => {
@@ -178,22 +208,24 @@ const MobileContent = () => {
                 <View style={styles.calendarSection}>
                     <View style={styles.calendarContainer}>
                         {/* Calendar days */}
-                        <View style={styles.calendarDays}>
-                            {['8', '10', '11', '12', '13', '14'].map((day, index) => (
-                                <View key={index} style={styles.calendarDay}>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.calendarDays}
+                        >
+                            {calendarDays?.map((day) => (
+                                <View key={day.key} style={styles.calendarDay}>
                                     <View style={styles.dayCard}>
                                         <Icon name="barbell" size={16} color="#FFFFFF" />
                                         <View style={styles.dayInfo}>
-                                            <Text style={styles.dayNumber}>{day}</Text>
-                                            <Text style={styles.dayName}>
-                                                {['пн', 'ср', 'чт', 'пт', 'сб', 'вс'][index]}
-                                            </Text>
+                                            <Text style={styles.dayNumber}>{day.dayNumber}</Text>
+                                            <Text style={styles.dayName}>{day.dayName}</Text>
                                         </View>
                                     </View>
                                     <View style={styles.dayDot} />
                                 </View>
                             ))}
-                        </View>
+                        </ScrollView>
                     </View>
                 </View>
 
