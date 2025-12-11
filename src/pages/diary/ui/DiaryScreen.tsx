@@ -7,10 +7,11 @@ import {
     StyleSheet,
 } from 'react-native'
 import { GradientHeader } from '@/shared/ui/GradientBG'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { SafeAreaContainer } from '@/shared/ui/SafeAreaContainer'
+import { Button } from '@/shared/ui/Button'
 import { dairyApi } from '@/features/dairy/api'
 import type { DiaryInput } from '@/features/dairy/api'
 import Emo1 from '@/assets/images/moods/emo1.svg'
@@ -18,6 +19,7 @@ import Emo2 from '@/assets/images/moods/emo2.svg'
 import Emo3 from '@/assets/images/moods/emo3.svg'
 import Emo4 from '@/assets/images/moods/emo4.svg'
 import Emo5 from '@/assets/images/moods/emo5.svg'
+
 
 interface RatingOption {
 	id: number
@@ -125,8 +127,7 @@ const QuestionSection = ({
 
 export const DiaryScreen = () => {
     const router = useRouter()
-    const { scheduleId } = useLocalSearchParams<{ scheduleId?: string }>()
-    const resolvedScheduleId = Number.isFinite(Number(scheduleId)) ? Number(scheduleId) : 0
+    const { id: resolvedScheduleId } =  useLocalSearchParams()
     const [mood, setMood] = useState<number | null>(null)
     const [wellBeing, setWellBeing] = useState<number | null>(null)
     const [energyLevel, setEnergyLevel] = useState<number | null>(null)
@@ -135,20 +136,14 @@ export const DiaryScreen = () => {
     const [wakeTime, setWakeTime] = useState('07:00')
     const [notes, setNotes] = useState('')
 
-    const diaryPayloadRef = useRef<DiaryInput>({
-        schedule_id: resolvedScheduleId,
-        diary_energy_level: energyLevel ?? 0,
-        diary_mood: mood ?? 0,
-        diary_note: notes,
-        diary_sleep_quality: sleepQuality ?? 0,
-        diary_sleep_time: normalizeTimeForSubmit(sleepTime),
-        diary_wake_time: normalizeTimeForSubmit(wakeTime),
-        diary_wellbeing: wellBeing ?? 0,
-    })
+    const isFormValid =
+        mood !== null && wellBeing !== null && energyLevel !== null && sleepQuality !== null
 
-    useEffect(() => {
-        diaryPayloadRef.current = {
-            schedule_id: resolvedScheduleId,
+    const handleSave = async () => {
+        console.log('resolvedScheduleId')
+        console.log(resolvedScheduleId)
+        const payload: DiaryInput = {
+            schedule_id: Number(resolvedScheduleId),
             diary_energy_level: energyLevel ?? 0,
             diary_mood: mood ?? 0,
             diary_note: notes,
@@ -157,17 +152,22 @@ export const DiaryScreen = () => {
             diary_wake_time: normalizeTimeForSubmit(wakeTime),
             diary_wellbeing: wellBeing ?? 0,
         }
-    }, [energyLevel, mood, notes, resolvedScheduleId, sleepQuality, sleepTime, wakeTime, wellBeing])
 
-    useEffect(() => {
-        return () => {
-            const payload = diaryPayloadRef.current
-
-            void dairyApi.upsertDiary(payload).catch(() => undefined)
+        try {
+            console.log('payload')
+            console.log(payload)
+            await dairyApi.upsertDiary(payload).then((res) => {
+                console.log('res')
+                console.log(res)
+                if (res.success) {
+                    router.navigate('/home')
+                }
+            })
+        
+        } catch (error) {
+            console.error('Failed to save diary:', error)
         }
-    }, [])
-
-
+    }
 
     const currentDate = new Date().toLocaleDateString('ru-RU', {
         day: 'numeric',
@@ -288,6 +288,14 @@ export const DiaryScreen = () => {
                         </Text>
                     </View>
                 </ScrollView>
+
+                {isFormValid && (
+                    <View className="px-4 pb-4 pt-2">
+                        <Button variant="primary" size="l" fullWidth onPress={handleSave}>
+                            Сохранить
+                        </Button>
+                    </View>
+                )}
             </SafeAreaContainer>
         </View>
     )

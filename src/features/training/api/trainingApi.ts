@@ -11,6 +11,7 @@ export type Activity = {
     ID: number,
     Progress: number[],
     Type: string,
+		is_diary_complete: boolean,
 }
 
 export type TrainingPlanTraining = {

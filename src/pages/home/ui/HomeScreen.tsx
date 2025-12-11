@@ -13,9 +13,7 @@ import { Icon, Button, BackgroundLayoutNoSidePadding, TrainingTags } from '@/sha
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { useNavbarLayout } from '@/shared/lib'
 import {
-    type Activity,
-    trainingApi,
-    type TrainingPlan,
+    type Activity, trainingApi, type TrainingPlan,
 } from '@/features/training/api'
 import { getUserId } from '@/shared/lib/auth'
 import type { ApiResult } from '@/shared/api/types'
@@ -30,6 +28,20 @@ import Stretching from '@/assets/images/stretching.svg'
 import Barbell	 from '@/assets/images/barbell.svg'
 
 import { Feather } from '@expo/vector-icons'
+
+type CalendarDays = {
+	key: string
+	id: number,
+	dateKey: string,
+	dayNumber: string
+	dayName: string
+}
+
+type SelectedDayInternal = {
+	day: string
+	dayIdx: number
+	dayId: number
+}
 
 /**
  * Home screen - main page according to Figma design
@@ -47,7 +59,6 @@ export const HomeScreen = () => {
  */
 const MobileContent = () => {
     const router = useRouter()
-    //  const startTraining = useTrainingStore((state) => state.startTraining)
     const { contentPaddingBottom } = useNavbarLayout()
 
     const [userId, setUserId] = useState<number | null>(null)
@@ -57,7 +68,6 @@ const MobileContent = () => {
 
     useEffect(() => {
         const trainingByDay = trainingDays?.data?.find((day) => day.date.slice(0, 10) == selectedDateInternal)
-
         setSelectedDayTraining(trainingByDay?.activities ?? [])
     }, [selectedDateInternal])
    
@@ -65,6 +75,25 @@ const MobileContent = () => {
     const scrollRef = useRef<ScrollView>(null)
     const itemLayoutsRef = useRef<Record<string, { x: number; width: number }>>({})
 
+    const { data: trainingDays, isLoading } = useQuery<
+		ApiResult<TrainingPlan>,
+		Error
+	>({
+	    queryKey: ['trainingPlan', userId],
+	    queryFn: async () => {
+	        if (!userId) throw new Error('User ID is required')
+	        return await trainingApi.getTrainingPlan(userId)
+	    },
+	    // select: (result) => {
+	    //     if (!result?.success) return []
+	    //     return result.data?.data ?? []
+
+	    // },
+	    // placeholderData: (previousData) => previousData,
+	    staleTime: 5 * 60 * 1000,
+	    enabled: !!userId,
+	    retry: false,
+	})
     // Get user ID on mount
     useEffect(() => {
         const fetchUserId = async () => {
@@ -89,26 +118,6 @@ const MobileContent = () => {
         if (Number.isNaN(dateObj.getTime())) return ''
         return dateObj.toISOString().slice(0, 10)
     }
-    // Fetch training plan when userId is available
-    const { data: trainingDays, isLoading } = useQuery<
-        ApiResult<TrainingPlan>,
-        Error
-    >({
-        queryKey: ['trainingPlan', userId],
-        queryFn: async () => {
-            if (!userId) throw new Error('User ID is required')
-            return await trainingApi.getTrainingPlan(userId)
-        },
-        // select: (result) => {
-        //     if (!result?.success) return []
-        //     return result.data?.data ?? []
-
-        // },
-        // placeholderData: (previousData) => previousData,
-        staleTime: 5 * 60 * 1000,
-        enabled: !!userId,
-        retry: false,
-    })
 
     console.log('trainingDays')
     console.log(trainingDays)
@@ -133,7 +142,7 @@ const MobileContent = () => {
     const resolvedSelectedDate = useMemo(() => {
         if (!calendarDays?.length) return selectedDateInternal
 
-        const hasExplicit = calendarDays.some((day) => day.dateKey === selectedDateInternal)
+        const hasExplicit = calendarDays.some((day) => day.id === selectedDateInternal.dayId)
         if (hasExplicit) return selectedDateInternal
 
         const todayKey = getDateKey(new Date())
@@ -157,78 +166,12 @@ const MobileContent = () => {
     }, [resolvedSelectedDate, calendarWidth, calendarDays])
 
     const handleOpenDemo = (trainingId: number) => {
-        // const demo: Training = {
-        //     id: 295,
-        //     trainingType: 't7',
-        //     title: 'Ноги и Ягодицы + Пресс',
-        //     description:
-        // 'Создай своё лучшее тело от ягодиц до кубиков! Каждое приседание и подъем — это шаг к подтянутой фигуре и уверенности в себе. Заверши сессию укреплением кора и почувствуй, как твоё тело становится сильнее и гармоничнее.',
-        //     difficulty: 2,
-        //     experience: 60,
-        //     inventory: [1, 2, 3],
-        //     exercises: [
-        //         {
-        //             id: 'squat',
-        //             side: 'single',
-        //             name: 'Классический присед с резинкой',
-        //             rest_time: 10,
-        //             duration: 5,
-        //             progress: 15,
-        //             sets: 2,
-        //             reps: 2,
-        //             isAi: false,
-        //             VideoTheory:
-        // 		'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-        //             VideoPractice:
-        // 		'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0.mp4',
-        //
-        //             isVertical: true,
-        //         },
-        //
-        //         {
-        //             id: 'leg_abduction_l',
-        //             side: 'single',
-        //             name: 'Отведение ноги назад с опорой на локти ',
-        //             rest_time: 10,
-        //             duration: 5,
-        //             progress: 15,
-        //             sets: 2,
-        //             reps: 2,
-        //             isAi: false,
-        //             VideoTheory:
-        // 		'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-        //             VideoPractice:
-        // 		'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20%20-%20L.mp4',
-        //             VideoPracticeSecond:
-        // 		'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20-%20R.mp4',
-        //
-        //             isVertical: false,
-        //         },
-        //
-        //         // {
-        //         //     'id': 'leg_abduction_r',
-        //         //     'side': 'both',
-        //         //     'name': 'Отведение ноги назад с опорой на локти ',
-        //         //     'rest_time': 40,
-        //         //     'duration': 5,
-        //         //     'progress': 15,
-        //         //     'sets': 2,
-        //         //     'reps': 5,
-        //         //     'isAi': false,
-        //         //     'VideoTheory': 'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-        //         //     'VideoPractice': 'https://storage.yandexcloud.net/fitdb/trainings/0009%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%20%20-%20L.mp4',
-        //         //
-        //         //     'isVertical': false,
-        //         // },
-        //     ],
-        // }
-        //
-        // startTraining(demo)
+    
         router.push({ pathname: '/(training)/session', params: { trainingId } })
     }
 
-    const handleOpenDiary = () => {
-        router.push('/diary')
+    const handleOpenDiary = (schedulerId: number) => {
+        router.push({ pathname: '/diary', params: { id:schedulerId } })
     }
 
     const getTrainingTitle = (activity: Activity) => {
@@ -239,7 +182,7 @@ const MobileContent = () => {
 
     const isFinishedTraining = (activity: Activity) => !activity?.Progress.includes(0)
 
-    const getTrainingIcon = (activity: Activity): Element => {
+    const getTrainingIcon = (activity: Activity): React.ReactNode => {
 
         if (isFinishedTraining(activity)) {
             return <Feather name="check" size={24} color="black" />
@@ -350,14 +293,15 @@ const MobileContent = () => {
                         <View style={styles.cardHeader}>
                             <Text style={styles.dayTitle}>День {selectedDayIdx}</Text>
                             <Text style={styles.dayDescription}>
-								Самое время начать{'\n'}Первая тренировка уже ждёт тебя
+								Самое время начать{'\n'}Тренировка уже ждёт тебя
                             </Text>
                         </View>
                     </View>
                     {/* Action Buttons */}
-                    <View style={styles.actionButtons}>
-                        {
-                            selectedDayTraining.map((training) =>  <TouchableOpacity key={training.ID}  style={styles.actionButton} onPress={() => handleOpenDemo(training.ID)}>
+									
+                    {
+                        selectedDayTraining.map((training, idx) =>  <View  key={training.ID}  style={styles.actionButtons}>
+                            <TouchableOpacity style={styles.actionButton} onPress={() => handleOpenDemo(training.ID)}>
                                 <View style={styles.buttonContent}>
                                     <View style={styles.buttonInfo}>
                                         <Text style={styles.buttonTitle}>{getTrainingTitle(training)}</Text>
@@ -375,28 +319,31 @@ const MobileContent = () => {
                                         {getTrainingIcon(training)}
                                     </View>
                                 </View>
-                            </TouchableOpacity>)
-                        }
+                            </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.actionButton} onPress={handleOpenDiary}>
-                            <View style={styles.buttonContent}>
-                                <View style={styles.buttonInfo}>
-                                    <Text style={styles.buttonTitle}>Дневник</Text>
-                                    <TrainingTags
-                                        icon1={<MaterialIcons name="timer" size={16} color="white" />}
-                                        title1={'40 минут'}
-                                        icon2={
-                                            <MaterialCommunityIcons name="bow-arrow" size={16} color="white" />
+                            { selectedDayTraining.length - 1 == idx && <TouchableOpacity style={styles.actionButton} onPress={() => handleOpenDiary(training.ID)}>
+                                <View style={styles.buttonContent}>
+                                    <View style={styles.buttonInfo}>
+                                        <Text style={styles.buttonTitle}>Дневник</Text>
+                                        <TrainingTags
+                                            icon1={<MaterialIcons name="timer" size={16} color="white" />}
+                                            title1={'40 минут'}
+                                            icon2={
+                                                <MaterialCommunityIcons name="bow-arrow" size={16} color="white" />
+                                            }
+                                            title2={'+20 опыта'}
+                                        />
+                                    </View>
+                                    <View style={[styles.buttonIcon, { backgroundColor:training.is_diary_complete ? '#aaec4d' :  '#a172ff' } ]} >
+                                        {
+                                            training.is_diary_complete ? <Feather name="check" size={24} color="black" /> :  <Icon name="diary" size={32} color="#A172FF" />
                                         }
-                                        title2={'+20 опыта'}
-                                    />
+                                    </View>
                                 </View>
-                                <View style={[styles.buttonIcon, { backgroundColor: '#a172ff' } ]} >
-                                    <Icon name="diary" size={32} color="#A172FF" />
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
+                            </TouchableOpacity>
+                            }
+                        </View>)
+                    }
                 </View>
             </ScrollView>
 
@@ -545,6 +492,7 @@ const styles = StyleSheet.create({
     },
     actionButtons: {
         gap: 8,
+        marginBottom: 8
     },
     actionButton: {
         backgroundColor: '#3F3F3F',
