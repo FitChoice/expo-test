@@ -8,7 +8,7 @@ import {
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon, Button, BackgroundLayoutNoSidePadding, TrainingTags } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { useNavbarLayout } from '@/shared/lib'
@@ -63,37 +63,36 @@ const MobileContent = () => {
 
     const [userId, setUserId] = useState<number | null>(null)
     const [selectedDayIdx, setSelectedDayIdx] = useState(1)
-    const [selectedDateInternal, setSelectedDateInternal] = useState<string>(() => new Date().toISOString().slice(0, 10))
+    const [selectedDateInternal, setSelectedDateInternal] = useState<string>(() => {
+        const d = new Date()
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    })
+    const { data: trainingDays, isLoading } = useQuery<
+        ApiResult<TrainingPlan>,
+        Error
+    >({
+        queryKey: ['trainingPlan', userId],
+        queryFn: async () => {
+            if (!userId) throw new Error('User ID is required')
+            return await trainingApi.getTrainingPlan(userId)
+        },
+        staleTime: 5 * 60 * 1000,
+        enabled: !!userId,
+        retry: false,
+    })
+
     const [ selectedDayTraining, setSelectedDayTraining ] = useState<Activity[]>([])
 
     useEffect(() => {
-        const trainingByDay = trainingDays?.data?.find((day) => day.date.slice(0, 10) == selectedDateInternal)
+        if (!trainingDays?.success) return
+        const trainingByDay = trainingDays.data.find((day) => day.date.slice(0, 10) == selectedDateInternal)
         setSelectedDayTraining(trainingByDay?.activities ?? [])
-    }, [selectedDateInternal])
-   
+    }, [selectedDateInternal, trainingDays])
+
     const [calendarWidth, setCalendarWidth] = useState(0)
     const scrollRef = useRef<ScrollView>(null)
     const itemLayoutsRef = useRef<Record<string, { x: number; width: number }>>({})
 
-    const { data: trainingDays, isLoading } = useQuery<
-		ApiResult<TrainingPlan>,
-		Error
-	>({
-	    queryKey: ['trainingPlan', userId],
-	    queryFn: async () => {
-	        if (!userId) throw new Error('User ID is required')
-	        return await trainingApi.getTrainingPlan(userId)
-	    },
-	    // select: (result) => {
-	    //     if (!result?.success) return []
-	    //     return result.data?.data ?? []
-
-	    // },
-	    // placeholderData: (previousData) => previousData,
-	    staleTime: 5 * 60 * 1000,
-	    enabled: !!userId,
-	    retry: false,
-	})
     // Get user ID on mount
     useEffect(() => {
         const fetchUserId = async () => {
@@ -114,20 +113,26 @@ const MobileContent = () => {
 
     const getDateKey = (value?: string | Date | null) => {
         if (!value) return ''
-        const dateObj = typeof value === 'string' ? new Date(value) : value
+        if (typeof value === 'string') return value.slice(0, 10)
+        
+        const dateObj = value
         if (Number.isNaN(dateObj.getTime())) return ''
-        return dateObj.toISOString().slice(0, 10)
+        
+        const year = dateObj.getFullYear()
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+        const day = String(dateObj.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
     }
 
-    console.log('trainingDays')
-    console.log(trainingDays)
 	
     const calendarDays = useMemo(() => {
+        if (!trainingDays?.success) return []
+        console.log(trainingDays)
         return trainingDays?.data?.map((day, index) => {
             const parsedDate = day.date ? new Date(day.date) : null
             const isValidDate = parsedDate && !Number.isNaN(parsedDate.getTime())
             const safeDate = isValidDate ? parsedDate : null
-            const dateKey = getDateKey(safeDate)
+            const dateKey = day.date ? day.date.slice(0, 10) : getDateKey(safeDate)
 
             return {
                 key: String(day.id ?? day.date ?? index),
@@ -137,12 +142,12 @@ const MobileContent = () => {
                 dayName: safeDate ? weekDayFormatter.format(safeDate).replace('.', '') : '',
             }
         })
-    }, [trainingDays?.data, weekDayFormatter])
+    }, [trainingDays, weekDayFormatter])
 
     const resolvedSelectedDate = useMemo(() => {
         if (!calendarDays?.length) return selectedDateInternal
 
-        const hasExplicit = calendarDays.some((day) => day.id === selectedDateInternal.dayId)
+        const hasExplicit = calendarDays.some((day) => day.dateKey === selectedDateInternal)
         if (hasExplicit) return selectedDateInternal
 
         const todayKey = getDateKey(new Date())
