@@ -9,6 +9,7 @@ import {
 import { GradientHeader } from '@/shared/ui/GradientBG'
 import React, { useEffect, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { SafeAreaContainer } from '@/shared/ui/SafeAreaContainer'
 import { Button } from '@/shared/ui/Button'
@@ -19,6 +20,7 @@ import Emo2 from '@/assets/images/moods/emo2.svg'
 import Emo3 from '@/assets/images/moods/emo3.svg'
 import Emo4 from '@/assets/images/moods/emo4.svg'
 import Emo5 from '@/assets/images/moods/emo5.svg'
+import { showToast } from '@/shared/lib'
 
 
 interface RatingOption {
@@ -127,6 +129,7 @@ const QuestionSection = ({
 
 export const DiaryScreen = () => {
     const router = useRouter()
+    const queryClient = useQueryClient()
     const { id: resolvedScheduleId } =  useLocalSearchParams()
     const [mood, setMood] = useState<number | null>(null)
     const [wellBeing, setWellBeing] = useState<number | null>(null)
@@ -140,8 +143,7 @@ export const DiaryScreen = () => {
         mood !== null && wellBeing !== null && energyLevel !== null && sleepQuality !== null
 
     const handleSave = async () => {
-        console.log('resolvedScheduleId')
-        console.log(resolvedScheduleId)
+
         const payload: DiaryInput = {
             schedule_id: Number(resolvedScheduleId),
             diary_energy_level: energyLevel ?? 0,
@@ -154,17 +156,21 @@ export const DiaryScreen = () => {
         }
 
         try {
-            console.log('payload')
-            console.log(payload)
-            await dairyApi.upsertDiary(payload).then((res) => {
-                console.log('res')
-                console.log(res)
+
+            await dairyApi.upsertDiary(payload).then(async (res) => {
+                // console.log('invalidated trainingPlan')
+                // console.log(res)
                 if (res.success) {
+                    showToast.success('Данные сохранены')
+                    await queryClient.invalidateQueries({ queryKey: ['trainingPlan'] })
+                    // console.log('invalidated trainingPlan')
+                    // console.log(res)
                     router.navigate('/home')
                 }
             })
         
         } catch (error) {
+            showToast.error('Что-то пошло не так')
             console.error('Failed to save diary:', error)
         }
     }

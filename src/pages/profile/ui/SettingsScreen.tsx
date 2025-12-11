@@ -21,14 +21,13 @@ import {
     SettingsItem,
     Icon,
     ConfirmModal,
-    Toast,
     Avatar,
 } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { SettingsSection, FAQAccordion } from '@/widgets/profile'
 import { userApi } from '@/features/user/api'
 import type { NotificationSettings } from '@/features/user/api'
-import { getUserId, clearAuthData, useNavbarLayout } from '@/shared/lib'
+import { getUserId, clearAuthData, useNavbarLayout, showToast } from '@/shared/lib'
 import { useProfileQuery } from '@/features/user/hooks/useProfileQuery'
 import { pickAvatarImage, type AvatarPickSource } from '@/shared/lib/media/pickAvatarImage'
 import {
@@ -47,15 +46,6 @@ export const SettingsScreen = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [showLogoutModal, setShowLogoutModal] = useState(false)
     const [isUpdatingAvatar, setIsUpdatingAvatar] = useState(false)
-    const [toast, setToast] = useState<{
-		visible: boolean
-		message: string
-		variant: 'success' | 'error'
-	}>({
-	    visible: false,
-	    message: '',
-	    variant: 'success',
-	})
 
     useEffect(() => {
         getUserId().then(setUserId)
@@ -86,11 +76,7 @@ export const SettingsScreen = () => {
             queryClient.invalidateQueries({ queryKey: ['notifications', userId] })
         },
         onError: () => {
-            setToast({
-                visible: true,
-                message: 'Ошибка сохранения настроек',
-                variant: 'error',
-            })
+            showToast.error('Ошибка сохранения настроек')
         },
     })
 
@@ -105,11 +91,7 @@ export const SettingsScreen = () => {
             router.replace('/auth')
         },
         onError: () => {
-            setToast({
-                visible: true,
-                message: 'Ошибка удаления аккаунта',
-                variant: 'error',
-            })
+            showToast.error('Ошибка удаления аккаунта')
         },
     })
 
@@ -139,22 +121,14 @@ export const SettingsScreen = () => {
         const result = await pickAvatarImage(source)
 
         if (result.status === 'denied') {
-            setToast({
-                visible: true,
-                message: 'Нужно разрешение на доступ к фото/камере',
-                variant: 'error',
-            })
+            showToast.error('Нужно разрешение на доступ к фото/камере')
             return
         }
 
         if (result.status !== 'picked') return
 
         if (!userId) {
-            setToast({
-                visible: true,
-                message: 'Не найден пользователь',
-                variant: 'error',
-            })
+            showToast.error('Не найден пользователь')
             return
         }
 
@@ -167,17 +141,9 @@ export const SettingsScreen = () => {
 
         if (uploadResult.success) {
             queryClient.invalidateQueries({ queryKey: ['profile', userId] })
-            setToast({
-                visible: true,
-                message: 'Аватар обновлен',
-                variant: 'success',
-            })
+            showToast.success('Аватар обновлен')
         } else {
-            setToast({
-                visible: true,
-                message: 'Ошибка загрузки аватара',
-                variant: 'error',
-            })
+            showToast.error('Ошибка загрузки аватара')
         }
     }
 
@@ -191,11 +157,7 @@ export const SettingsScreen = () => {
 
     const handleOpenURL = (url: string) => {
         Linking.openURL(url).catch(() => {
-            setToast({
-                visible: true,
-                message: 'Не удалось открыть ссылку',
-                variant: 'error',
-            })
+            showToast.error('Не удалось открыть ссылку')
         })
     }
 
@@ -209,13 +171,6 @@ export const SettingsScreen = () => {
 
     return (
         <View style={styles.container}>
-            <Toast
-                visible={toast.visible}
-                message={toast.message}
-                variant={toast.variant}
-                onHide={() => setToast((prev) => ({ ...prev, visible: false }))}
-            />
-
             <View className="flex-1">
                 <View className="px-5 pt-4">
                     <BackButton onPress={() => router.back()} />
@@ -353,11 +308,7 @@ export const SettingsScreen = () => {
                             label="Оценить приложение"
                             onPress={() => {
                                 // App Store / Google Play rating
-                                setToast({
-                                    visible: true,
-                                    message: 'Спасибо за интерес!',
-                                    variant: 'success',
-                                })
+                                showToast.success('Спасибо за интерес!')
                             }}
                             showDivider={false}
                             rightElement={

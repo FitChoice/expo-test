@@ -29,20 +29,6 @@ import Barbell	 from '@/assets/images/barbell.svg'
 
 import { Feather } from '@expo/vector-icons'
 
-type CalendarDays = {
-	key: string
-	id: number,
-	dateKey: string,
-	dayNumber: string
-	dayName: string
-}
-
-type SelectedDayInternal = {
-	day: string
-	dayIdx: number
-	dayId: number
-}
-
 /**
  * Home screen - main page according to Figma design
  */
@@ -63,10 +49,12 @@ const MobileContent = () => {
 
     const [userId, setUserId] = useState<number | null>(null)
     const [selectedDayIdx, setSelectedDayIdx] = useState(1)
+    const [selectedDayId, setSelectedDayId] = useState(0)
     const [selectedDateInternal, setSelectedDateInternal] = useState<string>(() => {
         const d = new Date()
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     })
+
     const { data: trainingDays, isLoading } = useQuery<
         ApiResult<TrainingPlan>,
         Error
@@ -83,10 +71,22 @@ const MobileContent = () => {
 
     const [ selectedDayTraining, setSelectedDayTraining ] = useState<Activity[]>([])
 
+    console.log('trainingDays')
+    console.log(trainingDays)
+    console.log('selectedDayIdx')
+    console.log(selectedDayIdx)
+
+    console.log('selectedDayTraining')
+    console.log(selectedDayTraining)
+
     useEffect(() => {
         if (!trainingDays?.success) return
-        const trainingByDay = trainingDays.data.find((day) => day.date.slice(0, 10) == selectedDateInternal)
-        setSelectedDayTraining(trainingByDay?.activities ?? [])
+        const trainingByDayIdx = trainingDays.data.findIndex((day) => day.date.slice(0, 10) == selectedDateInternal)
+        setSelectedDayTraining(trainingDays.data[trainingByDayIdx]?.activities ?? [])
+
+        setSelectedDayIdx(trainingByDayIdx)
+        setSelectedDayId(trainingDays.data[trainingByDayIdx]?.id)
+			
     }, [selectedDateInternal, trainingDays])
 
     const [calendarWidth, setCalendarWidth] = useState(0)
@@ -123,11 +123,9 @@ const MobileContent = () => {
         const day = String(dateObj.getDate()).padStart(2, '0')
         return `${year}-${month}-${day}`
     }
-
 	
     const calendarDays = useMemo(() => {
         if (!trainingDays?.success) return []
-        console.log(trainingDays)
         return trainingDays?.data?.map((day, index) => {
             const parsedDate = day.date ? new Date(day.date) : null
             const isValidDate = parsedDate && !Number.isNaN(parsedDate.getTime())
@@ -175,8 +173,8 @@ const MobileContent = () => {
         router.push({ pathname: '/(training)/session', params: { trainingId } })
     }
 
-    const handleOpenDiary = (schedulerId: number) => {
-        router.push({ pathname: '/diary', params: { id:schedulerId } })
+    const handleOpenDiary = (id: number) => {
+        router.push({ pathname: '/diary', params: { id } })
     }
 
     const getTrainingTitle = (activity: Activity) => {
@@ -267,7 +265,6 @@ const MobileContent = () => {
                                         onPress={() => {
                                             if (day.dateKey) {
                                                 setSelectedDateInternal(day.dateKey)
-                                                setSelectedDayIdx(idx + 1)
                                             }
                                         }}
                                     >
@@ -326,7 +323,7 @@ const MobileContent = () => {
                                 </View>
                             </TouchableOpacity>
 
-                            { selectedDayTraining.length - 1 == idx && <TouchableOpacity style={styles.actionButton} onPress={() => handleOpenDiary(training.ID)}>
+                            { selectedDayTraining.length - 1 == idx && <TouchableOpacity style={styles.actionButton} onPress={() => handleOpenDiary(selectedDayId)}>
                                 <View style={styles.buttonContent}>
                                     <View style={styles.buttonInfo}>
                                         <Text style={styles.buttonTitle}>Дневник</Text>
@@ -339,7 +336,7 @@ const MobileContent = () => {
                                             title2={'+20 опыта'}
                                         />
                                     </View>
-                                    <View style={[styles.buttonIcon, { backgroundColor:training.is_diary_complete ? '#aaec4d' :  '#a172ff' } ]} >
+                                    <View style={[styles.buttonIcon, { backgroundColor: trainingDays?.data[selectedDayIdx].is_diary_complete ? '#aaec4d' :  '#a172ff' } ]} >
                                         {
                                             training.is_diary_complete ? <Feather name="check" size={24} color="black" /> :  <Icon name="diary" size={32} color="#A172FF" />
                                         }

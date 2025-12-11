@@ -1,5 +1,11 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import {
+    MutationCache,
+    QueryCache,
+    QueryClient,
+    QueryClientProvider,
+} from '@tanstack/react-query'
 import { type ReactNode } from 'react'
+import { showToast } from '@/shared/lib'
 
 /**
  * Query client configuration
@@ -17,6 +23,16 @@ const queryClient = new QueryClient({
             refetchOnWindowFocus: false,
         },
     },
+    queryCache: new QueryCache({
+        onError: (error) => {
+            showToast.error(error.message)
+        },
+    }),
+    mutationCache: new MutationCache({
+        onError: (error) => {
+            showToast.error(error.message)
+        },
+    }),
 })
 
 interface QueryProviderProps {

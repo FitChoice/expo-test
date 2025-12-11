@@ -6,10 +6,10 @@
 import { useState } from 'react'
 import { View, ScrollView, Text } from 'react-native'
 import { useRouter } from 'expo-router'
-import { BackgroundLayout, BackButton, Input, Button, Toast } from '@/shared/ui'
+import { BackgroundLayout, BackButton, Input, Button } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { userApi } from '@/features/user/api'
-import { getUserId, useNavbarLayout } from '@/shared/lib'
+import { getUserId, useNavbarLayout, showToast } from '@/shared/lib'
 
 interface FormErrors {
 	oldPassword?: string
@@ -27,7 +27,6 @@ export const ChangePasswordScreen = () => {
     const [confirmPassword, setConfirmPassword] = useState('')
     const [errors, setErrors] = useState<FormErrors>({})
     const [isLoading, setIsLoading] = useState(false)
-    const [showToast, setShowToast] = useState(false)
 
     const clearError = (field: keyof FormErrors) => {
         setErrors((prev) => ({ ...prev, [field]: undefined }))
@@ -76,7 +75,7 @@ export const ChangePasswordScreen = () => {
             )
 
             if (result.success) {
-                setShowToast(true)
+                showToast.success('Пароль успешно изменён')
                 setOldPassword('')
                 setNewPassword('')
                 setConfirmPassword('')
@@ -104,13 +103,6 @@ export const ChangePasswordScreen = () => {
 
     return (
         <BackgroundLayout>
-            <Toast
-                visible={showToast}
-                message="Пароль успешно изменён"
-                variant="success"
-                onHide={() => setShowToast(false)}
-            />
-
             <View className="flex-1 px-5">
                 <View className="pt-4">
                     <BackButton onPress={() => router.back()} />
