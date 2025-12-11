@@ -7,7 +7,7 @@ import {
     StyleSheet,
 } from 'react-native'
 import { GradientHeader } from '@/shared/ui/GradientBG'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
@@ -166,6 +166,8 @@ export const DiaryScreen = () => {
                     // console.log('invalidated trainingPlan')
                     // console.log(res)
                     router.navigate('/home')
+                } else {
+                    showToast.error(res.error || 'Ошибка сохранения')
                 }
             })
         

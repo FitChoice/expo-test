@@ -29,3 +29,19 @@ export const formatFileSize = (bytes: number): string => {
     if (!size) return `${bytes} B`
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${size}`
 }
+
+/**
+ * Форматирует время из строки "HH:MM:SS" в "HH:MM"
+ * @param time - строка времени
+ * @returns строка в формате "HH:MM"
+ */
+export const formatTime = (time: string): string => {
+    if (!time) return ''
+    // Берем первые 5 символов для формата HH:MM
+    // Это работает для строк вида "08:30:00" или "08:30"
+    if (time.includes(':')) {
+        const parts = time.split(':')
+        return `${parts[0]}:${parts[1]}`
+    }
+    return time
+}

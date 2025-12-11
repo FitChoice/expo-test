@@ -19,15 +19,14 @@ export type TrainingPlanTraining = {
 	date: string,
 	id: number,
 	period_id: number,
+    is_diary_complete: boolean
 }
 
 export type TrainingPlanTrainingResponse = {
 
 }
 // Types for training responses
-export type TrainingPlan = {
-	data: TrainingPlanTraining[]
-}
+export type TrainingPlan = TrainingPlanTraining[]
 
 interface TrainingReport {
 	// TODO: Define based on actual API response

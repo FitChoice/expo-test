@@ -71,14 +71,6 @@ const MobileContent = () => {
 
     const [ selectedDayTraining, setSelectedDayTraining ] = useState<Activity[]>([])
 
-    console.log('trainingDays')
-    console.log(trainingDays)
-    console.log('selectedDayIdx')
-    console.log(selectedDayIdx)
-
-    console.log('selectedDayTraining')
-    console.log(selectedDayTraining)
-
     useEffect(() => {
         if (!trainingDays?.success) return
         const trainingByDayIdx = trainingDays.data.findIndex((day) => day.date.slice(0, 10) == selectedDateInternal)
