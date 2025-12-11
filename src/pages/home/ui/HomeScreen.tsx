@@ -69,6 +69,7 @@ const MobileContent = () => {
         retry: false,
     })
 
+
     const [ selectedDayTraining, setSelectedDayTraining ] = useState<Activity[]>([])
 
     useEffect(() => {
@@ -160,13 +161,19 @@ const MobileContent = () => {
         scrollToDate(resolvedSelectedDate)
     }, [resolvedSelectedDate, calendarWidth, calendarDays])
 
-    const handleOpenDemo = (trainingId: number) => {
+    const handleOpenTarining = (trainingId: number) => {
     
-        router.push({ pathname: '/(training)/session', params: { trainingId } })
+        router.push({ pathname: `/(training)/${trainingId}` })
     }
 
     const handleOpenDiary = (id: number) => {
-        router.push({ pathname: '/diary', params: { id } })
+        const day = trainingDays?.success ? trainingDays.data.find((d) => d.id === id) : undefined
+
+        if (day?.is_diary_complete) {
+            router.push({ pathname: '/diary/completed', params: { id } })
+        } else {
+            router.push({ pathname: '/diary', params: { id } })
+        }
     }
 
     const getTrainingTitle = (activity: Activity) => {
@@ -295,7 +302,7 @@ const MobileContent = () => {
 									
                     {
                         selectedDayTraining.map((training, idx) =>  <View  key={training.ID}  style={styles.actionButtons}>
-                            <TouchableOpacity style={styles.actionButton} onPress={() => handleOpenDemo(training.ID)}>
+                            <TouchableOpacity style={styles.actionButton} onPress={() => handleOpenTarining(training.ID)}>
                                 <View style={styles.buttonContent}>
                                     <View style={styles.buttonInfo}>
                                         <Text style={styles.buttonTitle}>{getTrainingTitle(training)}</Text>

@@ -33,7 +33,8 @@ type ExerciseFlowProps = {
 
 export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     useKeepAwake()
-    const [currentStep, setCurrentStep] = useState<ExerciseStep>('execution')
+    const showTutorial = useTrainingStore((state) => state.showTutorial)
+    const [currentStep, setCurrentStep] = useState<ExerciseStep>(showTutorial ? 'theory' : 'position')
     const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
     const [restType, setRestType] = useState<'rep' | 'set' | 'exercise'>('rep')
 
@@ -42,6 +43,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const currentSet = useTrainingStore((state) => state.currentSet)
     const nextExercise = useTrainingStore((state) => state.nextExercise)
     const finishTraining = useTrainingStore((state) => state.finishTraining)
+  
 
     const [repNumber, setRepNumber] = useState(0)
     const [setNumber, setSetNumber] = useState(0)
@@ -99,7 +101,8 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     }
 
     const handleExecutionComplete = () => {
-        if (currentExercise.side === 'single') {
+        const side = currentExercise.side || 'single'
+        if (side === 'single') {
             // Для single: reps = 1 set
             const newRepNumber = repNumber + 1
             setRepNumber(newRepNumber)
@@ -130,7 +133,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     }
                 }
             }
-        } else if (currentExercise.side === 'both') {
+        } else if (side === 'both') {
             // Для both: reps на одну сторону + reps на другую = 1 set
             const newRepNumber = repNumber + 1
             setRepNumber(newRepNumber)
@@ -156,21 +159,22 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     }
 
     const handleRestComplete = () => {
+        const side = currentExercise.side || 'single'
         if (restType === 'rep') {
             // После отдыха после rep продолжаем выполнение или переключаем сторону/завершаем сет
             if (
-                currentExercise.side === 'both' &&
-				currentSideState === 'right' &&
-				repNumber >= currentExercise.reps
+                side === 'both' &&
+                currentSideState === 'right' &&
+                repNumber >= currentExercise.reps
             ) {
                 // Завершили все reps на правой стороне - переключаемся на левую
                 setRepNumber(0)
                 setCurrentSideState('left')
                 setCurrentStep('side_switch')
             } else if (
-                currentExercise.side === 'both' &&
-				currentSideState === 'left' &&
-				repNumber >= currentExercise.reps
+                side === 'both' &&
+                currentSideState === 'left' &&
+                repNumber >= currentExercise.reps
             ) {
                 // Завершили все reps на левой стороне - завершаем сет
                 const newSetNumber = setNumber + 1
@@ -319,7 +323,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                 <RestScreen
                     onComplete={handleRestComplete}
                     duration={
-                        restType === 'rep' ? 10 : restType === 'set' ? 15 : currentExercise.rest_time
+                        restType === 'rep' ? 10 : restType === 'set' ? 15 : (currentExercise.rest_time || 30)
                     }
                 />
             )}

@@ -36,13 +36,10 @@ interface TrainingReport {
 export interface Exercise {
 	id: number
 	name: string
-	rest_time: number
-	duration: number
 	progress: number
 	sets: number
 	reps: number
-	isAi: boolean
-	videoUrl: string
+	is_ai: boolean
 }
 
 export interface TrainingInfo {
@@ -90,7 +87,41 @@ interface BuildTrainingPlanResponse {
 	[key: string]: unknown
 }
 
+export interface ExerciseInfoResponse {
+    duration: number
+    error_codes: number[]
+    id: number
+    is_ai: boolean
+    is_horizontal: boolean
+    is_mirror: boolean
+    layout: string
+    name: string
+    progress: number
+    reps: number
+    rest_after_exercise: number
+    rest_between_sets: number
+    sets: number
+    video_practice: string
+    video_practice_second: string
+    video_theory: string
+    working_side: string
+    working_side_second: string
+}
+
 export const trainingApi = {
+    /**
+	 * Get exercise info
+     * Returns detailed information about a specific exercise within a training, including progress
+     * @param trainingId - Training ID
+     * @param exerciseId - Exercise ID
+	 */
+    async getExerciseInfo(
+        trainingId: string,
+        exerciseId: number
+    ): Promise<ApiResult<ExerciseInfoResponse>> {
+        return apiClient.get(`/trainings/exercise/${trainingId}/${exerciseId}`)
+    },
+
     /**
 	 * Get latest training program
 	 */

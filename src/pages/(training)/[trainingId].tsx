@@ -3,8 +3,101 @@
  * Точка входа в тренировку, отображает информацию о тренировке
  * Поддерживает возобновление прерванной тренировки
  */
-import { View } from 'react-native'
+import { useLocalSearchParams } from 'expo-router'
+import { Text } from 'react-native'
+import { usePoseCameraSetup } from '@/widgets/pose-camera'
+import { Loader } from '@/shared/ui/Loader/Loader'
+import { TrainingInfo } from '@/widgets/training-session/ui/TrainingInfo'
+import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
+import { ExerciseFlow, OnboardingFlow } from '@/widgets/training-session'
+import { ExerciseSuccess } from '@/widgets/training-session/ui/ExerciseSuccess'
+import TrainingReportScreen from '@/pages/(training)/report'
+import {
+    TrainingAnalytics
+} from '@/widgets/training-session/ui/TrainingAnalytics'
+import { useEffect } from 'react'
+import { trainingApi, trainingKeys } from '@/features/training/api'
+import { useQuery } from '@tanstack/react-query'
+import { useTrainingStore } from '@/entities/training'
 
 export default function TrainingEntryScreen() {
-    return <View />
+
+    const { trainingId } = useLocalSearchParams<{ trainingId: string }>()
+    
+    const { data: trainingData, isLoading, isError, error: queryError } = useQuery({
+        queryKey: trainingKeys.detail(Number(trainingId)),
+        queryFn: () => trainingApi.getTrainingInfo(Number(trainingId)),
+        enabled: !!trainingId,
+        select: (result) => {
+            if (!result.success) throw new Error(result.error)
+            return result.data
+        }
+    })
+
+    const startTraining = useTrainingStore((state) => state.startTraining)
+    const training = useTrainingStore((state) => state.training)
+
+
+    const status = useTrainingStore((state) => state.status)
+    const { tfReady, model, orientation, error } = usePoseCameraSetup()
+	
+
+    // Initialize training store when data is fetched
+    useEffect(() => {
+        if (trainingData && !training) {
+            // @ts-ignore - API types might slightly differ from store types, should be aligned
+            startTraining(trainingData)
+        }
+    }, [trainingData, training, startTraining])
+
+    // If training data is not loaded or camera is not ready, show loading
+    if (isLoading || !training || !tfReady || !model || !orientation) {
+        return (
+            <>
+                {error ? <Text>{error.message}</Text> : null}
+                {isError ? <Text>Error loading training: {queryError?.message}</Text> : null}
+                {!error && !isError && <Loader text="Загрузка тренировки..." />}
+            </>
+        )
+    }
+
+    const mainContent = () => {
+        //   Render based on current status
+        switch (status) {
+        case 'info':
+            return <TrainingInfo />
+        case 'onboarding':
+            return (
+                <BackgroundLayoutNoSidePadding>
+                    <OnboardingFlow />
+                </BackgroundLayoutNoSidePadding>
+            )
+
+        case 'finished':
+            return (
+                <BackgroundLayoutNoSidePadding>
+                    <ExerciseSuccess />
+                </BackgroundLayoutNoSidePadding>
+            )
+
+        case 'report':
+            return (
+                <BackgroundLayoutNoSidePadding>
+                    <TrainingReportScreen />
+                </BackgroundLayoutNoSidePadding>
+            )
+
+        case 'analytics':
+            return (
+                <BackgroundLayoutNoSidePadding>
+                    <TrainingAnalytics />
+                </BackgroundLayoutNoSidePadding>
+            )
+
+        default:
+            return <ExerciseFlow model={model} orientation={orientation} />
+        }
+    }
+
+    return mainContent()
 }

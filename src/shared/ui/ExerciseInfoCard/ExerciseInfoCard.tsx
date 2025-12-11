@@ -8,7 +8,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons'
  * Показывает название, количество подходов, повторений и опционально тег AI-анализа
  */
 export const ExerciseInfoCard: React.FC<ExerciseInfoCardProps> = ({ exercise }) => {
-    const { name, sets, reps, isAi } = exercise
+    const { name, sets, reps, is_ai } = exercise
 
     return (
         <View className={'mb-2'}>
@@ -34,10 +34,10 @@ export const ExerciseInfoCard: React.FC<ExerciseInfoCardProps> = ({ exercise }) 
 
                         {/* Тег AI-анализа (опционально) */}
                         <View
-                            className={`rounded-full px-3 py-1.5 ${isAi ? 'border border-brand-purple-500 bg-brand-purple-900/20' : 'opacity-0'}`}
+                            className={`rounded-full px-3 py-1.5 ${is_ai ? 'border border-brand-purple-500 bg-brand-purple-900/20' : 'opacity-0'}`}
                         >
                             <Text
-                                className={`text-t4 ${isAi ? 'text-brand-purple-500' : 'text-transparent'}`}
+                                className={`text-t4 ${is_ai ? 'text-brand-purple-500' : 'text-transparent'}`}
                             >
 								AI-анализ
                             </Text>

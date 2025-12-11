@@ -45,19 +45,19 @@ export interface ActivitiesResponseItem {
 export type ActivitiesResponse = ActivitiesResponseItem[]
 
 export interface Exercise {
-	id: string
+	id: number
 	name: string
-	rest_time: number
-	duration: number
+	rest_time?: number
+	duration?: number
 	progress: number
 	sets: number
 	reps: number
-	isAi: boolean
-	VideoTheory: string
-	VideoPractice: string
+	is_ai: boolean
+	VideoTheory?: string
+	VideoPractice?: string
 	VideoPracticeSecond?: string
-	isVertical: boolean ////TEMPORARY FIELD
-	side: 'both' | 'single'
+	isVertical?: boolean ////TEMPORARY FIELD
+	side?: 'both' | 'single'
 }
 
 export interface Training {

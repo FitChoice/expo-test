@@ -160,7 +160,7 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
 
         const newIndex = currentExerciseIndex + 1
 
-        const exerciseSide = training.exercises[newIndex]?.side
+        const exerciseSide = training.exercises[newIndex]?.side || 'single'
         set({
             currentExerciseIndex: newIndex,
             currentSet: 1,

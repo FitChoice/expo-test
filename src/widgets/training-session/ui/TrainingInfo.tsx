@@ -50,8 +50,10 @@ export const TrainingInfo = () => {
         let totalSeconds = 0
         training.exercises.forEach((exercise) => {
             // Duration per set * number of sets + rest time between sets
-            const exerciseTime = exercise.duration * exercise.sets
-            const restTime = exercise.rest_time * Math.max(0, exercise.sets - 1)
+            const duration = exercise.duration || 60 // Default to 60s if missing
+            const rest = exercise.rest_time || 30 // Default to 30s if missing
+            const exerciseTime = duration * exercise.sets
+            const restTime = rest * Math.max(0, exercise.sets - 1)
             totalSeconds += exerciseTime + restTime
         })
         return Math.ceil(totalSeconds / 60)

@@ -76,7 +76,7 @@ const AUTO_RENDER = false
 type PoseCameraProps = {
 	model: posedetection.PoseDetector
 	orientation: ScreenOrientation.Orientation
-	exerciseId?: string
+	exerciseId?: string | number
 	onTelemetry?: (telemetry: EngineTelemetry) => void
 	onAllKeypointsDetected?: (allDetected: boolean) => void
 }
@@ -118,7 +118,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({
     useEffect(() => {
         if (!exerciseId) return
         // Recreate FSM stack whenever the user picks another exercise.
-        const rule = getExerciseRule(exerciseId)
+        const rule = getExerciseRule(String(exerciseId))
         if (!engineRef.current) {
             engineRef.current = new ExerciseEngine(rule)
         } else {
