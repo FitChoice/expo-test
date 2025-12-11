@@ -10,8 +10,6 @@ import { useQueryClient, useMutation } from '@tanstack/react-query'
 import {
     Container,
     Button,
-    Toast,
-    Avatar,
 } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { ProfileHeader } from '@/widgets/profile'

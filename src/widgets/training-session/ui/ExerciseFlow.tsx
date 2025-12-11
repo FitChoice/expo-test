@@ -39,24 +39,15 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const [restType, setRestType] = useState<'rep' | 'set' | 'exercise'>('rep')
 
     const training = useTrainingStore((state) => state.training)
-    const currentExerciseIndex = useTrainingStore((state) => state.currentExerciseIndex)
+
     const currentSet = useTrainingStore((state) => state.currentSet)
     const nextExercise = useTrainingStore((state) => state.nextExercise)
     const finishTraining = useTrainingStore((state) => state.finishTraining)
-  
+    const currentExercise = useTrainingStore((state) => state.currentExerciseDetail)
+	  const currentExerciseIndex = training.exercises.findIndex((exercise) => exercise.id === currentExercise?.id)
 
     const [repNumber, setRepNumber] = useState(0)
     const [setNumber, setSetNumber] = useState(0)
-
-    if (!training) return null
-
-    const currentExercise = training.exercises[currentExerciseIndex]
-    const isVertical = currentExercise?.isVertical
-
-    if (!currentExercise) return null
-
-    // Check if exercise has sides
-    // const hasSides = currentExercise?.side === 'both'
 
     // Проверяем ориентацию при изменении упражнения или при первом запуске
     useEffect(() => {
@@ -71,7 +62,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 						orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
 						orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
 
-                    const exerciseIsVertical = currentExercise.isVertical ?? false
+                    const exerciseIsVertical = !currentExercise?.is_horizontal
 
                     // Если ориентация не соответствует упражнению, показываем rotate экран
                     if (
@@ -86,7 +77,17 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             }
             checkOrientation()
         }
-    }, [currentExerciseIndex, currentStep, currentExercise])
+    }, [ currentStep, currentExercise])
+
+    if (!training) return null
+
+    // const currentExercise = training.exercises[currentExerciseIndex]
+    // const isVertical = currentExercise?.isVertical
+
+    if (!currentExercise) return null
+
+    // Check if exercise has sides
+    // const hasSides = currentExercise?.side === 'both'
 
     const handleRotateComplete = () => {
         setCurrentStep('theory')
@@ -101,8 +102,8 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     }
 
     const handleExecutionComplete = () => {
-        const side = currentExercise.side || 'single'
-        if (side === 'single') {
+
+        if (!currentExercise.is_mirror) {
             // Для single: reps = 1 set
             const newRepNumber = repNumber + 1
             setRepNumber(newRepNumber)
@@ -133,7 +134,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     }
                 }
             }
-        } else if (side === 'both') {
+        } else  {
             // Для both: reps на одну сторону + reps на другую = 1 set
             const newRepNumber = repNumber + 1
             setRepNumber(newRepNumber)
@@ -159,11 +160,11 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     }
 
     const handleRestComplete = () => {
-        const side = currentExercise.side || 'single'
+
         if (restType === 'rep') {
             // После отдыха после rep продолжаем выполнение или переключаем сторону/завершаем сет
             if (
-                side === 'both' &&
+                currentExercise.is_mirror  &&
                 currentSideState === 'right' &&
                 repNumber >= currentExercise.reps
             ) {
@@ -172,7 +173,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                 setCurrentSideState('left')
                 setCurrentStep('side_switch')
             } else if (
-                side === 'both' &&
+                currentExercise.is_mirror &&
                 currentSideState === 'left' &&
                 repNumber >= currentExercise.reps
             ) {
@@ -263,13 +264,13 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         <View className="flex-1">
             {currentStep === 'rotate' && (
                 <RotateScreen
-                    isVertical={isVertical ?? false}
+                    isVertical={!currentExercise.is_horizontal}
                     onComplete={handleRotateComplete}
                 />
             )}
             {currentStep === 'position' && (
                 <BodyPositionScreen
-                    isVertical={isVertical}
+                    isVertical={!currentExercise.is_horizontal}
                     //side={hasSides ? currentSideState : undefined}
                     key="position-check"
                     onComplete={handlePositionComplete}
@@ -283,7 +284,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     exercise={currentExercise}
                     currentSet={currentSet}
                     onComplete={handleCountdownComplete}
-                    isVertical={isVertical}
+                    isVertical={!currentExercise.is_horizontal}
                 />
             )}
 
@@ -299,7 +300,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     orientation={orientation}
                     onComplete={handleExecutionComplete}
                     exercise={currentExercise}
-                    isVertical={isVertical}
+                    isVertical={!currentExercise.is_horizontal}
                     currentSet={currentSet}
                 />
             )}
@@ -323,7 +324,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                 <RestScreen
                     onComplete={handleRestComplete}
                     duration={
-                        restType === 'rep' ? 10 : restType === 'set' ? 15 : (currentExercise.rest_time || 30)
+                        restType === 'rep' ? 10 : restType === 'set' ? currentExercise.rest_between_sets : (currentExercise.rest_after_exercise || 30)
                     }
                 />
             )}

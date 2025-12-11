@@ -13,7 +13,6 @@ import {
     type Goal,
     type AgeGroup,
 } from '@/entities/survey'
-import { surveyApi } from '../api'
 import { userApi } from '@/features/user'
 
 // Битовая маска дней недели: 1=Пн, 2=Вт, 4=Ср, 8=Чт, 16=Пт, 32=Сб, 64=Вс

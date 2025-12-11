@@ -14,8 +14,6 @@ import {
     useAudioPlayer,
     useFilePicker,
 } from '@/widgets/chat'
-import { NavigationBar } from '@/widgets/navigation-bar'
-import { useNavbarLayout } from '@/shared/lib'
 import {
     useChatHistory,
     useStreamResponse,
@@ -236,7 +234,6 @@ export const ChatScreen: React.FC = () => {
     const handlePauseAudio = useCallback(() => {
         pauseAudio()
     }, [pauseAudio])
-
 
     return (
         <View className="flex-1 bg-fill-900">

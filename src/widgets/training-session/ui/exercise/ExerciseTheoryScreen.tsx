@@ -10,14 +10,14 @@ import { VideoView, useVideoPlayer } from 'expo-video'
 
 import { VideoProgressBar } from '@/shared/ui'
 
-import type { Exercise } from '@/entities/training/model/types'
+import type { ExerciseInfoResponse } from '@/entities/training/model/types'
 
 import { ExerciseWithCounterWrapper } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 import { useVideoPlayerContext } from '@/shared/hooks/useVideoPlayerContext'
 import { VIDEO_SCREEN_HEIGHT as height } from '@/shared/constants/sizes'
 
 interface ExerciseCountdownScreenProps {
-	exercise: Exercise
+	exercise: ExerciseInfoResponse
 	currentSet: number
 	onComplete: () => void
 	isVertical?: boolean
@@ -29,7 +29,7 @@ function ExerciseExampleCountdownContent({
     isVertical,
     onComplete,
 }: {
-	exercise: Exercise
+	exercise: ExerciseInfoResponse
 	currentSet: number
 	player: ReturnType<typeof useVideoPlayer>
 	isVertical?: boolean
@@ -77,7 +77,7 @@ function ExerciseExampleCountdownContent({
         <>
             {/* Video */}
             <View style={{ height: isVertical ? height : 250 }}>
-                {exercise.VideoTheory ? (
+                {exercise.video_theory ? (
                     <VideoView
                         player={player}
                         style={{ flex: 1 }}
@@ -172,7 +172,7 @@ export function ExerciseTheoryScreen({
     onComplete,
     isVertical,
 }: ExerciseCountdownScreenProps) {
-    const player = useVideoPlayer(exercise.VideoTheory || '', (player) => {
+    const player = useVideoPlayer(exercise.video_theory || '', (player) => {
         player.loop = false
     })
 

@@ -4,6 +4,7 @@
 
 import { apiClient } from '@/shared/api'
 import type { ApiResult } from '@/shared/api/types'
+import type { ExerciseInfoResponse } from '@/entities/training/model/types'
 
 export type Activity = {
     Duration:number,
@@ -85,27 +86,6 @@ interface BuildTrainingPlanInput {
 interface BuildTrainingPlanResponse {
 	// TODO: Define based on actual API response
 	[key: string]: unknown
-}
-
-export interface ExerciseInfoResponse {
-    duration: number
-    error_codes: number[]
-    id: number
-    is_ai: boolean
-    is_horizontal: boolean
-    is_mirror: boolean
-    layout: string
-    name: string
-    progress: number
-    reps: number
-    rest_after_exercise: number
-    rest_between_sets: number
-    sets: number
-    video_practice: string
-    video_practice_second: string
-    video_theory: string
-    working_side: string
-    working_side_second: string
 }
 
 export const trainingApi = {

@@ -37,10 +37,8 @@ export default function TrainingEntryScreen() {
     const startTraining = useTrainingStore((state) => state.startTraining)
     const training = useTrainingStore((state) => state.training)
 
-
     const status = useTrainingStore((state) => state.status)
     const { tfReady, model, orientation, error } = usePoseCameraSetup()
-	
 
     // Initialize training store when data is fetched
     useEffect(() => {

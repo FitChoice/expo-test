@@ -16,20 +16,19 @@ export interface DiaryInput extends DiaryEntry {
 }
 
 export const dairyApi = {
-	/**
+    /**
 	 * Получить дневник тренировки по дню (schedule_id)
 	 * GET /api/v1/trainings/diary/{dayId}
 	 */
-	async getDiary(dayId: number): Promise<ApiResult<DiaryEntry>> {
-		return apiClient.get<DiaryEntry>(`/trainings/diary/${dayId}`)
-	},
+    async getDiary(dayId: number): Promise<ApiResult<DiaryEntry>> {
+        return apiClient.get<DiaryEntry>(`/trainings/diary/${dayId}`)
+    },
 
-	/**
+    /**
 	 * Создать или обновить дневник тренировки и начислить XP
 	 * POST /api/v1/trainings/diary
 	 */
-	async upsertDiary(payload: DiaryInput): Promise<ApiResult<DiaryEntry>> {
-		return apiClient.post<DiaryInput, DiaryEntry>('/trainings/diary', payload)
-	},
+    async upsertDiary(payload: DiaryInput): Promise<ApiResult<DiaryEntry>> {
+        return apiClient.post<DiaryInput, DiaryEntry>('/trainings/diary', payload)
+    },
 }
-

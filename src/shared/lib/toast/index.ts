@@ -25,4 +25,3 @@ export const showToast = {
     },
     hide: () => Toast.hide(),
 }
-

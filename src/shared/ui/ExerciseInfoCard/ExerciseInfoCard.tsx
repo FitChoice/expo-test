@@ -2,13 +2,14 @@ import React from 'react'
 import { View, Text } from 'react-native'
 import type { ExerciseInfoCardProps } from './types'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 
 /**
  * ExerciseInfoCard - компонент для отображения информации об упражнении
  * Показывает название, количество подходов, повторений и опционально тег AI-анализа
  */
 export const ExerciseInfoCard: React.FC<ExerciseInfoCardProps> = ({ exercise }) => {
-    const { name, sets, reps, is_ai } = exercise
+    const { progress, name, sets, reps, is_ai } = exercise
 
     return (
         <View className={'mb-2'}>
@@ -18,7 +19,12 @@ export const ExerciseInfoCard: React.FC<ExerciseInfoCardProps> = ({ exercise }) 
                 </View>
 
                 <View className="flex-1">
-                    <Text className="mb-4 text-pretty text-t2-bold text-white">{name}</Text>
+                    <View className="flex-row items-center gap-3">
+										 <Text className="mb-4 text-pretty text-t2-bold text-white">{name}</Text>
+										 { !!progress && <View className="rounded-full bg-brand-green-500 h-5 w-5">
+											 <FontAwesome6 name="check" size={4} color="black" />
+										 </View>}
+									 </View>
 
                     {/* Теги */}
                     <View className="flex-row gap-6">

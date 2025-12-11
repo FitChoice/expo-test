@@ -22,7 +22,6 @@ import Emo4 from '@/assets/images/moods/emo4.svg'
 import Emo5 from '@/assets/images/moods/emo5.svg'
 import { showToast } from '@/shared/lib'
 
-
 interface RatingOption {
 	id: number
 	Icon: React.ComponentType<any>

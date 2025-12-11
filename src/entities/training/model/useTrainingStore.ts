@@ -3,22 +3,27 @@
  */
 
 import { create } from 'zustand'
-import type {
-    Training,
-    TrainingStatus,
-    ExerciseSide,
-    ErrorLog,
-    SetData,
-    SavedWorkoutState,
+import {
+    type Training,
+    type TrainingStatus,
+    type ExerciseSide,
+    type ErrorLog,
+    type SetData,
+    type SavedWorkoutState,
+    type ExerciseInfoResponse,
+    type ExerciseDetails,
 } from './types'
 
 interface TrainingState {
 	// Current training data
 	training: Training | null
+	currentExerciseDetail: ExerciseDetails | null
+	isExerciseLoading: boolean
+	setCurrentExerciseId: (value: number) => void
 
 	// Session state
 	status: TrainingStatus
-	currentExerciseIndex: number
+	currentExerciseId: number
 	currentSet: number
 	currentReps: number
 	currentSide: ExerciseSide | null
@@ -50,16 +55,19 @@ interface TrainingState {
 	setAnalytics: () => void
 	setShowTutorial: (val: boolean) => void
 
+	//setCurrentExerciseIndex: (val: number) => void
 	nextExercise: () => void
 	nextSet: () => void
 	completeSet: (setData: SetData) => void
 	finishTraining: () => void
+    setExerciseDetail: (detail: ExerciseInfoResponse | null) => void
+    setExerciseLoading: (loading: boolean) => void
 }
 
 const initialState = {
     training: null,
     status: 'idle' as TrainingStatus,
-    currentExerciseIndex: 0,
+    currentExerciseId: 0,
     currentSet: 0,
     currentReps: 0,
     currentSide: null,
@@ -73,10 +81,20 @@ const initialState = {
     averageFormQuality: 0,
     caloriesBurned: 0,
     showTutorial: true,
+    currentExerciseDetail: null,
+    isExerciseLoading: false,
 }
 
 export const useTrainingStore = create<TrainingState>((set, get) => ({
     ...initialState,
+
+    setExerciseDetail: (detail: ExerciseInfoResponse | null) => {
+        set({ currentExerciseDetail: detail })
+    },
+
+    setExerciseLoading: (loading: boolean) => {
+        set({ isExerciseLoading: loading })
+    },
 
     /**
 	 * Start a new training session
@@ -103,7 +121,7 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
         if (!training) return
 
         set({
-            currentExerciseIndex: savedState.currentExerciseIndex,
+            //  currentExerciseIndex: savedState.currentExerciseIndex,
             currentSet: savedState.currentSet,
             currentReps: savedState.currentReps,
             currentSide: savedState.currentSide,
@@ -151,29 +169,34 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
         set({ ...initialState })
     },
 
+    setCurrentExerciseId: (id: number) => {
+        set({
+            currentExerciseId: id,
+        })
+    },
     /**
 	 * Move to next exercise
 	 */
     nextExercise: () => {
-        const { training, currentExerciseIndex, completedExercises } = get()
-        if (!training) return
-
-        const newIndex = currentExerciseIndex + 1
-
-        const exerciseSide = training.exercises[newIndex]?.side || 'single'
-        set({
-            currentExerciseIndex: newIndex,
-            currentSet: 1,
-            currentReps: 0,
-            currentSide:
-				exerciseSide === 'single' ? null : (exerciseSide as ExerciseSide | null),
-            completedExercises: [...completedExercises, currentExerciseIndex],
-        })
-
-        // // Check if training is finished
-        // if (newIndex >= training.exercises.length) {
-        //     set({ status: 'finished' })
-        // }
+        // const { training, currentExerciseIndex, completedExercises } = get()
+        // if (!training) return
+        //
+        // const newIndex = currentExerciseIndex + 1
+        //
+        // const exerciseSide = training.exercises[newIndex]?.side || 'single'
+        // set({
+        //     currentExerciseIndex: newIndex,
+        //     currentSet: 1,
+        //     currentReps: 0,
+        //     currentSide:
+        // exerciseSide === 'single' ? null : (exerciseSide as ExerciseSide | null),
+        //     completedExercises: [...completedExercises, currentExerciseIndex],
+        // })
+        //
+        // // // Check if training is finished
+        // // if (newIndex >= training.exercises.length) {
+        // //     set({ status: 'finished' })
+        // // }
     },
 
     /**

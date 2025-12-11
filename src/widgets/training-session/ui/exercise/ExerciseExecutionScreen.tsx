@@ -6,7 +6,7 @@
 
 import { View, Text, useWindowDimensions, Platform } from 'react-native'
 import { useEffect, useState } from 'react'
-import { type Exercise } from '@/entities/training'
+import { type ExerciseInfoResponse } from '@/entities/training'
 import { ExerciseWithCounterWrapper } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 import { VIDEO_SCREEN_HEIGHT as verticalCameraViewHeight } from '@/shared/constants/sizes'
 import { PoseCamera } from '@/widgets/pose-camera'
@@ -19,7 +19,7 @@ import { useVideoPlayerContext } from '@/shared/hooks/useVideoPlayerContext'
 interface TimerExerciseScreenProps {
 	isVertical?: boolean
 	onComplete: () => void
-	exercise: Exercise
+	exercise: ExerciseInfoResponse
 	model: posedetection.PoseDetector
 	orientation: ScreenOrientation.Orientation
 	currentSet: number
@@ -33,7 +33,7 @@ export function ExerciseExecutionScreen({
     orientation,
     currentSet,
 }: TimerExerciseScreenProps) {
-    const player = useVideoPlayer(exercise.VideoPractice || '', (player) => {
+    const player = useVideoPlayer(exercise.video_practice || '', (player) => {
         player.loop = true
         player.play()
     })
@@ -82,7 +82,7 @@ export function ExerciseExecutionScreen({
                         />
                     </View>
 
-                    {isVertical && exercise.VideoPractice && player && (
+                    {isVertical && exercise.video_practice && player && (
                         <View
                             style={{
                                 position: 'absolute',
@@ -205,7 +205,7 @@ export function ExerciseExecutionScreen({
                             <View className="flex-[1] basis-0 items-center justify-center"></View>
 
                             <View className="flex-[1.2] basis-0 items-end">
-                                {exercise.VideoPractice && player && (
+                                {exercise.video_practice && player && (
                                     <View
                                         style={{
                                             width: '50%',

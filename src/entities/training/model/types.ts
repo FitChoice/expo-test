@@ -42,33 +42,68 @@ export interface ActivitiesResponseItem {
 	user_id: number
 }
 
+export type ExerciseDetails = {
+	duration: number;
+	error_codes: number[];
+	id: number;
+	is_ai: boolean;
+	is_horizontal: boolean;
+	is_mirror: boolean;
+	layout: string;
+	name: string;
+	progress: number;
+	reps: number;
+	rest_after_exercise: number;
+	rest_between_sets: number;
+	sets: number;
+	video_practice: string;
+	video_practice_second: string;
+	video_theory: string;
+	working_side: string;
+	working_side_second: string;
+};
+
 export type ActivitiesResponse = ActivitiesResponseItem[]
 
 export interface Exercise {
-	id: number
-	name: string
-	rest_time?: number
-	duration?: number
-	progress: number
-	sets: number
-	reps: number
-	is_ai: boolean
-	VideoTheory?: string
-	VideoPractice?: string
-	VideoPracticeSecond?: string
-	isVertical?: boolean ////TEMPORARY FIELD
-	side?: 'both' | 'single'
+	id: number;
+	is_ai: boolean;
+	name: string;
+	progress: number;
+	reps: number;
+	sets: number;
+}
+
+export interface ExerciseInfoResponse {
+    duration: number
+    error_codes: number[]
+    id: number
+    is_ai: boolean
+    is_horizontal: boolean
+    is_mirror: boolean
+    layout: string
+    name: string
+    progress: number
+    reps: number
+    rest_after_exercise: number
+    rest_between_sets: number
+    sets: number
+    video_practice: string
+    video_practice_second: string
+    video_theory: string
+    working_side: string
+    working_side_second: string
 }
 
 export interface Training {
-	id: number
-	trainingType: string
-	title: string
-	description: string
-	difficulty: number
-	experience: number
-	inventory: number[]
-	exercises: Exercise[]
+	description: string;
+	difficulty: number;
+	exercises: Exercise[];
+	experience: number;
+	id: number;
+	inventory: number[];
+	title: string;
+	trainingType: string;
 }
 
 export interface Report {

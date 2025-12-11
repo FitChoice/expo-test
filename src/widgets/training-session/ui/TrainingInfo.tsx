@@ -10,7 +10,7 @@ import {
 import { router } from 'expo-router'
 import { Switch, TrainingTags, ExerciseInfoCard } from '@/shared/ui'
 import { useTrainingStore } from '@/entities/training'
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Entypo from '@expo/vector-icons/Entypo'
 import { BottomActionBtn } from '@/shared/ui/BottomActionBtn/BottomActionBtn'
@@ -43,15 +43,24 @@ export const TrainingInfo = () => {
     const startOnboarding = useTrainingStore((state) => state.startOnboarding)
     const showTutorial = useTrainingStore((state) => state.showTutorial)
     const setShowTutorial = useTrainingStore((state) => state.setShowTutorial)
+    const setCurrentExerciseId = useTrainingStore((state) => state.setCurrentExerciseId)
+	
+    useEffect(() => {
 
+        if (training?.exercises) {
+            const firstExerciseId = training?.exercises?.find((exercise) => exercise.progress == 0).id as number
+            setCurrentExerciseId(firstExerciseId)
+        }
+
+    }, [training?.exercises])
     // Calculate training duration in minutes
     const trainingDuration = useMemo(() => {
         if (!training?.exercises) return 40
         let totalSeconds = 0
         training.exercises.forEach((exercise) => {
             // Duration per set * number of sets + rest time between sets
-            const duration = exercise.duration || 60 // Default to 60s if missing
-            const rest = exercise.rest_time || 30 // Default to 30s if missing
+            const duration =  60 // Default to 60s if missing
+            const rest =  30 // Default to 30s if missing
             const exerciseTime = duration * exercise.sets
             const restTime = rest * Math.max(0, exercise.sets - 1)
             totalSeconds += exerciseTime + restTime
@@ -144,7 +153,7 @@ export const TrainingInfo = () => {
                 </View>
 
                 <View className="rounded-3xl bg-black px-6 pb-20 pt-6">
-                    <Text className="mb-4 text-t1.1 text-white">2 упражнения</Text>
+                    <Text className="mb-4 text-t1.1 text-white">{training?.exercises.length} упражнения</Text>
 
                     {training?.exercises.map((exercise) => (
                         <ExerciseInfoCard key={exercise.id} exercise={exercise} />

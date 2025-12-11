@@ -4,23 +4,56 @@
  * Включает проверку звука, разрешений камеры, положения телефона и калибровку гироскопа
  */
 
-import { useState } from 'react'
-import { SoundCheckScreen } from './onboarding/SoundCheckScreen'
-import { CameraPermissionScreen } from './onboarding/CameraPermissionScreen'
-import { PhonePositionScreen } from './onboarding/PhonePositionScreen'
-import { GyroscopeLevelScreen } from './onboarding/GyroscopeLevelScreen'
-import { RotatePhoneScreen } from './onboarding/RotatePhoneScreen'
+import { useEffect, useState } from 'react'
 import { useTrainingStore } from '@/entities/training'
 import { View } from 'react-native'
+import { trainingApi } from '@/features/training/api'
+import { Loader } from '@/shared/ui'
+import {
+    SoundCheckScreen
+} from '@/widgets/training-session/ui/onboarding/SoundCheckScreen'
+import {
+    CameraPermissionScreen
+} from '@/widgets/training-session/ui/onboarding/CameraPermissionScreen'
+import {
+    RotatePhoneScreen
+} from '@/widgets/training-session/ui/onboarding/RotatePhoneScreen'
+import {
+    PhonePositionScreen
+} from '@/widgets/training-session/ui/onboarding/PhonePositionScreen'
+import {
+    GyroscopeLevelScreen
+} from '@/widgets/training-session/ui/onboarding/GyroscopeLevelScreen'
 
 type OnboardingStep = 'sound' | 'camera' | 'position' | 'gyroscope' | 'rotate'
 
 export function OnboardingFlow() {
+	
+    const [isLoading, setIsLoading] = useState(true)
     const [currentStep, setCurrentStep] = useState<OnboardingStep>('sound')
     const resume = useTrainingStore((state) => state.resume)
     const training = useTrainingStore((state) => state.training)
+    const currentExerciseDetail = useTrainingStore((state) => state.currentExerciseDetail)
+    const currentExerciseId = useTrainingStore((state) => state.currentExerciseId)
+    const setExerciseDetail = useTrainingStore((state) => state.setExerciseDetail)
+
+    useEffect(() => {
+			
+	 trainingApi.getExerciseInfo(String(training!.id), currentExerciseId!)
+		 .then((result) => {
+			 console.log('result', result)
+			 if (result.success) {
+			
+				 setExerciseDetail(result.data)
+				 setIsLoading(false)
+			 } else {
+				 throw new Error(result.error)
+			 }
+		 })
+		 .catch((error) => {console.error(error)})
+		 .finally(() => {	 setIsLoading(false)})
+    }, [])
     // Проверяем первое упражнение на isVertical
-    const firstExercise = training?.exercises[0]
 
     const handleNextStep = () => {
         switch (currentStep) {
@@ -28,7 +61,7 @@ export function OnboardingFlow() {
             setCurrentStep('camera')
             break
         case 'camera': {
-            if (firstExercise && !firstExercise.isVertical) {
+            if (currentExerciseDetail?.is_horizontal) {
                 setCurrentStep('rotate')
             } else {
                 setCurrentStep('position')
@@ -47,7 +80,10 @@ export function OnboardingFlow() {
             break
         }
     }
-
+		
+    if (isLoading) {
+        return <Loader  />
+    }
     return (
         <View className="w-full flex-1">
             {currentStep === 'sound' && <SoundCheckScreen onNext={handleNextStep} />}
@@ -57,7 +93,7 @@ export function OnboardingFlow() {
             {currentStep === 'gyroscope' && (
                 <GyroscopeLevelScreen
                     onNext={handleNextStep}
-                    isVertical={firstExercise?.isVertical ?? false}
+                    isVertical={!currentExerciseDetail?.is_horizontal}
                 />
             )}
         </View>

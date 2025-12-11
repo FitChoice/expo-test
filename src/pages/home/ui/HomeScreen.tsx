@@ -69,7 +69,6 @@ const MobileContent = () => {
         retry: false,
     })
 
-
     const [ selectedDayTraining, setSelectedDayTraining ] = useState<Activity[]>([])
 
     useEffect(() => {
