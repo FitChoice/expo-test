@@ -40,14 +40,10 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
     const training = useTrainingStore((state) => state.training)
 
-    const currentSet = useTrainingStore((state) => state.currentSet)
     const nextExercise = useTrainingStore((state) => state.nextExercise)
     const finishTraining = useTrainingStore((state) => state.finishTraining)
+    const exerciseDetails = useTrainingStore((state) => state.exerciseDetails)
     const currentExercise = useTrainingStore((state) => state.currentExerciseDetail)
-	  const currentExerciseIndex = training.exercises.findIndex((exercise) => exercise.id === currentExercise?.id)
-
-
-
     const [repNumber, setRepNumber] = useState(0)
     const [setNumber, setSetNumber] = useState(0)
 
@@ -83,10 +79,15 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
     if (!training) return null
 
+    const currentExerciseIndex = training.exercises.findIndex((exercise) => exercise.id === currentExercise?.id)
+
     // const currentExercise = training.exercises[currentExerciseIndex]
     // const isVertical = currentExercise?.isVertical
 
     if (!currentExercise) return null
+
+    // UI expects 1-based set number; internal state stays 0-based for calculations
+    const displayCurrentSet = Math.max(1, Math.min(setNumber + 1, currentExercise.sets ?? setNumber + 1))
 
     // Check if exercise has sides
     // const hasSides = currentExercise?.side === 'both'
@@ -224,6 +225,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const handleTransitionComplete = async () => {
         // Получаем данные следующего упражнения до вызова nextExercise()
         const nextExerciseData = training.exercises[currentExerciseIndex + 1]
+        const nextExerciseDetail = exerciseDetails.find((exercise) => exercise.id === nextExerciseData?.id)
 
         // Переход к следующему упражнению
         nextExercise()
@@ -234,8 +236,8 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         setRestType('rep')
 
         // Проверяем ориентацию перед началом следующего упражнения
-        if (nextExerciseData) {
-            const nextIsVertical = nextExerciseData.isVertical ?? false
+        if (nextExerciseDetail) {
+            const nextIsVertical = !nextExerciseDetail.is_horizontal
             try {
                 const orientation = await ScreenOrientation.getOrientationAsync()
                 const isPortrait =
@@ -284,7 +286,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             {currentStep === 'theory' && (
                 <ExerciseTheoryScreen
                     exercise={currentExercise}
-                    currentSet={currentSet}
+                    currentSet={displayCurrentSet}
                     onComplete={handleCountdownComplete}
                     isVertical={true}//{!currentExercise.is_horizontal}
                 />
@@ -303,7 +305,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     onComplete={handleExecutionComplete}
                     exercise={currentExercise}
                     isVertical={!currentExercise.is_horizontal}
-                    currentSet={currentSet}
+                    currentSet={displayCurrentSet}
                 />
             )}
             {/*{currentStep === 'success' && (*/}

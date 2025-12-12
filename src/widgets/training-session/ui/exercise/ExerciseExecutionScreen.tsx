@@ -136,7 +136,7 @@ export function ExerciseExecutionScreen({
                 )}
 
                 {/* Exercise Info */}
-                <View className="absolute bottom-0 left-0 right-0 p-6">
+                <View className="p-6">
                     {/* Exercise Name */}
                     {isVertical ? (
                         <Text className="text-center text-t1 text-light-text-200">
@@ -147,10 +147,10 @@ export function ExerciseExecutionScreen({
                     )}
 
                     {isVertical ? (
-                        <>
+                        <View className={'justify-center align-center'}>
                             {/* Set Info */}
-                            <View className="flex-row justify-center px-1">
-                                <View className="flex-1 basis-0 items-center">
+                            <View className="flex-row px-1">
+                                <View className="flex-1 basis-0 items-center pt-10 ">
                                     <Text
                                         className={`text-[64px] leading-[72px] ${
                                             telemetry?.reps === 0
@@ -160,7 +160,7 @@ export function ExerciseExecutionScreen({
                                                     : 'text-light-text-200'
                                         }`}
                                     >
-                                        {telemetry?.reps}
+                                        {telemetry?.reps || 0}
                                         <Text
                                             className={`text-[32px] leading-[36px] ${
                                                 telemetry?.reps === exercise.reps
@@ -175,7 +175,7 @@ export function ExerciseExecutionScreen({
                                     <Text className="mb-1 text-t2 color-[#949494]">повторения</Text>
                                 </View>
                             </View>
-                        </>
+                        </View>
                     ) : (
                         <View className="flex-row px-1">
                             <View className="flex-[0.5] basis-0 items-center rounded-3xl bg-fill-800 p-1">

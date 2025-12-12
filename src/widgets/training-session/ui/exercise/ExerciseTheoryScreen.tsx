@@ -5,10 +5,10 @@
  */
 
 import { View, Text } from 'react-native'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { VideoView, useVideoPlayer } from 'expo-video'
 
-import { VideoProgressBar } from '@/shared/ui'
+import { LargeNumberDisplay, VideoProgressBar } from '@/shared/ui'
 
 import type { ExerciseInfoResponse } from '@/entities/training/model/types'
 
@@ -25,9 +25,10 @@ interface ExerciseCountdownScreenProps {
 
 function ExerciseExampleCountdownContent({
     exercise,
+    currentSet,
     player,
     isVertical,
-    onComplete,
+    onComplete
 }: {
 	exercise: ExerciseInfoResponse
 	currentSet: number
@@ -37,31 +38,52 @@ function ExerciseExampleCountdownContent({
 }) {
     const videoPlayerContext = useVideoPlayerContext()
     const hasCompletedRef = useRef(false)
+    const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+    const [remainingTime, setRemainingTime] = useState(0)
 
-	console.log('ExerciseTheoryScreen: player', player)
+    useEffect(() => {
+        hasCompletedRef.current = false
+        setRemainingTime(0)
+        if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current)
+        }
+    }, [player])
 
     useEffect(() => {
         if (!player) return
 
-        const checkCompletion = () => {
-            if (hasCompletedRef.current) return
+        const startCountdown = (durationSeconds: number) => {
+            setRemainingTime(durationSeconds)
 
-            // Проверяем, что видео закончилось (currentTime близко к duration)
-            if (player.duration > 0 && player.currentTime >= player.duration - 0.1) {
-                hasCompletedRef.current = true
-                onComplete()
-            }
+            countdownIntervalRef.current = setInterval(() => {
+                setRemainingTime((prev) => {
+                    if (prev <= 1) {
+                        if (!hasCompletedRef.current) {
+                            hasCompletedRef.current = true
+                            onComplete()
+                        }
+                        if (countdownIntervalRef.current) {
+                            clearInterval(countdownIntervalRef.current)
+                        }
+                        return 0
+                    }
+                    return prev - 1
+                })
+            }, 1000)
         }
 
-        // Проверяем периодически, когда видео загружено и воспроизводится
-        const interval = setInterval(() => {
+        const waitForReady = setInterval(() => {
             if (player.status === 'readyToPlay' && player.duration > 0) {
-                checkCompletion()
+                clearInterval(waitForReady)
+                startCountdown(Math.ceil(player.duration))
             }
-        }, 100)
+        }, 200)
 
         return () => {
-            clearInterval(interval)
+            clearInterval(waitForReady)
+            if (countdownIntervalRef.current) {
+                clearInterval(countdownIntervalRef.current)
+            }
         }
     }, [player, onComplete])
 
@@ -69,11 +91,16 @@ function ExerciseExampleCountdownContent({
         if (player && videoPlayerContext) {
             const unregister = videoPlayerContext.registerPlayer(player)
             return unregister
-        } else {
-            console.log('ExerciseTheoryScreen: cannot register - missing player or context')
         }
         return undefined
     }, [player, videoPlayerContext])
+
+    const minutes = Math.floor(remainingTime / 60)
+        .toString()
+        .padStart(2, '0')
+    const seconds = Math.floor(remainingTime % 60)
+        .toString()
+        .padStart(2, '0')
 
     return (
         <>
@@ -91,9 +118,6 @@ function ExerciseExampleCountdownContent({
                 )}
             </View>
 
-            {/*<View className="w-full px-4 py-4 justify-center items-center ">*/}
-            {/*    <StepProgress current={0} total={5} />*/}
-            {/*</View>*/}
             {!isVertical && (
                 <View className="absolute bottom-10 left-0 right-0 items-center justify-center px-4">
                     <VideoProgressBar player={player} className="mb-2" />
@@ -113,72 +137,31 @@ function ExerciseExampleCountdownContent({
                             <VideoProgressBar player={player} />
                         </View>
 
+                        <LargeNumberDisplay
+                            value={`${minutes}:${seconds}`}
+                            size="large"
+                        />
+                        {/* Set Info */}
+
                         <View className="flex-row px-1 gap-2">
-                          <View className="flex-1 basis-0 items-center bg-fill-800 rounded-3xl p-2 ">
-                              <Text className="text-[64px] leading-[72px] text-light-text-200">
-                                  {currentSet}
-                                  <Text className="text-[32px] leading-[36px] color-[#949494] "> / {exercise.sets}</Text>
-                              </Text>
-                              <Text className="text-t2 color-[#949494] mb-1">подход</Text>
-                          </View>
-                          <View className="flex-1 basis-0 items-center bg-fill-800 rounded-3xl p-2">
-                              <Text className="text-[64px] leading-[72px] text-light-text-200">
-                                  {exercise.reps || exercise.duration}
-                              </Text>
-                              <Text className="text-t2 color-[#949494] mb-1">повторения</Text>
-                          </View>
-                      </View>
+                            <View className="flex-1 basis-0 items-center bg-fill-800 rounded-3xl p-2 ">
+                                <Text className="text-[64px] leading-[72px] text-light-text-200">
+                                    {currentSet}
+                                    <Text className="text-[32px] leading-[36px] color-[#949494] "> / {exercise.sets}</Text>
+                                </Text>
+                                <Text className="text-t2 color-[#949494] mb-1">подход</Text>
+                            </View>
+                            <View className="flex-1 basis-0 items-center bg-fill-800 rounded-3xl p-2">
+                                <Text className="text-[64px] leading-[72px] text-light-text-200">
+                                    {exercise.reps || exercise.duration}
+                                </Text>
+                                <Text className="text-t2 color-[#949494] mb-1">повторения</Text>
+                            </View>
+                        </View>
                     </>
                 ) : (
                     <></>
                 )}
-
-                {/*{isVertical ? (*/}
-                {/*    <>*/}
-                {/*        /!* Countdown *!/*/}
-                {/*        <CountdownDisplay isVertical={isVertical} />*/}
-
-                {/*        /!* Set Info *!/*/}
-                {/*        <View className="flex-row px-1 gap-2">*/}
-                {/*            <View className="flex-1 basis-0 items-center bg-fill-800 rounded-3xl p-2 ">*/}
-                {/*                <Text className="text-[64px] leading-[72px] text-light-text-200">*/}
-                {/*                    {currentSet}*/}
-                {/*                    <Text className="text-[32px] leading-[36px] color-[#949494] "> / {exercise.sets}</Text>*/}
-                {/*                </Text>*/}
-                {/*                <Text className="text-t2 color-[#949494] mb-1">подход</Text>*/}
-                {/*            </View>*/}
-                {/*            <View className="flex-1 basis-0 items-center bg-fill-800 rounded-3xl p-2">*/}
-                {/*                <Text className="text-[64px] leading-[72px] text-light-text-200">*/}
-                {/*                    {exercise.reps || exercise.duration}*/}
-                {/*                </Text>*/}
-                {/*                <Text className="text-t2 color-[#949494] mb-1">повторения</Text>*/}
-                {/*            </View>*/}
-                {/*        </View>*/}
-                {/*    </>*/}
-                {/*) : (*/}
-                {/*    <View className="flex-row px-1 pb-2 gap-2">*/}
-                {/*        /!* Set Info *!/*/}
-                {/*        <View className="flex-1 basis-0 flex-row gap-2  items-end">*/}
-                {/*            <View className="flex-[0.5] basis-0 items-center bg-fill-800 rounded-3xl p-1">*/}
-                {/*                <Text className="text-[64px] leading-[72px] text-light-text-200">*/}
-                {/*                    {currentSet}*/}
-                {/*                    <Text className="text-[32px] leading-[36px] color-[#949494] "> / {exercise.sets}</Text>*/}
-                {/*                </Text>*/}
-                {/*                <Text className="text-t2 color-[#949494] mb-1">подход</Text>*/}
-                {/*            </View>*/}
-                {/*            /!* Countdown *!/*/}
-                {/*            <View className="flex-1 basis-0 items-center">*/}
-                {/*                <CountdownDisplay isVertical={isVertical} />*/}
-                {/*            </View>*/}
-                {/*            <View className="flex-[0.5] basis-0 items-center bg-fill-800 rounded-3xl p-1">*/}
-                {/*                <Text className="text-[64px] leading-[72px] text-light-text-200">*/}
-                {/*                    {exercise.reps || exercise.duration}*/}
-                {/*                </Text>*/}
-                {/*                <Text className="text-t2 color-[#949494] mb-1">повторения</Text>*/}
-                {/*            </View>*/}
-                {/*        </View>*/}
-                {/*    </View>*/}
-                {/*)}*/}
             </View>
         </>
     )
@@ -190,8 +173,6 @@ export function ExerciseTheoryScreen({
     onComplete,
     isVertical,
 }: ExerciseCountdownScreenProps) {
-
-
     const player = useVideoPlayer(exercise.video_theory || '', (player) => {
         player.loop = false
     })
