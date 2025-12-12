@@ -102,9 +102,9 @@ src/
 
 **`training-session/`**
 - `OnboardingFlow` — подготовка к тренировке (камера, звук, положение)
-- `ExerciseFlow` — основной флоу выполнения упражнений
+- `ExerciseFlow` — основной флоу выполнения упражнений. Поддерживает зеркальные упражнения: после первой стороны показывается экран смены стороны (`BodyPositionScreen` с заголовком «Смена рабочей стороны»), сет завершается только после обеих сторон.
 - `TrainingInfo`, `TrainingAnalytics` — инфо-панели
-- Экраны: `AIExerciseScreen`, `BodyPositionScreen`, `ExerciseTheoryScreen`, `RestScreen`, `ExerciseSuccess`
+- Экраны: `AIExerciseScreen`, `BodyPositionScreen` (кастомные заголовок/подзаголовок через пропсы), `ExerciseTheoryScreen`, `RestScreen`, `ExerciseSuccess`
 
 **`pose-camera/`**
 - `PoseCamera` — камера с анализом движений
@@ -201,6 +201,7 @@ pnpm web                # Web build
 
 pnpm run check          # Полная проверка (format + lint + type-check)
 pnpm run lint:fix       # Автофикс линтинга
+pnpm run generate:api   # Генерация Orval-клиента (OpenAPI → hooks + схемы)
 ```
 
 ### Makefile

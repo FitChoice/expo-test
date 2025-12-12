@@ -11,6 +11,11 @@ type BodyPositionScreenProps = {
 	onComplete: () => void
 	model: posedetection.PoseDetector
 	orientation: ScreenOrientation.Orientation
+	title?: string
+	subtitle?: string
+	titleClassName?: string
+	subtitleClassName?: string
+	successText?: string
 }
 
 export const BodyPositionScreen = ({
@@ -18,6 +23,11 @@ export const BodyPositionScreen = ({
     onComplete,
     model,
     orientation,
+    title = 'Примите исходное положение',
+    subtitle = 'Встаньте так, чтобы ваше тело полностью попадало в кадр и входило в контур',
+    titleClassName,
+    subtitleClassName,
+    successText = 'Вперёд!',
 }: BodyPositionScreenProps) => {
     const isPortrait = () => {
         return (
@@ -149,27 +159,31 @@ export const BodyPositionScreen = ({
                 )}
 
                 <View className="pl-2 pt-10">
-                    <Text className="mb-2 text-left text-h2 text-light-text-100">
-						Примите исходное положение
+                    <Text className={titleClassName ?? 'mb-2 text-left text-h2 text-light-text-100'}>
+						{title}
                     </Text>
-                    <Text className="text-left text-t2 text-light-text-200">
-						Встаньте так, чтобы ваше тело полностью попадало в кадр и входило в контур
-                    </Text>
+                    {subtitle && (
+                        <Text className={subtitleClassName ?? 'text-left text-t2 text-light-text-200'}>
+							{subtitle}
+                        </Text>
+                    )}
 
                     {showSuccess && (
                         <View className="mt-6 items-center">
-                            <Text className="text-h1 text-brand-green-500">Вперёд!</Text>
+                            <Text className="text-h1 text-brand-green-500">{successText}</Text>
                         </View>
                     )}
 
                     {!isVertical && (
                         <View className="absolute bottom-0 left-0 right-0 z-10 items-center justify-center bg-black opacity-50">
-                            <Text className="mb-2 text-left text-h2 text-light-text-100">
-								Примите исходное положение
+                            <Text className={titleClassName ?? 'mb-2 text-left text-h2 text-light-text-100'}>
+								{title}
                             </Text>
-                            <Text className="text-left text-t2 text-light-text-200">
-								Встаньте так, чтобы ваше тело полностью попадало в кадр и входило в контур
-                            </Text>
+                            {subtitle && (
+                                <Text className={subtitleClassName ?? 'text-left text-t2 text-light-text-200'}>
+									{subtitle}
+                                </Text>
+                            )}
 
                             {showSuccess && (
                                 <View className="mb-2 mt-2 items-center">
