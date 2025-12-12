@@ -4,26 +4,27 @@
  */
 
 import { useState, useEffect } from 'react'
-import { View, ScrollView, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native'
+import { View, ScrollView, Text, TouchableOpacity, Alert, ActivityIndicator, Image, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useQueryClient, useMutation } from '@tanstack/react-query'
-import {
-    Container,
-    Button,
+import { AuthGuard,
 } from '@/shared/ui'
-import { NavigationBar } from '@/widgets/navigation-bar'
 import { ProfileHeader } from '@/widgets/profile'
 import { userApi } from '@/features/user/api'
 import { getUserId, useNavbarLayout, showToast } from '@/shared/lib'
 import { pickAvatarImage, type AvatarPickSource } from '@/shared/lib/media/pickAvatarImage'
 import { useProfileQuery } from '@/features/user/hooks/useProfileQuery'
+import { Feather } from '@expo/vector-icons'
+import { NavigationBar } from '@/widgets/navigation-bar'
+import boySample from '../../../../assets/images/profile_girl_sample.png'
 
 export const ProfileScreen = () => {
     return (
-        <Container>
-            <ProfileContent />
-            <NavigationBar />
-        </Container>
+        <AuthGuard>
+            <View style={styles.container}>
+                <ProfileContent />
+            </View>
+        </AuthGuard>
     )
 }
 
@@ -44,7 +45,7 @@ const ProfileContent = () => {
         }
         fetchUserId()
     }, [])
-
+	
     // Fetch profile data
     const { data: profile, isLoading } = useProfileQuery(userId)
 
@@ -110,7 +111,7 @@ const ProfileContent = () => {
         ])
     }
 
-    if (isLoading) {
+    if (isLoading || !profile) {
         return (
             <View className="flex-1 items-center justify-center">
                 <ActivityIndicator color="#FFFFFF" size="large" />
@@ -121,6 +122,13 @@ const ProfileContent = () => {
 
     return (
         <View className="flex-1">
+            {/*<Toast*/}
+            {/*    visible={toast.visible}*/}
+            {/*    message={toast.message}*/}
+            {/*    variant={toast.variant}*/}
+            {/*    onHide={() => setToast((prev) => ({ ...prev, visible: false }))}*/}
+            {/*/>*/}
+
             <ScrollView
                 className="flex-1 px-5"
                 contentContainerStyle={{
@@ -145,42 +153,46 @@ const ProfileContent = () => {
                 {/* CTA Banner */}
                 <TouchableOpacity
                     onPress={() => router.push('/survey')}
-                    className="mt-6 overflow-hidden rounded-[24px]"
+                    className="mt-8 overflow-hidden rounded-[24px] bg-[#1E1E1E]"
+                    activeOpacity={0.85}
+                    style={{ minHeight: 150, padding: 20 }}
                 >
-                    <View className="bg-[#2C2C2E] px-5 py-5">
-                        <Text className="mb-2 text-[20px] font-semibold text-white">
-							Ваша программа
+                    <View className="flex-1 pr-16">
+                        <Text className="text-[16px] font-semibold text-white">
+											Изменить программу тренировок
                         </Text>
-                        <Text className="mb-4 text-t3 text-light-text-500">
-							Пройдите опрос заново, чтобы скорректировать план тренировок под новые
-							цели
-                        </Text>
-                        <Button
-                            variant="secondary"
-                            size="s"
-                            onPress={() => router.push('/survey')}
-                            className="self-start"
-                        >
-							Обновить план
-                        </Button>
+                        <View className="mt-5 h-12 w-12 items-center justify-center rounded-full bg-[#A96CF5]">
+                            <Feather name="chevrons-right" size={24} color="white" />
+                        </View>
                     </View>
+
+                    <Image
+                        source={boySample}
+                        style={{
+                            position: 'absolute',
+                            right: -8,
+                            bottom: -6,
+                            width: 160,
+                            height: 160,
+                            resizeMode: 'contain',
+                        }}
+                    />
                 </TouchableOpacity>
 
-                {/* Settings Button */}
-                {!isEditMode && (
-                    <View className="mt-6">
-                        <Button
-                            variant="secondary"
-                            size="m"
-                            fullWidth
-                            onPress={() => router.push('/settings')}
-                            leftIcon={<Text className="mr-2 text-xl">⚙️</Text>}
-                        >
-							Настройки
-                        </Button>
-                    </View>
-                )}
             </ScrollView>
+            <NavigationBar />
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#151515', // BG/Dark 500 BG - контентный контейнер
+        ///borderRadius: 32,
+
+        position: 'relative', // Для позиционирования элементов
+        zIndex: 3, // Поверх браслета и заголовка
+        overflow: 'hidden', // Для корректного отображения градиента
+    },
+})
