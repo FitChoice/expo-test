@@ -5,8 +5,8 @@
 
 import React, { useState } from 'react'
 import { View, Text, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native'
-import { Icon } from '@/shared/ui'
 import type { FAQItem } from '@/shared/constants/profile'
+import Entypo from '@expo/vector-icons/Entypo'
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -43,11 +43,15 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({ items }) => {
                             <Text className="flex-1 pr-4 text-t2 text-white">
                                 {item.question}
                             </Text>
-                            <Icon
-                                name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                                size={20}
-                                color="#FFFFFF"
-                            />
+
+                            {
+                                isExpanded ? <Entypo name="chevron-small-up" size={24} color="#989898" /> : <Entypo name="chevron-small-down" size={24} color="#989898" />
+                            }
+                            {/*<Icon*/}
+                            {/*    name={isExpanded ? 'chevron-up' : 'chevron-down'}*/}
+                            {/*    size={20}*/}
+                            {/*    color="#FFFFFF"*/}
+                            {/*/>*/}
                         </TouchableOpacity>
 
                         {isExpanded && (

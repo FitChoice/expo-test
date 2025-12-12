@@ -2,7 +2,7 @@
  * TermsOfServiceScreen - экран пользовательского соглашения
  */
 
-import { View, ScrollView, Text } from 'react-native'
+import { View, ScrollView, Text, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { BackgroundLayout, BackButton } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
@@ -14,7 +14,7 @@ export const TermsOfServiceScreen = () => {
     const { contentPaddingBottom } = useNavbarLayout()
 
     return (
-        <BackgroundLayout>
+        <View style={styles.container}>
             <View className="flex-1 px-5">
                 <View className="pt-4">
                     <BackButton onPress={() => router.back()} />
@@ -22,7 +22,7 @@ export const TermsOfServiceScreen = () => {
 
                 <ScrollView
                     className="flex-1"
-                    contentContainerStyle={{ paddingTop: 20, paddingBottom: contentPaddingBottom }}
+                    contentContainerStyle={{ paddingTop: 100, paddingBottom: contentPaddingBottom }}
                     showsVerticalScrollIndicator={false}
                 >
                     <Text className="mb-6 text-t1 font-medium text-white">
@@ -35,6 +35,18 @@ export const TermsOfServiceScreen = () => {
 
                 <NavigationBar />
             </View>
-        </BackgroundLayout>
+        </View>
     )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#151515', 
+        ///borderRadius: 32,
+        paddingHorizontal: '4%',
+        position: 'relative', // Для позиционирования элементов
+        zIndex: 3, // Поверх браслета и заголовка
+        overflow: 'hidden', // Для корректного отображения градиента
+    },
+})

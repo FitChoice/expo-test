@@ -210,6 +210,7 @@ export const SettingsScreen = () => {
                     <SettingsSection title="Уведомления">
                         <SettingsItem
                             label="Основные"
+                            description="Ежедневные напоминания, связанные с базовой активностью"
                             rightElement={
                                 <Switch
                                     checked={currentNotifications.basic}
@@ -219,6 +220,7 @@ export const SettingsScreen = () => {
                         />
                         <SettingsItem
                             label="Прогресс и мотивация"
+                            description={'Поддерживают интерес, формируют ощущение роста и вовлечённости'}
                             rightElement={
                                 <Switch
                                     checked={currentNotifications.progress}
@@ -227,7 +229,8 @@ export const SettingsScreen = () => {
                             }
                         />
                         <SettingsItem
-                            label="Отчетность"
+                            label="Отчётность"
+                            description="Помогают отслеживать результаты и обновлять личные данные"
                             rightElement={
                                 <Switch
                                     checked={currentNotifications.reports}
@@ -236,7 +239,8 @@ export const SettingsScreen = () => {
                             }
                         />
                         <SettingsItem
-                            label="Системные"
+                            label="Система"
+                            description={'Информационные и сервисные уведомления'}
                             showDivider={false}
                             rightElement={
                                 <Switch
@@ -252,24 +256,18 @@ export const SettingsScreen = () => {
                         <SettingsItem
                             label="Сменить пароль"
                             onPress={() => router.push('/change-password')}
-                            rightElement={
-                                <Icon name="chevron-right" size={20} color="#949494" />
-                            }
+
                         />
                         <SettingsItem
                             label="Удалить аккаунт"
                             onPress={() => setShowDeleteModal(true)}
-                            rightElement={
-                                <Icon name="chevron-right" size={20} color="#949494" />
-                            }
+
                         />
                         <SettingsItem
                             label="Выйти"
                             onPress={() => setShowLogoutModal(true)}
                             showDivider={false}
-                            rightElement={
-                                <Icon name="sign-out" size={20} color="#949494" />
-                            }
+
                         />
                     </SettingsSection>
 
@@ -285,35 +283,29 @@ export const SettingsScreen = () => {
                         />
                         <SettingsItem
                             label="Поддержка"
-                            onPress={() => handleOpenURL(`mailto:${SUPPORT_EMAIL}`)}
-                            rightElement={
-                                <Icon name="chevron-right" size={20} color="#949494" />
-                            }
+                            // onPress={() => handleOpenURL(`mailto:${SUPPORT_EMAIL}`)}
+                            // rightElement={
+                            //     <Icon name="chevron-right" size={20} color="#949494" />
+                            // }
                         />
                         <SettingsItem
                             label="Политика конфиденциальности"
                             onPress={() => router.push('/privacy-policy')}
-                            rightElement={
-                                <Icon name="chevron-right" size={20} color="#949494" />
-                            }
                         />
                         <SettingsItem
                             label="Пользовательское соглашение"
                             onPress={() => router.push('/terms')}
-                            rightElement={
-                                <Icon name="chevron-right" size={20} color="#949494" />
-                            }
                         />
                         <SettingsItem
                             label="Оценить приложение"
-                            onPress={() => {
-                                // App Store / Google Play rating
-                                showToast.success('Спасибо за интерес!')
-                            }}
-                            showDivider={false}
-                            rightElement={
-                                <Icon name="chevron-right" size={20} color="#949494" />
-                            }
+                            // onPress={() => {
+                            //     // App Store / Google Play rating
+                            //     showToast.success('Спасибо за интерес!')
+                            // }}
+                            // showDivider={false}
+                            // rightElement={
+                            //     <Icon name="chevron-right" size={20} color="#949494" />
+                            // }
                         />
                     </SettingsSection>
 
@@ -327,17 +319,13 @@ export const SettingsScreen = () => {
                         <SettingsItem
                             label={SUPPORT_PHONE}
                             onPress={() => handleOpenURL(`tel:${SUPPORT_PHONE}`)}
-                            rightElement={
-                                <Icon name="chevron-right" size={20} color="#949494" />
-                            }
+
                         />
                         <SettingsItem
                             label={SUPPORT_EMAIL}
                             onPress={() => handleOpenURL(`mailto:${SUPPORT_EMAIL}`)}
                             showDivider={false}
-                            rightElement={
-                                <Icon name="chevron-right" size={20} color="#949494" />
-                            }
+
                         />
                     </SettingsSection>
                 </ScrollView>
