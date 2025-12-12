@@ -34,7 +34,7 @@ type ExerciseFlowProps = {
 export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     useKeepAwake()
     const showTutorial = useTrainingStore((state) => state.showTutorial)
-    const [currentStep, setCurrentStep] = useState<ExerciseStep>(showTutorial ? 'theory' : 'position')
+    const [currentStep, setCurrentStep] = useState<ExerciseStep>('execution')//(showTutorial ? 'theory' : 'position')
     const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
     const [restType, setRestType] = useState<'rep' | 'set' | 'exercise'>('rep')
 
@@ -106,7 +106,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
     const handleExecutionComplete = () => {
 
-        if (!currentExercise.is_mirror) {
+        if (currentExercise.is_mirror) {
             // Для single: reps = 1 set
             const newRepNumber = repNumber + 1
             setRepNumber(newRepNumber)
@@ -317,6 +317,9 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     onComplete={handleSideSwitchComplete}
                     model={model}
                     orientation={orientation}
+                    title="Смена рабочей стороны"
+                    titleClassName="mb-2 text-left text-h1 text-brand-green-500"
+                    subtitle=""
                 />
 
             // <SideSwitchScreen

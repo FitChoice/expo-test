@@ -88,6 +88,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({
     onTelemetry,
     onAllKeypointsDetected,
 }) => {
+    
     const cameraRef = useRef(null)
     const engineRef = useRef<ExerciseEngine | null>(null)
     const prevRepsRef = useRef<number>(0)
@@ -114,11 +115,12 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({
             }
         }
     }, [])
-
+  
     useEffect(() => {
-        if (!exerciseId) return
+        // if (!exerciseId) return
         // Recreate FSM stack whenever the user picks another exercise.
         const rule = getExerciseRule(String(exerciseId))
+			 // console.log('rule!!!!!', rule)
         if (!engineRef.current) {
             engineRef.current = new ExerciseEngine(rule)
         } else {
@@ -293,11 +295,31 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({
         }
     }
 
+    const mapKeypointsToRaw = (pose: posedetection.Pose | undefined): RawKeypoint[] => {
+        if (!pose?.keypoints?.length) {
+            return []
+        }
+
+        const width = getOutputTensorWidth()
+        const height = getOutputTensorHeight()
+
+        if (!width || !height) {
+            return []
+        }
+
+        return pose.keypoints.map((kp) => ({
+            x: (kp.x ?? 0) / width,
+            y: (kp.y ?? 0) / height,
+            score: kp.score ?? 0,
+            name: kp.name,
+        }))
+    }
+
     // Translate pose-detection output into the engine telemetry feed expected by the UI.
     const emitTelemetry = (pose: posedetection.Pose | undefined) => {
         if (!engineRef.current || !onTelemetry) return
-        const keypoints = pose?.keypoints as RawKeypoint[] | undefined
-        const telemetry = engineRef.current.process(keypoints ?? [], Date.now())
+        const keypoints = mapKeypointsToRaw(pose)
+        const telemetry = engineRef.current.process(keypoints, Date.now())
 
         // Воспроизводим звук при увеличении количества повторений
         if (telemetry.reps > prevRepsRef.current && telemetry.reps > 0) {

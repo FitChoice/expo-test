@@ -33,6 +33,7 @@ export function ExerciseExecutionScreen({
     orientation,
     currentSet,
 }: TimerExerciseScreenProps) {
+
     const player = useVideoPlayer(exercise.video_practice || '', (player) => {
         player.loop = true
         player.play()
@@ -41,13 +42,9 @@ export function ExerciseExecutionScreen({
     const [telemetry, setTelemetry] = useState<EngineTelemetry | null>(null)
 
     useEffect(() => {
-        if (player && videoPlayerContext) {
-            const unregister = videoPlayerContext.registerPlayer(player)
-            return unregister
-        } else {
-            console.log('ExerciseExecutionScreen: cannot register - missing player or context')
-        }
-        return undefined
+        if (!player || !videoPlayerContext) return
+        const unregister = videoPlayerContext.registerPlayer(player)
+        return unregister
     }, [player, videoPlayerContext])
 
     const { height: windowHeight } = useWindowDimensions()
