@@ -171,13 +171,12 @@ export function ExerciseExecutionScreen({
                                     </Text>
                                     <Text className="mb-1 text-t2 color-[#949494]">повторения</Text>
                                 </View>
-                                {
-                                    telemetry?.reps == exercise.reps && <View className="mt-6 items-center">
-                                        <Text className="text-h1 text-brand-green-500">Так держать!</Text>
-                                    </View>
-                                }
-                                
                             </View>
+                            {
+                                telemetry?.reps == exercise.reps && <View className="mt-6 items-center">
+                                    <Text className="text-t2 text-brand-green-500">Так держать!</Text>
+                                </View>
+                            }
                         </View>
                     ) : (
                         <View className="flex-row px-1">

@@ -102,7 +102,11 @@ src/
 
 **`training-session/`**
 - `OnboardingFlow` — подготовка к тренировке (камера, звук, положение)
-- `ExerciseFlow` — основной флоу выполнения упражнений. Поддерживает зеркальные упражнения: после первой стороны показывается экран смены стороны (`BodyPositionScreen` с заголовком «Смена рабочей стороны»), сет завершается только после обеих сторон.
+- `ExerciseFlow` — основной флоу выполнения упражнений:
+  - старт шага с проверкой ориентации; для горизонтальных упражнений — экран `rotate`, затем `position`/`execution`
+  - порядок шагов: `theory/position → execution → side_switch (для is_mirror) → rest`
+  - rest: если длительность >10 cек — основная фаза rest, затем 10 cек practice с `video_practice`; если 10 cек — только обычный rest
+  - сет считается завершённым после обеих сторон у зеркальных упражнений
 - `TrainingInfo`, `TrainingAnalytics` — инфо-панели
 - Экраны: `AIExerciseScreen`, `BodyPositionScreen` (кастомные заголовок/подзаголовок через пропсы), `ExerciseTheoryScreen`, `RestScreen`, `ExerciseSuccess`
 

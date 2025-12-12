@@ -31,8 +31,8 @@ type ExerciseFlowProps = {
 
 export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     useKeepAwake()
-    const showTutorial = false//useTrainingStore((state) => state.showTutorial)
-    const entryStep: ExerciseStep = 'side_switch'//showTutorial ? 'theory' : 'position'
+    const showTutorial = useTrainingStore((state) => state.showTutorial)
+    const entryStep: ExerciseStep = showTutorial ? 'theory' : 'position'
     const [currentStep, setCurrentStep] = useState<ExerciseStep>(entryStep)
     const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
     const [restType, setRestType] = useState<'rep' | 'set' | 'exercise'>('rep')
@@ -88,35 +88,34 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const exercises = exerciseDetails
     const currentExercise = exercises[currentExerciseIndex]
 
-    // Проверяем ориентацию при изменении упражнения или при первом запуске
-    useEffect(() => {
-        if ((currentStep === 'theory' || currentStep === 'position') && currentExercise) {
-            const checkOrientation = async () => {
-                try {
-                    const orientation = await ScreenOrientation.getOrientationAsync()
-                    const isPortrait =
-						orientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
-						orientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
-                    const isLandscape =
-						orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
-						orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
+    const startExercise = async (
+        exercise: (typeof exercises)[number],
+        nextStep: ExerciseStep = entryStep
+    ) => {
+        const exerciseIsVertical = !exercise.is_horizontal
+        try {
+            const currentOrientation = await ScreenOrientation.getOrientationAsync()
+            const isPortrait =
+				currentOrientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
+				currentOrientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
+            const isLandscape =
+				currentOrientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
+				currentOrientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
 
-                    const exerciseIsVertical = !currentExercise?.is_horizontal
+            const needsRotate =
+				(exerciseIsVertical && !isPortrait) || (!exerciseIsVertical && !isLandscape)
 
-                    // Если ориентация не соответствует упражнению, показываем rotate экран
-                    if (
-                        (exerciseIsVertical && !isPortrait) ||
-						(!exerciseIsVertical && !isLandscape)
-                    ) {
-                        setCurrentStep('rotate')
-                    }
-                } catch (err) {
-                    console.warn('Error checking orientation:', err)
-                }
+            if (needsRotate || exercise.is_horizontal) {
+                setCurrentStep('rotate')
+                return
             }
-            checkOrientation()
+
+            setCurrentStep(nextStep)
+        } catch (err) {
+            console.warn('Error checking orientation:', err)
+            setCurrentStep(nextStep)
         }
-    }, [currentStep, currentExercise])
+    }
 
     useEffect(() => {
         if (!currentExercise) {
@@ -128,8 +127,14 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         setRestType('rep')
         setRestPhase('main')
         setShouldSwitchSide(false)
-        setCurrentStep(entryStep)
+        void startExercise(currentExercise, entryStep)
     }, [currentExercise?.id, entryStep])
+
+    useEffect(() => {
+        if (currentStep === 'rest') {
+            setRestPhase('main')
+        }
+    }, [currentStep])
 
     if (!currentExercise) return null
 
@@ -144,7 +149,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const requiresSideSwitch = Boolean(currentExercise.is_mirror)
 
     const handleRotateComplete = () => {
-        setCurrentStep(entryStep)
+        setCurrentStep(currentExercise.is_horizontal ? 'position' : entryStep)
     }
 
     const handleCountdownComplete = () => {
@@ -154,12 +159,6 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const handlePositionComplete = () => {
         setCurrentStep('execution')
     }
-
-    useEffect(() => {
-        if (currentStep === 'rest') {
-            setRestPhase('main')
-        }
-    }, [currentStep])
 
     const handleExecutionComplete = () => {
         const newRepNumber = repNumber + 1
@@ -227,38 +226,12 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
     const proceedToNextExercise = async () => {
         const nextIndex = currentExerciseIndex + 1
-        const nextExerciseDetail = exercises[nextIndex]
 
-        if (!nextExerciseDetail) {
+        if (!exercises[nextIndex]) {
             finishTraining()
             return
         }
         setCurrentExerciseIndex(nextIndex)
-
-        // Проверяем ориентацию перед началом следующего упражнения
-        if (nextExerciseDetail) {
-            const nextIsVertical = !nextExerciseDetail.is_horizontal
-            try {
-                const nextOrientation = await ScreenOrientation.getOrientationAsync()
-                const isPortrait =
-					nextOrientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
-					nextOrientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
-                const isLandscape =
-					nextOrientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
-					nextOrientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
-
-                if ((nextIsVertical && !isPortrait) || (!nextIsVertical && !isLandscape)) {
-                    setCurrentStep('rotate')
-                } else {
-                    setCurrentStep(entryStep)
-                }
-            } catch (err) {
-                console.warn('Error checking orientation:', err)
-                setCurrentStep(entryStep)
-            }
-        } else {
-            setCurrentStep(entryStep)
-        }
     }
 
     const handleRestComplete = () => {
@@ -288,7 +261,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
     const baseRestDuration =
 		restType === 'rep'
-		    ? 10
+		    ? 5
 		    : restType === 'set'
 		        ? currentExercise.rest_between_sets ?? 15
 		        : currentExercise.rest_after_exercise ?? 30
@@ -331,7 +304,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     exercise={currentExercise}
                     currentSet={displayCurrentSet}
                     onComplete={handleCountdownComplete}
-                    isVertical={true}//{!currentExercise.is_horizontal}
+                    isVertical={!currentExercise.is_horizontal}
                 />
             )}
 
