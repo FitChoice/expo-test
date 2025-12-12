@@ -18,6 +18,7 @@ interface TrainingState {
 	// Current training data
 	training: Training | null
 	currentExerciseDetail: ExerciseDetails | null
+	exerciseDetails: ExerciseInfoResponse[]
 	isExerciseLoading: boolean
 	setCurrentExerciseId: (value: number) => void
 
@@ -60,8 +61,9 @@ interface TrainingState {
 	nextSet: () => void
 	completeSet: (setData: SetData) => void
 	finishTraining: () => void
-    setExerciseDetail: (detail: ExerciseInfoResponse | null) => void
-    setExerciseLoading: (loading: boolean) => void
+	setExerciseDetail: (detail: ExerciseInfoResponse | null) => void
+	setExerciseLoading: (loading: boolean) => void
+	setExerciseDetails: ( successfulExercises: ExerciseInfoResponse[]) => void,
 }
 
 const initialState = {
@@ -83,6 +85,8 @@ const initialState = {
     showTutorial: true,
     currentExerciseDetail: null,
     isExerciseLoading: false,
+	exerciseDetails: [],
+
 }
 
 export const useTrainingStore = create<TrainingState>((set, get) => ({
@@ -91,6 +95,16 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
     setExerciseDetail: (detail: ExerciseInfoResponse | null) => {
         set({ currentExerciseDetail: detail })
     },
+
+	setExerciseDetails: (details: ExerciseInfoResponse[]) => {
+		const { currentExerciseId } = get()
+		const matchedExercise = details.find((exercise) => exercise.id === currentExerciseId) ?? null
+
+		set({
+			exerciseDetails: details,
+			currentExerciseDetail: matchedExercise ?? details[0] ?? null,
+		})
+	},
 
     setExerciseLoading: (loading: boolean) => {
         set({ isExerciseLoading: loading })
@@ -170,9 +184,13 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
     },
 
     setCurrentExerciseId: (id: number) => {
-        set({
-            currentExerciseId: id,
-        })
+        const { exerciseDetails } = get()
+        const nextDetail = exerciseDetails.find((exercise) => exercise.id === id) ?? null
+
+		set({
+			currentExerciseId: id,
+			currentExerciseDetail: nextDetail,
+		})
     },
     /**
 	 * Move to next exercise

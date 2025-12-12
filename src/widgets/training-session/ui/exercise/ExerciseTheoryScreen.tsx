@@ -38,6 +38,8 @@ function ExerciseExampleCountdownContent({
     const videoPlayerContext = useVideoPlayerContext()
     const hasCompletedRef = useRef(false)
 
+	console.log('ExerciseTheoryScreen: player', player)
+
     useEffect(() => {
         if (!player) return
 
@@ -110,6 +112,22 @@ function ExerciseExampleCountdownContent({
                         <View className="px-4">
                             <VideoProgressBar player={player} />
                         </View>
+
+                        <View className="flex-row px-1 gap-2">
+                          <View className="flex-1 basis-0 items-center bg-fill-800 rounded-3xl p-2 ">
+                              <Text className="text-[64px] leading-[72px] text-light-text-200">
+                                  {currentSet}
+                                  <Text className="text-[32px] leading-[36px] color-[#949494] "> / {exercise.sets}</Text>
+                              </Text>
+                              <Text className="text-t2 color-[#949494] mb-1">подход</Text>
+                          </View>
+                          <View className="flex-1 basis-0 items-center bg-fill-800 rounded-3xl p-2">
+                              <Text className="text-[64px] leading-[72px] text-light-text-200">
+                                  {exercise.reps || exercise.duration}
+                              </Text>
+                              <Text className="text-t2 color-[#949494] mb-1">повторения</Text>
+                          </View>
+                      </View>
                     </>
                 ) : (
                     <></>
@@ -172,6 +190,8 @@ export function ExerciseTheoryScreen({
     onComplete,
     isVertical,
 }: ExerciseCountdownScreenProps) {
+
+
     const player = useVideoPlayer(exercise.video_theory || '', (player) => {
         player.loop = false
     })

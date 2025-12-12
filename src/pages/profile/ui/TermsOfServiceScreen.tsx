@@ -4,7 +4,7 @@
 
 import { View, ScrollView, Text, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
-import { BackgroundLayout, BackButton } from '@/shared/ui'
+import {  BackButton } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { useNavbarLayout } from '@/shared/lib'
 import { TERMS_OF_SERVICE_TEXT } from '@/shared/constants/profile'

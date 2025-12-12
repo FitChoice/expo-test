@@ -46,6 +46,8 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const currentExercise = useTrainingStore((state) => state.currentExerciseDetail)
 	  const currentExerciseIndex = training.exercises.findIndex((exercise) => exercise.id === currentExercise?.id)
 
+
+
     const [repNumber, setRepNumber] = useState(0)
     const [setNumber, setSetNumber] = useState(0)
 
@@ -284,7 +286,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     exercise={currentExercise}
                     currentSet={currentSet}
                     onComplete={handleCountdownComplete}
-                    isVertical={!currentExercise.is_horizontal}
+                    isVertical={true}//{!currentExercise.is_horizontal}
                 />
             )}
 

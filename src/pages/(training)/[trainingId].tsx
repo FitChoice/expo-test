@@ -15,14 +15,16 @@ import TrainingReportScreen from '@/pages/(training)/report'
 import {
     TrainingAnalytics
 } from '@/widgets/training-session/ui/TrainingAnalytics'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { trainingApi, trainingKeys } from '@/features/training/api'
 import { useQuery } from '@tanstack/react-query'
-import { useTrainingStore } from '@/entities/training'
+import { type ExerciseInfoResponse, useTrainingStore } from '@/entities/training'
 
 export default function TrainingEntryScreen() {
 
     const { trainingId } = useLocalSearchParams<{ trainingId: string }>()
+
+    const [exerciseIsLoading, setExerciseIsLoading] = useState(false)
     
     const { data: trainingData, isLoading, isError, error: queryError } = useQuery({
         queryKey: trainingKeys.detail(Number(trainingId)),
@@ -36,6 +38,9 @@ export default function TrainingEntryScreen() {
 
     const startTraining = useTrainingStore((state) => state.startTraining)
     const training = useTrainingStore((state) => state.training)
+    const setExerciseDetails = useTrainingStore((state) => state.setExerciseDetails)
+    const setExerciseDetail = useTrainingStore((state) => state.setExerciseDetail)
+    // const setExerciseLoading = useTrainingStore((state) => state.setExerciseLoading)
 
     const status = useTrainingStore((state) => state.status)
     const { tfReady, model, orientation, error } = usePoseCameraSetup()
@@ -48,8 +53,69 @@ export default function TrainingEntryScreen() {
         }
     }, [trainingData, training, startTraining])
 
+    useEffect(() => {
+        if (!training?.id || !training.exercises?.length) return
+
+        let isCancelled = false
+
+        const { exercises, id } = training
+
+        const loadExercises = async () => {
+            setExerciseIsLoading(true)
+
+            try {
+                const responses = await Promise.all(
+                    exercises.map((exercise) => trainingApi.getExerciseInfo(String(id), exercise.id))
+                )
+
+                if (isCancelled) return
+
+                const successfulExercises = responses
+                    .filter(
+                        (response): response is { success: true; data: ExerciseInfoResponse } =>
+                            response.success
+                    )
+                    .map((response) => response.data)
+
+                setExerciseDetails(successfulExercises)
+
+                if (!successfulExercises.length) {
+                    return
+                }
+
+                const firstExercise = successfulExercises[0]
+                if (!firstExercise) {
+                    return
+                }
+                const nextExerciseId =
+                    exercises.find((exercise) => exercise.progress === 0)?.id ?? firstExercise.id
+
+                const nextExerciseDetail: ExerciseInfoResponse =
+                    successfulExercises.find((exercise) => exercise.id === nextExerciseId) ??
+                    firstExercise
+
+                setExerciseDetail(nextExerciseDetail)
+            } finally {
+                if (!isCancelled) {
+                    setExerciseIsLoading(false)
+                }
+            }
+        }
+
+        loadExercises()
+
+        return () => {
+            isCancelled = true
+        }
+    }, [
+        setExerciseDetail,
+        setExerciseDetails,
+        training?.exercises,
+        training?.id,
+    ])
+
     // If training data is not loaded or camera is not ready, show loading
-    if (isLoading || !training || !tfReady || !model || !orientation) {
+    if (isLoading || !training || !tfReady || !model || !orientation || exerciseIsLoading) {
         return (
             <>
                 {error ? <Text>{error.message}</Text> : null}

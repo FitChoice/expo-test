@@ -13,6 +13,7 @@ export type ButtonVariant =
 export type ButtonSize =
 	| 'xs' // Extra small (40px height)
 	| 's' // Small (48px height)
+	| 'm' // Medium (52px height)
 	| 'l' // Large (56px height)
 
 // Пропсы компонента Button
