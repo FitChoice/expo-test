@@ -43,6 +43,19 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const [shouldSwitchSide, setShouldSwitchSide] = useState(false)
 
     const finishTraining = useTrainingStore((state) => state.finishTraining)
+
+    const resetReps = () => {
+        setRepNumber(0)
+    }
+
+    const resetExerciseProgress = () => {
+        setRepNumber(0)
+        setSetNumber(0)
+        setCurrentSideState('right')
+        setRestType('rep')
+        setRestPhase('main')
+        setShouldSwitchSide(false)
+    }
     const exerciseDetails = [
         {
             duration: 0,
@@ -121,12 +134,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         if (!currentExercise) {
             return
         }
-        setRepNumber(0)
-        setSetNumber(0)
-        setCurrentSideState('right')
-        setRestType('rep')
-        setRestPhase('main')
-        setShouldSwitchSide(false)
+        resetExerciseProgress()
         void startExercise(currentExercise, entryStep)
     }, [currentExercise?.id, entryStep])
 
@@ -161,19 +169,14 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     }
 
     const handleExecutionComplete = () => {
-        const newRepNumber = repNumber + 1
-        setRepNumber(newRepNumber)
+        // onComplete срабатывает после выполнения нужного количества повторений,
+        // поэтому считаем, что текущая сторона завершена полностью
+        resetReps()
 
         if (requiresSideSwitch) {
-            const finishedSide = newRepNumber >= repsPerSide
+            const isRightSide = currentSideState === 'right'
 
-            if (!finishedSide) {
-                setRestType('rep')
-                setCurrentStep('rest')
-                return
-            }
-
-            if (currentSideState === 'right') {
+            if (isRightSide) {
                 setShouldSwitchSide(true)
                 setRestType('rep')
                 setCurrentStep('rest')
@@ -182,7 +185,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
             const newSetNumber = setNumber + 1
             setSetNumber(newSetNumber)
-            setRepNumber(0)
+            resetReps()
             setCurrentSideState('right')
 
             if (newSetNumber < setsPerExercise) {
@@ -199,17 +202,10 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             return
         }
 
-        const finishedReps = newRepNumber >= repsPerSide
-
-        if (!finishedReps) {
-            setRestType('rep')
-            setCurrentStep('rest')
-            return
-        }
-
         const newSetNumber = setNumber + 1
         setSetNumber(newSetNumber)
-        setRepNumber(0)
+        resetReps()
+        setCurrentSideState('right')
 
         if (newSetNumber < setsPerExercise) {
             setRestType('set')
@@ -231,6 +227,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             finishTraining()
             return
         }
+        resetExerciseProgress()
         setCurrentExerciseIndex(nextIndex)
     }
 
@@ -238,7 +235,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         if (restType === 'rep') {
             if (requiresSideSwitch && shouldSwitchSide) {
                 setShouldSwitchSide(false)
-                setRepNumber(0)
+                resetReps()
                 setCurrentSideState('left')
                 setCurrentStep('side_switch')
                 return
@@ -248,7 +245,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         }
 
         if (restType === 'set') {
-            setRepNumber(0)
+            resetReps()
             setCurrentSideState('right')
             setCurrentStep('position')
             return
@@ -281,6 +278,8 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         setCurrentStep('execution')
     }
 
+    const executionKey = `${currentExercise.id}-${setNumber}-${currentSideState}`
+
     return (
         <View className="flex-1">
             {currentStep === 'rotate' && (
@@ -310,6 +309,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
 
             {currentStep === 'execution' && (
                 <ExerciseExecutionScreen
+                    key={executionKey}
                     model={model}
                     orientation={orientation}
                     onComplete={handleExecutionComplete}

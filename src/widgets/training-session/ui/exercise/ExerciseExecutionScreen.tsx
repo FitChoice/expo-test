@@ -174,7 +174,7 @@ export function ExerciseExecutionScreen({
                             </View>
                             {
                                 telemetry?.reps == exercise.reps && <View className="mt-6 items-center">
-                                    <Text className="text-t2 text-brand-green-500">Так держать!</Text>
+                                    <Text className="text-h1 text-brand-green-500">Так держать!</Text>
                                 </View>
                             }
                         </View>
