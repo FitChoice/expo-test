@@ -42,6 +42,8 @@ export default function TrainingEntryScreen() {
     const setExerciseDetail = useTrainingStore((state) => state.setExerciseDetail)
     // const setExerciseLoading = useTrainingStore((state) => state.setExerciseLoading)
 
+    console.log('training', training)
+
     const status = useTrainingStore((state) => state.status)
     const { tfReady, model, orientation, error } = usePoseCameraSetup()
 
@@ -76,6 +78,8 @@ export default function TrainingEntryScreen() {
                             response.success
                     )
                     .map((response) => response.data)
+
+                console.log('successfulExercises', successfulExercises)
 
                 setExerciseDetails(successfulExercises)
 

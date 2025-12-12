@@ -42,6 +42,7 @@ export const TrainingAnalytics = () => {
                     <TouchableOpacity
                         className="h-12 w-12 items-center justify-center rounded-2xl bg-gray-500/50"
                         // onPress={handleBack}
+                        onPress={handleGoToReportPage}
                     >
                         <Ionicons name="chevron-back" size={24} color="white" />
                     </TouchableOpacity>

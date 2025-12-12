@@ -85,7 +85,7 @@ const initialState = {
     showTutorial: true,
     currentExerciseDetail: null,
     isExerciseLoading: false,
-	exerciseDetails: [],
+    exerciseDetails: [],
 
 }
 
@@ -96,15 +96,15 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
         set({ currentExerciseDetail: detail })
     },
 
-	setExerciseDetails: (details: ExerciseInfoResponse[]) => {
-		const { currentExerciseId } = get()
-		const matchedExercise = details.find((exercise) => exercise.id === currentExerciseId) ?? null
+    setExerciseDetails: (details: ExerciseInfoResponse[]) => {
+        const { currentExerciseId } = get()
+        const matchedExercise = details.find((exercise) => exercise.id === currentExerciseId) ?? null
 
-		set({
-			exerciseDetails: details,
-			currentExerciseDetail: matchedExercise ?? details[0] ?? null,
-		})
-	},
+        set({
+            exerciseDetails: details,
+            currentExerciseDetail: matchedExercise ?? details[0] ?? null,
+        })
+    },
 
     setExerciseLoading: (loading: boolean) => {
         set({ isExerciseLoading: loading })
@@ -187,10 +187,10 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
         const { exerciseDetails } = get()
         const nextDetail = exerciseDetails.find((exercise) => exercise.id === id) ?? null
 
-		set({
-			currentExerciseId: id,
-			currentExerciseDetail: nextDetail,
-		})
+        set({
+            currentExerciseId: id,
+            currentExerciseDetail: nextDetail,
+        })
     },
     /**
 	 * Move to next exercise

@@ -22,7 +22,6 @@ interface TimerExerciseScreenProps {
 	exercise: ExerciseInfoResponse
 	model: posedetection.PoseDetector
 	orientation: ScreenOrientation.Orientation
-	currentSet: number
 }
 
 export function ExerciseExecutionScreen({
@@ -31,7 +30,6 @@ export function ExerciseExecutionScreen({
     exercise,
     model,
     orientation,
-    currentSet,
 }: TimerExerciseScreenProps) {
 
     const player = useVideoPlayer(exercise.video_practice || '', (player) => {
@@ -53,7 +51,9 @@ export function ExerciseExecutionScreen({
 
     useEffect(() => {
         if (telemetry?.reps == exercise.reps) {
-            onComplete()
+            setTimeout(() => {
+                onComplete()
+            }, 2000)
         }
     }, [telemetry?.reps])
 
@@ -171,6 +171,12 @@ export function ExerciseExecutionScreen({
                                     </Text>
                                     <Text className="mb-1 text-t2 color-[#949494]">повторения</Text>
                                 </View>
+                                {
+                                    telemetry?.reps == exercise.reps && <View className="mt-6 items-center">
+                                        <Text className="text-h1 text-brand-green-500">Так держать!</Text>
+                                    </View>
+                                }
+                                
                             </View>
                         </View>
                     ) : (

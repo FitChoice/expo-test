@@ -19,7 +19,6 @@ import {
     BackButton,
     Switch,
     SettingsItem,
-    Icon,
     ConfirmModal,
     Avatar,
 } from '@/shared/ui'

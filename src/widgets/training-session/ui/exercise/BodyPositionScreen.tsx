@@ -16,6 +16,7 @@ type BodyPositionScreenProps = {
 	titleClassName?: string
 	subtitleClassName?: string
 	successText?: string
+    type?: 'side_switch'
 }
 
 export const BodyPositionScreen = ({
@@ -160,11 +161,11 @@ export const BodyPositionScreen = ({
 
                 <View className="pl-2 pt-10">
                     <Text className={titleClassName ?? 'mb-2 text-left text-h2 text-light-text-100'}>
-						{title}
+                        {title}
                     </Text>
                     {subtitle && (
                         <Text className={subtitleClassName ?? 'text-left text-t2 text-light-text-200'}>
-							{subtitle}
+                            {subtitle}
                         </Text>
                     )}
 
@@ -177,11 +178,11 @@ export const BodyPositionScreen = ({
                     {!isVertical && (
                         <View className="absolute bottom-0 left-0 right-0 z-10 items-center justify-center bg-black opacity-50">
                             <Text className={titleClassName ?? 'mb-2 text-left text-h2 text-light-text-100'}>
-								{title}
+                                {title}
                             </Text>
                             {subtitle && (
                                 <Text className={subtitleClassName ?? 'text-left text-t2 text-light-text-200'}>
-									{subtitle}
+                                    {subtitle}
                                 </Text>
                             )}
 

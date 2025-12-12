@@ -1,7 +1,7 @@
 /**
  * ExerciseFlow widget
  * Управляет flow выполнения упражнений
- * Включает countdown, body position check, exercise execution, rest, transitions
+ * Включает countdown, body position check, exercise execution, rest
  */
 
 import { useState, useEffect } from 'react'
@@ -10,7 +10,6 @@ import * as ScreenOrientation from 'expo-screen-orientation'
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import { BodyPositionScreen } from './exercise/BodyPositionScreen'
 import { RestScreen } from './exercise/RestScreen'
-import { ExerciseTransitionScreen } from './exercise/ExerciseTransitionScreen'
 import { RotateScreen } from './exercise/RotateScreen'
 import { useTrainingStore } from '@/entities/training'
 import { ExerciseExecutionScreen } from '@/widgets/training-session/ui/exercise/ExerciseExecutionScreen'
@@ -23,7 +22,6 @@ type ExerciseStep =
 	| 'execution'
 	| 'side_switch'
 	| 'rest'
-	| 'transition'
 	| 'rotate'
 
 type ExerciseFlowProps = {
@@ -33,23 +31,66 @@ type ExerciseFlowProps = {
 
 export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     useKeepAwake()
-    const showTutorial = useTrainingStore((state) => state.showTutorial)
-    const [currentStep, setCurrentStep] = useState<ExerciseStep>('execution')//(showTutorial ? 'theory' : 'position')
+    const showTutorial = false//useTrainingStore((state) => state.showTutorial)
+    const entryStep: ExerciseStep = 'side_switch'//showTutorial ? 'theory' : 'position'
+    const [currentStep, setCurrentStep] = useState<ExerciseStep>(entryStep)
     const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
     const [restType, setRestType] = useState<'rep' | 'set' | 'exercise'>('rep')
-
-    const training = useTrainingStore((state) => state.training)
-
-    const nextExercise = useTrainingStore((state) => state.nextExercise)
-    const finishTraining = useTrainingStore((state) => state.finishTraining)
-    const exerciseDetails = useTrainingStore((state) => state.exerciseDetails)
-    const currentExercise = useTrainingStore((state) => state.currentExerciseDetail)
+    const [restPhase, setRestPhase] = useState<'main' | 'practice'>('main')
     const [repNumber, setRepNumber] = useState(0)
     const [setNumber, setSetNumber] = useState(0)
+    const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
+    const [shouldSwitchSide, setShouldSwitchSide] = useState(false)
+
+    const finishTraining = useTrainingStore((state) => state.finishTraining)
+    const exerciseDetails = [
+        {
+            duration: 0,
+            id: 0,
+            is_ai: false,
+            is_horizontal: false,
+            is_mirror: false,
+            layout: 'стоя',
+            name: 'Приседания 1',
+            progress: 0,
+            reps: 2,
+            rest_after_exercise: 20,
+            rest_between_sets: 20,
+            sets: 2,
+            error_codes: [],
+            video_practice: 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0.mp4',
+            video_practice_second: '',
+            video_theory: 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+            working_side: '-',
+            working_side_second: '',
+        },
+        {
+            duration: 0,
+            id: 1,
+            is_ai: false,
+            is_horizontal: false,
+            is_mirror: true,
+            layout: 'стоя',
+            name: 'Приседания 2',
+            progress: 0,
+            reps: 2,
+            rest_after_exercise: 20,
+            rest_between_sets: 20,
+            sets: 2,
+            error_codes: [],
+            video_practice: 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0.mp4',
+            video_practice_second: '',
+            video_theory: 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
+            working_side: '-',
+            working_side_second: '',
+        },
+    ]
+    const exercises = exerciseDetails
+    const currentExercise = exercises[currentExerciseIndex]
 
     // Проверяем ориентацию при изменении упражнения или при первом запуске
     useEffect(() => {
-        if (currentStep === 'theory' && currentExercise) {
+        if ((currentStep === 'theory' || currentStep === 'position') && currentExercise) {
             const checkOrientation = async () => {
                 try {
                     const orientation = await ScreenOrientation.getOrientationAsync()
@@ -75,25 +116,35 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             }
             checkOrientation()
         }
-    }, [ currentStep, currentExercise])
+    }, [currentStep, currentExercise])
 
-    if (!training) return null
-
-    const currentExerciseIndex = training.exercises.findIndex((exercise) => exercise.id === currentExercise?.id)
-
-    // const currentExercise = training.exercises[currentExerciseIndex]
-    // const isVertical = currentExercise?.isVertical
+    useEffect(() => {
+        if (!currentExercise) {
+            return
+        }
+        setRepNumber(0)
+        setSetNumber(0)
+        setCurrentSideState('right')
+        setRestType('rep')
+        setRestPhase('main')
+        setShouldSwitchSide(false)
+        setCurrentStep(entryStep)
+    }, [currentExercise?.id, entryStep])
 
     if (!currentExercise) return null
 
-    // UI expects 1-based set number; internal state stays 0-based for calculations
-    const displayCurrentSet = Math.max(1, Math.min(setNumber + 1, currentExercise.sets ?? setNumber + 1))
+    const displayCurrentSet = Math.max(
+        1,
+        Math.min(setNumber + 1, currentExercise.sets ?? setNumber + 1)
+    )
 
-    // Check if exercise has sides
-    // const hasSides = currentExercise?.side === 'both'
+    const isLastExercise = currentExerciseIndex === exercises.length - 1
+    const repsPerSide = currentExercise.reps ?? 1
+    const setsPerExercise = currentExercise.sets ?? 1
+    const requiresSideSwitch = Boolean(currentExercise.is_mirror)
 
     const handleRotateComplete = () => {
-        setCurrentStep('theory')
+        setCurrentStep(entryStep)
     }
 
     const handleCountdownComplete = () => {
@@ -104,165 +155,158 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         setCurrentStep('execution')
     }
 
+    useEffect(() => {
+        if (currentStep === 'rest') {
+            setRestPhase('main')
+        }
+    }, [currentStep])
+
     const handleExecutionComplete = () => {
+        const newRepNumber = repNumber + 1
+        setRepNumber(newRepNumber)
 
-        if (currentExercise.is_mirror) {
-            // Для single: reps = 1 set
-            const newRepNumber = repNumber + 1
-            setRepNumber(newRepNumber)
+        if (requiresSideSwitch) {
+            const finishedSide = newRepNumber >= repsPerSide
 
-            if (newRepNumber < currentExercise.reps) {
-                // Еще есть повторения в текущем сете - показываем отдых после rep (10 сек)
+            if (!finishedSide) {
                 setRestType('rep')
                 setCurrentStep('rest')
-            } else {
-                // Завершили все повторения в сете
-                const newSetNumber = setNumber + 1
-                setSetNumber(newSetNumber)
-
-                if (newSetNumber < currentExercise.sets) {
-                    // Есть еще сеты - показываем отдых после set (15 сек)
-                    setRestType('set')
-                    setCurrentStep('rest')
-                } else {
-                    // Завершили все сеты упражнения
-                    const isLastExercise = currentExerciseIndex === training.exercises.length - 1
-                    if (isLastExercise) {
-                        //  setCurrentStep('finished')
-                        finishTraining()
-                    } else {
-                        // Показываем отдых после завершения упражнения
-                        setRestType('exercise')
-                        setCurrentStep('rest')
-                    }
-                }
+                return
             }
-        } else  {
-            // Для both: reps на одну сторону + reps на другую = 1 set
-            const newRepNumber = repNumber + 1
-            setRepNumber(newRepNumber)
 
-            if (newRepNumber < currentExercise.reps) {
-                // Еще есть повторения на текущей стороне - показываем отдых после rep (10 сек)
+            if (currentSideState === 'right') {
+                setShouldSwitchSide(true)
                 setRestType('rep')
                 setCurrentStep('rest')
+                return
+            }
+
+            const newSetNumber = setNumber + 1
+            setSetNumber(newSetNumber)
+            setRepNumber(0)
+            setCurrentSideState('right')
+
+            if (newSetNumber < setsPerExercise) {
+                setRestType('set')
+                setCurrentStep('rest')
             } else {
-                // Завершили все повторения на текущей стороне
-                // Проверяем, нужно ли переключать сторону
-                if (currentSideState === 'right') {
-                    // Переключаемся на левую сторону - показываем отдых после rep перед переключением
-                    setRestType('rep')
-                    setCurrentStep('rest')
+                if (isLastExercise) {
+                    finishTraining()
                 } else {
-                    // Завершили все повторения на левой стороне - показываем отдых после rep перед завершением сета
-                    setRestType('rep')
+                    setRestType('exercise')
                     setCurrentStep('rest')
                 }
             }
+            return
         }
-    }
 
-    const handleRestComplete = () => {
+        const finishedReps = newRepNumber >= repsPerSide
 
-        if (restType === 'rep') {
-            // После отдыха после rep продолжаем выполнение или переключаем сторону/завершаем сет
-            if (
-                currentExercise.is_mirror  &&
-                currentSideState === 'right' &&
-                repNumber >= currentExercise.reps
-            ) {
-                // Завершили все reps на правой стороне - переключаемся на левую
-                setRepNumber(0)
-                setCurrentSideState('left')
-                setCurrentStep('side_switch')
-            } else if (
-                currentExercise.is_mirror &&
-                currentSideState === 'left' &&
-                repNumber >= currentExercise.reps
-            ) {
-                // Завершили все reps на левой стороне - завершаем сет
-                const newSetNumber = setNumber + 1
-                setSetNumber(newSetNumber)
-                setRepNumber(0)
-                setCurrentSideState('right')
-
-                if (newSetNumber < currentExercise.sets) {
-                    // Есть еще сеты - показываем отдых после set (15 сек)
-                    setRestType('set')
-                    setCurrentStep('rest')
-                } else {
-                    // Завершили все сеты упражнения
-                    const isLastExercise = currentExerciseIndex === training.exercises.length - 1
-                    if (isLastExercise) {
-                        // setCurrentStep('success')
-                        finishTraining()
-                    } else {
-                        // Показываем отдых после завершения упражнения
-                        setRestType('exercise')
-                        setCurrentStep('rest')
-                    }
-                }
-            } else {
-                // Продолжаем выполнение
-                setCurrentStep('execution')
-            }
-        } else if (restType === 'set') {
-            // После отдыха после set начинаем следующий сет
-            setRepNumber(0) // Сбрасываем счетчик повторений для следующего сета
-            setCurrentStep('position')
-        } else if (restType === 'exercise') {
-            // После отдыха после упражнения переходим к следующему упражнению через transition
-            setCurrentStep('transition')
+        if (!finishedReps) {
+            setRestType('rep')
+            setCurrentStep('rest')
+            return
         }
-    }
 
-    const handleSideSwitchComplete = () => {
-        // После переключения стороны продолжаем выполнение на новой стороне
-        //	setCurrentSideState('left')
-        setCurrentStep('execution')
-    }
-
-    const handleTransitionComplete = async () => {
-        // Получаем данные следующего упражнения до вызова nextExercise()
-        const nextExerciseData = training.exercises[currentExerciseIndex + 1]
-        const nextExerciseDetail = exerciseDetails.find((exercise) => exercise.id === nextExerciseData?.id)
-
-        // Переход к следующему упражнению
-        nextExercise()
-        // Сбрасываем счетчики для нового упражнения
+        const newSetNumber = setNumber + 1
+        setSetNumber(newSetNumber)
         setRepNumber(0)
-        setSetNumber(0)
-        setCurrentSideState('right')
-        setRestType('rep')
+
+        if (newSetNumber < setsPerExercise) {
+            setRestType('set')
+            setCurrentStep('rest')
+        } else {
+            if (isLastExercise) {
+                finishTraining()
+            } else {
+                setRestType('exercise')
+                setCurrentStep('rest')
+            }
+        }
+    }
+
+    const proceedToNextExercise = async () => {
+        const nextIndex = currentExerciseIndex + 1
+        const nextExerciseDetail = exercises[nextIndex]
+
+        if (!nextExerciseDetail) {
+            finishTraining()
+            return
+        }
+        setCurrentExerciseIndex(nextIndex)
 
         // Проверяем ориентацию перед началом следующего упражнения
         if (nextExerciseDetail) {
             const nextIsVertical = !nextExerciseDetail.is_horizontal
             try {
-                const orientation = await ScreenOrientation.getOrientationAsync()
+                const nextOrientation = await ScreenOrientation.getOrientationAsync()
                 const isPortrait =
-					orientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
-					orientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
+					nextOrientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
+					nextOrientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
                 const isLandscape =
-					orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
-					orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
+					nextOrientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
+					nextOrientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
 
-                // Если ориентация не соответствует следующему упражнению, показываем rotate экран
                 if ((nextIsVertical && !isPortrait) || (!nextIsVertical && !isLandscape)) {
                     setCurrentStep('rotate')
                 } else {
-                    setCurrentStep('theory')
+                    setCurrentStep(entryStep)
                 }
             } catch (err) {
                 console.warn('Error checking orientation:', err)
-                setCurrentStep('theory')
+                setCurrentStep(entryStep)
             }
         } else {
-            setCurrentStep('theory')
+            setCurrentStep(entryStep)
         }
     }
 
-    const nextExerciseData = training.exercises[currentExerciseIndex + 1]
+    const handleRestComplete = () => {
+        if (restType === 'rep') {
+            if (requiresSideSwitch && shouldSwitchSide) {
+                setShouldSwitchSide(false)
+                setRepNumber(0)
+                setCurrentSideState('left')
+                setCurrentStep('side_switch')
+                return
+            }
+            setCurrentStep('execution')
+            return
+        }
+
+        if (restType === 'set') {
+            setRepNumber(0)
+            setCurrentSideState('right')
+            setCurrentStep('position')
+            return
+        }
+
+        if (restType === 'exercise') {
+            void proceedToNextExercise()
+        }
+    }
+
+    const baseRestDuration =
+		restType === 'rep'
+		    ? 10
+		    : restType === 'set'
+		        ? currentExercise.rest_between_sets ?? 15
+		        : currentExercise.rest_after_exercise ?? 30
+
+    const hasPracticePhase = baseRestDuration > 10
+    const mainRestDuration = hasPracticePhase ? baseRestDuration - 10 : baseRestDuration
+
+    const handleRestPhaseComplete = () => {
+        if (hasPracticePhase && restPhase === 'main') {
+            setRestPhase('practice')
+            return
+        }
+        handleRestComplete()
+    }
+
+    const handleSideSwitchComplete = () => {
+        setCurrentStep('execution')
+    }
 
     return (
         <View className="flex-1">
@@ -275,7 +319,6 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             {currentStep === 'position' && (
                 <BodyPositionScreen
                     isVertical={!currentExercise.is_horizontal}
-                    //side={hasSides ? currentSideState : undefined}
                     key="position-check"
                     onComplete={handlePositionComplete}
                     model={model}
@@ -292,12 +335,6 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                 />
             )}
 
-            {/*{currentStep === 'execution' && currentExercise.isAi && (*/}
-            {/*	<AIExerciseScreen*/}
-            {/*		onComplete={handleExecutionComplete}*/}
-
-            {/*	/>*/}
-            {/*)}*/}
             {currentStep === 'execution' && (
                 <ExerciseExecutionScreen
                     model={model}
@@ -305,7 +342,6 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     onComplete={handleExecutionComplete}
                     exercise={currentExercise}
                     isVertical={!currentExercise.is_horizontal}
-                    currentSet={displayCurrentSet}
                 />
             )}
             {/*{currentStep === 'success' && (*/}
@@ -316,32 +352,37 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     key="side-switch"
                     onComplete={handleSideSwitchComplete}
                     model={model}
+                    type="side_switch"
                     orientation={orientation}
                     title="Смена рабочей стороны"
                     titleClassName="mb-2 text-left text-h1 text-brand-green-500"
                     subtitle=""
+                    isVertical={true}
                 />
-
-            // <SideSwitchScreen
-            // 	nextSide={currentSideState === null ? 'left' : 'right'}
-            // 	onComplete={handleSideSwitchComplete}
-            // />
             )}
             {currentStep === 'rest' && (
-                <RestScreen
-                    onComplete={handleRestComplete}
-                    duration={
-                        restType === 'rep' ? 10 : restType === 'set' ? currentExercise.rest_between_sets : (currentExercise.rest_after_exercise || 30)
-                    }
-                />
+                <>
+                    {restPhase === 'main' && (
+                        <RestScreen
+                            onComplete={handleRestPhaseComplete}
+                            duration={mainRestDuration}
+                            exercise={currentExercise}
+                            currentSet={displayCurrentSet}
+                        />
+                    )}
+                    {restPhase === 'practice' && (
+                        <ExerciseTheoryScreen
+                            exercise={currentExercise}
+                            currentSet={displayCurrentSet}
+                            onComplete={handleRestComplete}
+                            isVertical
+                            videoUrlOverride={currentExercise.video_practice}
+                            durationOverrideSeconds={10}
+                        />
+                    )}
+                </>
             )}
 
-            {currentStep === 'transition' && nextExerciseData && (
-                <ExerciseTransitionScreen
-                    nextExercise={nextExerciseData}
-                    onComplete={handleTransitionComplete}
-                />
-            )}
         </View>
     )
 }

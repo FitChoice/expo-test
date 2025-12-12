@@ -21,6 +21,8 @@ interface ExerciseCountdownScreenProps {
 	currentSet: number
 	onComplete: () => void
 	isVertical?: boolean
+	videoUrlOverride?: string
+	durationOverrideSeconds?: number
 }
 
 function ExerciseExampleCountdownContent({
@@ -28,13 +30,17 @@ function ExerciseExampleCountdownContent({
     currentSet,
     player,
     isVertical,
-    onComplete
+    onComplete,
+    durationOverrideSeconds,
+    videoUrl
 }: {
 	exercise: ExerciseInfoResponse
 	currentSet: number
 	player: ReturnType<typeof useVideoPlayer>
 	isVertical?: boolean
 	onComplete: () => void
+	durationOverrideSeconds?: number
+	videoUrl?: string
 }) {
     const videoPlayerContext = useVideoPlayerContext()
     const hasCompletedRef = useRef(false)
@@ -72,6 +78,15 @@ function ExerciseExampleCountdownContent({
             }, 1000)
         }
 
+        if (durationOverrideSeconds) {
+            startCountdown(durationOverrideSeconds)
+            return () => {
+                if (countdownIntervalRef.current) {
+                    clearInterval(countdownIntervalRef.current)
+                }
+            }
+        }
+
         const waitForReady = setInterval(() => {
             if (player.status === 'readyToPlay' && player.duration > 0) {
                 clearInterval(waitForReady)
@@ -85,7 +100,7 @@ function ExerciseExampleCountdownContent({
                 clearInterval(countdownIntervalRef.current)
             }
         }
-    }, [player, onComplete])
+    }, [player, onComplete, durationOverrideSeconds])
 
     useEffect(() => {
         if (player && videoPlayerContext) {
@@ -106,7 +121,7 @@ function ExerciseExampleCountdownContent({
         <>
             {/* Video */}
             <View style={{ height: isVertical ? height : 250 }}>
-                {exercise.video_theory ? (
+                {videoUrl ? (
                     <VideoView
                         player={player}
                         style={{ flex: 1 }}
@@ -172,8 +187,10 @@ export function ExerciseTheoryScreen({
     currentSet,
     onComplete,
     isVertical,
+    videoUrlOverride,
+    durationOverrideSeconds,
 }: ExerciseCountdownScreenProps) {
-    const player = useVideoPlayer(exercise.video_theory || '', (player) => {
+    const player = useVideoPlayer(videoUrlOverride ?? exercise.video_theory ?? '', (player) => {
         player.loop = false
     })
 
@@ -191,6 +208,8 @@ export function ExerciseTheoryScreen({
                 player={player}
                 isVertical={isVertical}
                 onComplete={onComplete}
+                videoUrl={videoUrlOverride ?? exercise.video_theory}
+                durationOverrideSeconds={durationOverrideSeconds}
             />
         </ExerciseWithCounterWrapper>
     )
