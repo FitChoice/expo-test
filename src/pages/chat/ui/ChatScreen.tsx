@@ -1,11 +1,10 @@
 /**
  * ChatScreen - основной экран чата с ИИ-ассистентом
- * Composition Root: связывает чистые UI хуки с бизнес-логикой
- * Поддерживает Mock режим для тестирования без бэкенда
+ * Composition Root: связывает UI хуки с бизнес-логикой (real API)
  */
 
-import React, { useCallback, useMemo } from 'react'
-import { View, KeyboardAvoidingView, Platform } from 'react-native'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { View, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native'
 import {
     ChatHeader,
     MessageList,
@@ -15,55 +14,40 @@ import {
     useFilePicker,
 } from '@/widgets/chat'
 import {
+    CHAT_PAGE_SIZE,
     useChatHistory,
-    useStreamResponse,
     useChatStore,
     useAttachmentUpload,
-    useMockStreamResponse,
-    useMockUploadFile,
+    useSendMessage,
 } from '@/features/chat'
-import { WELCOME_MESSAGE, getAttachmentTypeFromMime, type Message } from '@/entities/chat'
+import { getAttachmentTypeFromMime, type Message } from '@/entities/chat'
+import { getUserId } from '@/shared/lib/auth'
 
 export const ChatScreen: React.FC = () => {
-    // Get mock mode state
+    const [userId, setUserId] = useState<number | null>(null)
+    const [isSending, setIsSending] = useState(false)
+
     const {
-        isMockMode,
-        mockMessages,
         pendingAttachments,
         removePendingAttachment,
         clearPendingAttachments,
-        addPendingAttachment,
-        updateAttachmentProgress,
-        markAttachmentUploaded,
     } = useChatStore()
 
-    // === Real Mode Hooks ===
+    useEffect(() => {
+        getUserId().then((id) => setUserId(id))
+    }, [])
+
     const {
         data: chatData,
-        isLoading: isLoadingReal,
+        isLoading,
         isFetchingNextPage,
         hasNextPage,
         fetchNextPage,
-    } = useChatHistory()
+    } = useChatHistory({ userId: userId ?? undefined, limit: CHAT_PAGE_SIZE, enabled: Boolean(userId) })
 
-    const {
-        streamingContent: realStreamingContent,
-        isStreaming: isRealStreaming,
-        startStream: startRealStream,
-    } = useStreamResponse()
+    const sendMessage = useSendMessage(CHAT_PAGE_SIZE)
 
-    // Real upload hook
-    const { uploadAttachment: uploadRealAttachment, isUploading: isRealUploading } =
-        useAttachmentUpload()
-
-    // === Mock Mode Hooks ===
-    const {
-        streamingContent: mockStreamingContent,
-        isStreaming: isMockStreaming,
-        startStream: startMockStream,
-    } = useMockStreamResponse()
-
-    const { uploadFile: mockUploadFile } = useMockUploadFile()
+    const { uploadAttachment, isUploading } = useAttachmentUpload()
 
     // === UI Media Hooks (используются в обоих режимах) ===
     const {
@@ -84,116 +68,56 @@ export const ChatScreen: React.FC = () => {
 
     const { pickImages, pickDocuments } = useFilePicker()
 
-    // === Computed values based on mode ===
-    const isLoading = isMockMode ? false : isLoadingReal
-    const isStreaming = isMockMode ? isMockStreaming : isRealStreaming
-    const streamingContent = isMockMode ? mockStreamingContent : realStreamingContent
-    const isUploading = isMockMode ? false : isRealUploading
-
-    // Messages: mock или real
     const messages = useMemo<Message[]>(() => {
-        if (isMockMode) {
-            return mockMessages
-        }
-        const serverMessages = chatData?.messages ?? []
-        if (serverMessages.length === 0) {
-            return [WELCOME_MESSAGE]
-        }
-        return serverMessages
-    }, [isMockMode, mockMessages, chatData?.messages])
-
-    // === Upload handler (разный для mock и real) ===
-    const uploadAttachment = useCallback(
-        (params: {
-            type: 'image' | 'audio' | 'video' | 'file'
-            localUri: string
-            name: string
-            mimeType: string
-            size?: number
-            duration?: number
-            width?: number
-            height?: number
-        }) => {
-            if (isMockMode) {
-                // В mock режиме: добавляем вложение и эмулируем загрузку
-                const attachmentId = `att_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
-                addPendingAttachment({
-                    id: attachmentId,
-                    type: params.type,
-                    localUri: params.localUri,
-                    name: params.name,
-                    mimeType: params.mimeType,
-                    size: params.size ?? 0,
-                    duration: params.duration,
-                    width: params.width,
-                    height: params.height,
-                    uploadProgress: 0,
-                    uploadStatus: 'uploading',
-                })
-                // Эмулируем прогресс загрузки
-                mockUploadFile(attachmentId, params.localUri)
-            } else {
-                // Real mode: используем настоящую загрузку
-                uploadRealAttachment(params)
-            }
-        },
-        [isMockMode, addPendingAttachment, mockUploadFile, uploadRealAttachment]
-    )
+        if (!chatData?.pages) return []
+        return chatData.pages.flatMap((page) => page.messages)
+    }, [chatData?.pages])
 
     // === Handlers ===
 
-    const handleSend = useCallback(
-        async (text: string) => {
-            if (!text.trim() && pendingAttachments.length === 0) return
+    const handleSend = useCallback(async (text: string) => {
+        if (!userId) return
+        const attachmentsSnapshot = useChatStore.getState().pendingAttachments
+        if (!text.trim() && attachmentsSnapshot.length === 0) return
 
-            const attachments = [...pendingAttachments]
-            clearPendingAttachments()
+        clearPendingAttachments()
 
-            if (isMockMode) {
-                await startMockStream(text, attachments)
-            } else {
-                await startRealStream(text, attachments)
-            }
-        },
-        [
-            clearPendingAttachments,
-            isMockMode,
-            pendingAttachments,
-            startMockStream,
-            startRealStream,
-        ]
-    )
+        setIsSending(true)
+        try {
+            await sendMessage.mutateAsync({
+                content: text,
+                attachments: attachmentsSnapshot,
+                userId,
+            })
+        } finally {
+            setIsSending(false)
+        }
+    }, [clearPendingAttachments, sendMessage, userId])
 
     const handleStopRecording = useCallback(async () => {
         const result = await stopRecording()
         if (result) {
-            // Голосовое сообщение отправляется сразу (стандартный UX)
             const voiceAttachment = {
-                id: `att_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
                 type: 'audio' as const,
                 localUri: result.uri,
-                remoteUrl: result.uri, // В mock режиме используем localUri
                 name: `voice_${Date.now()}.m4a`,
                 mimeType: 'audio/m4a',
                 size: 0,
                 duration: result.durationMs,
-                uploadProgress: 100,
-                uploadStatus: 'completed' as const,
             }
 
-            // Сразу отправляем
-            if (isMockMode) {
-                await startMockStream('', [voiceAttachment])
-            } else {
-                await startRealStream('', [voiceAttachment])
+            const attachmentId = await uploadAttachment(voiceAttachment)
+            const uploaded = useChatStore.getState().pendingAttachments.find((a) => a.id === attachmentId)
+            if (uploaded && userId) {
+                await handleSend('')
             }
         }
-    }, [stopRecording, isMockMode, startMockStream, startRealStream])
+    }, [stopRecording, uploadAttachment, handleSend, userId])
 
     const handlePickImage = useCallback(async () => {
         const files = await pickImages()
         for (const file of files) {
-            uploadAttachment({
+            await uploadAttachment({
                 type: getAttachmentTypeFromMime(file.mimeType),
                 localUri: file.uri,
                 name: file.fileName,
@@ -208,7 +132,7 @@ export const ChatScreen: React.FC = () => {
     const handlePickDocument = useCallback(async () => {
         const files = await pickDocuments()
         for (const file of files) {
-            uploadAttachment({
+            await uploadAttachment({
                 type: 'file',
                 localUri: file.uri,
                 name: file.fileName,
@@ -219,10 +143,10 @@ export const ChatScreen: React.FC = () => {
     }, [pickDocuments, uploadAttachment])
 
     const handleLoadMore = useCallback(() => {
-        if (!isMockMode && hasNextPage) {
+        if (hasNextPage) {
             fetchNextPage()
         }
-    }, [fetchNextPage, hasNextPage, isMockMode])
+    }, [fetchNextPage, hasNextPage])
 
     const handlePlayAudio = useCallback(
         (id: string, uri: string) => {
@@ -248,10 +172,10 @@ export const ChatScreen: React.FC = () => {
                     messages={messages}
                     isLoading={isLoading}
                     isLoadingMore={isFetchingNextPage}
-                    hasMore={isMockMode ? false : (hasNextPage ?? false)}
+                    hasMore={hasNextPage ?? false}
                     onLoadMore={handleLoadMore}
-                    isTyping={isStreaming && !streamingContent}
-                    streamingContent={streamingContent}
+                    isTyping={isSending}
+                    streamingContent={undefined}
                     currentPlayingId={currentPlayingId}
                     isPlaying={isPlaying}
                     playbackPosition={playbackPosition}
@@ -271,10 +195,16 @@ export const ChatScreen: React.FC = () => {
                         onRemoveAttachment={removePendingAttachment}
                         onPickImage={handlePickImage}
                         onPickDocument={handlePickDocument}
-                        disabled={isStreaming || isUploading}
+                        disabled={!userId || isSending || isUploading}
                     />
                 </View>
             </KeyboardAvoidingView>
+
+            {userId === null && (
+                <View className="absolute inset-0 items-center justify-center bg-fill-900">
+                    <ActivityIndicator size="large" color="#C5F680" />
+                </View>
+            )}
         </View>
     )
 }

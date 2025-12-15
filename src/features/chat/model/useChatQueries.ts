@@ -3,78 +3,82 @@
  * Server state management
  */
 
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getChatHistory, sendChatMessage, uploadFile, streamChatResponse } from '../api'
+import { useInfiniteQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query'
+import { getChatHistory, sendChatMessage, uploadFile } from '../api'
 import { mapMessagesFromDto, mapAttachmentToDto } from '@/entities/chat'
 import type { Message, Attachment } from '@/entities/chat'
 import type { SendChatMessageRequest, ChatAttachmentDto } from '@/shared/api/types'
-import { useRef, useCallback, useState } from 'react'
+import { generateId } from '@/shared/lib/utils'
 
 // Query keys для cache management
 export const chatQueryKeys = {
     all: ['chat'] as const,
-    history: () => [...chatQueryKeys.all, 'history'] as const,
+    history: (userId: number, limit?: number) =>
+        [...chatQueryKeys.all, 'history', userId, limit ?? 'default'] as const,
 }
+
+type ChatPage = {
+    messages: Message[]
+    limit: number
+    offset: number
+}
+
+export const CHAT_PAGE_SIZE = 20
 
 /**
  * Hook для загрузки истории чата
- * Поддерживает infinite scroll
- * При 404 (endpoint не найден или нет истории) возвращает пустой массив
+ * Поддерживает infinite scroll по offset/limit
  */
-export const useChatHistory = () => {
+export const useChatHistory = ({
+    userId,
+    limit = CHAT_PAGE_SIZE,
+    enabled = true,
+}: {
+	userId?: number | null
+	limit?: number
+	enabled?: boolean
+}) => {
     return useInfiniteQuery({
-        queryKey: chatQueryKeys.history(),
+        queryKey: chatQueryKeys.history(userId ?? 0, limit),
         queryFn: async ({ pageParam }) => {
-            const result = await getChatHistory(pageParam as string | undefined)
-
-            // Graceful handling: если 404 или нет данных - возвращаем пустую историю
+            if (!userId) {
+                return { messages: [] as Message[], limit, offset: 0 }
+            }
+            const currentOffset = typeof pageParam === 'number' ? pageParam : 0
+            const result = await getChatHistory({ userId, limit, offset: currentOffset })
             if (!result.success) {
-                // Не бросаем ошибку для 404 - просто нет истории
-                if (result.error?.includes('404') || result.error?.includes('not found')) {
-                    return {
-                        messages: [] as Message[],
-                        hasMore: false,
-                        nextCursor: undefined,
-                    }
-                }
                 throw new Error(result.error)
             }
-
             return {
                 messages: mapMessagesFromDto(result.data.messages),
-                hasMore: result.data.has_more,
-                nextCursor: result.data.next_cursor,
+                limit: result.data.limit,
+                offset: result.data.offset,
             }
         },
-        initialPageParam: undefined as string | undefined,
-        getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextCursor : undefined),
-        select: (data) => ({
-            // Flatten all pages into single message array
-            messages: data.pages.flatMap((page) => page.messages),
-            hasMore: data.pages[data.pages.length - 1]?.hasMore ?? false,
-        }),
-        // Не повторять запросы при ошибке 404
-        retry: (failureCount, error) => {
-            if (error.message?.includes('404')) return false
-            return failureCount < 3
-        },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage) =>
+            lastPage.messages.length < lastPage.limit
+                ? undefined
+                : lastPage.offset + lastPage.limit,
+        enabled: Boolean(userId) && enabled,
     })
 }
 
 /**
- * Hook для отправки сообщения
- * Использует optimistic update
+ * Hook для отправки сообщения и получения AI-ответа (без стриминга)
  */
-export const useSendMessage = () => {
+export const useSendMessage = (limit: number = CHAT_PAGE_SIZE) => {
     const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: async ({
             content,
             attachments,
+            userId,
         }: {
 			content: string
 			attachments: Attachment[]
+			userId: number
 		}) => {
             const attachmentDtos: ChatAttachmentDto[] = attachments
                 .filter((a) => a.uploadStatus === 'completed' && a.remoteUrl)
@@ -82,25 +86,27 @@ export const useSendMessage = () => {
 
             const request: SendChatMessageRequest = {
                 content,
-                attachments: attachmentDtos.length > 0 ? attachmentDtos : undefined,
+                files: attachmentDtos.length > 0 ? attachmentDtos : undefined,
+                role: 'user',
+                user_id: userId,
             }
 
             const result = await sendChatMessage(request)
+
             if (!result.success) {
                 throw new Error(result.error)
             }
+
             return result.data
         },
-        onMutate: async ({ content, attachments }) => {
-            // Cancel outgoing queries
-            await queryClient.cancelQueries({ queryKey: chatQueryKeys.history() })
+        onMutate: async ({ content, attachments, userId }) => {
+            const queryKey = chatQueryKeys.history(userId, limit)
+            await queryClient.cancelQueries({ queryKey })
 
-            // Get current cache
-            const previousData = queryClient.getQueryData(chatQueryKeys.history())
+            const previousData = queryClient.getQueryData<InfiniteData<ChatPage>>(queryKey)
 
-            // Optimistic update - add user message
-            const optimisticMessage: Message = {
-                id: `temp_${Date.now()}`,
+            const optimisticUserMessage: Message = {
+                id: generateId('msg'),
                 role: 'user',
                 content,
                 createdAt: new Date(),
@@ -108,19 +114,62 @@ export const useSendMessage = () => {
                 isStreaming: false,
             }
 
-            // This is complex with infinite query, so we'll invalidate instead
-            // For now, we return context for rollback
-            return { previousData, optimisticMessage }
+            queryClient.setQueryData(queryKey, (oldData?: InfiniteData<ChatPage>) => {
+                if (!oldData || !oldData.pages || oldData.pages.length === 0) {
+                    return {
+                        pages: [{ messages: [optimisticUserMessage], limit, offset: 0 }],
+                        pageParams: [0],
+                    }
+                }
+                const [firstPage, ...rest] = oldData.pages
+                if (!firstPage) return oldData
+                const updatedFirst = {
+                    ...firstPage,
+                    messages: [...firstPage.messages, optimisticUserMessage],
+                }
+                return { ...oldData, pages: [updatedFirst, ...rest] }
+            })
+
+            return { previousData, userId, optimisticUserMessage }
         },
-        onError: (_, __, context) => {
-            // Rollback on error
-            if (context?.previousData) {
-                queryClient.setQueryData(chatQueryKeys.history(), context.previousData)
+        onError: (_error, variables, context) => {
+            if (!context) return
+            const queryKey = chatQueryKeys.history(context.userId, limit)
+            if (context.previousData) {
+                queryClient.setQueryData(queryKey, context.previousData)
             }
         },
-        onSettled: () => {
-            // Refetch to sync with server
-            queryClient.invalidateQueries({ queryKey: chatQueryKeys.history() })
+        onSuccess: (data, variables, context) => {
+            if (!context) return
+            const queryKey = chatQueryKeys.history(context.userId, limit)
+            queryClient.setQueryData(queryKey, (oldData?: InfiniteData<ChatPage>) => {
+                if (!oldData || !oldData.pages || oldData.pages.length === 0) return oldData
+                const [firstPage, ...rest] = oldData.pages
+                if (!firstPage) return oldData
+
+                const assistantMessage: Message = {
+                    id: generateId('msg'),
+                    role: 'assistant',
+                    content: data.message,
+                    createdAt: new Date(),
+                    attachments: [],
+                    isStreaming: false,
+                }
+
+                const updatedFirst = {
+                    ...firstPage,
+                    messages: [...firstPage.messages, assistantMessage],
+                }
+
+                return { ...oldData, pages: [updatedFirst, ...rest] }
+            })
+        },
+        onSettled: (_data, _error, variables) => {
+            if (variables?.userId) {
+                queryClient.invalidateQueries({
+                    queryKey: chatQueryKeys.history(variables.userId, limit),
+                })
+            }
         },
     })
 }
@@ -144,81 +193,4 @@ export const useUploadFile = () => {
             return result.data
         },
     })
-}
-
-/**
- * Hook для стриминга AI ответа
- */
-export const useStreamResponse = () => {
-    const [streamingContent, setStreamingContent] = useState('')
-    const [isStreaming, setIsStreaming] = useState(false)
-    const streamRef = useRef<{ close: () => void } | null>(null)
-    const queryClient = useQueryClient()
-
-    const startStream = useCallback(
-        async (content: string, attachments: Attachment[]) => {
-            setIsStreaming(true)
-            setStreamingContent('')
-
-            const attachmentDtos: ChatAttachmentDto[] = attachments
-                .filter((a) => a.uploadStatus === 'completed' && a.remoteUrl)
-                .map(mapAttachmentToDto)
-
-            const request: SendChatMessageRequest = {
-                content,
-                attachments: attachmentDtos.length > 0 ? attachmentDtos : undefined,
-            }
-
-            try {
-                streamRef.current = await streamChatResponse(request, {
-                    onChunk: (text) => {
-                        setStreamingContent((prev) => prev + text)
-                    },
-                    onComplete: () => {
-                        setIsStreaming(false)
-                        // Invalidate to get final message from server
-                        queryClient.invalidateQueries({ queryKey: chatQueryKeys.history() })
-                    },
-                    onError: (error) => {
-                        // Graceful handling: при 404 показываем заглушку
-                        if (error.includes('404')) {
-                            setStreamingContent(
-                                'API чата в разработке. Скоро AI-ассистент будет доступен! 🚀'
-                            )
-                            setTimeout(() => {
-                                setIsStreaming(false)
-                                setStreamingContent('')
-                            }, 2000)
-                        } else {
-                            console.error('Stream error:', error)
-                            setIsStreaming(false)
-                        }
-                    },
-                })
-            } catch {
-                // Network error или другая ошибка инициализации
-                setStreamingContent('Не удалось подключиться к серверу. Попробуйте позже.')
-                setTimeout(() => {
-                    setIsStreaming(false)
-                    setStreamingContent('')
-                }, 2000)
-            }
-        },
-        [queryClient]
-    )
-
-    const stopStream = useCallback(() => {
-        if (streamRef.current) {
-            streamRef.current.close()
-            streamRef.current = null
-        }
-        setIsStreaming(false)
-    }, [])
-
-    return {
-        streamingContent,
-        isStreaming,
-        startStream,
-        stopStream,
-    }
 }

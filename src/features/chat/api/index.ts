@@ -1,6 +1,6 @@
 export {
     getChatHistory,
+    getChatLatest,
     sendChatMessage,
     uploadFile,
-    streamChatResponse,
 } from './chatApi'

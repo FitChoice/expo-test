@@ -77,8 +77,8 @@ src/
 - `surveyApi` — отправка данных опроса
 
 **`chat/`**
-- `chatApi` — API чата
-- `model` — хуки `useChatQueries`, `useChatStore`, `useAttachmentUpload`, `useMockChat`
+- `chatApi` — API чата (real-only: `/chat`, `/chat/latest`, `/chat/message`, `/chat/upload`; `env.API_URL` задаёт базу)
+- `model` — хуки `useChatQueries` (offset/limit infiniteQuery), `useSendMessage` (оптимистичный user + ответ ассистента), `useAttachmentUpload` (upload + прогресс), `useChatStore` (pending attachments)
 
 **`training/`**
 - `trainingApi` — API тренировок

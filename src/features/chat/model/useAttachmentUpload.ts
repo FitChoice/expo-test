@@ -30,7 +30,7 @@ export const useAttachmentUpload = () => {
     } = useChatStore()
 
     const uploadAttachment = useCallback(
-        (params: UploadParams) => {
+        async (params: UploadParams) => {
             const attachment = createAttachment({
                 type: params.type,
                 localUri: params.localUri,
@@ -44,8 +44,8 @@ export const useAttachmentUpload = () => {
 
             addPendingAttachment(attachment)
 
-            uploadFileMutation.mutate(
-                {
+            try {
+                const data = await uploadFileMutation.mutateAsync({
                     file: {
                         uri: params.localUri,
                         name: params.name,
@@ -54,16 +54,11 @@ export const useAttachmentUpload = () => {
                     onProgress: (progress) => {
                         updateAttachmentProgress(attachment.id, progress)
                     },
-                },
-                {
-                    onSuccess: (data) => {
-                        markAttachmentUploaded(attachment.id, data.url)
-                    },
-                    onError: () => {
-                        markAttachmentError(attachment.id)
-                    },
-                }
-            )
+                })
+                markAttachmentUploaded(attachment.id, data.url)
+            } catch {
+                markAttachmentError(attachment.id)
+            }
 
             return attachment.id
         },

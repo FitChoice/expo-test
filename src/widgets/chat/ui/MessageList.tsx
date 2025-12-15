@@ -48,7 +48,7 @@ export const MessageList: React.FC<MessageListProps> = ({
             // Небольшая задержка для рендера
             setTimeout(() => {
                 listRef.current?.scrollToEnd({ animated: true })
-            }, 100)
+            }, 1000)
         }
     }, [messages.length])
 

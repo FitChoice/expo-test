@@ -1,23 +1,14 @@
 /**
  * Chat Zustand store
- * Client state: pending attachments + Mock mode
- * Server state managed by TanStack Query (in real mode)
+ * Client state: pending attachments
+ * Server state managed by TanStack Query
  */
 
 import { create } from 'zustand'
-import type { Attachment, AttachmentType, Message } from '@/entities/chat'
-import { generateId } from '@/shared/lib'
-import { WELCOME_MESSAGE } from '@/entities/chat'
+import type { Attachment, AttachmentType } from '@/entities/chat'
+import { generateId } from '@/shared/lib/utils'
 
 interface ChatState {
-    // === Mock Mode ===
-    isMockMode: boolean
-    mockMessages: Message[]
-    toggleMockMode: () => void
-    addMockMessage: (message: Message) => void
-    clearMockMessages: () => void
-
-    // === Pending Attachments ===
     pendingAttachments: Attachment[]
     addPendingAttachment: (attachment: Attachment) => void
     removePendingAttachment: (id: string) => void
@@ -28,29 +19,6 @@ interface ChatState {
 }
 
 export const useChatStore = create<ChatState>((set) => ({
-    // === Mock Mode ===
-    isMockMode: false,
-    mockMessages: [WELCOME_MESSAGE], // Начинаем с приветственного сообщения
-
-    toggleMockMode: () =>
-        set((state) => {
-            const newMode = !state.isMockMode
-            // При переключении в mock режим - сбрасываем сообщения
-            return {
-                isMockMode: newMode,
-                mockMessages: newMode ? [WELCOME_MESSAGE] : state.mockMessages,
-            }
-        }),
-
-    addMockMessage: (message) =>
-        set((state) => ({
-            mockMessages: [...state.mockMessages, message],
-        })),
-
-    clearMockMessages: () =>
-        set({ mockMessages: [WELCOME_MESSAGE] }),
-
-    // === Pending Attachments ===
     pendingAttachments: [],
 
     addPendingAttachment: (attachment) =>

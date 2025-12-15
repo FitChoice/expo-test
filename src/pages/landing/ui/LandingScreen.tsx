@@ -147,17 +147,6 @@ export const LandingScreen = () => {
                                 variant="primary"
                                 size="l"
                                 fullWidth
-                                onPress={() => router.push('/home')}
-                                accessibilityRole="button"
-                                accessibilityLabel="Зарегистрироваться"
-                                accessibilityHint="Создать новый аккаунт в приложении"
-                            >
-								Home
-                            </Button>
-                            <Button
-                                variant="primary"
-                                size="l"
-                                fullWidth
                                 onPress={handleRegister}
                                 accessibilityRole="button"
                                 accessibilityLabel="Зарегистрироваться"

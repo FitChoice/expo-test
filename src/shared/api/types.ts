@@ -64,12 +64,12 @@ export interface ErrorResponse {
 // API result wrapper
 export type ApiResult<T> = { success: true; data: T } | { success: false; error: string }
 
-// === CHAT API TYPES ===
+// === CHAT API TYPES (v1) ===
 
 export type ChatAttachmentType = 'image' | 'video' | 'audio' | 'file'
 
 export interface ChatAttachmentDto {
-	type: ChatAttachmentType
+	type: string // backend returns string, normalize to ChatAttachmentType in mappers
 	url: string
 	name?: string
 	size?: number
@@ -77,28 +77,29 @@ export interface ChatAttachmentDto {
 }
 
 export interface ChatMessageDto {
-	id: string
-	role: 'user' | 'assistant'
+	id: number
+	user_id: number
+	role: string
 	content: string
 	created_at: string // ISO 8601
-	attachments?: ChatAttachmentDto[]
+	files: ChatAttachmentDto[]
 }
 
 export interface SendChatMessageRequest {
 	content: string
-	attachments?: ChatAttachmentDto[]
+	files?: ChatAttachmentDto[]
+	role: string
+	user_id: number
 }
 
 export interface SendChatMessageResponse {
-	id: string
-	content: string
-	created_at: string
+	message: string
 }
 
 export interface ChatHistoryResponse {
 	messages: ChatMessageDto[]
-	has_more: boolean
-	next_cursor?: string
+	limit: number
+	offset: number
 }
 
 export interface UploadFileResponse {
