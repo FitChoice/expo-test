@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
+import { ActivityIndicator, View, Text, TouchableOpacity } from 'react-native'
 import { Avatar, ProgressBar } from '@/shared/ui'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Feather } from '@expo/vector-icons'
@@ -14,13 +14,12 @@ interface ProfileHeaderProps {
 	name: string
 	email: string
 	avatar: string | null
-	level: number
 	experience: number
-	experienceToNextLevel: number
 	isEditMode: boolean
 	onAvatarPress: () => void
 	onCancel: () => void
 	isSaving?: boolean
+	isAvatarUploading?: boolean
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -28,12 +27,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     email,
     avatar,
     experience,
-    experienceToNextLevel,
     isEditMode,
     onAvatarPress,
+    isAvatarUploading = false,
 }) => {
-    const progress =
-		experienceToNextLevel > 0 ? experience / experienceToNextLevel : 0
 
     return (
         <View className="items-center pt-2">
@@ -52,6 +49,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     size={96}
                     editable={isEditMode}
                     onPress={onAvatarPress}
+                    loading={isAvatarUploading}
                 />
             </View>
 
@@ -86,7 +84,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             {/* Progress bar */}
             <View className="mt-3 w-full px-1">
                 <ProgressBar
-                    progress={progress}
+                    progress={experience}
                     height={6}
                     trackColor="#2B2B2E"
                     fillColor="#A96CF5"

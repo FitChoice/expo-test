@@ -3,13 +3,10 @@
  */
 
 export interface UserProfile {
-	id: number
-	name: string
+	avatar_url: string | null
 	email: string
-	avatar: string | null
-	level: number
 	experience: number
-	experienceToNextLevel: number
+	name: string
 }
 
 export interface NotificationSettings {
@@ -21,8 +18,9 @@ export interface NotificationSettings {
 
 export interface UpdateProfileInput {
 	name?: string
+	avatar_url?: string
 }
 
-export interface UpdateAvatarResponse {
-	avatar: string
+export interface AvatarPresignUrlResponse {
+	url: string
 }

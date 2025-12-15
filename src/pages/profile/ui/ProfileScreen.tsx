@@ -14,6 +14,7 @@ import { userApi } from '@/features/user/api'
 import { getUserId, useNavbarLayout, showToast } from '@/shared/lib'
 import { pickAvatarImage, type AvatarPickSource } from '@/shared/lib/media/pickAvatarImage'
 import { useProfileQuery } from '@/features/user/hooks/useProfileQuery'
+import { useUploadAvatar } from '@/features/user/hooks/useUploadAvatar'
 import { Feather } from '@expo/vector-icons'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import boySample from '../../../../assets/images/profile_girl_sample.png'
@@ -47,13 +48,13 @@ const ProfileContent = () => {
     }, [])
 	
     // Fetch profile data
-    const { data: profile, isLoading } = useProfileQuery(userId)
+    const { data: userProfile, isLoading } = useProfileQuery(userId)
 
     // Update profile mutation
     const updateProfileMutation = useMutation({
         mutationFn: async (name: string) => {
             if (!userId) throw new Error('User ID required')
-            return userApi.updateUser(userId.toString(), { name })
+            return userApi.updateUser(userId, { name })
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['profile', userId] })
@@ -65,16 +66,15 @@ const ProfileContent = () => {
         },
     })
 
-    // Handlers
-    const handleEditStart = () => {
-        setIsEditMode(true)
-    }
+    const uploadAvatarMutation = useUploadAvatar()
 
     const handleCancel = () => {
         setIsEditMode(false)
     }
 
     const pickAndUploadAvatar = async (source: AvatarPickSource) => {
+        if (uploadAvatarMutation.isPending) return
+
         const result = await pickAvatarImage(source)
 
         if (result.status === 'denied') {
@@ -89,20 +89,15 @@ const ProfileContent = () => {
             return
         }
 
-        // Optimistic update handled by React Query + local state if needed
-        // For now just sending request
-        const uploadResult = await userApi.updateAvatar(userId.toString(), result.asset.uri)
-
-        if (uploadResult.success) {
-            queryClient.invalidateQueries({ queryKey: ['profile', userId] })
-            showToast.success('Аватар обновлен')
-        } else {
-            showToast.error('Ошибка загрузки аватара')
+        try {
+            await uploadAvatarMutation.mutateAsync({ userId, asset: result.asset })
+        } catch {
+            // onError внутри мутации покажет тост
         }
     }
 
     const handleAvatarPress = () => {
-        if (!isEditMode) return
+        if (!isEditMode || uploadAvatarMutation.isPending) return
 
         Alert.alert('Изменить фото', 'Выберите источник', [
             { text: 'Камера', onPress: () => pickAndUploadAvatar('camera') },
@@ -111,7 +106,7 @@ const ProfileContent = () => {
         ])
     }
 
-    if (isLoading || !profile) {
+    if (isLoading || !userProfile) {
         return (
             <View className="flex-1 items-center justify-center">
                 <ActivityIndicator color="#FFFFFF" size="large" />
@@ -138,16 +133,15 @@ const ProfileContent = () => {
                 showsVerticalScrollIndicator={false}
             >
                 <ProfileHeader
-                    name={profile.name}
-                    email={profile.email}
-                    avatar={profile.avatar}
-                    level={profile.level}
-                    experience={profile.experience}
-                    experienceToNextLevel={profile.experienceToNextLevel}
+                    name={userProfile.name}
+                    email={userProfile.email}
+                    avatar={userProfile.avatar_url}
+                    experience={userProfile.experience}
                     isEditMode={isEditMode}
                     onAvatarPress={handleAvatarPress}
                     onCancel={handleCancel}
                     isSaving={updateProfileMutation.isPending}
+                    isAvatarUploading={uploadAvatarMutation.isPending}
                 />
 
                 {/* CTA Banner */}

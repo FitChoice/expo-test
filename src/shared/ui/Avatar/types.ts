@@ -3,4 +3,5 @@ export interface AvatarProps {
 	size?: number
 	editable?: boolean
 	onPress?: () => void
+	loading?: boolean
 }

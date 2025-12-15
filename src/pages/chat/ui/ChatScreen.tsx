@@ -19,13 +19,14 @@ import {
     useChatStore,
     useAttachmentUpload,
     useSendMessage,
+    useChatLatest,
 } from '@/features/chat'
 import { getAttachmentTypeFromMime, type Message } from '@/entities/chat'
 import { getUserId } from '@/shared/lib/auth'
 
 export const ChatScreen: React.FC = () => {
     const [userId, setUserId] = useState<number | null>(null)
-    const [isSending, setIsSending] = useState(false)
+    const [isAwaitingAssistant, setIsAwaitingAssistant] = useState(false)
 
     const {
         pendingAttachments,
@@ -46,15 +47,15 @@ export const ChatScreen: React.FC = () => {
     } = useChatHistory({ userId: userId ?? undefined, limit: CHAT_PAGE_SIZE, enabled: Boolean(userId) })
 
     const sendMessage = useSendMessage(CHAT_PAGE_SIZE)
+    const isAwaitingAnswer = isAwaitingAssistant || sendMessage.isPending
 
-    const { uploadAttachment, isUploading } = useAttachmentUpload()
+    const { uploadAttachment, isUploading } = useAttachmentUpload(userId)
 
     // === UI Media Hooks (используются в обоих режимах) ===
     const {
         isRecording,
         recordingDuration,
         startRecording,
-        stopRecording,
         cancelRecording,
     } = useAudioRecorder()
 
@@ -66,59 +67,70 @@ export const ChatScreen: React.FC = () => {
         pause: pauseAudio,
     } = useAudioPlayer()
 
-    const { pickImages, pickDocuments } = useFilePicker()
+    const { pickImages } = useFilePicker()
 
     const messages = useMemo<Message[]>(() => {
         if (!chatData?.pages) return []
         return chatData.pages.flatMap((page) => page.messages)
     }, [chatData?.pages])
 
+    const lastServerMessageId = useMemo(() => {
+        if (messages.length === 0) return null
+        const numericIds = messages
+            .map((m) => Number(m.id))
+            .filter((id) => Number.isFinite(id)) as number[]
+        if (numericIds.length === 0) return null
+        return Math.max(...numericIds)
+    }, [messages])
+
+    useChatLatest({
+        userId: userId ?? undefined,
+        afterId: lastServerMessageId,
+        limit: CHAT_PAGE_SIZE,
+        enabled: isAwaitingAnswer,
+        onAssistantMessage: () => setIsAwaitingAssistant(false),
+    })
+
     // === Handlers ===
 
-    const handleSend = useCallback(async (text: string) => {
-        if (!userId) return
-        const attachmentsSnapshot = useChatStore.getState().pendingAttachments
-        if (!text.trim() && attachmentsSnapshot.length === 0) return
+    const handleSend = useCallback(
+        async (text: string) => {
+            if (!userId || isAwaitingAnswer) return
+            const attachmentsSnapshot = useChatStore.getState().pendingAttachments
+            if (!text.trim() && attachmentsSnapshot.length === 0) return
 
-        clearPendingAttachments()
+            clearPendingAttachments()
 
-        setIsSending(true)
-        try {
-            await sendMessage.mutateAsync({
-                content: text,
-                attachments: attachmentsSnapshot,
-                userId,
-            })
-        } finally {
-            setIsSending(false)
-        }
-    }, [clearPendingAttachments, sendMessage, userId])
+            setIsAwaitingAssistant(true)
+            try {
+                await sendMessage.mutateAsync({
+                    content: text,
+                    attachments: attachmentsSnapshot,
+                    userId,
+                })
+            } catch (error) {
+                setIsAwaitingAssistant(false)
+                throw error
+            }
+        },
+        [clearPendingAttachments, sendMessage, userId, isAwaitingAnswer]
+    )
 
     const handleStopRecording = useCallback(async () => {
-        const result = await stopRecording()
-        if (result) {
-            const voiceAttachment = {
-                type: 'audio' as const,
-                localUri: result.uri,
-                name: `voice_${Date.now()}.m4a`,
-                mimeType: 'audio/m4a',
-                size: 0,
-                duration: result.durationMs,
-            }
-
-            const attachmentId = await uploadAttachment(voiceAttachment)
-            const uploaded = useChatStore.getState().pendingAttachments.find((a) => a.id === attachmentId)
-            if (uploaded && userId) {
-                await handleSend('')
-            }
-        }
-    }, [stopRecording, uploadAttachment, handleSend, userId])
+        // Voice is disabled for now
+        return
+    }, [])
 
     const handlePickImage = useCallback(async () => {
+        if (isAwaitingAnswer) return
         const files = await pickImages()
         for (const file of files) {
+            const type = getAttachmentTypeFromMime(file.mimeType)
+            if (type !== 'image') {
+                continue
+            }
             await uploadAttachment({
-                type: getAttachmentTypeFromMime(file.mimeType),
+                type,
                 localUri: file.uri,
                 name: file.fileName,
                 mimeType: file.mimeType,
@@ -127,20 +139,7 @@ export const ChatScreen: React.FC = () => {
                 height: file.height,
             })
         }
-    }, [pickImages, uploadAttachment])
-
-    const handlePickDocument = useCallback(async () => {
-        const files = await pickDocuments()
-        for (const file of files) {
-            await uploadAttachment({
-                type: 'file',
-                localUri: file.uri,
-                name: file.fileName,
-                mimeType: file.mimeType,
-                size: file.fileSize,
-            })
-        }
-    }, [pickDocuments, uploadAttachment])
+    }, [pickImages, uploadAttachment, isAwaitingAnswer])
 
     const handleLoadMore = useCallback(() => {
         if (hasNextPage) {
@@ -174,7 +173,7 @@ export const ChatScreen: React.FC = () => {
                     isLoadingMore={isFetchingNextPage}
                     hasMore={hasNextPage ?? false}
                     onLoadMore={handleLoadMore}
-                    isTyping={isSending}
+                    isTyping={isAwaitingAnswer}
                     streamingContent={undefined}
                     currentPlayingId={currentPlayingId}
                     isPlaying={isPlaying}
@@ -194,8 +193,10 @@ export const ChatScreen: React.FC = () => {
                         pendingAttachments={pendingAttachments}
                         onRemoveAttachment={removePendingAttachment}
                         onPickImage={handlePickImage}
-                        onPickDocument={handlePickDocument}
-                        disabled={!userId || isSending || isUploading}
+                        onPickDocument={() => {}}
+                        voiceEnabled={false}
+                        fileEnabled={false}
+                        disabled={!userId || isAwaitingAnswer || isUploading}
                     />
                 </View>
             </KeyboardAvoidingView>

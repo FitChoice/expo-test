@@ -8,7 +8,7 @@ import type {
     UserProfile,
     NotificationSettings,
     UpdateProfileInput,
-    UpdateAvatarResponse,
+    AvatarPresignUrlResponse,
 } from './types'
 
 type UpdatePasswordPayload = {
@@ -29,28 +29,25 @@ export const userApi = {
 	 * Update user data
 	 */
     async updateUser(
-        userId: number,
+        userId: string | number,
         data: UpdateProfileInput
     ): Promise<ApiResult<UserProfile>> {
         return apiClient.patch(`/user/update/${userId}`, data)
     },
 
     /**
-	 * Update user avatar
+	 * Get presigned URL for avatar upload
 	 */
-    async updateAvatar(
+    async getAvatarPresignUrl(
         userId: string,
-        imageUri: string
-    ): Promise<ApiResult<UpdateAvatarResponse>> {
-        const filename = imageUri.split('/').pop() || 'avatar.jpg'
-        const match = /\.(\w+)$/.exec(filename)
-        const type = match ? `image/${match[1]}` : 'image/jpeg'
+        filename: string
+    ): Promise<ApiResult<AvatarPresignUrlResponse>> {
+        const safeName = filename.trim() || 'avatar.jpg'
+        const prefixedFilename = `${userId}-${safeName}`
+        const endpoint = `/user/avatar/presign-url?filename=${encodeURIComponent(prefixedFilename)}`
 
-        return apiClient.upload(`/user/${userId}/avatar`, {
-            uri: imageUri,
-            name: filename,
-            type,
-        })
+        // API expects filename in query params (see swagger), body is not used
+        return apiClient.put<undefined, AvatarPresignUrlResponse>(endpoint, undefined as undefined)
     },
 
     /**

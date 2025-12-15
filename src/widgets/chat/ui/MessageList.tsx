@@ -5,7 +5,7 @@
 
 import React, { useCallback, useRef, useEffect } from 'react'
 import { View, ActivityIndicator } from 'react-native'
-import { FlashList } from '@shopify/flash-list'
+import { FlashList, type FlashListRef } from '@shopify/flash-list'
 import type { Message } from '@/entities/chat'
 import { MessageBubble } from './MessageBubble'
 import { TypingIndicator } from './TypingIndicator'
@@ -40,17 +40,17 @@ export const MessageList: React.FC<MessageListProps> = ({
     onPlayAudio,
     onPauseAudio,
 }) => {
-    const listRef = useRef<FlashList<Message>>(null)
+    const listRef = useRef<FlashListRef<Message>>(null)
 
     // Автоскролл к новым сообщениям
     useEffect(() => {
         if (messages.length > 0 && listRef.current) {
-            // Небольшая задержка для рендера
+            // небольшая задержка для рендера
             setTimeout(() => {
                 listRef.current?.scrollToEnd({ animated: true })
-            }, 1000)
+            }, 150)
         }
-    }, [messages.length])
+    }, [messages.length, isTyping, streamingContent])
 
     const renderItem = useCallback(
         ({ item }: { item: Message }) => (

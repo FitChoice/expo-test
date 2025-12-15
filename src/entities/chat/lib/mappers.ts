@@ -68,7 +68,7 @@ export const mapMessageFromDto = (dto: ChatMessageDto): Message => ({
  */
 export const mapAttachmentToDto = (attachment: Attachment): ChatAttachmentDto => ({
     type: attachment.type,
-    url: attachment.remoteUrl ?? attachment.localUri,
+    url: attachment.remoteUrl ?? '',
     name: attachment.name,
     size: attachment.size,
     duration: attachment.duration,

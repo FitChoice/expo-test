@@ -4,15 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import {
-    View,
-    ScrollView,
-    Text,
-    Linking,
-    StyleSheet,
-    Alert,
-    ActivityIndicator,
-} from 'react-native'
+import { View, ScrollView, Text, Linking, StyleSheet, Alert } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -28,6 +20,7 @@ import { userApi } from '@/features/user/api'
 import type { NotificationSettings } from '@/features/user/api'
 import { getUserId, clearAuthData, useNavbarLayout, showToast } from '@/shared/lib'
 import { useProfileQuery } from '@/features/user/hooks/useProfileQuery'
+import { useUploadAvatar } from '@/features/user/hooks/useUploadAvatar'
 import { pickAvatarImage, type AvatarPickSource } from '@/shared/lib/media/pickAvatarImage'
 import {
     FAQ_ITEMS,
@@ -44,7 +37,7 @@ export const SettingsScreen = () => {
     const [userId, setUserId] = useState<number | null>(null)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [showLogoutModal, setShowLogoutModal] = useState(false)
-    const [isUpdatingAvatar, setIsUpdatingAvatar] = useState(false)
+    const uploadAvatarMutation = useUploadAvatar()
 
     useEffect(() => {
         getUserId().then(setUserId)
@@ -131,22 +124,16 @@ export const SettingsScreen = () => {
             return
         }
 
-        setIsUpdatingAvatar(true)
-        const uploadResult = await userApi.updateAvatar(
-            userId.toString(),
-            result.asset.uri
-        )
-        setIsUpdatingAvatar(false)
-
-        if (uploadResult.success) {
-            queryClient.invalidateQueries({ queryKey: ['profile', userId] })
-            showToast.success('Аватар обновлен')
-        } else {
-            showToast.error('Ошибка загрузки аватара')
+        try {
+            await uploadAvatarMutation.mutateAsync({ userId, asset: result.asset })
+        } catch {
+            // onError внутри мутации покажет тост
         }
     }
 
     const handleAvatarPress = () => {
+        if (uploadAvatarMutation.isPending) return
+
         Alert.alert('Изменить фото', 'Выберите источник', [
             { text: 'Камера', onPress: () => handleAvatarPick('camera') },
             { text: 'Галерея', onPress: () => handleAvatarPick('library') },
@@ -192,12 +179,8 @@ export const SettingsScreen = () => {
                                     size={96}
                                     editable
                                     onPress={handleAvatarPress}
+                                    loading={uploadAvatarMutation.isPending}
                                 />
-                                {isUpdatingAvatar && (
-                                    <View className="absolute inset-0 items-center justify-center bg-black/50">
-                                        <ActivityIndicator color="#FFFFFF" />
-                                    </View>
-                                )}
                             </View>
                             <Text className="mt-4 text-[20px] font-semibold text-white">
                                 {profile.name || 'Имя пользователя'}

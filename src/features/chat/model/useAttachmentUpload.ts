@@ -4,24 +4,28 @@
  * Single Responsibility: только загрузка
  */
 
-import { useCallback } from 'react'
-import { useUploadFile } from './useChatQueries'
+import { useCallback, useState } from 'react'
 import { useChatStore, createAttachment } from './useChatStore'
 import type { AttachmentType } from '@/entities/chat'
+import { apiClient } from '@/shared/api/client'
 
 interface UploadParams {
-	type: AttachmentType
-	localUri: string
-	name: string
-	mimeType: string
-	size?: number
-	duration?: number
-	width?: number
-	height?: number
+    type: AttachmentType
+    localUri: string
+    name: string
+    mimeType: string
+    size?: number
+    duration?: number
+    width?: number
+    height?: number
 }
 
-export const useAttachmentUpload = () => {
-    const uploadFileMutation = useUploadFile()
+type AvatarPresignUrlResponse = {
+    url: string
+}
+
+export const useAttachmentUpload = (userId: number | null) => {
+    const [isUploading, setIsUploading] = useState(false)
     const {
         addPendingAttachment,
         updateAttachmentProgress,
@@ -31,6 +35,12 @@ export const useAttachmentUpload = () => {
 
     const uploadAttachment = useCallback(
         async (params: UploadParams) => {
+            if (!userId) {
+                throw new Error('User is required for upload')
+            }
+            if (params.type !== 'image') {
+                throw new Error('Only image attachments are supported right now')
+            }
             const attachment = createAttachment({
                 type: params.type,
                 localUri: params.localUri,
@@ -44,35 +54,55 @@ export const useAttachmentUpload = () => {
 
             addPendingAttachment(attachment)
 
-            try {
-                const data = await uploadFileMutation.mutateAsync({
-                    file: {
-                        uri: params.localUri,
-                        name: params.name,
-                        type: params.mimeType,
-                    },
-                    onProgress: (progress) => {
-                        updateAttachmentProgress(attachment.id, progress)
-                    },
-                })
-                markAttachmentUploaded(attachment.id, data.url)
-            } catch {
-                markAttachmentError(attachment.id)
-            }
+            const safeName = (params.name || 'image.jpg').trim() || 'image.jpg'
+            const prefixedName = `${userId}-${safeName}`
 
-            return attachment.id
+            try {
+                setIsUploading(true)
+                const presign = await apiClient.put<undefined, AvatarPresignUrlResponse>(
+                    `/user/avatar/presign-url?filename=${encodeURIComponent(prefixedName)}`,
+                    undefined
+                )
+
+                if (!presign.success || !presign.data?.url) {
+                    throw new Error(presign.error || 'Failed to get presigned URL')
+                }
+
+                const uploadUrl = presign.data.url
+                const formData = new FormData()
+                formData.append('file', {
+                    uri: params.localUri,
+                    name: safeName,
+                    type: params.mimeType,
+                } as unknown as Blob)
+
+                updateAttachmentProgress(attachment.id, 0)
+
+                const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    body: formData,
+                })
+
+                if (!response.ok) {
+                    throw new Error(`Upload failed with status ${response.status}`)
+                }
+
+                const publicUrl = uploadUrl.split('?')[0]
+                updateAttachmentProgress(attachment.id, 100)
+                markAttachmentUploaded(attachment.id, publicUrl)
+                return attachment.id
+            } catch (error) {
+                markAttachmentError(attachment.id)
+                throw error
+            } finally {
+                setIsUploading(false)
+            }
         },
-        [
-            addPendingAttachment,
-            markAttachmentError,
-            markAttachmentUploaded,
-            updateAttachmentProgress,
-            uploadFileMutation,
-        ]
+        [addPendingAttachment, markAttachmentError, markAttachmentUploaded, updateAttachmentProgress, userId]
     )
 
     return {
         uploadAttachment,
-        isUploading: uploadFileMutation.isPending,
+        isUploading,
     }
 }

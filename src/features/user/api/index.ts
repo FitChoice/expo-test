@@ -3,5 +3,5 @@ export type {
     UserProfile,
     NotificationSettings,
     UpdateProfileInput,
-    UpdateAvatarResponse,
+    AvatarPresignUrlResponse,
 } from './types'

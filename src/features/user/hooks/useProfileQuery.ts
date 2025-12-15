@@ -7,9 +7,11 @@ export const useProfileQuery = (userId: number | null) => {
         queryKey: ['profile', userId],
         queryFn: async () => {
             if (!userId) throw new Error('User ID required')
-            const result = await userApi.getProfile(userId.toString())
-            if (!result.success) throw new Error(result.error)
-            return result.data
+            const profileResponse = await userApi.getProfile(userId.toString())
+        console.log('profileResponse')
+        console.log(profileResponse)
+            if (!profileResponse.success) throw new Error(profileResponse.error)
+            return profileResponse.data
         },
         enabled: !!userId,
     })

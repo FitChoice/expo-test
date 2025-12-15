@@ -11,12 +11,14 @@ interface AttachmentPickerProps {
     onPickImage: () => void
     onPickFile: () => void
     onClose: () => void
+    fileEnabled?: boolean
 }
 
 export const AttachmentPicker: React.FC<AttachmentPickerProps> = ({
     onPickImage,
     onPickFile,
     onClose,
+    fileEnabled = true,
 }) => {
     return (
         <>
@@ -64,6 +66,8 @@ export const AttachmentPicker: React.FC<AttachmentPickerProps> = ({
                     <Pressable
                         onPress={onPickFile}
                         className="flex-row items-center px-4 py-3 active:bg-fill-700"
+                        disabled={!fileEnabled}
+                        style={!fileEnabled ? { opacity: 0.4 } : undefined}
                     >
                         <View className="h-5 w-5 items-center justify-center">
                             <Icon name="file" size={20} color="#FFFFFF" />

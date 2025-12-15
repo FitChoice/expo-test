@@ -34,6 +34,8 @@ interface MessageInputProps {
     onPickDocument: () => void
     // State
     disabled?: boolean
+    voiceEnabled?: boolean
+    fileEnabled?: boolean
 }
 
 /**
@@ -62,6 +64,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     onPickImage,
     onPickDocument,
     disabled = false,
+    voiceEnabled = true,
+    fileEnabled = true,
 }) => {
     const insets = useSafeAreaInsets()
     const [text, setText] = useState('')
@@ -110,11 +114,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     // Long press для начала записи
     const handleMicLongPress = useCallback(() => {
+        if (!voiceEnabled) return
         if (!isRecording && !disabled) {
             setIsRecordingLocked(false)
             onStartRecording()
         }
-    }, [isRecording, disabled, onStartRecording])
+    }, [isRecording, disabled, onStartRecording, voiceEnabled])
 
     // Отпускание кнопки - остановка записи (если не заблокировано)
     const handleMicPressOut = useCallback(() => {
@@ -144,11 +149,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             setShowAttachmentPicker(false)
             if (option === 'image') {
                 onPickImage()
-            } else {
+            } else if (fileEnabled) {
                 onPickDocument()
             }
         },
-        [onPickDocument, onPickImage]
+        [fileEnabled, onPickDocument, onPickImage]
     )
 
     return (
@@ -164,6 +169,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     onPickImage={() => handlePickOption('image')}
                     onPickFile={() => handlePickOption('file')}
                     onClose={() => setShowAttachmentPicker(false)}
+                    fileEnabled={fileEnabled}
                 />
             )}
 
@@ -363,7 +369,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                 delayLongPress={150}
                                 className="h-12 w-12 items-center justify-center rounded-2xl"
                                 style={{ backgroundColor: '#2B2B2B' }}
-                                disabled={disabled}
+                                disabled={disabled || !voiceEnabled}
                             >
                                 <Icon name="microphone" size={24} color="#FFFFFF" />
                             </Pressable>

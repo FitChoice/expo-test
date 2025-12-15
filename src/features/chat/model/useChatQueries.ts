@@ -3,11 +3,12 @@
  * Server state management
  */
 
-import { useInfiniteQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query'
-import { getChatHistory, sendChatMessage, uploadFile } from '../api'
+import { useEffect } from 'react'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query'
+import { getChatHistory, getChatLatest, sendChatMessage, uploadFile } from '../api'
 import { mapMessagesFromDto, mapAttachmentToDto } from '@/entities/chat'
 import type { Message, Attachment } from '@/entities/chat'
-import type { SendChatMessageRequest, ChatAttachmentDto } from '@/shared/api/types'
+import type { SendChatMessageRequest, ChatAttachmentDto, ChatMessageDto } from '@/shared/api/types'
 import { generateId } from '@/shared/lib/utils'
 
 // Query keys для cache management
@@ -15,6 +16,8 @@ export const chatQueryKeys = {
     all: ['chat'] as const,
     history: (userId: number, limit?: number) =>
         [...chatQueryKeys.all, 'history', userId, limit ?? 'default'] as const,
+    latest: (userId: number, afterId: number, limit?: number) =>
+        [...chatQueryKeys.all, 'latest', userId, afterId, limit ?? 'default'] as const,
 }
 
 type ChatPage = {
@@ -50,7 +53,9 @@ export const useChatHistory = ({
                 throw new Error(result.error)
             }
             return {
-                messages: mapMessagesFromDto(result.data.messages),
+                messages: mapMessagesFromDto(result.data.messages).sort(
+                    (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+                ),
                 limit: result.data.limit,
                 offset: result.data.offset,
             }
@@ -125,7 +130,9 @@ export const useSendMessage = (limit: number = CHAT_PAGE_SIZE) => {
                 if (!firstPage) return oldData
                 const updatedFirst = {
                     ...firstPage,
-                    messages: [...firstPage.messages, optimisticUserMessage],
+                    messages: [...firstPage.messages, optimisticUserMessage].sort(
+                        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+                    ),
                 }
                 return { ...oldData, pages: [updatedFirst, ...rest] }
             })
@@ -141,28 +148,6 @@ export const useSendMessage = (limit: number = CHAT_PAGE_SIZE) => {
         },
         onSuccess: (data, variables, context) => {
             if (!context) return
-            const queryKey = chatQueryKeys.history(context.userId, limit)
-            queryClient.setQueryData(queryKey, (oldData?: InfiniteData<ChatPage>) => {
-                if (!oldData || !oldData.pages || oldData.pages.length === 0) return oldData
-                const [firstPage, ...rest] = oldData.pages
-                if (!firstPage) return oldData
-
-                const assistantMessage: Message = {
-                    id: generateId('msg'),
-                    role: 'assistant',
-                    content: data.message,
-                    createdAt: new Date(),
-                    attachments: [],
-                    isStreaming: false,
-                }
-
-                const updatedFirst = {
-                    ...firstPage,
-                    messages: [...firstPage.messages, assistantMessage],
-                }
-
-                return { ...oldData, pages: [updatedFirst, ...rest] }
-            })
         },
         onSettled: (_data, _error, variables) => {
             if (variables?.userId) {
@@ -193,4 +178,72 @@ export const useUploadFile = () => {
             return result.data
         },
     })
+}
+
+/**
+ * Polls latest chat messages after a given id
+ */
+export const useChatLatest = ({
+    userId,
+    afterId,
+    limit = CHAT_PAGE_SIZE,
+    enabled = true,
+    onAssistantMessage,
+}: {
+    userId?: number | null
+    afterId?: number | null
+    limit?: number
+    enabled?: boolean
+    onAssistantMessage?: () => void
+}) => {
+    const queryClient = useQueryClient()
+    const latestQuery = useQuery<Message[], Error>({
+        queryKey: chatQueryKeys.latest(userId ?? 0, afterId ?? 0, limit),
+        enabled: Boolean(userId) && enabled && typeof afterId === 'number',
+        refetchInterval: enabled ? 1000 : false,
+        queryFn: async () => {
+            if (!userId || typeof afterId !== 'number') {
+                return [] as Message[]
+            }
+            const result = await getChatLatest({ userId, afterId })
+            if (!result.success) {
+                throw new Error(result.error)
+            }
+            const dtoArray = Array.isArray(result.data)
+                ? result.data
+                : (result.data as { messages?: ChatMessageDto[] })?.messages ?? []
+            return mapMessagesFromDto(dtoArray).sort(
+                (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+            )
+        },
+    })
+
+    useEffect(() => {
+        const newMessages = latestQuery.data
+        if (!userId || !newMessages || newMessages.length === 0) return
+
+        if (newMessages.some((m) => m.role === 'assistant')) {
+            onAssistantMessage?.()
+        }
+        const historyKey = chatQueryKeys.history(userId, limit)
+        queryClient.setQueryData<InfiniteData<ChatPage>>(historyKey, (oldData) => {
+            if (!oldData || !oldData.pages || oldData.pages.length === 0) {
+                return {
+                    pages: [{ messages: newMessages, limit, offset: 0 }],
+                    pageParams: [0],
+                }
+            }
+            const [firstPage, ...rest] = oldData.pages
+            if (!firstPage) return oldData
+            const existingIds = new Set(firstPage.messages.map((m: Message) => m.id))
+            const mergedMessages = [
+                ...firstPage.messages,
+                ...newMessages.filter((m: Message) => !existingIds.has(m.id)),
+            ].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+
+            return { ...oldData, pages: [{ ...firstPage, messages: mergedMessages }, ...rest] }
+        })
+    }, [latestQuery.data, queryClient, limit, userId, onAssistantMessage])
+
+    return latestQuery
 }
