@@ -32,8 +32,8 @@ export const Checkbox: React.FC<CheckboxProps> = ({
             onPress={handlePress}
             disabled={disabled}
             className={`items-center justify-center rounded-full ${
-                checked ? 'bg-[#C5F680]' : 'border-2 border-white bg-transparent'
-            } ${disabled ? 'opacity-50' : ''} ${className}`}
+                checked ? 'bg-[#C5F680]' : 'border-2 border-white bg-black'
+            } ${disabled ? 'opacity-50' : 'bg-black'} ${className}`}
             style={{
                 width: currentSize.size,
                 height: currentSize.size,

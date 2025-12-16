@@ -31,7 +31,7 @@ export const SurveyStep3: React.FC<SurveyStep3Props> = ({
                             alignItems: 'center',
                         }}
                     >
-                        <Text className="text-sm text-white">до 18</Text>
+                        <Text className="text-t3-regular text-white">до 18</Text>
                     </GlowButton>
                     <GlowButton
                         isSelected={ageGroup === '18_24'}
@@ -43,7 +43,7 @@ export const SurveyStep3: React.FC<SurveyStep3Props> = ({
                             alignItems: 'center',
                         }}
                     >
-                        <Text className="text-sm text-white">18 - 24</Text>
+                        <Text className="text-t3-regular text-white">18 - 24</Text>
                     </GlowButton>
                 </View>
                 <View className="flex-row gap-2">
@@ -57,7 +57,7 @@ export const SurveyStep3: React.FC<SurveyStep3Props> = ({
                             alignItems: 'center',
                         }}
                     >
-                        <Text className="text-sm text-white">25 - 34</Text>
+                        <Text className="text-t3-regular text-white">25 - 34</Text>
                     </GlowButton>
                     <GlowButton
                         isSelected={ageGroup === '35_44'}
@@ -69,7 +69,7 @@ export const SurveyStep3: React.FC<SurveyStep3Props> = ({
                             alignItems: 'center',
                         }}
                     >
-                        <Text className="text-sm text-white">35 - 44</Text>
+                        <Text className="text-t3-regular text-white">35 - 44</Text>
                     </GlowButton>
                 </View>
                 <View className="flex-row gap-2">
@@ -83,7 +83,7 @@ export const SurveyStep3: React.FC<SurveyStep3Props> = ({
                             alignItems: 'center',
                         }}
                     >
-                        <Text className="text-sm text-white">45 - 54</Text>
+                        <Text className="text-t3-regular text-white">45 - 54</Text>
                     </GlowButton>
                     <GlowButton
                         isSelected={ageGroup === '55_64'}
@@ -95,7 +95,7 @@ export const SurveyStep3: React.FC<SurveyStep3Props> = ({
                             alignItems: 'center',
                         }}
                     >
-                        <Text className="text-sm text-white">55 - 64</Text>
+                        <Text className="text-t3-regular text-white">55 - 64</Text>
                     </GlowButton>
                 </View>
                 <View className="flex-row gap-2">
@@ -109,7 +109,7 @@ export const SurveyStep3: React.FC<SurveyStep3Props> = ({
                             alignItems: 'center',
                         }}
                     >
-                        <Text className="text-sm text-white">65 +</Text>
+                        <Text className="text-t3-regular text-white">65 +</Text>
                     </GlowButton>
                     <View style={{ flex: 1 }} />
                 </View>

@@ -26,11 +26,11 @@ export const SurveyStep6: React.FC<SurveyStep6Props> = ({ bmiCategory }) => {
             </View>
 
             <View className="flex-row items-baseline gap-2 px-4">
-                <Text className="text-white">Индекс Массы Тела -</Text>
+                <Text className="text-white text-t2">Индекс Массы Тела -</Text>
                 <Text style={sharedStyles.title}>{bmiCategory.bmi}</Text>
             </View>
             <View className="px-4">
-                <Text className="font-inter text-left text-base font-normal leading-[19.2px] text-white">
+                <Text className="text-t2 text-left text-base font-normal leading-[19.2px] text-white">
                     {bmiCategory.description}
                 </Text>
             </View>

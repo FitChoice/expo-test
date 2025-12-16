@@ -110,8 +110,8 @@ export const AuthScreen = () => {
     }
 
     return (
-        <View className="bg-bg-dark-700 flex-1">
-            <BackgroundLayout>
+        <View className="flex-1 py-4 px-2 bg-bg-dark-900">
+            <BackgroundLayout styles={{ borderRadius: 32 }}>
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View className="flex-1 justify-between px-4 pt-[14px]">
                         {/* Кнопка возврата назад */}
@@ -154,10 +154,10 @@ export const AuthScreen = () => {
                                     source={braceletImage}
                                     style={{
                                         position: 'absolute',
-                                        top: '6%',
-                                        left: '16%',
-                                        width: '82%',
-                                        height: '85%',
+                                        top: '2%',
+                                        left: '8%',
+                                        width: '100%',
+                                        height: '100%',
                                     }}
                                     resizeMode="contain"
                                 />

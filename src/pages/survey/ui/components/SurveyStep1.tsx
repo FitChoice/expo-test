@@ -21,6 +21,7 @@ export const SurveyStep1: React.FC<SurveyStep1Props> = ({ name, onNameChange }) 
                     placeholder="Ваше имя"
                     value={name}
                     onChangeText={onNameChange}
+                    autoFocus
                     variant="text"
                     size="default"
                 />

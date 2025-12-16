@@ -46,7 +46,7 @@ export const SurveyStep7: React.FC<SurveyStep7Props> = ({
                 paddingLeft: 16,
             }}
         >
-            <Text className="text-sm text-white">{label}</Text>
+            <Text className="text-t3 text-white">{label}</Text>
         </GlowButton>
     )
 

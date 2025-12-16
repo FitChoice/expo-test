@@ -38,6 +38,7 @@ export const Input = forwardRef<TextInput, InputProps>(
     ) => {
         const [passwordVisible, setPasswordVisible] = useState(false)
         const [dropdownOpen, setDropdownOpen] = useState(false)
+        const [isFocused, setIsFocused] = useState(false)
 
         const filled = !!value
         const hasError = !!error
@@ -59,10 +60,12 @@ export const Input = forwardRef<TextInput, InputProps>(
 
             if (hasError) {
                 baseClasses.push('border border-feedback-negative-900')
+            } else if (isFocused) {
+                baseClasses.push('border border-[#BA9BF7]')
             }
 
             return baseClasses.join(' ')
-        }, [size, disabled, hasError])
+        }, [size, disabled, hasError, isFocused])
 
         const textColor = useMemo(() => {
             if (disabled) return '#949494'
@@ -107,14 +110,21 @@ export const Input = forwardRef<TextInput, InputProps>(
                     <View className={`${containerClassNames} min-h-[112px]`}>
                         <TextInput
                             ref={ref}
+                            {...rest}
                             value={value}
                             placeholder={placeholder}
                             placeholderTextColor="#C1C1C1"
                             multiline
                             numberOfLines={4}
                             editable={!disabled}
-                            onFocus={onFocus}
-                            onBlur={onBlur}
+                            onFocus={(e) => {
+                                setIsFocused(true)
+                                onFocus?.(e)
+                            }}
+                            onBlur={(e) => {
+                                setIsFocused(false)
+                                onBlur?.(e)
+                            }}
                             onChangeText={rest.onChangeText}
                             autoCapitalize="sentences"
                             autoCorrect={true}
@@ -173,12 +183,19 @@ export const Input = forwardRef<TextInput, InputProps>(
 
                     <TextInput
                         ref={ref}
+                        {...rest}
                         value={value}
                         placeholder={placeholder}
                         placeholderTextColor="#8F8F92"
                         editable={!disabled}
-                        onFocus={onFocus}
-                        onBlur={onBlur}
+                        onFocus={(e) => {
+                            setIsFocused(true)
+                            onFocus?.(e)
+                        }}
+                        onBlur={(e) => {
+                            setIsFocused(false)
+                            onBlur?.(e)
+                        }}
                         onChangeText={rest.onChangeText || handleChangeText}
                         keyboardType={rest.keyboardType || 'default'}
                         secureTextEntry={shouldHidePassword}

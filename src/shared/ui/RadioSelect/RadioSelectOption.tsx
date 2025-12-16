@@ -37,7 +37,7 @@ export const RadioSelectOption: React.FC<RadioSelectOptionProps> = ({
             {option.icon && <View style={styles.iconContainer}>{option.icon}</View>}
 
             {/* Текст */}
-            <Text style={[styles.optionText, { color: disabled ? '#C1C1C1' : '#FFFFFF' }]}>
+            <Text className="text-t2" style={{ color: disabled ? '#C1C1C1' : '#FFFFFF' }}>
                 {option.label}
             </Text>
         </GlowButton>
@@ -46,9 +46,9 @@ export const RadioSelectOption: React.FC<RadioSelectOptionProps> = ({
 
 const styles = StyleSheet.create({
     optionContainer: {
-        paddingHorizontal: 20,
-        paddingVertical: 18,
-        minHeight: 56,
+justifyContent: 'center',
+alignItems: 'center',
+        minHeight: 80,
     },
     contentContainer: {
         flexDirection: 'row',
@@ -59,10 +59,5 @@ const styles = StyleSheet.create({
     iconContainer: {
         marginRight: 8,
     },
-    optionText: {
-        fontFamily: 'Onest',
-        fontWeight: '500',
-        fontSize: 14,
-        lineHeight: 16.8,
-    },
+  
 })

@@ -379,98 +379,111 @@ export const SurveyScreen = () => {
     // Для экрана загрузки и ошибки используем flex-1 для центрирования
     const isFullHeightContent = currentStep === 14 && (isSubmitting || submitError)
 
+
     return (
-        <View className="flex-1 bg-[#151515]">
-            <BackgroundLayout>
-                <View className={'flex-1 justify-between bg-transparent'}>
-                    {/* Верхний контент */}
-                    <View className={isFullHeightContent ? 'flex-1' : 'flex-shrink'}>
-                        {/* Header section with back button */}
+        <View className="flex-1 bg-[#151515] px-4">
+       
+            <View className={'flex-1 justify-between bg-transparent'}>
+                {/* Верхний контент */}
+                <View className={isFullHeightContent ? 'flex-1' : 'flex-shrink'}>
+                    {/* Header section with back button */}
+                    {!notShowProgress && (
+                        <View className="mb-2" style={sectionPadding}>
+                            <BackButton
+                                onPress={handleBack}
+                                color="#989898"
+                                variant="transparent"
+                                position="relative"
+                            />
+                        </View>
+                    )}
+
+                    {/* Content section with progress bar and main content */}
+                    <View className="mb-6 bg-transparent" style={sectionPadding}>
+                        {/* Индикатор прогресса */}
                         {!notShowProgress && (
-                            <View className="mb-2" style={sectionPadding}>
-                                <BackButton
-                                    onPress={handleBack}
-                                    color="#989898"
-                                    variant="transparent"
-                                    position="relative"
+                            <View className="mb-6 h-2 w-full rounded-lg bg-fill-800">
+                                <View
+                                    className="h-2 rounded-lg bg-[#A172FF]"
+                                    style={{ width: getProgressWidth() }}
                                 />
                             </View>
                         )}
-
-                        {/* Content section with progress bar and main content */}
-                        <View className="mb-6 bg-transparent" style={sectionPadding}>
-                            {/* Индикатор прогресса */}
-                            {!notShowProgress && (
-                                <View className="mb-6 h-2 w-full rounded-lg bg-fill-800">
-                                    <View
-                                        className="h-2 rounded-lg bg-[#A172FF]"
-                                        style={{ width: getProgressWidth() }}
-                                    />
-                                </View>
-                            )}
-                        </View>
-
-                        {/* Основной контент */}
-                        <View
-                            className={
-                                isFullHeightContent
-                                    ? 'w-full flex-1 bg-transparent'
-                                    : 'w-full gap-6 bg-transparent'
-                            }
-                        >
-                            {renderCurrentStep()}
-                        </View>
                     </View>
 
-                    {/* Кнопки внизу экрана с анимацией */}
-                    <Animated.View
-                        className="gap-2 pt-8"
-                        style={[
-                            Platform.OS === 'ios' ? { transform: [{ translateY }] } : {},
-                            sectionPadding,
-                            {
-                                paddingBottom: insets.bottom + 10,
-                            },
-                        ]}
+                    {/* Основной контент */}
+                    <View
+                        className={
+                            isFullHeightContent
+                                ? 'w-full flex-1 bg-transparent'
+                                : 'w-full gap-6 bg-transparent'
+                        }
                     >
-                        {canProceed() && (
-                            <Button
-                                variant="primary"
-                                size="l"
-                                fullWidth
-                                onPress={currentStep === 13 ? handleEnableNotifications : handleNext}
-                                className="h-[56px]"
-                            >
-                                {currentStep == 13 ? 'Включить' : 'Далее'}
-                            </Button>
-                        )}
-
-                        {currentStep == 13 || currentStep == 12 ? (
-                            <Button
-                                variant="tertiary"
-                                size="l"
-                                fullWidth
-                                onPress={async () => {
-                                    handleNext()
-                                }}
-                                className="h-[56px]"
-                            >
-								Не сейчас
-                            </Button>
-                        ) : null}
-
-                        {currentStep == 14 && !isSubmitting && !submitError && (
-                            <Button
-                                iconLeft={<Icon name="dumbbell" />}
-                                variant={'secondary'}
-                                onPress={() => router.push('/home')}
-                            >
-								Перейти к тренировкам
-                            </Button>
-                        )}
-                    </Animated.View>
+                        {renderCurrentStep()}
+                    </View>
                 </View>
-            </BackgroundLayout>
+
+                {/* Кнопки внизу экрана с анимацией */}
+                <Animated.View
+                    className="gap-2 pt-8"
+                    style={[
+                        Platform.OS === 'ios' ? { transform: [{ translateY }] } : {},
+                        sectionPadding,
+                        {
+                            paddingBottom: insets.bottom + 10,
+                        },
+                    ]}
+                >
+                    {canProceed() && (
+                        <Button
+                            variant="primary"
+                            fullWidth
+                            onPress={currentStep === 13 ? handleEnableNotifications : handleNext}
+                            className="h-[56px]"
+                        >
+                            {currentStep == 13 ? 'Включить' : 'Далее'}
+                        </Button>
+                    )}
+
+                    {currentStep == 13 || currentStep == 12 ? (
+                        <Button
+                            variant="tertiary"
+                            fullWidth
+                            onPress={async () => {
+                                handleNext()
+                            }}
+                            className="h-[56px]"
+                        >
+								Не сейчас
+                        </Button>
+                    ) : null}
+
+                    { currentStep == 4 && (
+                        <Button
+                            variant="tertiary"
+
+                            fullWidth
+                            onPress={async () => {
+                                handleNext()
+                            }}
+                            className="h-[56px]"
+                        >
+								Не знаю
+                        </Button>
+                    ) }
+
+                    {currentStep == 14 && !isSubmitting && !submitError && (
+                        <Button
+                            iconLeft={<Icon name="dumbbell" />}
+                            variant={'secondary'}
+                            onPress={() => router.push('/home')}
+                        >
+								Перейти к тренировкам
+                        </Button>
+                    )}
+                </Animated.View>
+            </View>
+     
         </View>
     )
 }

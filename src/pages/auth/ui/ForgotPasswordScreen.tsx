@@ -428,12 +428,11 @@ export const ForgotPasswordScreen = () => {
     }
 
     return (
-        <View className="bg-bg-dark-700 flex-1">
-            <BackgroundLayout>
+        <View className="flex-1 py-4 px-2 bg-bg-dark-900">
+            <BackgroundLayout styles={{ borderRadius: 32 }}>
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View className="flex-1">
                         <BackButton onPress={() => router.back()} />
-
                         {renderContent()}
                     </View>
                 </TouchableWithoutFeedback>

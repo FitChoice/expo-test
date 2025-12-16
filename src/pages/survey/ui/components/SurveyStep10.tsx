@@ -31,7 +31,7 @@ export const SurveyStep10: React.FC<SurveyStep10Props> = ({
         <>
             <View className="gap-4 bg-transparent">
                 <Text style={sharedStyles.title}>Для чего вы тренируетесь?</Text>
-                <Text className="font-inter text-left text-base font-normal leading-[19.2px] text-white">
+                <Text className="text-t2 text-left text-light-text-500  ">
 					Выберите до {maxGoals}-х целей
                 </Text>
             </View>
