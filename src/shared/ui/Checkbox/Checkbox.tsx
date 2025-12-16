@@ -22,7 +22,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
     const sizeStyles = {
         sm: { size: 32, icon: 18 },
         md: { size: 36, icon: 20 },
-        lg: { size: 40, icon: 24 },
+        lg: { size: 40, icon: 24 },     
     }
 
     const currentSize = sizeStyles[size]

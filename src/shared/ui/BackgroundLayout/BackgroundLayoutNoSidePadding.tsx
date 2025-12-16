@@ -20,12 +20,11 @@ export const BackgroundLayoutNoSidePadding = ({
         <View style={styles.container}>
             {/* Радиальный градиент с blur-эффектом */}
             {/*<RadialGradientBackground />*/}
-{
-    needBg &&   <View style={[styles.gradientContainer, { width: SCREEN_WIDTH }]}>
-                <GradientBg />
-            </View>
-}
-          
+            {
+                needBg &&   <View style={[styles.gradientContainer, { width: SCREEN_WIDTH }]}>
+                    <GradientBg />
+                </View>
+            }
 
             {/* Контент */}
             <SafeAreaContainer

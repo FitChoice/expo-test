@@ -111,4 +111,3 @@ export interface MainStatsParams {
 	userId: string | number
 	date?: string
 }
-

@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { ActivityIndicator, View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import { Avatar, ProgressBar } from '@/shared/ui'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Feather } from '@expo/vector-icons'

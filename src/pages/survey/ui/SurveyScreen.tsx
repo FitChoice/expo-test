@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { View, Animated, Platform } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as Notifications from 'expo-notifications'
-import { Button, BackButton, Icon, BackgroundLayout } from '@/shared/ui'
+import { Button, BackButton, Icon } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation, getUserId } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { useSurveyFlow } from '@/features/survey-flow'
@@ -378,7 +378,6 @@ export const SurveyScreen = () => {
 
     // Для экрана загрузки и ошибки используем flex-1 для центрирования
     const isFullHeightContent = currentStep === 14 && (isSubmitting || submitError)
-
 
     return (
         <View className="flex-1 bg-[#151515] px-4">

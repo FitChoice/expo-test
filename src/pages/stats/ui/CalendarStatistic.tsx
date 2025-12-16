@@ -67,7 +67,7 @@ const Day = ({ day, hasWorkout, hasDiary, scheduleId, onPress }: DayCell & { onP
 
     const workoutColor = hasWorkout ? ACTIVE_COLOR : INACTIVE_COLOR
     const diaryColor = hasDiary ? ACTIVE_COLOR : INACTIVE_COLOR
-   // const isClickable = Boolean(scheduleId && onPress)
+    // const isClickable = Boolean(scheduleId && onPress)
 
     return (
         <TouchableOpacity

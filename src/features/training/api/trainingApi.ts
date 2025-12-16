@@ -69,8 +69,12 @@ interface CompleteTrainingResponse {
 }
 
 interface ExecuteExerciseInput {
-	id: number
-	reps: number
+	id: number,
+	quality: number
+	recorded_errors: [
+		number
+	],
+	reps: number,
 	training_id: number
 }
 

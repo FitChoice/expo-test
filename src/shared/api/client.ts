@@ -82,7 +82,6 @@ class ApiClient {
                     }
                 }
             }
-
     
             if (!response.ok) {
                 // Log non-JSON error responses

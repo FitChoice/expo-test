@@ -116,7 +116,6 @@ export const DayDetailsScreen = () => {
 
             const result = await statsApi.getDayDetails({ id: scheduleId })
 
-
             if (!isMounted) return
 
             if (!result.success) {
@@ -152,13 +151,13 @@ export const DayDetailsScreen = () => {
 
         const diaryTask: DayTask | null = details.diary
             ? {
-                  id: `diary-${details.diary.id}`,
-                  title: 'Запись в дневнике',
-                  duration: 10,
-                  xp: 10,
-                  icon: Diary,
-                  completed: details.diary.filled,
-              }
+                id: `diary-${details.diary.id}`,
+                title: 'Запись в дневнике',
+                duration: 10,
+                xp: 10,
+                icon: Diary,
+                completed: details.diary.filled,
+            }
             : null
 
         return diaryTask ? [...trainingTasks, diaryTask] : trainingTasks
@@ -218,4 +217,3 @@ export const DayDetailsScreen = () => {
         </View>
     )
 }
-

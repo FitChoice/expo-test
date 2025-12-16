@@ -8,8 +8,8 @@ export const useProfileQuery = (userId: number | null) => {
         queryFn: async () => {
             if (!userId) throw new Error('User ID required')
             const profileResponse = await userApi.getProfile(userId.toString())
-        console.log('profileResponse')
-        console.log(profileResponse)
+            console.log('profileResponse')
+            console.log(profileResponse)
             if (!profileResponse.success) throw new Error(profileResponse.error)
             return profileResponse.data
         },
