@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { ActivityIndicator, Text, View } from 'react-native'
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
+import { useRouter } from 'expo-router'
 
 import { statsApi } from '@/features/stats/api/statsApi'
 import Barbell from '@/assets/images/barbell.svg'
@@ -16,6 +17,8 @@ type DayCell = {
     day: number | null
     hasWorkout?: boolean
     hasDiary?: boolean
+    scheduleId?: number
+    dateKey?: string
 }
 
 const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1)
@@ -49,22 +52,31 @@ const buildMonth = (date: Date, calendarByDate: Map<string, CalendarItem>) => {
             day: dayNumber,
             hasWorkout: Boolean(item?.completedTraining),
             hasDiary: Boolean(item?.filledDiary),
+            scheduleId: item?.id,
+            dateKey: key,
         }
     })
 
     return { title, days, key: `${date.getFullYear()}-${date.getMonth()}` }
 }
 
-const Day = ({ day, hasWorkout, hasDiary }: DayCell) => {
+const Day = ({ day, hasWorkout, hasDiary, scheduleId, onPress }: DayCell & { onPress?: () => void }) => {
     if (!day) {
         return <View style={{ width: '14.28%' }} className="mb-3 h-16" />
     }
 
     const workoutColor = hasWorkout ? ACTIVE_COLOR : INACTIVE_COLOR
     const diaryColor = hasDiary ? ACTIVE_COLOR : INACTIVE_COLOR
+   // const isClickable = Boolean(scheduleId && onPress)
 
     return (
-        <View style={{ width: '14.28%' }} className="items-center mb-3">
+        <TouchableOpacity
+            style={{ width: '14.28%' }}
+            className="items-center mb-3"
+            //disabled={!isClickable}
+            activeOpacity={0.85}
+            onPress={onPress}
+        >
             <Text className="mb-2 text-light-text-200 text-t3-regular">{day}</Text>
             <View className="h-16 w-14 items-center justify-center rounded-3xl bg-[#1f1f1f] py-2">
                 <View className="items-center gap-1">
@@ -72,11 +84,12 @@ const Day = ({ day, hasWorkout, hasDiary }: DayCell) => {
                     <Diary width={16} height={16} color={diaryColor} fill={diaryColor} />
                 </View>
             </View>
-        </View>
+        </TouchableOpacity>
     )
 }
 
 export const CalendarStatistic = () => {
+    const router = useRouter()
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [calendarByDate, setCalendarByDate] = useState<Map<string, CalendarItem>>(new Map())
@@ -131,7 +144,17 @@ export const CalendarStatistic = () => {
         )
     }, [calendarByDate])
 
+    const handleDayPress = (day: DayCell) => {
+        if (!day.day || !day.scheduleId) return
 
+        router.push({
+            pathname: '/stats-day',
+            params: {
+                id: String(day.scheduleId),
+                date: day.dateKey ?? '',
+            },
+        })
+    }
 
     if (isLoading) {
         return (
@@ -172,11 +195,13 @@ export const CalendarStatistic = () => {
                     </View>
 
                     <View className="flex-row flex-wrap">
-                        {days.map((day, idx) => {
-                            console.log('day')
-                            console.log(day)
-                            return <Day key={`${key}-${idx}`} {...day} />
-                        })}
+                        {days.map((day, idx) => (
+                            <Day
+                                key={`${key}-${idx}`}
+                                {...day}
+                                onPress={() => handleDayPress(day)}
+                            />
+                        ))}
                     </View>
                 </View>
             ))}
