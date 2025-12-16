@@ -1,5 +1,5 @@
-import React from 'react'
-import { View, Text, Image, TouchableOpacity } from 'react-native'
+import React, { useEffect, useMemo, useState } from 'react'
+import { View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { Icon } from '@/shared/ui'
@@ -18,13 +18,34 @@ import Diary from '@/shared/ui/Icon/assets/diary.svg'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Fontisto from '@expo/vector-icons/Fontisto'
 import EvilIcons from '@expo/vector-icons/EvilIcons'
+import { statsApi } from '@/features/stats/api/statsApi'
+import type { MainStatsResponse } from '@/features/stats/api/types'
+import { getUserId } from '@/shared/lib/auth'
 
-const overallStats = [
-    { icon: <Barbell color="#aaec4d" fill="#aaec4d" /> , value: '160', label: 'Тренировок' },
-    { icon: <Morning color="#aaec4d" fill="#aaec4d" />, value: '586', label: 'Энергии' },
-    { icon: <Diary color="#aaec4d" fill="#aaec4d" />, value: '25', label: 'Записей дневника' },
-    { icon: <MaterialCommunityIcons name="clock" size={24} color="#aaec4d" />, value: '27ч 16м', label: 'Время тренировки' },
-    { icon: <Fontisto name="fire" size={24} color="#aaec4d" />, value: '100 000', label: 'Калорий сожжено' },
+type OverallStatConfig = {
+    icon: React.ReactNode
+    label: string
+    key: keyof MainStatsResponse
+    formatter?: (value: number) => string
+}
+
+const OVERALL_STATS_CONFIG: OverallStatConfig[] = [
+    { icon: <Barbell color="#aaec4d" fill="#aaec4d" />, label: 'Тренировок', key: 'trainings_count' },
+    { icon: <Morning color="#aaec4d" fill="#aaec4d" />, label: 'Энергии', key: 'quality_growth' },
+    { icon: <Diary color="#aaec4d" fill="#aaec4d" />, label: 'Записей дневника', key: 'diaries_count' },
+    {
+        icon: <MaterialCommunityIcons name="clock" size={24} color="#aaec4d" />,
+        label: 'Время тренировки',
+        key: 'trainings_time',
+        formatter: (minutes) => {
+            const hours = Math.floor(minutes / 60)
+            const mins = minutes % 60
+            if (hours <= 0 && mins <= 0) return '0м'
+            if (hours <= 0) return `${mins}м`
+            return `${hours}ч ${mins}м`
+        },
+    },
+    { icon: <Fontisto name="fire" size={24} color="#aaec4d" />, label: 'Калорий сожжено', key: 'cals' },
 ]
 
 const moodPoints = [
@@ -52,7 +73,66 @@ const bodyWeightPoints = [
     { month: 'дк', value: 56 },
 ]
 export function DayStatistic() {
-	
+    const [mainStats, setMainStats] = useState<MainStatsResponse | null>(null)
+    const [isStatsLoading, setIsStatsLoading] = useState(true)
+    const [statsError, setStatsError] = useState<string | null>(null)
+
+    useEffect(() => {
+        let isMounted = true
+
+        const loadMainStats = async () => {
+            setIsStatsLoading(true)
+            setStatsError(null)
+
+            const userId = await getUserId()
+            if (!userId) {
+                if (isMounted) {
+                    setStatsError('Не удалось определить пользователя')
+                    setIsStatsLoading(false)
+                }
+                return
+            }
+
+            const result = await statsApi.getMainStats({ userId })
+
+            console.log('result')
+            console.log(result)
+
+            if (!isMounted) return
+
+            if (!result.success) {
+                setStatsError(result.error ?? 'Не удалось загрузить статистику')
+                setIsStatsLoading(false)
+                return
+            }
+
+            setMainStats(result.data)
+            setIsStatsLoading(false)
+        }
+
+        loadMainStats()
+
+        return () => {
+            isMounted = false
+        }
+    }, [])
+
+    const overallStats = useMemo(
+        () =>
+            OVERALL_STATS_CONFIG.map(({ formatter, key, ...rest }) => {
+                const value = mainStats ? mainStats[key] : undefined
+                const formattedValue =
+                    value === undefined || value === null
+                        ? '—'
+                        : formatter
+                            ? formatter(value)
+                            : String(value)
+
+                return { ...rest, value: formattedValue }
+            }),
+        [mainStats],
+    )
+
     return (
         <>
             {/* Weekly summary */}
@@ -105,27 +185,38 @@ export function DayStatistic() {
                 <Text className='text-t.1 text-white' >За все время</Text>
 
                 <View className="flex-row flex-wrap gap-3">
-                    {overallStats.map((stat, idx) => (
-                        <View
-                            key={stat.label}
-                            className={`rounded-2xl bg-[#1e1e1e] py-4 px-2 ${
-                                idx === 2 ? 'basis-full' : 'basis-[47%]'
-                            }`}
-                        >
-                            <View className="mb-2 flex-row items-center justify-between">
-                                <View className="flex-row">
-                                    <Text> {stat.icon} </Text>
-                                    <Text className="text-h2 text-light-text-100">{stat.value}</Text>
-                                </View>
-                                <View className="p-2 items-center justify-center rounded-2xl bg-[#F4F4F4]/20">
-                                    <Feather name="arrow-right" size={24} color="white" />
-                                </View>
-
-                            </View>
-
-                            <Text className="text-caption-regular text-light-text-500">{stat.label}</Text>
+                    {isStatsLoading ? (
+                        <View className="mt-2 w-full items-center justify-center rounded-2xl bg-[#1e1e1e] py-6">
+                            <ActivityIndicator color="#aaec4d" />
+                            <Text className="mt-2 text-body-medium text-light-text-300">Загружаем статистику...</Text>
                         </View>
-                    ))}
+                    ) : statsError ? (
+                        <View className="w-full rounded-2xl bg-[#1e1e1e] p-4">
+                            <Text className="text-body-medium text-feedback-negative-900">{statsError}</Text>
+                        </View>
+                    ) : (
+                        overallStats.map((stat, idx) => (
+                            <View
+                                key={stat.label}
+                                className={`rounded-2xl bg-[#1e1e1e] py-4 px-2 ${
+                                    idx === 2 ? 'basis-full' : 'basis-[47%]'
+                                }`}
+                            >
+                                <View className="mb-2 flex-row items-center justify-between">
+                                    <View className="flex-row">
+                                        <Text> {stat.icon} </Text>
+                                        <Text className="text-h2 text-light-text-100">{stat.value}</Text>
+                                    </View>
+                                    <View className="items-center justify-center rounded-2xl bg-[#F4F4F4]/20 p-2">
+                                        <Feather name="arrow-right" size={24} color="white" />
+                                    </View>
+
+                                </View>
+
+                                <Text className="text-caption-regular text-light-text-500">{stat.label}</Text>
+                            </View>
+                        ))
+                    )}
                 </View>
             </View>
 
