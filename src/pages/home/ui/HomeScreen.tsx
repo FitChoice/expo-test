@@ -26,6 +26,7 @@ import { Loader } from '@/shared/ui/Loader/Loader'
 import MorningExercise from '@/assets/images/morning_ex.svg'
 import Stretching from '@/assets/images/stretching.svg'
 import Barbell	 from '@/assets/images/barbell.svg'
+import Diary from '@/assets/images/diary_white.svg'
 
 import { Feather } from '@expo/vector-icons'
 
@@ -188,8 +189,8 @@ const MobileContent = () => {
         if (isFinishedTraining(activity)) {
             return <Feather name="check" size={24} color="black" />
         }
-        return activity?.Type.includes('t') ?  <Barbell/> :
-            activity?.Type.includes('w') ? <MorningExercise /> :
+        return activity?.Type.includes('t') ?  <Barbell fill={'white'}/> :
+            activity?.Type.includes('w') ? <MorningExercise fill={'white'} /> :
                 <Stretching />
     }
 
@@ -336,7 +337,7 @@ const MobileContent = () => {
                                     </View>
                                     <View style={[styles.buttonIcon, { backgroundColor: trainingDays?.data[selectedDayIdx].is_diary_complete ? '#aaec4d' :  '#a172ff' } ]} >
                                         {
-                                            training.is_diary_complete ? <Feather name="check" size={24} color="black" /> :  <Icon name="diary" size={32} color="#A172FF" />
+                                            training.is_diary_complete ? <Feather name="check" size={24} color="black" /> :  <Diary h={24} fill="white" />
                                         }
                                     </View>
                                 </View>
@@ -365,8 +366,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        gap: 94,
-        paddingHorizontal: 14,
+
     },
     progressItem: {
         width: 56,
