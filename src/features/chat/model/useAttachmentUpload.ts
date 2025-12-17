@@ -59,9 +59,11 @@ export const useAttachmentUpload = (userId: number | null) => {
 
             try {
                 setIsUploading(true)
-                const presign = await apiClient.put<undefined, AvatarPresignUrlResponse>(
-                    `/user/avatar/presign-url?filename=${encodeURIComponent(prefixedName)}`,
-                    undefined
+                const presign = await apiClient.put<{filename: string}, AvatarPresignUrlResponse>(
+                    '/user/presign-url',
+                    {
+                        filename: encodeURIComponent(prefixedName),
+                    }
                 )
 
                 if (!presign.success || !presign.data?.url) {

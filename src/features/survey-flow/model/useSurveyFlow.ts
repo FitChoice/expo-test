@@ -178,8 +178,8 @@ const initialSurveyData: SurveyData = {
     main_direction: null,
     secondary_direction: null,
     age: null,
-    height: null,
-    weight: null,
+    height: 165,
+    weight: 60,
     bmi: null,
     notif_main: false,
 }

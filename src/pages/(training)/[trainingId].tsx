@@ -24,6 +24,7 @@ export default function TrainingEntryScreen() {
 
     const { trainingId } = useLocalSearchParams<{ trainingId: string }>()
 
+
     const [exerciseIsLoading, setExerciseIsLoading] = useState(false)
     
     const { data: trainingData, isLoading, isError, error: queryError } = useQuery({
@@ -36,7 +37,9 @@ export default function TrainingEntryScreen() {
         }
     })
 
+
     const startTraining = useTrainingStore((state) => state.startTraining)
+    const resetTraining = useTrainingStore((state) => state.reset)
     const training = useTrainingStore((state) => state.training)
     const setExerciseDetails = useTrainingStore((state) => state.setExerciseDetails)
     const setExerciseDetail = useTrainingStore((state) => state.setExerciseDetail)
@@ -45,13 +48,25 @@ export default function TrainingEntryScreen() {
     const status = useTrainingStore((state) => state.status)
     const { tfReady, model, orientation, error } = usePoseCameraSetup()
 
+    // Reset local training state when the route id changes to avoid showing stale session
+    useEffect(() => {
+        if (!trainingId) return
+
+        const numericId = Number(trainingId)
+        if (Number.isNaN(numericId)) return
+
+        if (training?.id && training.id !== numericId) {
+            resetTraining()
+        }
+    }, [resetTraining, training?.id, trainingId])
+
     // Initialize training store when data is fetched
     useEffect(() => {
-        if (trainingData && !training) {
+        if (trainingData && training?.id !== trainingData.id) {
             // @ts-ignore - API types might slightly differ from store types, should be aligned
             startTraining(trainingData)
         }
-    }, [trainingData, training, startTraining])
+    }, [trainingData, training?.id, startTraining])
 
     useEffect(() => {
         if (!training?.id || !training.exercises?.length) return
@@ -129,9 +144,7 @@ export default function TrainingEntryScreen() {
         //   Render based on current status
         switch (status) {
         case 'info':
-            return   <BackgroundLayoutNoSidePadding >
-                <TrainingInfo />
-            </BackgroundLayoutNoSidePadding>
+            return    <TrainingInfo />
         case 'onboarding':
             return (
                 <BackgroundLayoutNoSidePadding>

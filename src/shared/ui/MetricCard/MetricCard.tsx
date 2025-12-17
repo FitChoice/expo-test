@@ -15,7 +15,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     description,
 }) => {
     return (
-        <View className="h-full flex-1 rounded-3xl bg-white/20 p-4">
+        <View className="h-full flex-1 rounded-3xl bg-white/20 p-2">
             {/* Icon in top right corner */}
             <View className="items-end justify-end">
                 <View className="h-12 w-12 items-center justify-center rounded-full bg-brand-green-500/30">

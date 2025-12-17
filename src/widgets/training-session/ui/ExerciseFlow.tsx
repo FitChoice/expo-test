@@ -18,6 +18,7 @@ import { ExerciseTheoryScreen } from '@/widgets/training-session/ui/exercise/Exe
 import { trainingApi, type ExecuteExerciseInput } from '@/features/training/api'
 import type { ExerciseInfoResponse } from '@/entities/training'
 import { showToast } from '@/shared/lib'
+import { Button } from '@/shared/ui/Button'
 
 type ExerciseStep =
 	| 'theory'

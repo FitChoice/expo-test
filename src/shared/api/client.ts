@@ -453,6 +453,9 @@ class ApiClient {
                 },
             })
 
+            console.log('response')
+            console.log(response)
+
             // Handle 401 - unauthorized
             if (response.status === 401) {
                 await this.handleUnauthorized()

@@ -118,7 +118,7 @@ export default function TrainingReportScreen() {
             </View>
 
             {/* Button at bottom */}
-            <View className="flex-row gap-2 py-2">
+            <View className="flex-row gap-2 py-2 pb-20">
                 <Button variant="tertiary" onPress={handleFinish} className="flex-1">
 					Закрыть
                 </Button>

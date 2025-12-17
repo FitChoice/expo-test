@@ -163,7 +163,8 @@ const MobileContent = () => {
         scrollToDate(resolvedSelectedDate)
     }, [resolvedSelectedDate, calendarWidth, calendarDays])
 
-    const handleOpenTarining = (trainingId: number) => {
+    const handleOpenTraining = (trainingId: number) => {
+
         setTrainingStatus('info')
         router.push({ pathname: `/(training)/${trainingId}` })
     }
@@ -304,7 +305,7 @@ const MobileContent = () => {
 									
                     {
                         selectedDayTraining.map((training, idx) =>  <View  key={training.ID}  style={styles.actionButtons}>
-                            <TouchableOpacity style={styles.actionButton} onPress={() => handleOpenTarining(training.ID)}>
+                            <TouchableOpacity style={styles.actionButton} onPress={() => handleOpenTraining(training.ID)}>
                                 <View style={styles.buttonContent}>
                                     <View style={styles.buttonInfo}>
                                         <Text style={styles.buttonTitle}>{getTrainingTitle(training)}</Text>

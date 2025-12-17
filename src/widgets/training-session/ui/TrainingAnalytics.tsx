@@ -169,7 +169,7 @@ export const TrainingAnalytics = () => {
                     </View>
                 </View>
 
-                <View className="flex-row gap-2 py-2">
+                <View className="flex-row gap-2 py-2 pb-20">
                     <Button
                         iconLeft={<Ionicons name="chevron-back" size={24} color="#FFFFFF" />}
                         variant="tertiary"

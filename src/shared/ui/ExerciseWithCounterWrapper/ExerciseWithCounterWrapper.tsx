@@ -138,7 +138,7 @@ export const ExerciseWithCounterWrapper = ({
                 {/* Control Buttons */}
                 {isShowActionButtons && (
                     <View
-                        className={'absolute right-14 top-10 z-10 flex-row justify-end gap-2 '}
+                        className={'absolute right-4 top-10 z-10 flex-row justify-end gap-2 '}
                     >
                         <ControlButton
                             icon={<AntDesign name="pause" size={24} color="#FFFFFF" />}

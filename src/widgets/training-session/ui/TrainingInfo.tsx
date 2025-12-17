@@ -16,6 +16,8 @@ import Entypo from '@expo/vector-icons/Entypo'
 import { BottomActionBtn } from '@/shared/ui/BottomActionBtn/BottomActionBtn'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { GradientBg } from '@/shared/ui/GradientBG'
+import { trainingApi } from '@/features/training/api'
+import { showToast } from '@/shared/lib'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const trainingInfoBanner = require('@/assets/images/training_info_banner.png')
@@ -78,6 +80,36 @@ export const TrainingInfo = () => {
         startOnboarding()
     }
 
+    const sendTrainingCompletion = () => {
+        if (!training?.id) return
+
+        const payload: Parameters<(typeof trainingApi)['completeTraining']>[0] = {
+            report_active_time: 12,
+            report_cals: 12,
+            report_duration: 12,
+            report_technique_quality: 2,
+            time: new Date().toISOString(),
+            training_id:  training.id,
+        }
+
+        // console.log('payload')
+        // console.log(payload)
+
+        void trainingApi
+            .completeTraining(payload)
+            .then((result) => {
+                // console.log('result')
+                // console.log(result)
+                if (result.success) {
+                    showToast.success('Тренировка успешно завершена')
+                } else {
+                    showToast.error(result.error ?? 'Не удалось завершить тренировку')
+                }
+            })
+            .catch((error) => {
+                showToast.error(error?.message ?? 'Ошибка завершения тренировки')
+            })
+    }
     return (
         <View className="flex-1">
             <View style={[styles.gradientContainer, { width: SCREEN_WIDTH }]}>
@@ -85,6 +117,7 @@ export const TrainingInfo = () => {
             </View>
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 {/* Banner Image with Close Button */}
+
                 <View className="relative">
                     <Image source={trainingInfoBanner} className="w-full" resizeMode="cover" />
                     {/* Close Button - Top Right */}
@@ -117,6 +150,9 @@ export const TrainingInfo = () => {
                             className="mb-4"
                         />
 
+                        {/*<Button onPress={sendTrainingCompletion}>*/}
+                        {/*	завершить*/}
+                        {/*</Button>*/}
                         <Text className="mb-4 text-h2 text-white">
                             {training?.title || 'Подвижность верхнего отдела позвоночника'}
                         </Text>
