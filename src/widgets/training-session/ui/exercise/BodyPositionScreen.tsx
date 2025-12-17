@@ -103,7 +103,7 @@ export const BodyPositionScreen = ({
             <BackgroundLayoutNoSidePadding>
                 <View
                     style={{
-                        height: CAM_PREVIEW_HEIGHT,
+                        height: isVertical ? CAM_PREVIEW_HEIGHT : '100%',
                         backgroundColor: 'transparent',
                         borderRadius: 24,
                         overflow: 'hidden',

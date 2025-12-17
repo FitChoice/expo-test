@@ -8,13 +8,16 @@ import { View, Text, useWindowDimensions, Platform } from 'react-native'
 import { useEffect, useState } from 'react'
 import { type ExerciseInfoResponse } from '@/entities/training'
 import { ExerciseWithCounterWrapper } from '@/shared/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
-import { VIDEO_SCREEN_HEIGHT as verticalCameraViewHeight } from '@/shared/constants/sizes'
+import {
+    VIDEO_SCREEN_HEIGHT as verticalCameraViewHeight,
+} from '@/shared/constants/sizes'
 import { PoseCamera } from '@/widgets/pose-camera'
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import type * as ScreenOrientation from 'expo-screen-orientation'
 import type { EngineTelemetry } from '../../../../../poseflow-js'
 import { useVideoPlayer, VideoView } from 'expo-video'
 import { useVideoPlayerContext } from '@/shared/hooks/useVideoPlayerContext'
+import { VideoProgressBar } from '@/shared/ui'
 
 interface TimerExerciseScreenProps {
 	isVertical?: boolean
@@ -22,6 +25,7 @@ interface TimerExerciseScreenProps {
 	exercise: ExerciseInfoResponse
 	model: posedetection.PoseDetector
 	orientation: ScreenOrientation.Orientation
+	practiceVideoUrl?: string
 }
 
 export function ExerciseExecutionScreen({
@@ -30,9 +34,10 @@ export function ExerciseExecutionScreen({
     exercise,
     model,
     orientation,
+    practiceVideoUrl,
 }: TimerExerciseScreenProps) {
 
-    const player = useVideoPlayer(exercise.video_practice || '', (player) => {
+    const player = useVideoPlayer(practiceVideoUrl || exercise.video_practice || '', (player) => {
         player.loop = true
         player.play()
     })
@@ -59,13 +64,13 @@ export function ExerciseExecutionScreen({
 
     return (
         <ExerciseWithCounterWrapper>
-            <View className="flex-1">
+            <View >
                 {/* Camera View with Video Overlay */}
                 <View
                     style={{
-                        height,
-                        position: 'relative',
+                        height: isVertical ? height : '100%',
                         width: '100%',
+
                         overflow: 'hidden',
                         borderRadius: 8,
                     }}
@@ -79,7 +84,74 @@ export function ExerciseExecutionScreen({
                         />
                     </View>
 
-                    {isVertical && exercise.video_practice && player && (
+                    {!isVertical && (
+                        <>
+                            <View className="absolute top-10 left-0 right-0 items-center justify-center px-4">
+                                {/*<VideoProgressBar player={player} className="mb-2" />*/}
+                                <Text className="text-center text-t1 text-light-text-200">{exercise.name}</Text>
+                            </View>
+
+                            <View className="absolute bottom-20 left-0 right-0 z-10 px-12">
+                               
+                                <View className="flex-row px-1">
+                                    <View className="flex-[0.5] basis-0 items-center rounded-3xl bg-fill-800 p-1">
+                                        <Text
+                                            className={`text-[64px] leading-[72px] ${
+                                                telemetry?.reps === 0
+                                                    ? 'text-light-text-200'
+                                                    : telemetry?.reps === exercise.reps
+                                                        ? 'text-brand-green-500'
+                                                        : 'text-light-text-200'
+                                            }`}
+                                        >
+                                            {telemetry?.reps}
+                                            <Text
+                                                className={`text-[32px] leading-[36px] ${
+                                                    telemetry?.reps === exercise.reps
+                                                        ? 'text-brand-green-500'
+                                                        : 'color-[#949494]'
+                                                }`}
+                                            >
+                                                {' '}
+																/ {exercise.reps}
+                                            </Text>
+                                        </Text>
+                                        <Text className="mb-1 text-t2 color-[#949494]">повторения</Text>
+                                    </View>
+                                    <View className="flex-[1] basis-0 items-center justify-center"></View>
+
+                                    <View className="flex-[1.2] basis-0 items-end">
+                                        {exercise.video_practice && player && (
+                                            <View
+                                                style={{
+                                                    width: '50%',
+                                                    height: '100%',
+                                                    overflow: 'hidden',
+                                                    backgroundColor: 'transparent',
+                                                    borderRadius: 8,
+                                                    shadowColor: '#000',
+                                                    shadowOffset: { width: 0, height: 2 },
+                                                    shadowOpacity: 0.25,
+                                                    shadowRadius: 3.84,
+                                                }}
+                                            >
+                                                <VideoView
+                                                    player={player}
+                                                    style={{ width: '100%', height: '100%' }}
+                                                    contentFit="cover"
+                                                    nativeControls={false}
+                                                />
+                                            </View>
+                                        )}
+                                    </View>
+                          
+                                </View>
+                            </View>
+                        </>
+
+                    )}
+
+                    {isVertical && (practiceVideoUrl || exercise.video_practice) && player && (
                         <View
                             style={{
                                 position: 'absolute',
@@ -122,15 +194,6 @@ export function ExerciseExecutionScreen({
                 {/*        <StepProgress current={0} total={5} />*/}
                 {/*    </View>*/}
                 {/*)}*/}
-
-                {!isVertical && (
-                    <View className="absolute left-0 right-0 top-5 items-center justify-center">
-                        {/*<StepProgress current={0} total={5} isVertical={isVertical} />*/}
-                        <Text className="text-center text-t1 text-light-text-200">
-                            {exercise.name}
-                        </Text>
-                    </View>
-                )}
 
                 {/* Exercise Info */}
                 <View className="p-6">
@@ -178,60 +241,7 @@ export function ExerciseExecutionScreen({
                                 </View>
                             }
                         </View>
-                    ) : (
-                        <View className="flex-row px-1">
-                            <View className="flex-[0.5] basis-0 items-center rounded-3xl bg-fill-800 p-1">
-                                <Text
-                                    className={`text-[64px] leading-[72px] ${
-                                        telemetry?.reps === 0
-                                            ? 'text-light-text-200'
-                                            : telemetry?.reps === exercise.reps
-                                                ? 'text-brand-green-500'
-                                                : 'text-light-text-200'
-                                    }`}
-                                >
-                                    {telemetry?.reps}
-                                    <Text
-                                        className={`text-[32px] leading-[36px] ${
-                                            telemetry?.reps === exercise.reps
-                                                ? 'text-brand-green-500'
-                                                : 'color-[#949494]'
-                                        }`}
-                                    >
-                                        {' '}
-										/ {exercise.reps}
-                                    </Text>
-                                </Text>
-                                <Text className="mb-1 text-t2 color-[#949494]">повторения</Text>
-                            </View>
-                            <View className="flex-[1] basis-0 items-center justify-center"></View>
-
-                            <View className="flex-[1.2] basis-0 items-end">
-                                {exercise.video_practice && player && (
-                                    <View
-                                        style={{
-                                            width: '50%',
-                                            height: '100%',
-                                            overflow: 'hidden',
-                                            backgroundColor: 'transparent',
-                                            borderRadius: 8,
-                                            shadowColor: '#000',
-                                            shadowOffset: { width: 0, height: 2 },
-                                            shadowOpacity: 0.25,
-                                            shadowRadius: 3.84,
-                                        }}
-                                    >
-                                        <VideoView
-                                            player={player}
-                                            style={{ width: '100%', height: '100%' }}
-                                            contentFit="cover"
-                                            nativeControls={false}
-                                        />
-                                    </View>
-                                )}
-                            </View>
-                        </View>
-                    )}
+                    ) : <></>}
                 </View>
             </View>
         </ExerciseWithCounterWrapper>

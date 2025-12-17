@@ -5,7 +5,7 @@
  */
 
 import { View, Text } from 'react-native'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { VideoView, useVideoPlayer } from 'expo-video'
 
 import { LargeNumberDisplay, VideoProgressBar } from '@/shared/ui'
@@ -46,44 +46,70 @@ function ExerciseExampleCountdownContent({
     const hasCompletedRef = useRef(false)
     const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
     const [remainingTime, setRemainingTime] = useState(0)
+    const remainingTimeRef = useRef(0)
 
-    useEffect(() => {
-        hasCompletedRef.current = false
-        setRemainingTime(0)
+    const clearCountdownInterval = useCallback(() => {
         if (countdownIntervalRef.current) {
             clearInterval(countdownIntervalRef.current)
+            countdownIntervalRef.current = null
         }
-    }, [player])
+    }, [])
 
-    useEffect(() => {
-        if (!player) return
+    const startCountdown = useCallback(
+        (initialSeconds?: number) => {
+            if (initialSeconds !== undefined) {
+                setRemainingTime(initialSeconds)
+                remainingTimeRef.current = initialSeconds
+            }
 
-        const startCountdown = (durationSeconds: number) => {
-            setRemainingTime(durationSeconds)
+            clearCountdownInterval()
 
             countdownIntervalRef.current = setInterval(() => {
                 setRemainingTime((prev) => {
+                    const nextValue = prev <= 1 ? 0 : prev - 1
+                    remainingTimeRef.current = nextValue
+
                     if (prev <= 1) {
                         if (!hasCompletedRef.current) {
                             hasCompletedRef.current = true
                             onComplete()
                         }
-                        if (countdownIntervalRef.current) {
-                            clearInterval(countdownIntervalRef.current)
-                        }
+                        clearCountdownInterval()
                         return 0
                     }
-                    return prev - 1
+                    return nextValue
                 })
             }, 1000)
+        },
+        [clearCountdownInterval, onComplete]
+    )
+
+    const pauseCountdown = useCallback(() => {
+        clearCountdownInterval()
+    }, [clearCountdownInterval])
+
+    const resumeCountdown = useCallback(() => {
+        if (hasCompletedRef.current) return
+        if (countdownIntervalRef.current) return
+        if (remainingTimeRef.current > 0) {
+            startCountdown()
         }
+    }, [startCountdown])
+
+    useEffect(() => {
+        hasCompletedRef.current = false
+        remainingTimeRef.current = 0
+        setRemainingTime(0)
+        clearCountdownInterval()
+    }, [player, clearCountdownInterval])
+
+    useEffect(() => {
+        if (!player) return
 
         if (durationOverrideSeconds) {
             startCountdown(durationOverrideSeconds)
             return () => {
-                if (countdownIntervalRef.current) {
-                    clearInterval(countdownIntervalRef.current)
-                }
+                clearCountdownInterval()
             }
         }
 
@@ -96,11 +122,9 @@ function ExerciseExampleCountdownContent({
 
         return () => {
             clearInterval(waitForReady)
-            if (countdownIntervalRef.current) {
-                clearInterval(countdownIntervalRef.current)
-            }
+            clearCountdownInterval()
         }
-    }, [player, onComplete, durationOverrideSeconds])
+    }, [player, durationOverrideSeconds, startCountdown, clearCountdownInterval])
 
     useEffect(() => {
         if (player && videoPlayerContext) {
@@ -109,6 +133,15 @@ function ExerciseExampleCountdownContent({
         }
         return undefined
     }, [player, videoPlayerContext])
+
+    useEffect(() => {
+        if (!videoPlayerContext) return undefined
+        const unregister = videoPlayerContext.registerPausable({
+            pause: pauseCountdown,
+            resume: resumeCountdown,
+        })
+        return unregister
+    }, [pauseCountdown, resumeCountdown, videoPlayerContext])
 
     const minutes = Math.floor(remainingTime / 60)
         .toString()
@@ -120,7 +153,7 @@ function ExerciseExampleCountdownContent({
     return (
         <>
             {/* Video */}
-            <View style={{ height: isVertical ? height : 250 }}>
+            <View style={{ height: isVertical ? height : '100%' }}>
                 {videoUrl ? (
                     <VideoView
                         player={player}
@@ -132,13 +165,42 @@ function ExerciseExampleCountdownContent({
                     <View className="bg-brand-dark-300 flex-1" />
                 )}
             </View>
-
             {!isVertical && (
-                <View className="absolute bottom-10 left-0 right-0 items-center justify-center px-4">
-                    <VideoProgressBar player={player} className="mb-2" />
-                    <Text className="text-center text-t1 text-light-text-200">{exercise.name}</Text>
-                </View>
-            )}
+                <>
+                    <View className="absolute top-10 left-0 right-0 items-center justify-center px-4">
+                        <VideoProgressBar player={player} className="mb-2" />
+                        <Text className="text-center text-t1 text-light-text-200">{exercise.name}</Text>
+                    </View>
+
+                    <View className="absolute bottom-0 flex-row px-1 pb-2 gap-2">
+
+                        <View className="flex-1 basis-0 flex-row gap-2  items-end">
+                            <View className="flex-[0.5] basis-0 items-center bg-fill-800 rounded-3xl p-1">
+                                <Text className="text-[64px] leading-[72px] text-light-text-200">
+                                    {currentSet}
+                                    <Text className="text-[32px] leading-[36px] color-[#949494] "> / {exercise.sets}</Text>
+                                </Text>
+                                <Text className="text-t2 color-[#949494] mb-1">подход</Text>
+                            </View>
+
+                            <View className="flex-1 basis-0 items-center">
+                                <LargeNumberDisplay
+                                    value={`${minutes}:${seconds}`}
+                                    size="large"
+                                    variant="horizontal"
+                                />
+                            </View>
+                            <View className="flex-[0.5] basis-0 items-center bg-fill-800 rounded-3xl p-1">
+                                <Text className="text-[64px] leading-[72px] text-light-text-200">
+                                    {exercise.reps || exercise.duration}
+                                </Text>
+                                <Text className="text-t2 color-[#949494] mb-1">повторения</Text>
+                            </View>
+                        </View>
+                    </View>
+                </>
+              
+            )} 
 
             {/* Exercise Info */}
             <View className="p-5">
@@ -174,9 +236,7 @@ function ExerciseExampleCountdownContent({
                             </View>
                         </View>
                     </>
-                ) : (
-                    <></>
-                )}
+                ) : <></>}
             </View>
         </>
     )

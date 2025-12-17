@@ -14,7 +14,7 @@ export interface LargeNumberDisplayProps extends ViewProps {
 	/** Вариант размера */
 	size?: 'large' | 'xlarge'
 	/** Цвет */
-	variant?: 'default' | 'accent' | 'success'
+	variant?: 'default' | 'accent' | 'success' | 'horizontal'
 }
 
 export function LargeNumberDisplay({
@@ -32,6 +32,7 @@ export function LargeNumberDisplay({
 
     const colorStyles = {
         default: 'text-light-text-200',
+        horizontal: 'text-light-text-900',
         accent: 'text-brand-purple-500',
         success: 'text-brand-green-500',
     }

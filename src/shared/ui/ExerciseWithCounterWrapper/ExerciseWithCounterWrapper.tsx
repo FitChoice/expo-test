@@ -10,6 +10,7 @@ import type { VideoPlayer } from 'expo-video'
 import {
     VideoPlayerContext,
     type VideoPlayerContextValue,
+    type PauseResumeHandler,
 } from '@/shared/hooks/useVideoPlayerContext'
 
 export const ExerciseWithCounterWrapper = ({
@@ -25,6 +26,47 @@ export const ExerciseWithCounterWrapper = ({
     const [isPaused, setIsPaused] = useState(false)
     const timerRef = useRef<number | null>(null)
     const videoPlayersRef = useRef<Set<VideoPlayer>>(new Set())
+    const pausableHandlersRef = useRef<Set<PauseResumeHandler>>(new Set())
+
+    const pauseAll = useCallback(() => {
+        // Пауза видео
+        videoPlayersRef.current.forEach((player) => {
+            try {
+                player.pause()
+            } catch (e) {
+                console.error('Error pausing video:', e)
+            }
+        })
+
+        // Пауза дополнительной логики (например, таймеры)
+        pausableHandlersRef.current.forEach((handler) => {
+            try {
+                handler.pause()
+            } catch (e) {
+                console.error('Error pausing handler:', e)
+            }
+        })
+    }, [])
+
+    const resumeAll = useCallback(() => {
+        // Возобновление видео
+        videoPlayersRef.current.forEach((player) => {
+            try {
+                player.play()
+            } catch (e) {
+                // Игнорируем ошибки если плеер уже уничтожен
+            }
+        })
+
+        // Возобновление дополнительной логики
+        pausableHandlersRef.current.forEach((handler) => {
+            try {
+                handler.resume()
+            } catch (e) {
+                console.error('Error resuming handler:', e)
+            }
+        })
+    }, [])
 
     const onStop = useCallback(() => {
         setShowStopModal(true)
@@ -33,52 +75,23 @@ export const ExerciseWithCounterWrapper = ({
             timerRef.current = null
             setIsPaused(true)
         }
-        // Пауза видео
-        videoPlayersRef.current.forEach((player) => {
-            try {
-                player.pause()
-            } catch (e) {
-                console.error('Error pausing video:', e)
-            }
-        })
-    }, [])
+        pauseAll()
+    }, [pauseAll])
 
     const pauseTimer = useCallback(() => {
         setShowPauseModal(true)
-
-        // Пауза видео
-        videoPlayersRef.current.forEach((player) => {
-            try {
-                player.pause()
-            } catch (e) {
-                console.error('Error pausing video:', e)
-            }
-        })
-    }, [])
+        pauseAll()
+    }, [pauseAll])
 
     const resumeTimer = useCallback(() => {
         setShowPauseModal(false)
-        // Возобновление видео
-        videoPlayersRef.current.forEach((player) => {
-            try {
-                player.play()
-            } catch (e) {
-                // Игнорируем ошибки если плеер уже уничтожен
-            }
-        })
-    }, [])
+        resumeAll()
+    }, [resumeAll])
 
     const handleStopResume = useCallback(() => {
         setShowStopModal(false)
-        // Возобновление видео
-        videoPlayersRef.current.forEach((player) => {
-            try {
-                player.play()
-            } catch (e) {
-                // Игнорируем ошибки если плеер уже уничтожен
-            }
-        })
-    }, [setShowStopModal])
+        resumeAll()
+    }, [resumeAll, setShowStopModal])
 
     const handleStopTraining = () => {
         setShowStopModal(false)
@@ -93,11 +106,20 @@ export const ExerciseWithCounterWrapper = ({
         }
     }, [])
 
+    const registerPausable = useCallback((handler: PauseResumeHandler) => {
+        pausableHandlersRef.current.add(handler)
+
+        return () => {
+            pausableHandlersRef.current.delete(handler)
+        }
+    }, [])
+
     const videoPlayerContextValue = useMemo<VideoPlayerContextValue>(
         () => ({
             registerPlayer,
+            registerPausable,
         }),
-        [registerPlayer]
+        [registerPlayer, registerPausable]
     )
 
     return (
@@ -116,7 +138,7 @@ export const ExerciseWithCounterWrapper = ({
                 {/* Control Buttons */}
                 {isShowActionButtons && (
                     <View
-                        className={'absolute left-4 right-4 top-10 z-10 flex-row justify-end gap-2'}
+                        className={'absolute right-14 top-10 z-10 flex-row justify-end gap-2 '}
                     >
                         <ControlButton
                             icon={<AntDesign name="pause" size={24} color="#FFFFFF" />}

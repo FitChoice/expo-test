@@ -129,7 +129,9 @@ export default function TrainingEntryScreen() {
         //   Render based on current status
         switch (status) {
         case 'info':
-            return <TrainingInfo />
+            return   <BackgroundLayoutNoSidePadding >
+                <TrainingInfo />
+            </BackgroundLayoutNoSidePadding>
         case 'onboarding':
             return (
                 <BackgroundLayoutNoSidePadding>

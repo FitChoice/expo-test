@@ -53,13 +53,11 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
     const [shouldSwitchSide, setShouldSwitchSide] = useState(false)
 
-    // console.log('currentExerciseDetail', currentExerciseDetail)
-    // console.log('exercises', exercises)
-    // console.log('currentExerciseIndex', currentExerciseIndex)
+    console.log('currentExerciseDetail', currentExerciseDetail)
+    console.log('exercises', exercises)
+    console.log('currentExerciseIndex', currentExerciseIndex)
 
-
-
-	const finishTraining = useTrainingStore((state) => state.finishTraining)
+    const finishTraining = useTrainingStore((state) => state.finishTraining)
 
     const sendTrainingCompletion = () => {
         if (!training?.id) return
@@ -147,7 +145,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             const needsRotate =
 				(exerciseIsVertical && !isPortrait) || (!exerciseIsVertical && !isLandscape)
 
-            if (needsRotate || exercise.is_horizontal) {
+            if (needsRotate) {
                 setCurrentStep('rotate')
                 return
             }
@@ -183,10 +181,14 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const isLastExercise = currentExerciseIndex === exercises.length - 1
     const repsPerSide = currentExercise.reps ?? 1
     const setsPerExercise = currentExercise.sets ?? 1
-    const requiresSideSwitch = Boolean(currentExercise.is_mirror)
+    const requiresSideSwitch = Boolean(
+        typeof currentExercise.is_mirror === 'number'
+            ? Number(currentExercise.is_mirror)
+            : currentExercise.is_mirror
+    )
 
     const handleRotateComplete = () => {
-        setCurrentStep(currentExercise.is_horizontal ? 'position' : entryStep)
+        setCurrentStep(entryStep)
     }
 
     const handleCountdownComplete = () => {
@@ -223,6 +225,16 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             .catch((error) => {
                 showToast.error(error?.message ?? 'Ошибка отправки упражнения')
             })
+    }
+
+    const getPracticeVideoUrl = (exercise: ExerciseInfoResponse) => {
+        if (!exercise.is_mirror) {
+            return exercise.video_practice
+        }
+        if (currentSideState === 'left') {
+            return exercise.video_practice_second || exercise.video_practice
+        }
+        return exercise.video_practice
     }
 
     const handleExecutionComplete = () => {
@@ -380,6 +392,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     onComplete={handleExecutionComplete}
                     exercise={currentExercise}
                     isVertical={!currentExercise.is_horizontal}
+                    practiceVideoUrl={getPracticeVideoUrl(currentExercise)}
                 />
             )}
             {/*{currentStep === 'success' && (*/}
@@ -395,7 +408,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                     title="Смена рабочей стороны"
                     titleClassName="mb-2 text-left text-h1 text-brand-green-500"
                     subtitle=""
-                    isVertical={true}
+                    isVertical={!currentExercise.is_horizontal}
                 />
             )}
             {currentStep === 'rest' && (
@@ -414,7 +427,7 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                             currentSet={displayCurrentSet}
                             onComplete={handleRestComplete}
                             isVertical
-                            videoUrlOverride={currentExercise.video_practice}
+                            videoUrlOverride={getPracticeVideoUrl(currentExercise)}
                             durationOverrideSeconds={10}
                         />
                     )}

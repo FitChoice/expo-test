@@ -27,6 +27,7 @@ export function PauseModal({ visible, onResume }: PauseModalProps) {
     const isLandscape = width > height
 
     return (
+
         <RNModal
             visible={visible}
             transparent
@@ -59,7 +60,7 @@ export function PauseModal({ visible, onResume }: PauseModalProps) {
 
                 {/* Button at bottom */}
                 <View
-                    className={`absolute bottom-0 left-0 right-0 px-6 pb-safe-bottom ${isLandscape ? 'pb-6' : 'pb-6'}`}
+                    className={`absolute bottom-20 left-0 right-0 px-6 pb-safe-bottom ${isLandscape ? 'pb-6' : 'pb-6'}`}
                 >
                     <Button
                         onPress={onResume}
@@ -71,5 +72,6 @@ export function PauseModal({ visible, onResume }: PauseModalProps) {
                 </View>
             </View>
         </RNModal>
+
     )
 }
