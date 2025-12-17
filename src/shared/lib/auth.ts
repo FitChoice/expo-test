@@ -90,8 +90,32 @@ export const saveRefreshToken = async (refreshToken: string): Promise<void> => {
 }
 
 /**
+ * Get refresh token from SecureStore
+ * @returns Refresh token or null if not found
+ */
+export const getRefreshToken = async (): Promise<string | null> => {
+    try {
+        return await SecureStore.getItemAsync('refresh_token')
+    } catch (error) {
+        console.error('Failed to get refresh token:', error)
+        return null
+    }
+}
+
+/**
+ * Clear refresh token from SecureStore
+ */
+export const clearRefreshToken = async (): Promise<void> => {
+    try {
+        await SecureStore.deleteItemAsync('refresh_token')
+    } catch (error) {
+        console.error('Failed to clear refresh token:', error)
+    }
+}
+
+/**
  * Clear all auth data from SecureStore
  */
 export const clearAuthData = async (): Promise<void> => {
-    await Promise.all([clearUserId(), clearAuthToken()])
+    await Promise.all([clearUserId(), clearAuthToken(), clearRefreshToken()])
 }

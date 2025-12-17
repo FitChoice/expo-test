@@ -350,6 +350,11 @@ export const RegisterScreen = () => {
                                     variant="text"
                                     size="default"
                                     error={emailError}
+                                    autoComplete="off"
+                                    textContentType="none"
+                                    autoCorrect={false}
+                                    autoCapitalize="none"
+                                    importantForAutofill="no"
                                 />
 
                                 <Input
@@ -367,6 +372,8 @@ export const RegisterScreen = () => {
                                     autoComplete="off"
                                     textContentType="none"
                                     importantForAutofill="no"
+                                    autoCorrect={false}
+                                    autoCapitalize="none"
                                 />
 
                                 <Input
@@ -382,6 +389,8 @@ export const RegisterScreen = () => {
                                     autoComplete="off"
                                     textContentType="none"
                                     importantForAutofill="no"
+                                    autoCorrect={false}
+                                    autoCapitalize="none"
                                 />
                             </Animated.View>
                         </View>

@@ -5,6 +5,7 @@
 import { apiClient } from '@/shared/api'
 import type { ApiResult } from '@/shared/api/types'
 import type { ExerciseInfoResponse } from '@/entities/training/model/types'
+import { refreshAccessToken } from '@/shared/api/refreshToken'
 
 export type Activity = {
     Duration:number,
@@ -128,6 +129,10 @@ export const trainingApi = {
     async completeTraining(
         data: CompleteTrainingInput
     ): Promise<ApiResult<CompleteTrainingResponse>> {
+        const refreshResult = await refreshAccessToken()
+        if (refreshResult !== 'ok') {
+            return { success: false, error: 'Unauthorized' }
+        }
         return apiClient.put('/trainings/complete', data)
     },
 
@@ -137,6 +142,10 @@ export const trainingApi = {
     async executeExercise(
         data: ExecuteExerciseInput
     ): Promise<ApiResult<ExecuteExerciseResponse>> {
+        const refreshResult = await refreshAccessToken()
+        if (refreshResult !== 'ok') {
+            return { success: false, error: 'Unauthorized' }
+        }
         return apiClient.put('/trainings/exercise', data)
     },
 
