@@ -15,6 +15,7 @@ import { useNavbarLayout } from '@/shared/lib'
 import {
     type Activity, trainingApi, type TrainingPlan,
 } from '@/features/training/api'
+import { useTrainingStore } from '@/entities/training'
 import { getUserId } from '@/shared/lib/auth'
 import type { ApiResult } from '@/shared/api/types'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
@@ -47,6 +48,7 @@ export const HomeScreen = () => {
 const MobileContent = () => {
     const router = useRouter()
     const { contentPaddingBottom } = useNavbarLayout()
+    const setTrainingStatus = useTrainingStore((state) => state.setStatus)
 
     const [userId, setUserId] = useState<number | null>(null)
     const [selectedDayIdx, setSelectedDayIdx] = useState(1)
@@ -162,7 +164,7 @@ const MobileContent = () => {
     }, [resolvedSelectedDate, calendarWidth, calendarDays])
 
     const handleOpenTarining = (trainingId: number) => {
-    
+        setTrainingStatus('info')
         router.push({ pathname: `/(training)/${trainingId}` })
     }
 

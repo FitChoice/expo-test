@@ -64,6 +64,7 @@ interface TrainingState {
 	setExerciseDetail: (detail: ExerciseInfoResponse | null) => void
 	setExerciseLoading: (loading: boolean) => void
 	setExerciseDetails: ( successfulExercises: ExerciseInfoResponse[]) => void,
+    setStatus: (status: TrainingStatus) => void
 }
 
 const initialState = {
@@ -108,6 +109,10 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
 
     setExerciseLoading: (loading: boolean) => {
         set({ isExerciseLoading: loading })
+    },
+
+    setStatus: (status) => {
+        set({ status })
     },
 
     /**

@@ -102,11 +102,14 @@ src/
 
 **`training-session/`**
 - `OnboardingFlow` — подготовка к тренировке (камера, звук, положение)
-- `ExerciseFlow` — основной флоу выполнения упражнений:
-  - старт шага с проверкой ориентации; для горизонтальных упражнений — экран `rotate`, затем `position`/`execution`
-  - порядок шагов: `theory/position → execution → side_switch (для is_mirror) → rest`
-  - rest: если длительность >10 cек — основная фаза rest, затем 10 cек practice с `video_practice`; если 10 cек — только обычный rest
-  - сет считается завершённым после обеих сторон у зеркальных упражнений
+- `ExerciseFlow` — основной флоу выполнения упражнений (FSM):
+  - Инициализация: стартовый шаг `theory` (если `showTutorial`), иначе `position`. Состояния: текущий шаг, сторона (`right/left`), тип отдыха (`rep/set/exercise`), фаза отдыха (`main/practice`), счётчики повторов/сетов, индекс упражнения.
+  - Ориентация: перед стартом сверяет требуемую ориентацию (`is_horizontal`). Если не совпадает, показывает `rotate`, затем возвращает в стартовый шаг.
+  - Базовый маршрут шагов: `theory → position → execution → rest` (без смены стороны) либо `theory → position → execution → rest → side_switch → execution → rest` (для зеркальных `is_mirror`).
+  - Выполнение (`execution`): после завершения подхода сбрасывает повторы. Для зеркальных упражнений: первая сторона уводит в `rest (rep)` с флагом смены стороны → `side_switch` → вторая сторона завершает сет и либо уходит на `rest (set/exercise)`, либо завершает тренировку. Для не-зеркальных: завершает сет и идёт в `rest (set/exercise)` или завершает тренировку.
+  - Отдых (`rest`): тип зависит от контекста (`rep`=5с, `set`=`rest_between_sets` или 15с по умолчанию, `exercise`=`rest_after_exercise` или 30с). Если длительность >10с, делится на `main` и `practice`: сначала `RestScreen` на `base - 10`, затем `ExerciseTheoryScreen` (practice, 10с, может использовать `video_practice`).
+  - Переходы отдыха: `rep` → возвращает в `execution` или запускает `side_switch`; `set` → сбрасывает сторону на `right`, идёт в `position`; `exercise` → выбирает следующее упражнение или `finishTraining()`.
+  - Экранные компоненты по шагам: `rotate` → `RotateScreen`; `theory/practice` → `ExerciseTheoryScreen`; `position/side_switch` → `BodyPositionScreen` (со спец. заголовком для смены стороны); `execution` → `ExerciseExecutionScreen`; `rest` (main) → `RestScreen`.
 - `TrainingInfo`, `TrainingAnalytics` — инфо-панели
 - Экраны: `AIExerciseScreen`, `BodyPositionScreen` (кастомные заголовок/подзаголовок через пропсы), `ExerciseTheoryScreen`, `RestScreen`, `ExerciseSuccess`
 

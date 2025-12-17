@@ -15,6 +15,9 @@ import { useTrainingStore } from '@/entities/training'
 import { ExerciseExecutionScreen } from '@/widgets/training-session/ui/exercise/ExerciseExecutionScreen'
 import { useKeepAwake } from 'expo-keep-awake'
 import { ExerciseTheoryScreen } from '@/widgets/training-session/ui/exercise/ExerciseTheoryScreen'
+import { trainingApi, type ExecuteExerciseInput } from '@/features/training/api'
+import type { ExerciseInfoResponse } from '@/entities/training'
+import { showToast } from '@/shared/lib'
 
 type ExerciseStep =
 	| 'theory'
@@ -32,6 +35,14 @@ type ExerciseFlowProps = {
 export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     useKeepAwake()
     const showTutorial = useTrainingStore((state) => state.showTutorial)
+    const exercises = useTrainingStore((state) => state.exerciseDetails)
+    const currentExerciseDetail = useTrainingStore((state) => state.currentExerciseDetail)
+    const setCurrentExerciseId = useTrainingStore((state) => state.setCurrentExerciseId)
+    const training = useTrainingStore((state) => state.training)
+    const activeTime = useTrainingStore((state) => state.activeTime)
+    const caloriesBurned = useTrainingStore((state) => state.caloriesBurned)
+    const averageFormQuality = useTrainingStore((state) => state.averageFormQuality)
+    const elapsedTime = useTrainingStore((state) => state.elapsedTime)
     const entryStep: ExerciseStep = showTutorial ? 'theory' : 'position'
     const [currentStep, setCurrentStep] = useState<ExerciseStep>(entryStep)
     const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
@@ -42,7 +53,44 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
     const [shouldSwitchSide, setShouldSwitchSide] = useState(false)
 
-    const finishTraining = useTrainingStore((state) => state.finishTraining)
+    // console.log('currentExerciseDetail', currentExerciseDetail)
+    // console.log('exercises', exercises)
+    // console.log('currentExerciseIndex', currentExerciseIndex)
+
+
+
+	const finishTraining = useTrainingStore((state) => state.finishTraining)
+
+    const sendTrainingCompletion = () => {
+        if (!training?.id) return
+
+        const payload: Parameters<(typeof trainingApi)['completeTraining']>[0] = {
+            report_active_time: activeTime,
+            report_cals: caloriesBurned,
+            report_duration: elapsedTime,
+            report_technique_quality: averageFormQuality,
+            time: new Date().toISOString(),
+            training_id: training.id,
+        }
+
+        void trainingApi
+            .completeTraining(payload)
+            .then((result) => {
+                if (result.success) {
+                    showToast.success('Тренировка успешно завершена')
+                } else {
+                    showToast.error(result.error ?? 'Не удалось завершить тренировку')
+                }
+            })
+            .catch((error) => {
+                showToast.error(error?.message ?? 'Ошибка завершения тренировки')
+            })
+    }
+
+    const finishTrainingFlow = () => {
+        finishTraining()
+        sendTrainingCompletion()
+    }
 
     const resetReps = () => {
         setRepNumber(0)
@@ -56,50 +104,31 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         setRestPhase('main')
         setShouldSwitchSide(false)
     }
-    const exerciseDetails = [
-        {
-            duration: 0,
-            id: 0,
-            is_ai: false,
-            is_horizontal: false,
-            is_mirror: false,
-            layout: 'стоя',
-            name: 'Приседания 1',
-            progress: 0,
-            reps: 2,
-            rest_after_exercise: 20,
-            rest_between_sets: 20,
-            sets: 2,
-            error_codes: [],
-            video_practice: 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0.mp4',
-            video_practice_second: '',
-            video_theory: 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-            working_side: '-',
-            working_side_second: '',
-        },
-        {
-            duration: 0,
-            id: 1,
-            is_ai: false,
-            is_horizontal: false,
-            is_mirror: true,
-            layout: 'стоя',
-            name: 'Приседания 2',
-            progress: 0,
-            reps: 2,
-            rest_after_exercise: 20,
-            rest_between_sets: 20,
-            sets: 2,
-            error_codes: [],
-            video_practice: 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D0%BF%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0.mp4',
-            video_practice_second: '',
-            video_theory: 'https://storage.yandexcloud.net/fitdb/trainings/0001%20-%20%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D1%8F.mp4',
-            working_side: '-',
-            working_side_second: '',
-        },
-    ]
-    const exercises = exerciseDetails
-    const currentExercise = exercises[currentExerciseIndex]
+    useEffect(() => {
+        if (!currentExerciseDetail && exercises[0]) {
+            setCurrentExerciseId(exercises[0].id)
+        }
+    }, [currentExerciseDetail, exercises, setCurrentExerciseId])
+
+    useEffect(() => {
+        if (!exercises.length) return
+
+        if (currentExerciseDetail) {
+            const matchedIndex = exercises.findIndex(
+                (exercise) => exercise.id === currentExerciseDetail.id
+            )
+
+            if (matchedIndex !== -1) {
+                setCurrentExerciseIndex(matchedIndex)
+                return
+            }
+        }
+
+        setCurrentExerciseIndex(0)
+    }, [currentExerciseDetail, exercises])
+
+    const currentExercise =
+		currentExerciseDetail ?? (exercises.length > 0 ? exercises[currentExerciseIndex] : null)
 
     const startExercise = async (
         exercise: (typeof exercises)[number],
@@ -168,7 +197,38 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         setCurrentStep('execution')
     }
 
+    const sendExerciseCompletion = (exercise: ExerciseInfoResponse) => {
+        if (!training?.id) return
+
+        const totalSides = exercise.is_mirror ? 2 : 1
+        const totalReps = (exercise.reps ?? 0) * (exercise.sets ?? 1) * totalSides
+
+        const payload: ExecuteExerciseInput = {
+            id: exercise.id,
+            training_id: training.id,
+            reps: totalReps,
+            quality: 100,
+            recorded_errors: [],
+        }
+
+        void trainingApi
+            .executeExercise(payload)
+            .then((result) => {
+                if (result.success) {
+                    showToast.success('Упражнение отправлено')
+                } else {
+                    showToast.error(result.error ?? 'Не удалось отправить упражнение')
+                }
+            })
+            .catch((error) => {
+                showToast.error(error?.message ?? 'Ошибка отправки упражнения')
+            })
+    }
+
     const handleExecutionComplete = () => {
+        if (!currentExercise) {
+            return
+        }
         // onComplete срабатывает после выполнения нужного количества повторений,
         // поэтому считаем, что текущая сторона завершена полностью
         resetReps()
@@ -192,8 +252,10 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
                 setRestType('set')
                 setCurrentStep('rest')
             } else {
+                sendExerciseCompletion(currentExercise)
+
                 if (isLastExercise) {
-                    finishTraining()
+                    finishTrainingFlow()
                 } else {
                     setRestType('exercise')
                     setCurrentStep('rest')
@@ -211,8 +273,10 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
             setRestType('set')
             setCurrentStep('rest')
         } else {
+            sendExerciseCompletion(currentExercise)
+
             if (isLastExercise) {
-                finishTraining()
+                finishTrainingFlow()
             } else {
                 setRestType('exercise')
                 setCurrentStep('rest')
@@ -224,11 +288,12 @@ export function ExerciseFlow({ model, orientation }: ExerciseFlowProps) {
         const nextIndex = currentExerciseIndex + 1
 
         if (!exercises[nextIndex]) {
-            finishTraining()
+            finishTrainingFlow()
             return
         }
         resetExerciseProgress()
         setCurrentExerciseIndex(nextIndex)
+        setCurrentExerciseId(exercises[nextIndex].id)
     }
 
     const handleRestComplete = () => {

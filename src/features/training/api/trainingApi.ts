@@ -23,9 +23,6 @@ export type TrainingPlanTraining = {
     is_diary_complete: boolean
 }
 
-export type TrainingPlanTrainingResponse = {
-
-}
 // Types for training responses
 export type TrainingPlan = TrainingPlanTraining[]
 
@@ -68,13 +65,11 @@ interface CompleteTrainingResponse {
 	[key: string]: unknown
 }
 
-interface ExecuteExerciseInput {
-	id: number,
+export interface ExecuteExerciseInput {
+	id: number
 	quality: number
-	recorded_errors: [
-		number
-	],
-	reps: number,
+	recorded_errors: number[]
+	reps: number
 	training_id: number
 }
 
