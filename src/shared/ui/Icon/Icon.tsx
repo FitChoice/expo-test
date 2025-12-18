@@ -96,126 +96,126 @@ const iconMap: Record<
 	IconName,
 	React.FC<{ width?: number; height?: number; fill?: string; style?: object }>
 > = {
-    'chevron-down': ChevronDown,
-    'chevron-left': ChevronLeft,
-    'chevron-right': ChevronRight,
-    'chevrons-right': ChevronsRight,
-    'chevron-up': ChevronUp,
-    'arrow-forward': ArrowForward,
-    'arrow-back': ArrowBack,
-    close: Close,
-    check: Check,
-    'check-circle': CheckCircle,
-    plus: Plus,
-    share: Share,
-    reload: Reload,
-    'sign-out': SignOut,
-    'trash-simple': TrashSimple,
-    'pencil-simple': PencilSimple,
-    info: Info,
-    warning: Warning,
-    eye: Eye,
-    'eye-slash': EyeSlash,
-    user: User,
-    'user-circle': UserCircle,
-    'gear-fine': GearFine,
-    'dots-three-vertical': DotsThreeVertical,
-    'gender-female': GenderFemale,
-    'gender-male': GenderMale,
-    house: House,
-    camera: Camera,
-    file: File,
-    image: Image,
-    timer: Timer,
-    fire: Fire,
-    lightning: Lightning,
-    'calendar-dots': CalendarDots,
-    ruler: Ruler,
-    barbell: Barbell,
-    clock: Timer, // Using timer as clock placeholder
-    'clock-time-eight': Timer, // Using timer as clock-time-eight placeholder
-    star: Lightning, // Using lightning as star placeholder temporarily
-    pause: Timer, // Using timer as pause placeholder temporarily
-    activity: Lightning, // Using lightning as activity placeholder
-    repeat: Timer, // Using timer as repeat placeholder
-    target: Lightning, // Using lightning as target placeholder
-    'bow-arrow': Lightning, // Using lightning as bow-arrow placeholder
-    'health-knees': HealthKnees,
-    'health-neck-shoulders': HealthNeckShoulders,
-    'health-back-pain': HealthBackPain,
-    'health-pregnancy': HealthPregnancy,
-    'health-childbirth': HealthChildbirth,
-    'health-varicose': HealthVaricose,
-    'health-hernia': HealthHernia,
-    'health-scoliosis': HealthScoliosis,
-    'health-hip': HealthHip,
-    'health-pressure': HealthPressure,
-    'health-wellbeing': HealthWellbeing,
-    'goal-lose-weight': GoalLoseWeight,
-    'goal-pain-relief': GoalPainRelief,
-    'goal-reduce-stress': GoalReduceStress,
-    'goal-flexibility': GoalFlexibility,
-    'goal-posture': GoalPosture,
-    'goal-strengthen': GoalStrengthen,
-    'goal-energy': GoalEnergy,
-    'workout-therapeutic': WorkoutTherapeutic,
-    'workout-rehabilitation': WorkoutRehabilitation,
-    'workout-meditation': WorkoutMeditation,
-    'workout-stretching': WorkoutStretching,
-    'workout-cardio': WorkoutCardio,
-    'workout-strength': WorkoutStrength,
-    'workout-healthy-back': WorkoutHealthyBack,
-    main: Main,
-    additional: Additional,
-    diary: Diary,
-    back: Back,
-    dumbbell: Dumbbell,
-    'goal-dumbbell': GoalDumbbell,
-    'goal-habit': GoalHabit,
-    'goal-pleasure': GoalPleasure,
-    'goal-technique': GoalTechnique,
-    'goal-stamina': GoalStamina,
-    microphone: Microphone,
-    send: Send,
-    paperclip: Paperclip,
-    play: Play,
-    'pause-solid': PauseSolid,
-    stop: Stop,
-    'ai-assistant': AiAssistant,
-    'ai-chat': AiChat,
-    lock: Lock,
+	'chevron-down': ChevronDown,
+	'chevron-left': ChevronLeft,
+	'chevron-right': ChevronRight,
+	'chevrons-right': ChevronsRight,
+	'chevron-up': ChevronUp,
+	'arrow-forward': ArrowForward,
+	'arrow-back': ArrowBack,
+	close: Close,
+	check: Check,
+	'check-circle': CheckCircle,
+	plus: Plus,
+	share: Share,
+	reload: Reload,
+	'sign-out': SignOut,
+	'trash-simple': TrashSimple,
+	'pencil-simple': PencilSimple,
+	info: Info,
+	warning: Warning,
+	eye: Eye,
+	'eye-slash': EyeSlash,
+	user: User,
+	'user-circle': UserCircle,
+	'gear-fine': GearFine,
+	'dots-three-vertical': DotsThreeVertical,
+	'gender-female': GenderFemale,
+	'gender-male': GenderMale,
+	house: House,
+	camera: Camera,
+	file: File,
+	image: Image,
+	timer: Timer,
+	fire: Fire,
+	lightning: Lightning,
+	'calendar-dots': CalendarDots,
+	ruler: Ruler,
+	barbell: Barbell,
+	clock: Timer, // Using timer as clock placeholder
+	'clock-time-eight': Timer, // Using timer as clock-time-eight placeholder
+	star: Lightning, // Using lightning as star placeholder temporarily
+	pause: Timer, // Using timer as pause placeholder temporarily
+	activity: Lightning, // Using lightning as activity placeholder
+	repeat: Timer, // Using timer as repeat placeholder
+	target: Lightning, // Using lightning as target placeholder
+	'bow-arrow': Lightning, // Using lightning as bow-arrow placeholder
+	'health-knees': HealthKnees,
+	'health-neck-shoulders': HealthNeckShoulders,
+	'health-back-pain': HealthBackPain,
+	'health-pregnancy': HealthPregnancy,
+	'health-childbirth': HealthChildbirth,
+	'health-varicose': HealthVaricose,
+	'health-hernia': HealthHernia,
+	'health-scoliosis': HealthScoliosis,
+	'health-hip': HealthHip,
+	'health-pressure': HealthPressure,
+	'health-wellbeing': HealthWellbeing,
+	'goal-lose-weight': GoalLoseWeight,
+	'goal-pain-relief': GoalPainRelief,
+	'goal-reduce-stress': GoalReduceStress,
+	'goal-flexibility': GoalFlexibility,
+	'goal-posture': GoalPosture,
+	'goal-strengthen': GoalStrengthen,
+	'goal-energy': GoalEnergy,
+	'workout-therapeutic': WorkoutTherapeutic,
+	'workout-rehabilitation': WorkoutRehabilitation,
+	'workout-meditation': WorkoutMeditation,
+	'workout-stretching': WorkoutStretching,
+	'workout-cardio': WorkoutCardio,
+	'workout-strength': WorkoutStrength,
+	'workout-healthy-back': WorkoutHealthyBack,
+	main: Main,
+	additional: Additional,
+	diary: Diary,
+	back: Back,
+	dumbbell: Dumbbell,
+	'goal-dumbbell': GoalDumbbell,
+	'goal-habit': GoalHabit,
+	'goal-pleasure': GoalPleasure,
+	'goal-technique': GoalTechnique,
+	'goal-stamina': GoalStamina,
+	microphone: Microphone,
+	send: Send,
+	paperclip: Paperclip,
+	play: Play,
+	'pause-solid': PauseSolid,
+	stop: Stop,
+	'ai-assistant': AiAssistant,
+	'ai-chat': AiChat,
+	lock: Lock,
 }
 
 // Компонент иконок
 export const Icon: React.FC<IconProps> = ({
-    name,
-    size = 24,
-    color = '#000000',
-    style,
+	name,
+	size = 24,
+	color = '#000000',
+	style,
 }) => {
-    const IconComponent = iconMap[name]
+	const IconComponent = iconMap[name]
 
-    if (!IconComponent) {
-        console.warn(`Icon "${name}" not found`)
-        return null
-    }
+	if (!IconComponent) {
+		console.warn(`Icon "${name}" not found`)
+		return null
+	}
 
-    return (
-        <View style={[styles.container, { width: size, height: size }, style]}>
-            <IconComponent
-                width={size}
-                height={size}
-                fill={color}
-                // Переопределяем currentColor для React Native
-                style={{ color: color }}
-            />
-        </View>
-    )
+	return (
+		<View style={[styles.container, { width: size, height: size }, style]}>
+			<IconComponent
+				width={size}
+				height={size}
+				fill={color}
+				// Переопределяем currentColor для React Native
+				style={{ color: color }}
+			/>
+		</View>
+	)
 }
 
 const styles = StyleSheet.create({
-    container: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
+	container: {
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
 })

@@ -14,28 +14,28 @@ interface FileAttachmentProps {
 }
 
 export const FileAttachment: React.FC<FileAttachmentProps> = ({
-    attachment,
-    isUserMessage,
+	attachment,
+	isUserMessage,
 }) => {
-    return (
-        <Pressable
-            className={`mb-2 flex-row items-center rounded-2xl p-3 ${
-                isUserMessage ? 'self-end bg-fill-700' : 'self-start bg-fill-800'
-            }`}
-            style={{ minWidth: 180, maxWidth: '85%' }}
-        >
-            {/* File icon - серый квадрат с иконкой */}
-            <View className="mr-3 h-10 w-10 items-center justify-center rounded-lg bg-fill-500">
-                <Icon name="file" size={20} color="#FFFFFF" />
-            </View>
+	return (
+		<Pressable
+			className={`mb-2 flex-row items-center rounded-2xl p-3 ${
+				isUserMessage ? 'self-end bg-fill-700' : 'self-start bg-fill-800'
+			}`}
+			style={{ minWidth: 180, maxWidth: '85%' }}
+		>
+			{/* File icon - серый квадрат с иконкой */}
+			<View className="mr-3 h-10 w-10 items-center justify-center rounded-lg bg-fill-500">
+				<Icon name="file" size={20} color="#FFFFFF" />
+			</View>
 
-            {/* File name */}
-            <Text
-                className="flex-1 font-rimma text-t3-regular text-light-text-100"
-                numberOfLines={1}
-            >
-                {attachment.name}
-            </Text>
-        </Pressable>
-    )
+			{/* File name */}
+			<Text
+				className="flex-1 font-rimma text-t3-regular text-light-text-100"
+				numberOfLines={1}
+			>
+				{attachment.name}
+			</Text>
+		</Pressable>
+	)
 }

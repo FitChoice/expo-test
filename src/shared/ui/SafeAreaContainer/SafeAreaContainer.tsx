@@ -25,25 +25,25 @@ import { SafeAreaView, type Edge } from 'react-native-safe-area-context'
  * </SafeAreaContainer>
  */
 interface SafeAreaContainerProps {
-    children: React.ReactNode
-    edges?: Edge[]
-    style?: StyleProp<ViewStyle>
+	children: React.ReactNode
+	edges?: Edge[]
+	style?: StyleProp<ViewStyle>
 }
 
 export const SafeAreaContainer = ({
-    children,
-    edges = ['top', 'left', 'right'],
-    style,
+	children,
+	edges = ['top', 'left', 'right'],
+	style,
 }: SafeAreaContainerProps) => {
-    return (
-        <SafeAreaView edges={edges} style={[styles.container, style]}>
-            {children}
-        </SafeAreaView>
-    )
+	return (
+		<SafeAreaView edges={edges} style={[styles.container, style]}>
+			{children}
+		</SafeAreaView>
+	)
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
+	container: {
+		flex: 1,
+	},
 })

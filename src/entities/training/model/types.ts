@@ -13,17 +13,17 @@ export type TrainingStatus =
 	| 'analytics'
 
 export const equipment = {
-    1: '/src/assets/images/equipment/1.png',
-    2: '/src/assets/images/equipment/2.png',
-    3: '/src/assets/images/equipment/3.png',
-    4: '/src/assets/images/equipment/4.png',
-    5: '/src/assets/images/equipment/5.png',
-    6: '/src/assets/images/equipment/6.png',
-    7: '/src/assets/images/equipment/7.png',
-    8: '/src/assets/images/equipment/8.png',
-    9: '/src/assets/images/equipment/9.png',
-    10: '/src/assets/images/equipment/10.png',
-    11: '/src/assets/images/equipment/11.png',
+	1: '/src/assets/images/equipment/1.png',
+	2: '/src/assets/images/equipment/2.png',
+	3: '/src/assets/images/equipment/3.png',
+	4: '/src/assets/images/equipment/4.png',
+	5: '/src/assets/images/equipment/5.png',
+	6: '/src/assets/images/equipment/6.png',
+	7: '/src/assets/images/equipment/7.png',
+	8: '/src/assets/images/equipment/8.png',
+	9: '/src/assets/images/equipment/9.png',
+	10: '/src/assets/images/equipment/10.png',
+	11: '/src/assets/images/equipment/11.png',
 }
 
 export interface Activity {
@@ -43,67 +43,67 @@ export interface ActivitiesResponseItem {
 }
 
 export type ExerciseDetails = {
-	duration: number;
-	error_codes: number[];
-	id: number;
-	is_ai: boolean;
-	is_horizontal: boolean;
-	is_mirror: boolean;
-	layout: string;
-	name: string;
-	progress: number;
-	reps: number;
-	rest_after_exercise: number;
-	rest_between_sets: number;
-	sets: number;
-	video_practice: string;
-	video_practice_second: string;
-	video_theory: string;
-	working_side: string;
-	working_side_second: string;
-};
+	duration: number
+	error_codes: number[]
+	id: number
+	is_ai: boolean
+	is_horizontal: boolean
+	is_mirror: boolean
+	layout: string
+	name: string
+	progress: number
+	reps: number
+	rest_after_exercise: number
+	rest_between_sets: number
+	sets: number
+	video_practice: string
+	video_practice_second: string
+	video_theory: string
+	working_side: string
+	working_side_second: string
+}
 
 export type ActivitiesResponse = ActivitiesResponseItem[]
 
 export interface Exercise {
-	id: number;
-	is_ai: boolean;
-	name: string;
-	progress: number;
-	reps: number;
-	sets: number;
+	id: number
+	is_ai: boolean
+	name: string
+	progress: number
+	reps: number
+	sets: number
 }
 
 export interface ExerciseInfoResponse {
-    duration: number
-    error_codes: number[]
-    id: number
-    is_ai: boolean
-    is_horizontal: boolean
-    is_mirror: boolean
-    layout: string
-    name: string
-    progress: number
-    reps: number
-    rest_after_exercise: number
-    rest_between_sets: number
-    sets: number
-    video_practice: string
-    video_practice_second: string
-    video_theory: string
-    working_side: string
-    working_side_second: string
+	duration: number
+	error_codes: number[]
+	id: number
+	is_ai: boolean
+	is_horizontal: boolean
+	is_mirror: boolean
+	layout: string
+	name: string
+	progress: number
+	reps: number
+	rest_after_exercise: number
+	rest_between_sets: number
+	sets: number
+	video_practice: string
+	video_practice_second: string
+	video_theory: string
+	working_side: string
+	working_side_second: string
 }
 
 export interface Training {
-	description: string;
-	difficulty: number;
-	exercises: Exercise[];
-	experience: number;
-	id: number;
-	inventory: number[];
-	title: string;
-	trainingType: string;
+	description: string
+	difficulty: number
+	exercises: Exercise[]
+	experience: number
+	id: number
+	inventory: number[]
+	title: string
+	trainingType: string
 }
 
 export interface Report {
@@ -111,6 +111,27 @@ export interface Report {
 	report_cals: number
 	report_duration: number
 	report_technique_quality: number
+}
+
+/**
+ * API payloads (domain-level request DTOs)
+ * Keep here to avoid shared/ui or widgets depending on features/api layer.
+ */
+export interface CompleteTrainingInput {
+	report_active_time: number
+	report_cals: number
+	report_duration: number
+	report_technique_quality: number
+	time: string // ISO
+	training_id: number
+}
+
+export interface ExecuteExerciseInput {
+	id: number
+	quality: number
+	recorded_errors: number[]
+	reps: number
+	training_id: number
 }
 
 /**

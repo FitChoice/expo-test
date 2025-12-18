@@ -12,171 +12,180 @@ import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
 import { ExerciseFlow, OnboardingFlow } from '@/widgets/training-session'
 import { ExerciseSuccess } from '@/widgets/training-session/ui/ExerciseSuccess'
 import TrainingReportScreen from '@/pages/(training)/report'
-import {
-    TrainingAnalytics
-} from '@/widgets/training-session/ui/TrainingAnalytics'
+import { TrainingAnalytics } from '@/widgets/training-session/ui/TrainingAnalytics'
 import { useEffect, useState } from 'react'
 import { trainingApi, trainingKeys } from '@/features/training/api'
 import { useQuery } from '@tanstack/react-query'
 import { type ExerciseInfoResponse, useTrainingStore } from '@/entities/training'
+import {
+	useCompleteTrainingMutation,
+	useExecuteExerciseMutation,
+} from '@/features/training-session'
 
 export default function TrainingEntryScreen() {
+	const { trainingId } = useLocalSearchParams<{ trainingId: string }>()
 
-    const { trainingId } = useLocalSearchParams<{ trainingId: string }>()
+	const [exerciseIsLoading, setExerciseIsLoading] = useState(false)
 
+	const {
+		data: trainingData,
+		isLoading,
+		isError,
+		error: queryError,
+	} = useQuery({
+		queryKey: trainingKeys.detail(Number(trainingId)),
+		queryFn: () => trainingApi.getTrainingInfo(Number(trainingId)),
+		enabled: !!trainingId,
+		select: (result) => {
+			if (!result.success) throw new Error(result.error)
+			return result.data
+		},
+	})
 
-    const [exerciseIsLoading, setExerciseIsLoading] = useState(false)
-    
-    const { data: trainingData, isLoading, isError, error: queryError } = useQuery({
-        queryKey: trainingKeys.detail(Number(trainingId)),
-        queryFn: () => trainingApi.getTrainingInfo(Number(trainingId)),
-        enabled: !!trainingId,
-        select: (result) => {
-            if (!result.success) throw new Error(result.error)
-            return result.data
-        }
-    })
+	const startTraining = useTrainingStore((state) => state.startTraining)
+	const resetTraining = useTrainingStore((state) => state.reset)
+	const training = useTrainingStore((state) => state.training)
+	const setExerciseDetails = useTrainingStore((state) => state.setExerciseDetails)
+	const setExerciseDetail = useTrainingStore((state) => state.setExerciseDetail)
+	// const setExerciseLoading = useTrainingStore((state) => state.setExerciseLoading)
 
+	const status = useTrainingStore((state) => state.status)
+	const { tfReady, model, orientation, error } = usePoseCameraSetup()
+	const executeExercise = useExecuteExerciseMutation()
+	const completeTraining = useCompleteTrainingMutation()
 
-    const startTraining = useTrainingStore((state) => state.startTraining)
-    const resetTraining = useTrainingStore((state) => state.reset)
-    const training = useTrainingStore((state) => state.training)
-    const setExerciseDetails = useTrainingStore((state) => state.setExerciseDetails)
-    const setExerciseDetail = useTrainingStore((state) => state.setExerciseDetail)
-    // const setExerciseLoading = useTrainingStore((state) => state.setExerciseLoading)
+	// Reset local training state when the route id changes to avoid showing stale session
+	useEffect(() => {
+		if (!trainingId) return
 
-    const status = useTrainingStore((state) => state.status)
-    const { tfReady, model, orientation, error } = usePoseCameraSetup()
+		const numericId = Number(trainingId)
+		if (Number.isNaN(numericId)) return
 
-    // Reset local training state when the route id changes to avoid showing stale session
-    useEffect(() => {
-        if (!trainingId) return
+		if (training?.id && training.id !== numericId) {
+			resetTraining()
+		}
+	}, [resetTraining, training?.id, trainingId])
 
-        const numericId = Number(trainingId)
-        if (Number.isNaN(numericId)) return
+	// Initialize training store when data is fetched
+	useEffect(() => {
+		if (trainingData && training?.id !== trainingData.id) {
+			startTraining(trainingData)
+		}
+	}, [trainingData, training?.id, startTraining])
 
-        if (training?.id && training.id !== numericId) {
-            resetTraining()
-        }
-    }, [resetTraining, training?.id, trainingId])
+	useEffect(() => {
+		if (!training?.id || !training.exercises?.length) return
 
-    // Initialize training store when data is fetched
-    useEffect(() => {
-        if (trainingData && training?.id !== trainingData.id) {
-            // @ts-ignore - API types might slightly differ from store types, should be aligned
-            startTraining(trainingData)
-        }
-    }, [trainingData, training?.id, startTraining])
+		let isCancelled = false
 
-    useEffect(() => {
-        if (!training?.id || !training.exercises?.length) return
+		const { exercises, id } = training
 
-        let isCancelled = false
+		const loadExercises = async () => {
+			setExerciseIsLoading(true)
 
-        const { exercises, id } = training
+			try {
+				const responses = await Promise.all(
+					exercises.map((exercise) =>
+						trainingApi.getExerciseInfo(String(id), exercise.id)
+					)
+				)
 
-        const loadExercises = async () => {
-            setExerciseIsLoading(true)
+				if (isCancelled) return
 
-            try {
-                const responses = await Promise.all(
-                    exercises.map((exercise) => trainingApi.getExerciseInfo(String(id), exercise.id))
-                )
+				const successfulExercises = responses
+					.filter(
+						(response): response is { success: true; data: ExerciseInfoResponse } =>
+							response.success
+					)
+					.map((response) => response.data)
 
-                if (isCancelled) return
+				setExerciseDetails(successfulExercises)
 
-                const successfulExercises = responses
-                    .filter(
-                        (response): response is { success: true; data: ExerciseInfoResponse } =>
-                            response.success
-                    )
-                    .map((response) => response.data)
-            
-                setExerciseDetails(successfulExercises)
+				if (!successfulExercises.length) {
+					return
+				}
 
-                if (!successfulExercises.length) {
-                    return
-                }
+				const firstExercise = successfulExercises[0]
+				if (!firstExercise) {
+					return
+				}
+				const nextExerciseId =
+					exercises.find((exercise) => exercise.progress === 0)?.id ?? firstExercise.id
 
-                const firstExercise = successfulExercises[0]
-                if (!firstExercise) {
-                    return
-                }
-                const nextExerciseId =
-                    exercises.find((exercise) => exercise.progress === 0)?.id ?? firstExercise.id
+				const nextExerciseDetail: ExerciseInfoResponse =
+					successfulExercises.find((exercise) => exercise.id === nextExerciseId) ??
+					firstExercise
 
-                const nextExerciseDetail: ExerciseInfoResponse =
-                    successfulExercises.find((exercise) => exercise.id === nextExerciseId) ??
-                    firstExercise
+				setExerciseDetail(nextExerciseDetail)
+			} finally {
+				if (!isCancelled) {
+					setExerciseIsLoading(false)
+				}
+			}
+		}
 
-                setExerciseDetail(nextExerciseDetail)
-            } finally {
-                if (!isCancelled) {
-                    setExerciseIsLoading(false)
-                }
-            }
-        }
+		loadExercises()
 
-        loadExercises()
+		return () => {
+			isCancelled = true
+		}
+	}, [setExerciseDetail, setExerciseDetails, training?.exercises, training?.id])
 
-        return () => {
-            isCancelled = true
-        }
-    }, [
-        setExerciseDetail,
-        setExerciseDetails,
-        training?.exercises,
-        training?.id,
-    ])
+	// If training data is not loaded or camera is not ready, show loading
+	if (isLoading || !training || !tfReady || !model || !orientation || exerciseIsLoading) {
+		return (
+			<>
+				{error ? <Text>{error.message}</Text> : null}
+				{isError ? <Text>Error loading training: {queryError?.message}</Text> : null}
+				{!error && !isError && <Loader text="Загрузка тренировки..." />}
+			</>
+		)
+	}
 
-    // If training data is not loaded or camera is not ready, show loading
-    if (isLoading || !training || !tfReady || !model || !orientation || exerciseIsLoading) {
-        return (
-            <>
-                {error ? <Text>{error.message}</Text> : null}
-                {isError ? <Text>Error loading training: {queryError?.message}</Text> : null}
-                {!error && !isError && <Loader text="Загрузка тренировки..." />}
-            </>
-        )
-    }
+	const mainContent = () => {
+		//   Render based on current status
+		switch (status) {
+			case 'info':
+				return <TrainingInfo />
+			case 'onboarding':
+				return (
+					<BackgroundLayoutNoSidePadding>
+						<OnboardingFlow />
+					</BackgroundLayoutNoSidePadding>
+				)
 
-    const mainContent = () => {
-        //   Render based on current status
-        switch (status) {
-        case 'info':
-            return    <TrainingInfo />
-        case 'onboarding':
-            return (
-                <BackgroundLayoutNoSidePadding>
-                    <OnboardingFlow />
-                </BackgroundLayoutNoSidePadding>
-            )
+			case 'finished':
+				return (
+					<BackgroundLayoutNoSidePadding>
+						<ExerciseSuccess />
+					</BackgroundLayoutNoSidePadding>
+				)
 
-        case 'finished':
-            return (
-                <BackgroundLayoutNoSidePadding>
-                    <ExerciseSuccess />
-                </BackgroundLayoutNoSidePadding>
-            )
+			case 'report':
+				return (
+					<BackgroundLayoutNoSidePadding>
+						<TrainingReportScreen />
+					</BackgroundLayoutNoSidePadding>
+				)
 
-        case 'report':
-            return (
-                <BackgroundLayoutNoSidePadding>
-                    <TrainingReportScreen />
-                </BackgroundLayoutNoSidePadding>
-            )
+			case 'analytics':
+				return (
+					<BackgroundLayoutNoSidePadding>
+						<TrainingAnalytics />
+					</BackgroundLayoutNoSidePadding>
+				)
 
-        case 'analytics':
-            return (
-                <BackgroundLayoutNoSidePadding>
-                    <TrainingAnalytics />
-                </BackgroundLayoutNoSidePadding>
-            )
+			default:
+				return (
+					<ExerciseFlow
+						model={model}
+						orientation={orientation}
+						onExecuteExercise={executeExercise.mutateAsync}
+						onCompleteTraining={completeTraining.mutateAsync}
+					/>
+				)
+		}
+	}
 
-        default:
-            return <ExerciseFlow model={model} orientation={orientation} />
-        }
-    }
-
-    return mainContent()
+	return mainContent()
 }

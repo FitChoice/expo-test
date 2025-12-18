@@ -42,7 +42,8 @@ export default tseslint.config(
 		rules: {
 			...reactHooks.configs.recommended.rules,
 			'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-			'@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+			// We use unused-imports plugin for unused vars/imports reporting & fixes.
+			'@typescript-eslint/no-unused-vars': 'off',
 			'unused-imports/no-unused-imports': 'warn',
 			'unused-imports/no-unused-vars': ['warn', {
 				vars: 'all',
@@ -51,7 +52,8 @@ export default tseslint.config(
 				argsIgnorePattern: '^_'
 			}],
 			'@typescript-eslint/ban-ts-comment': 'warn',
-			'@typescript-eslint/no-explicit-any': 'warn',
+			'@typescript-eslint/no-explicit-any': 'off',
+			'@typescript-eslint/no-require-imports': 'off',
 			'@typescript-eslint/consistent-type-imports': ['error', {
 				prefer: 'type-imports',
 				disallowTypeAnnotations: false,
@@ -61,17 +63,23 @@ export default tseslint.config(
 			'react/display-name': 'error',
 			'react/prop-types': 'error',
 			'react-hooks/exhaustive-deps': 0,
-			'linebreak-style': ['warn', 'unix'],
+			// React Compiler/animated patterns: these rules are too noisy for this codebase right now.
+			'react-hooks/refs': 'off',
+			'react-hooks/set-state-in-effect': 'off',
+			'react-hooks/preserve-manual-memoization': 'off',
+			// Formatting is handled by Prettier. ESLint should not fight it.
+			'linebreak-style': 'off',
 			'no-console': ['error', { allow: ['warn', 'error'] }],
 			'no-empty': 'error',
 			'no-unused-labels': 'error',
 			'no-debugger': 'error',
-			'no-undef': 'error',
-			'no-multiple-empty-lines': ['error', { 'max': 1, 'maxEOF': 0 }],
-			'semi': ['error', 'never'],
-			'quotes': ['error', 'single'],
-			'indent': ['error', 4],
-			"object-curly-spacing": ["error", "always"]
+			// TypeScript already checks undefined identifiers; this rule is too noisy for TS/React Native globals.
+			'no-undef': 'off',
+			'no-multiple-empty-lines': 'off',
+			'semi': 'off',
+			'quotes': 'off',
+			'indent': 'off',
+			'object-curly-spacing': 'off'
 		},
 	}
 )

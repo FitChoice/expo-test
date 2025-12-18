@@ -7,31 +7,30 @@ import { RadialGradientBackground } from './RadialGradientBackground'
  * Используется для создания общего фона для страниц с радиальным градиентом
  */
 export const BackgroundLayout = ({
-    children,
-    styles: containerStyle,
+	children,
+	styles: containerStyle,
 }: {
-    children: React.ReactNode
-    styles?: StyleProp<ViewStyle>
+	children: React.ReactNode
+	styles?: StyleProp<ViewStyle>
 }) => {
-    return (
-        <View style={[styles.container, containerStyle]}>
-            {/* Радиальный градиент с blur-эффектом */}
-            <RadialGradientBackground />
+	return (
+		<View style={[styles.container, containerStyle]}>
+			{/* Радиальный градиент с blur-эффектом */}
+			<RadialGradientBackground />
 
-            {/* Контент */}
-            {children}
-        </View>
-    )
+			{/* Контент */}
+			{children}
+		</View>
+	)
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#1E1E1E', // BG/Dark 500 BG - контентный контейнер
-        paddingHorizontal: '4%',
-        position: 'relative', // Для позиционирования элементов
-        zIndex: 3, // Поверх браслета и заголовка
-        overflow: 'hidden', // Для корректного отображения градиента
-
-    },
+	container: {
+		flex: 1,
+		backgroundColor: '#1E1E1E', // BG/Dark 500 BG - контентный контейнер
+		paddingHorizontal: '4%',
+		position: 'relative', // Для позиционирования элементов
+		zIndex: 3, // Поверх браслета и заголовка
+		overflow: 'hidden', // Для корректного отображения градиента
+	},
 })

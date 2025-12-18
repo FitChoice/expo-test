@@ -16,48 +16,48 @@ interface SoundCheckScreenProps {
 }
 
 export function SoundCheckScreen({ onNext }: SoundCheckScreenProps) {
-    const handleStop = useCallback(() => {
-        router.back()
-    }, [])
+	const handleStop = useCallback(() => {
+		router.back()
+	}, [])
 
-    return (
-        <View className="flex-1">
-            {/* Gradient Background */}
+	return (
+		<View className="flex-1">
+			{/* Gradient Background */}
 
-            {/* Close Button */}
-            <View className="absolute right-4 z-10">
-                <CloseBtn handlePress={handleStop} classNames={'h-12 w-12 rounded-2xl'} />
-            </View>
+			{/* Close Button */}
+			<View className="absolute right-4 z-10">
+				<CloseBtn handlePress={handleStop} classNames={'h-12 w-12 rounded-2xl'} />
+			</View>
 
-            {/* Progress Dots */}
+			{/* Progress Dots */}
 
-            <View className="absolute left-1/2 top-10 z-10 -translate-x-1/2">
-                <DotsProgress total={4} current={0} variant="onboarding" />
-            </View>
+			<View className="absolute left-1/2 top-10 z-10 -translate-x-1/2">
+				<DotsProgress total={4} current={0} variant="onboarding" />
+			</View>
 
-            {/* Icon Section */}
-            <View className="flex-1 items-center justify-center">
-                <SoundIcon width={194} height={186} />
-            </View>
+			{/* Icon Section */}
+			<View className="flex-1 items-center justify-center">
+				<SoundIcon width={194} height={186} />
+			</View>
 
-            {/* Text and Button Section */}
-            <View className="px-6 pb-6">
-                {/* Title */}
-                <Text className="mb-3 text-left text-h2 font-bold text-light-text-100">
+			{/* Text and Button Section */}
+			<View className="px-6 pb-6">
+				{/* Title */}
+				<Text className="mb-3 text-left text-h2 font-bold text-light-text-100">
 					Включите звук
-                </Text>
+				</Text>
 
-                {/* Description */}
-                <Text className="mb-20 text-left text-t2 leading-6 text-light-text-500">
+				{/* Description */}
+				<Text className="mb-20 text-left text-t2 leading-6 text-light-text-500">
 					Убедитесь, что громкость включена на максимуме, чтобы слышать подсказки во время
 					тренировочки
-                </Text>
+				</Text>
 
-                {/* Button */}
-                <Button variant="primary" onPress={onNext} className="w-full">
+				{/* Button */}
+				<Button variant="primary" onPress={onNext} className="w-full">
 					Далее
-                </Button>
-            </View>
-        </View>
-    )
+				</Button>
+			</View>
+		</View>
+	)
 }

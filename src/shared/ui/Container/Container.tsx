@@ -13,47 +13,47 @@ interface ContainerProps extends ViewProps {
 }
 
 export const Container = ({ children, className, style, ...props }: ContainerProps) => {
-    const [isLandscape, setIsLandscape] = useState(false)
-    const insets = useSafeAreaInsets()
+	const [isLandscape, setIsLandscape] = useState(false)
+	const insets = useSafeAreaInsets()
 
-    useEffect(() => {
-        const checkOrientation = async () => {
-            try {
-                const orientation = await ScreenOrientation.getOrientationAsync()
-                const landscape =
+	useEffect(() => {
+		const checkOrientation = async () => {
+			try {
+				const orientation = await ScreenOrientation.getOrientationAsync()
+				const landscape =
 					orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
 					orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
-                setIsLandscape(landscape)
-            } catch (err) {
-                console.warn('Error reading orientation:', err)
-            }
-        }
+				setIsLandscape(landscape)
+			} catch (err) {
+				console.warn('Error reading orientation:', err)
+			}
+		}
 
-        checkOrientation()
+		checkOrientation()
 
-        const subscription = ScreenOrientation.addOrientationChangeListener(async () => {
-            await checkOrientation()
-        })
+		const subscription = ScreenOrientation.addOrientationChangeListener(async () => {
+			await checkOrientation()
+		})
 
-        return () => {
-            ScreenOrientation.removeOrientationChangeListener(subscription)
-        }
-    }, [])
+		return () => {
+			ScreenOrientation.removeOrientationChangeListener(subscription)
+		}
+	}, [])
 
-    const paddingStyle = {
-        paddingTop: isLandscape ? insets.top : insets.top,
-        paddingBottom: isLandscape ? insets.bottom : insets.bottom,
-        paddingLeft: isLandscape ? insets.left : 0,
-        paddingRight: isLandscape ? insets.right : 0,
-    }
+	const paddingStyle = {
+		paddingTop: isLandscape ? insets.top : insets.top,
+		paddingBottom: isLandscape ? insets.bottom : insets.bottom,
+		paddingLeft: isLandscape ? insets.left : 0,
+		paddingRight: isLandscape ? insets.right : 0,
+	}
 
-    return (
-        <View
-            className="flex-1"
-            style={[{ backgroundColor: 'transparent' }, paddingStyle, style]}
-            {...props}
-        >
-            <View className={`flex-1 ${className || ''}`}>{children}</View>
-        </View>
-    )
+	return (
+		<View
+			className="flex-1"
+			style={[{ backgroundColor: 'transparent' }, paddingStyle, style]}
+			{...props}
+		>
+			<View className={`flex-1 ${className || ''}`}>{children}</View>
+		</View>
+	)
 }

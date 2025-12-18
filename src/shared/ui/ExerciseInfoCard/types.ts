@@ -1,4 +1,4 @@
-import { type Exercise } from '@/features/training/api/trainingApi'
+import { type Exercise } from '@/entities/training'
 import { type ViewProps } from 'react-native'
 
 export interface ExerciseInfoCardProps extends ViewProps {

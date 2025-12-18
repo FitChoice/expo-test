@@ -2,7 +2,7 @@ import React from 'react'
 import { View, Text, ScrollView } from 'react-native'
 import { CheckboxSelect } from '@/shared/ui'
 import type { Goal } from '@/entities/survey'
-import { sharedStyles } from './shared-styles'
+import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 
 import GoalPosture from '@/shared/ui/Icon/assets/posture-purple.svg'
 import GoalPainRelief from '@/shared/ui/Icon/assets/pain-relief-purple.svg'
@@ -23,62 +23,62 @@ interface SurveyStep10Props {
  * Шаг 10: Цели тренировок
  */
 export const SurveyStep10: React.FC<SurveyStep10Props> = ({
-    goals,
-    onGoalsChange,
-    maxGoals = 3,
+	goals,
+	onGoalsChange,
+	maxGoals = 3,
 }) => {
-    return (
-        <>
-            <View className="gap-4 bg-transparent">
-                <Text style={sharedStyles.title}>Для чего вы тренируетесь?</Text>
-                <Text className="text-t2 text-left text-light-text-500  ">
+	return (
+		<>
+			<View className="gap-4 bg-transparent">
+				<Text style={sharedStyles.title}>Для чего вы тренируетесь?</Text>
+				<Text className="text-left text-t2 text-light-text-500">
 					Выберите до {maxGoals}-х целей
-                </Text>
-            </View>
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                nestedScrollEnabled={true}
-                bounces={false}
-                style={{ maxHeight: 450 }}
-            >
-                <CheckboxSelect
-                    isNeedCheckbox={true}
-                    options={[
-                        { value: 'posture', label: 'Улучшить осанку', icon: <GoalPosture /> },
-                        {
-                            value: 'pain_relief',
-                            label: 'Избавиться от боли',
-                            icon: <GoalPainRelief />,
-                        },
-                        {
-                            value: 'flexibility',
-                            label: 'Повысить гибкость',
-                            icon: <GoalFlexibility />,
-                        },
-                        { value: 'strength', label: 'Укрепить тело и мышцы', icon: <GoalStrength /> },
-                        {
-                            value: 'weight_loss',
-                            label: 'Сбросить вес и подтянуть фигуру',
-                            icon: <GoalWeightLoss />,
-                        },
-                        {
-                            value: 'stress_relief',
-                            label: 'Снизить стресс и напряжение',
-                            icon: <GoalStressRelief />,
-                        },
-                        { value: 'energy', label: 'Повысить уровень энергии', icon: <GoalEnergy /> },
-                        {
-                            value: 'wellness',
-                            label: 'Улучшить общее самочувствие',
-                            icon: <GoalWellness />,
-                        },
-                    ]}
-                    value={goals}
-                    onChange={(value) => onGoalsChange(value as Goal[])}
-                    size="full"
-                    maxSelected={maxGoals}
-                />
-            </ScrollView>
-        </>
-    )
+				</Text>
+			</View>
+			<ScrollView
+				showsVerticalScrollIndicator={false}
+				nestedScrollEnabled={true}
+				bounces={false}
+				style={{ maxHeight: 450 }}
+			>
+				<CheckboxSelect
+					isNeedCheckbox={true}
+					options={[
+						{ value: 'posture', label: 'Улучшить осанку', icon: <GoalPosture /> },
+						{
+							value: 'pain_relief',
+							label: 'Избавиться от боли',
+							icon: <GoalPainRelief />,
+						},
+						{
+							value: 'flexibility',
+							label: 'Повысить гибкость',
+							icon: <GoalFlexibility />,
+						},
+						{ value: 'strength', label: 'Укрепить тело и мышцы', icon: <GoalStrength /> },
+						{
+							value: 'weight_loss',
+							label: 'Сбросить вес и подтянуть фигуру',
+							icon: <GoalWeightLoss />,
+						},
+						{
+							value: 'stress_relief',
+							label: 'Снизить стресс и напряжение',
+							icon: <GoalStressRelief />,
+						},
+						{ value: 'energy', label: 'Повысить уровень энергии', icon: <GoalEnergy /> },
+						{
+							value: 'wellness',
+							label: 'Улучшить общее самочувствие',
+							icon: <GoalWellness />,
+						},
+					]}
+					value={goals}
+					onChange={(value) => onGoalsChange(value as Goal[])}
+					size="full"
+					maxSelected={maxGoals}
+				/>
+			</ScrollView>
+		</>
+	)
 }

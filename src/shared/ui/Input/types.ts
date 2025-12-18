@@ -1,8 +1,8 @@
 import { type ReactNode } from 'react'
 import {
-    type TextInputProps,
-    type ViewStyle,
-    type ImageSourcePropType,
+	type TextInputProps,
+	type ViewStyle,
+	type ImageSourcePropType,
 } from 'react-native'
 import { type IconName } from '../Icon/types'
 

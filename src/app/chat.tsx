@@ -5,9 +5,9 @@ import { ChatScreen } from '@/pages/chat'
  * Chat page route (protected)
  */
 export default function ChatPage() {
-    return (
-        <AuthGuard>
-            <ChatScreen />
-        </AuthGuard>
-    )
+	return (
+		<AuthGuard>
+			<ChatScreen />
+		</AuthGuard>
+	)
 }

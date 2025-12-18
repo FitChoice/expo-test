@@ -14,58 +14,71 @@ import { TrainingAnalytics } from '@/widgets/training-session/ui/TrainingAnalyti
 import { TrainingInfo } from '@/widgets/training-session/ui/TrainingInfo'
 import { ExerciseFlow, OnboardingFlow } from '@/widgets/training-session'
 import { ExerciseSuccess } from '@/widgets/training-session/ui/ExerciseSuccess'
+import {
+	useCompleteTrainingMutation,
+	useExecuteExerciseMutation,
+} from '@/features/training-session'
 
 export default function TrainingSessionScreen() {
-    const training = useTrainingStore((state) => state.training)
-    const status = useTrainingStore((state) => state.status)
-    const { tfReady, model, orientation, error } = usePoseCameraSetup()
+	const training = useTrainingStore((state) => state.training)
+	const status = useTrainingStore((state) => state.status)
+	const { tfReady, model, orientation, error } = usePoseCameraSetup()
+	const executeExercise = useExecuteExerciseMutation()
+	const completeTraining = useCompleteTrainingMutation()
 
-    // If training data is not loaded or camera is not ready, show loading
-    if (!training || !tfReady || !model || !orientation) {
-        return (
-            <>
-                {error ? <Text>{error.message}</Text> : <Loader text="Загрузка тренировки..." />}
-            </>
-        )
-    }
+	// If training data is not loaded or camera is not ready, show loading
+	if (!training || !tfReady || !model || !orientation) {
+		return (
+			<>
+				{error ? <Text>{error.message}</Text> : <Loader text="Загрузка тренировки..." />}
+			</>
+		)
+	}
 
-    const mainContent = () => {
-        //   Render based on current status
-        switch (status) {
-        case 'info':
-            return <TrainingInfo />
-        case 'onboarding':
-            return (
-                <BackgroundLayoutNoSidePadding>
-                    <OnboardingFlow />
-                </BackgroundLayoutNoSidePadding>
-            )
+	const mainContent = () => {
+		//   Render based on current status
+		switch (status) {
+			case 'info':
+				return <TrainingInfo />
+			case 'onboarding':
+				return (
+					<BackgroundLayoutNoSidePadding>
+						<OnboardingFlow />
+					</BackgroundLayoutNoSidePadding>
+				)
 
-        case 'finished':
-            return (
-                <BackgroundLayoutNoSidePadding>
-                    <ExerciseSuccess />
-                </BackgroundLayoutNoSidePadding>
-            )
+			case 'finished':
+				return (
+					<BackgroundLayoutNoSidePadding>
+						<ExerciseSuccess />
+					</BackgroundLayoutNoSidePadding>
+				)
 
-        case 'report':
-            return (
-                <BackgroundLayoutNoSidePadding>
-                    <TrainingReportScreen />
-                </BackgroundLayoutNoSidePadding>
-            )
+			case 'report':
+				return (
+					<BackgroundLayoutNoSidePadding>
+						<TrainingReportScreen />
+					</BackgroundLayoutNoSidePadding>
+				)
 
-        case 'analytics':
-            return (
-                <BackgroundLayoutNoSidePadding>
-                    <TrainingAnalytics />
-                </BackgroundLayoutNoSidePadding>
-            )
+			case 'analytics':
+				return (
+					<BackgroundLayoutNoSidePadding>
+						<TrainingAnalytics />
+					</BackgroundLayoutNoSidePadding>
+				)
 
-        default:
-            return <ExerciseFlow model={model} orientation={orientation} />
-        }
-    }
+			default:
+				return (
+					<ExerciseFlow
+						model={model}
+						orientation={orientation}
+						onExecuteExercise={executeExercise.mutateAsync}
+						onCompleteTraining={completeTraining.mutateAsync}
+					/>
+				)
+		}
+	}
 
-    return mainContent()
+	return mainContent()
 }

@@ -9,14 +9,14 @@ export const checkboxSelectSizeStyles: Record<
 		iconSize: number
 	}
 > = {
-    full: {
-        text: 'text-sm font-medium', // Text/t3
-        padding: 'px-4 py-8',
-        iconSize: 40,
-    },
-    half: {
-        text: 'text-sm font-medium', // Text/t3
-        padding: 'px-4 py-8',
-        iconSize: 24,
-    },
+	full: {
+		text: 'text-sm font-medium', // Text/t3
+		padding: 'px-4 py-8',
+		iconSize: 40,
+	},
+	half: {
+		text: 'text-sm font-medium', // Text/t3
+		padding: 'px-4 py-8',
+		iconSize: 24,
+	},
 }

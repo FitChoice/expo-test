@@ -10,50 +10,50 @@ interface SimpleIconProps {
 
 // Простая заглушка для иконок без SVG
 export const SimpleIcon = ({
-    name,
-    size = 16,
-    color = '#FFFFFF',
-    style,
+	name,
+	size = 16,
+	color = '#FFFFFF',
+	style,
 }: SimpleIconProps) => {
-    const getIconSymbol = (iconName: string) => {
-        const iconMap: Record<string, string> = {
-            eye: '👁',
-            'eye-slash': '👁‍🗨',
-            'chevron-down': '▼',
-            'chevron-up': '▲',
-            'chevron-left': '◀',
-            'chevron-right': '▶',
-            'arrow-forward': '→',
-            'arrow-back': '←',
-            close: '✕',
-            check: '✓',
-            'check-circle': '✓',
-            plus: '+',
-            share: '📤',
-            reload: '↻',
-            'sign-out': '🚪',
-            user: '👤',
-            camera: '📷',
-            file: '📄',
-            info: 'ℹ',
-            default: '●',
-        }
+	const getIconSymbol = (iconName: string) => {
+		const iconMap: Record<string, string> = {
+			eye: '👁',
+			'eye-slash': '👁‍🗨',
+			'chevron-down': '▼',
+			'chevron-up': '▲',
+			'chevron-left': '◀',
+			'chevron-right': '▶',
+			'arrow-forward': '→',
+			'arrow-back': '←',
+			close: '✕',
+			check: '✓',
+			'check-circle': '✓',
+			plus: '+',
+			share: '📤',
+			reload: '↻',
+			'sign-out': '🚪',
+			user: '👤',
+			camera: '📷',
+			file: '📄',
+			info: 'ℹ',
+			default: '●',
+		}
 
-        return iconMap[iconName] || iconMap['default']
-    }
+		return iconMap[iconName] || iconMap['default']
+	}
 
-    return (
-        <Text
-            style={[
-                {
-                    fontSize: size,
-                    color: color,
-                    textAlign: 'center',
-                },
-                style,
-            ]}
-        >
-            {getIconSymbol(name)}
-        </Text>
-    )
+	return (
+		<Text
+			style={[
+				{
+					fontSize: size,
+					color: color,
+					textAlign: 'center',
+				},
+				style,
+			]}
+		>
+			{getIconSymbol(name)}
+		</Text>
+	)
 }

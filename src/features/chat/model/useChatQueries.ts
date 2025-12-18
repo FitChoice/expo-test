@@ -4,26 +4,36 @@
  */
 
 import { useEffect } from 'react'
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query'
+import {
+	useInfiniteQuery,
+	useMutation,
+	useQuery,
+	useQueryClient,
+	type InfiniteData,
+} from '@tanstack/react-query'
 import { getChatHistory, getChatLatest, sendChatMessage, uploadFile } from '../api'
 import { mapMessagesFromDto, mapAttachmentToDto } from '@/entities/chat'
 import type { Message, Attachment } from '@/entities/chat'
-import type { SendChatMessageRequest, ChatAttachmentDto, ChatMessageDto } from '@/shared/api/types'
+import type {
+	SendChatMessageRequest,
+	ChatAttachmentDto,
+	ChatMessageDto,
+} from '@/shared/api/types'
 import { generateId } from '@/shared/lib/utils'
 
 // Query keys для cache management
 export const chatQueryKeys = {
-    all: ['chat'] as const,
-    history: (userId: number, limit?: number) =>
-        [...chatQueryKeys.all, 'history', userId, limit ?? 'default'] as const,
-    latest: (userId: number, afterId: number, limit?: number) =>
-        [...chatQueryKeys.all, 'latest', userId, afterId, limit ?? 'default'] as const,
+	all: ['chat'] as const,
+	history: (userId: number, limit?: number) =>
+		[...chatQueryKeys.all, 'history', userId, limit ?? 'default'] as const,
+	latest: (userId: number, afterId: number, limit?: number) =>
+		[...chatQueryKeys.all, 'latest', userId, afterId, limit ?? 'default'] as const,
 }
 
 type ChatPage = {
-    messages: Message[]
-    limit: number
-    offset: number
+	messages: Message[]
+	limit: number
+	offset: number
 }
 
 export const CHAT_PAGE_SIZE = 20
@@ -33,217 +43,217 @@ export const CHAT_PAGE_SIZE = 20
  * Поддерживает infinite scroll по offset/limit
  */
 export const useChatHistory = ({
-    userId,
-    limit = CHAT_PAGE_SIZE,
-    enabled = true,
+	userId,
+	limit = CHAT_PAGE_SIZE,
+	enabled = true,
 }: {
 	userId?: number | null
 	limit?: number
 	enabled?: boolean
 }) => {
-    return useInfiniteQuery({
-        queryKey: chatQueryKeys.history(userId ?? 0, limit),
-        queryFn: async ({ pageParam }) => {
-            if (!userId) {
-                return { messages: [] as Message[], limit, offset: 0 }
-            }
-            const currentOffset = typeof pageParam === 'number' ? pageParam : 0
-            const result = await getChatHistory({ userId, limit, offset: currentOffset })
-            if (!result.success) {
-                throw new Error(result.error)
-            }
-            return {
-                messages: mapMessagesFromDto(result.data.messages).sort(
-                    (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
-                ),
-                limit: result.data.limit,
-                offset: result.data.offset,
-            }
-        },
-        initialPageParam: 0,
-        getNextPageParam: (lastPage) =>
-            lastPage.messages.length < lastPage.limit
-                ? undefined
-                : lastPage.offset + lastPage.limit,
-        enabled: Boolean(userId) && enabled,
-    })
+	return useInfiniteQuery({
+		queryKey: chatQueryKeys.history(userId ?? 0, limit),
+		queryFn: async ({ pageParam }) => {
+			if (!userId) {
+				return { messages: [] as Message[], limit, offset: 0 }
+			}
+			const currentOffset = typeof pageParam === 'number' ? pageParam : 0
+			const result = await getChatHistory({ userId, limit, offset: currentOffset })
+			if (!result.success) {
+				throw new Error(result.error)
+			}
+			return {
+				messages: mapMessagesFromDto(result.data.messages).sort(
+					(a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+				),
+				limit: result.data.limit,
+				offset: result.data.offset,
+			}
+		},
+		initialPageParam: 0,
+		getNextPageParam: (lastPage) =>
+			lastPage.messages.length < lastPage.limit
+				? undefined
+				: lastPage.offset + lastPage.limit,
+		enabled: Boolean(userId) && enabled,
+	})
 }
 
 /**
  * Hook для отправки сообщения и получения AI-ответа (без стриминга)
  */
 export const useSendMessage = (limit: number = CHAT_PAGE_SIZE) => {
-    const queryClient = useQueryClient()
+	const queryClient = useQueryClient()
 
-    return useMutation({
-        mutationFn: async ({
-            content,
-            attachments,
-            userId,
-        }: {
+	return useMutation({
+		mutationFn: async ({
+			content,
+			attachments,
+			userId,
+		}: {
 			content: string
 			attachments: Attachment[]
 			userId: number
 		}) => {
-            const attachmentDtos: ChatAttachmentDto[] = attachments
-                .filter((a) => a.uploadStatus === 'completed' && a.remoteUrl)
-                .map(mapAttachmentToDto)
+			const attachmentDtos: ChatAttachmentDto[] = attachments
+				.filter((a) => a.uploadStatus === 'completed' && a.remoteUrl)
+				.map(mapAttachmentToDto)
 
-            const request: SendChatMessageRequest = {
-                content,
-                files: attachmentDtos.length > 0 ? attachmentDtos : undefined,
-                role: 'user',
-                user_id: userId,
-            }
+			const request: SendChatMessageRequest = {
+				content,
+				files: attachmentDtos.length > 0 ? attachmentDtos : undefined,
+				role: 'user',
+				user_id: userId,
+			}
 
-            const result = await sendChatMessage(request)
+			const result = await sendChatMessage(request)
 
-            if (!result.success) {
-                throw new Error(result.error)
-            }
+			if (!result.success) {
+				throw new Error(result.error)
+			}
 
-            return result.data
-        },
-        onMutate: async ({ content, attachments, userId }) => {
-            const queryKey = chatQueryKeys.history(userId, limit)
-            await queryClient.cancelQueries({ queryKey })
+			return result.data
+		},
+		onMutate: async ({ content, attachments, userId }) => {
+			const queryKey = chatQueryKeys.history(userId, limit)
+			await queryClient.cancelQueries({ queryKey })
 
-            const previousData = queryClient.getQueryData<InfiniteData<ChatPage>>(queryKey)
+			const previousData = queryClient.getQueryData<InfiniteData<ChatPage>>(queryKey)
 
-            const optimisticUserMessage: Message = {
-                id: generateId('msg'),
-                role: 'user',
-                content,
-                createdAt: new Date(),
-                attachments,
-                isStreaming: false,
-            }
+			const optimisticUserMessage: Message = {
+				id: generateId('msg'),
+				role: 'user',
+				content,
+				createdAt: new Date(),
+				attachments,
+				isStreaming: false,
+			}
 
-            queryClient.setQueryData(queryKey, (oldData?: InfiniteData<ChatPage>) => {
-                if (!oldData || !oldData.pages || oldData.pages.length === 0) {
-                    return {
-                        pages: [{ messages: [optimisticUserMessage], limit, offset: 0 }],
-                        pageParams: [0],
-                    }
-                }
-                const [firstPage, ...rest] = oldData.pages
-                if (!firstPage) return oldData
-                const updatedFirst = {
-                    ...firstPage,
-                    messages: [...firstPage.messages, optimisticUserMessage].sort(
-                        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
-                    ),
-                }
-                return { ...oldData, pages: [updatedFirst, ...rest] }
-            })
+			queryClient.setQueryData(queryKey, (oldData?: InfiniteData<ChatPage>) => {
+				if (!oldData || !oldData.pages || oldData.pages.length === 0) {
+					return {
+						pages: [{ messages: [optimisticUserMessage], limit, offset: 0 }],
+						pageParams: [0],
+					}
+				}
+				const [firstPage, ...rest] = oldData.pages
+				if (!firstPage) return oldData
+				const updatedFirst = {
+					...firstPage,
+					messages: [...firstPage.messages, optimisticUserMessage].sort(
+						(a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+					),
+				}
+				return { ...oldData, pages: [updatedFirst, ...rest] }
+			})
 
-            return { previousData, userId, optimisticUserMessage }
-        },
-        onError: (_error, variables, context) => {
-            if (!context) return
-            const queryKey = chatQueryKeys.history(context.userId, limit)
-            if (context.previousData) {
-                queryClient.setQueryData(queryKey, context.previousData)
-            }
-        },
-        onSuccess: (data, variables, context) => {
-            if (!context) return
-        },
-        onSettled: (_data, _error, variables) => {
-            if (variables?.userId) {
-                queryClient.invalidateQueries({
-                    queryKey: chatQueryKeys.history(variables.userId, limit),
-                })
-            }
-        },
-    })
+			return { previousData, userId, optimisticUserMessage }
+		},
+		onError: (_error, variables, context) => {
+			if (!context) return
+			const queryKey = chatQueryKeys.history(context.userId, limit)
+			if (context.previousData) {
+				queryClient.setQueryData(queryKey, context.previousData)
+			}
+		},
+		onSuccess: (data, variables, context) => {
+			if (!context) return
+		},
+		onSettled: (_data, _error, variables) => {
+			if (variables?.userId) {
+				queryClient.invalidateQueries({
+					queryKey: chatQueryKeys.history(variables.userId, limit),
+				})
+			}
+		},
+	})
 }
 
 /**
  * Hook для загрузки файла
  */
 export const useUploadFile = () => {
-    return useMutation({
-        mutationFn: async ({
-            file,
-            onProgress,
-        }: {
+	return useMutation({
+		mutationFn: async ({
+			file,
+			onProgress,
+		}: {
 			file: { uri: string; name: string; type: string }
 			onProgress?: (progress: number) => void
 		}) => {
-            const result = await uploadFile(file, onProgress)
-            if (!result.success) {
-                throw new Error(result.error)
-            }
-            return result.data
-        },
-    })
+			const result = await uploadFile(file, onProgress)
+			if (!result.success) {
+				throw new Error(result.error)
+			}
+			return result.data
+		},
+	})
 }
 
 /**
  * Polls latest chat messages after a given id
  */
 export const useChatLatest = ({
-    userId,
-    afterId,
-    limit = CHAT_PAGE_SIZE,
-    enabled = true,
-    onAssistantMessage,
+	userId,
+	afterId,
+	limit = CHAT_PAGE_SIZE,
+	enabled = true,
+	onAssistantMessage,
 }: {
-    userId?: number | null
-    afterId?: number | null
-    limit?: number
-    enabled?: boolean
-    onAssistantMessage?: () => void
+	userId?: number | null
+	afterId?: number | null
+	limit?: number
+	enabled?: boolean
+	onAssistantMessage?: () => void
 }) => {
-    const queryClient = useQueryClient()
-    const latestQuery = useQuery<Message[], Error>({
-        queryKey: chatQueryKeys.latest(userId ?? 0, afterId ?? 0, limit),
-        enabled: Boolean(userId) && enabled && typeof afterId === 'number',
-        refetchInterval: enabled ? 1000 : false,
-        queryFn: async () => {
-            if (!userId || typeof afterId !== 'number') {
-                return [] as Message[]
-            }
-            const result = await getChatLatest({ userId, afterId })
-            if (!result.success) {
-                throw new Error(result.error)
-            }
-            const dtoArray = Array.isArray(result.data)
-                ? result.data
-                : (result.data as { messages?: ChatMessageDto[] })?.messages ?? []
-            return mapMessagesFromDto(dtoArray).sort(
-                (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
-            )
-        },
-    })
+	const queryClient = useQueryClient()
+	const latestQuery = useQuery<Message[], Error>({
+		queryKey: chatQueryKeys.latest(userId ?? 0, afterId ?? 0, limit),
+		enabled: Boolean(userId) && enabled && typeof afterId === 'number',
+		refetchInterval: enabled ? 1000 : false,
+		queryFn: async () => {
+			if (!userId || typeof afterId !== 'number') {
+				return [] as Message[]
+			}
+			const result = await getChatLatest({ userId, afterId })
+			if (!result.success) {
+				throw new Error(result.error)
+			}
+			const dtoArray = Array.isArray(result.data)
+				? result.data
+				: ((result.data as { messages?: ChatMessageDto[] })?.messages ?? [])
+			return mapMessagesFromDto(dtoArray).sort(
+				(a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+			)
+		},
+	})
 
-    useEffect(() => {
-        const newMessages = latestQuery.data
-        if (!userId || !newMessages || newMessages.length === 0) return
+	useEffect(() => {
+		const newMessages = latestQuery.data
+		if (!userId || !newMessages || newMessages.length === 0) return
 
-        if (newMessages.some((m) => m.role === 'assistant')) {
-            onAssistantMessage?.()
-        }
-        const historyKey = chatQueryKeys.history(userId, limit)
-        queryClient.setQueryData<InfiniteData<ChatPage>>(historyKey, (oldData) => {
-            if (!oldData || !oldData.pages || oldData.pages.length === 0) {
-                return {
-                    pages: [{ messages: newMessages, limit, offset: 0 }],
-                    pageParams: [0],
-                }
-            }
-            const [firstPage, ...rest] = oldData.pages
-            if (!firstPage) return oldData
-            const existingIds = new Set(firstPage.messages.map((m: Message) => m.id))
-            const mergedMessages = [
-                ...firstPage.messages,
-                ...newMessages.filter((m: Message) => !existingIds.has(m.id)),
-            ].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+		if (newMessages.some((m) => m.role === 'assistant')) {
+			onAssistantMessage?.()
+		}
+		const historyKey = chatQueryKeys.history(userId, limit)
+		queryClient.setQueryData<InfiniteData<ChatPage>>(historyKey, (oldData) => {
+			if (!oldData || !oldData.pages || oldData.pages.length === 0) {
+				return {
+					pages: [{ messages: newMessages, limit, offset: 0 }],
+					pageParams: [0],
+				}
+			}
+			const [firstPage, ...rest] = oldData.pages
+			if (!firstPage) return oldData
+			const existingIds = new Set(firstPage.messages.map((m: Message) => m.id))
+			const mergedMessages = [
+				...firstPage.messages,
+				...newMessages.filter((m: Message) => !existingIds.has(m.id)),
+			].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
 
-            return { ...oldData, pages: [{ ...firstPage, messages: mergedMessages }, ...rest] }
-        })
-    }, [latestQuery.data, queryClient, limit, userId, onAssistantMessage])
+			return { ...oldData, pages: [{ ...firstPage, messages: mergedMessages }, ...rest] }
+		})
+	}, [latestQuery.data, queryClient, limit, userId, onAssistantMessage])
 
-    return latestQuery
+	return latestQuery
 }

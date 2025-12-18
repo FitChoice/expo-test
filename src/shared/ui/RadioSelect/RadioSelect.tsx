@@ -10,36 +10,36 @@ import { RadioSelectOption } from './RadioSelectOption'
  * С анимированным blur-эффектом при выборе и нажатии
  */
 export const RadioSelect: React.FC<RadioSelectProps> = ({
-    options,
-    value,
-    onChange,
-    disabled = false,
-    isNeedCheckbox,
+	options,
+	value,
+	onChange,
+	disabled = false,
+	isNeedCheckbox,
 }) => {
-    const handlePress = (optionValue: string) => {
-        if (disabled) return
-        onChange(optionValue)
-    }
+	const handlePress = (optionValue: string) => {
+		if (disabled) return
+		onChange(optionValue)
+	}
 
-    return (
-        <View className="gap-2">
-            {options.map((option) => {
-                const isSelected = value === option.value
+	return (
+		<View className="gap-2">
+			{options.map((option) => {
+				const isSelected = value === option.value
 
-                return (
-                    <RadioSelectOption
-                        isNeedCheckbox={isNeedCheckbox}
-                        key={option.value}
-                        option={option}
-                        isSelected={isSelected}
-                        isPressed={false}
-                        disabled={disabled}
-                        onPress={() => handlePress(option.value)}
-                        onPressIn={() => {}}
-                        onPressOut={() => {}}
-                    />
-                )
-            })}
-        </View>
-    )
+				return (
+					<RadioSelectOption
+						isNeedCheckbox={isNeedCheckbox}
+						key={option.value}
+						option={option}
+						isSelected={isSelected}
+						isPressed={false}
+						disabled={disabled}
+						onPress={() => handlePress(option.value)}
+						onPressIn={() => {}}
+						onPressOut={() => {}}
+					/>
+				)
+			})}
+		</View>
+	)
 }

@@ -12,27 +12,24 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 LogBox.ignoreLogs(['SafeAreaView has been deprecated'])
 
 function RootLayoutContent() {
-    const insets = useSafeAreaInsets()
+	const insets = useSafeAreaInsets()
 
-    return (
-        <>
-            {/* Глобальная настройка статус-бара - светлые иконки по умолчанию */}
-            <StatusBar style="light" />
-            <Slot />
-            <Toast
-                config={toastConfig}
-                topOffset={insets.top + 10}
-            />
-        </>
-    )
+	return (
+		<>
+			{/* Глобальная настройка статус-бара - светлые иконки по умолчанию */}
+			<StatusBar style="light" />
+			<Slot />
+			<Toast config={toastConfig} topOffset={insets.top + 10} />
+		</>
+	)
 }
 
 export default function Layout() {
-    return (
-        <ErrorBoundary>
-            <AppProvider>
-                <RootLayoutContent />
-            </AppProvider>
-        </ErrorBoundary>
-    )
+	return (
+		<ErrorBoundary>
+			<AppProvider>
+				<RootLayoutContent />
+			</AppProvider>
+		</ErrorBoundary>
+	)
 }

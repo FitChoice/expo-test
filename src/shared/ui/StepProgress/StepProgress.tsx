@@ -14,41 +14,41 @@ export interface StepProgressProps extends ViewProps {
 }
 
 export function StepProgress({
-    current,
-    total,
-    className,
-    isVertical,
-    ...props
+	current,
+	total,
+	className,
+	isVertical,
+	...props
 }: StepProgressProps) {
-    return (
-        <View
-            {...props}
-            className={`flex-row items-center gap-1 ${isVertical ? 'w-full' : 'w-1/2'}`}
-        >
-            {Array.from({ length: total }).map((_, index) => {
-                const isActive = index === current
+	return (
+		<View
+			{...props}
+			className={`flex-row items-center gap-1 ${isVertical ? 'w-full' : 'w-1/2'}`}
+		>
+			{Array.from({ length: total }).map((_, index) => {
+				const isActive = index === current
 
-                // if (isActive) {
-                // 	// Активный шаг - яркий зеленый круг с эффектом свечения
-                // 	return (
-                // 		<View key={index} className="flex-1 items-center">
-                // 			<View
-                // 				className="w-3 h-3 rounded-full bg-brand-green-500"
-                // 				style={{
-                // 					shadowColor: '#4ADE80',
-                // 					shadowOffset: { width: 0, height: 0 },
-                // 					shadowOpacity: 0.8,
-                // 					shadowRadius: 4,
-                // 					elevation: 4,
-                // 				}}
-                // 			/>
-                // 		</View>
-                // 	)
-                // }
+				// if (isActive) {
+				// 	// Активный шаг - яркий зеленый круг с эффектом свечения
+				// 	return (
+				// 		<View key={index} className="flex-1 items-center">
+				// 			<View
+				// 				className="w-3 h-3 rounded-full bg-brand-green-500"
+				// 				style={{
+				// 					shadowColor: '#4ADE80',
+				// 					shadowOffset: { width: 0, height: 0 },
+				// 					shadowOpacity: 0.8,
+				// 					shadowRadius: 4,
+				// 					elevation: 4,
+				// 				}}
+				// 			/>
+				// 		</View>
+				// 	)
+				// }
 
-                // Неактивные шаги - белые полупрозрачные прямоугольники с закругленными краями
-                return <View key={index} className="h-1.5 flex-1 rounded-full bg-white/30" />
-            })}
-        </View>
-    )
+				// Неактивные шаги - белые полупрозрачные прямоугольники с закругленными краями
+				return <View key={index} className="h-1.5 flex-1 rounded-full bg-white/30" />
+			})}
+		</View>
+	)
 }

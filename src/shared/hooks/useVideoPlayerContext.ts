@@ -14,10 +14,10 @@ export interface VideoPlayerContextValue {
 export const VideoPlayerContext = createContext<VideoPlayerContextValue | null>(null)
 
 export const useVideoPlayerContext = () => {
-    const context = useContext(VideoPlayerContext)
-    if (!context) {
-        console.warn('useVideoPlayerContext: context is null!')
-        return null
-    }
-    return context
+	const context = useContext(VideoPlayerContext)
+	if (!context) {
+		console.warn('useVideoPlayerContext: context is null!')
+		return null
+	}
+	return context
 }

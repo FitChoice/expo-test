@@ -35,8 +35,8 @@ export interface Message {
  * Определяет тип вложения по MIME-типу
  */
 export const getAttachmentTypeFromMime = (mimeType: string): AttachmentType => {
-    if (mimeType.startsWith('image/')) return 'image'
-    if (mimeType.startsWith('video/')) return 'video'
-    if (mimeType.startsWith('audio/')) return 'audio'
-    return 'file'
+	if (mimeType.startsWith('image/')) return 'image'
+	if (mimeType.startsWith('video/')) return 'video'
+	if (mimeType.startsWith('audio/')) return 'audio'
+	return 'file'
 }

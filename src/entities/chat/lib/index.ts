@@ -1,6 +1,6 @@
 export {
-    mapAttachmentFromDto,
-    mapMessageFromDto,
-    mapAttachmentToDto,
-    mapMessagesFromDto,
+	mapAttachmentFromDto,
+	mapMessageFromDto,
+	mapAttachmentToDto,
+	mapMessagesFromDto,
 } from './mappers'

@@ -5,9 +5,9 @@ import { HomeScreen } from '@/pages/home'
  * Home page route (protected)
  */
 export default function HomePage() {
-    return (
-        <AuthGuard>
-            <HomeScreen />
-        </AuthGuard>
-    )
+	return (
+		<AuthGuard>
+			<HomeScreen />
+		</AuthGuard>
+	)
 }

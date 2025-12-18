@@ -14,21 +14,21 @@ export interface ControlButtonProps extends Omit<TouchableOpacityProps, 'childre
 }
 
 export function ControlButton({
-    icon,
-    size = 48,
-    onPress,
-    className = '',
-    ...props
+	icon,
+	size = 48,
+	onPress,
+	className = '',
+	...props
 }: ControlButtonProps) {
-    return (
-        <TouchableOpacity
-            onPress={onPress}
-            className={`items-center justify-center rounded-2xl bg-fill-200/20 ${className}`}
-            style={{ width: size, height: size }}
-            activeOpacity={0.7}
-            {...props}
-        >
-            <View>{icon}</View>
-        </TouchableOpacity>
-    )
+	return (
+		<TouchableOpacity
+			onPress={onPress}
+			className={`items-center justify-center rounded-2xl bg-fill-200/20 ${className}`}
+			style={{ width: size, height: size }}
+			activeOpacity={0.7}
+			{...props}
+		>
+			<View>{icon}</View>
+		</TouchableOpacity>
+	)
 }

@@ -7,112 +7,112 @@ import { buttonVariantStyles, buttonSizeStyles, baseButtonStyles } from './style
 // Варианты: primary, secondary, special, tertiary, ghost
 // Размеры: xs, s, l
 export const Button = forwardRef<View, ButtonProps>(
-    (
-        {
-            children,
-            variant = 'primary',
-            size = 's',
-            iconLeft,
-            iconRight,
-            iconOnly = false,
-            disabled = false,
-            fullWidth = false,
-            className = '',
-            ...touchableProps
-        },
-        ref
-    ) => {
-        const [isPressed, setIsPressed] = useState(false)
+	(
+		{
+			children,
+			variant = 'primary',
+			size = 's',
+			iconLeft,
+			iconRight,
+			iconOnly = false,
+			disabled = false,
+			fullWidth = false,
+			className = '',
+			...touchableProps
+		},
+		ref
+	) => {
+		const [isPressed, setIsPressed] = useState(false)
 
-        // Получаем стили для варианта и размера
-        const variantStyle = buttonVariantStyles[variant]
-        const sizeStyle = buttonSizeStyles[size]
+		// Получаем стили для варианта и размера
+		const variantStyle = buttonVariantStyles[variant]
+		const sizeStyle = buttonSizeStyles[size]
 
-        // Определяем текущее состояние кнопки
-        const currentState = disabled ? 'disabled' : isPressed ? 'pressed' : 'default'
+		// Определяем текущее состояние кнопки
+		const currentState = disabled ? 'disabled' : isPressed ? 'pressed' : 'default'
 
-        // Формируем классы для контейнера
-        const containerClasses = [
-            baseButtonStyles,
-            sizeStyle.container,
-            variantStyle[currentState],
-            fullWidth ? 'w-full' : '',
-            iconOnly
-                ? sizeStyle.paddingIconOnly
-                : iconLeft
-                    ? sizeStyle.paddingIconLeft
-                    : iconRight
-                        ? sizeStyle.paddingIconRight
-                        : sizeStyle.padding,
-            className,
-        ]
-            .filter(Boolean)
-            .join(' ')
+		// Формируем классы для контейнера
+		const containerClasses = [
+			baseButtonStyles,
+			sizeStyle.container,
+			variantStyle[currentState],
+			fullWidth ? 'w-full' : '',
+			iconOnly
+				? sizeStyle.paddingIconOnly
+				: iconLeft
+					? sizeStyle.paddingIconLeft
+					: iconRight
+						? sizeStyle.paddingIconRight
+						: sizeStyle.padding,
+			className,
+		]
+			.filter(Boolean)
+			.join(' ')
 
-        // Формируем классы для текста
-        const textClasses = [
-            sizeStyle.text,
-            variantStyle[
+		// Формируем классы для текста
+		const textClasses = [
+			sizeStyle.text,
+			variantStyle[
 				`text${currentState.charAt(0).toUpperCase() + currentState.slice(1)}` as keyof typeof variantStyle
-            ],
-        ]
-            .filter(Boolean)
-            .join(' ')
+			],
+		]
+			.filter(Boolean)
+			.join(' ')
 
-        // Клонируем иконки с нужным размером и цветом
-        const renderIcon = (icon: React.ReactNode) => {
-            if (!isValidElement(icon)) return icon
+		// Клонируем иконки с нужным размером и цветом
+		const renderIcon = (icon: React.ReactNode) => {
+			if (!isValidElement(icon)) return icon
 
-            const iconColor = variantStyle[
+			const iconColor = variantStyle[
 				`text${currentState.charAt(0).toUpperCase() + currentState.slice(1)}` as keyof typeof variantStyle
-            ]
-                .replace('text-', '')
-                .replace('[', '')
-                .replace(']', '')
+			]
+				.replace('text-', '')
+				.replace('[', '')
+				.replace(']', '')
 
-            return cloneElement(icon as React.ReactElement<{ size?: number; color?: string }>, {
-                size: sizeStyle.icon,
-                color: iconColor.startsWith('#') ? iconColor : 'white',
-            })
-        }
+			return cloneElement(icon as React.ReactElement<{ size?: number; color?: string }>, {
+				size: sizeStyle.icon,
+				color: iconColor.startsWith('#') ? iconColor : 'white',
+			})
+		}
 
-        return (
-            <TouchableOpacity
-                ref={ref}
-                disabled={disabled}
-                activeOpacity={0.8}
-                onPressIn={() => setIsPressed(true)}
-                onPressOut={() => setIsPressed(false)}
-                className={containerClasses}
-                style={platformStyles.button}
-                {...touchableProps}
-            >
-                {iconLeft && !iconOnly && renderIcon(iconLeft)}
-                {iconOnly && iconLeft && renderIcon(iconLeft)}
-                {!iconOnly && <Text className={textClasses}>{children}</Text>}
-                {iconRight && !iconOnly && renderIcon(iconRight)}
-            </TouchableOpacity>
-        )
-    }
+		return (
+			<TouchableOpacity
+				ref={ref}
+				disabled={disabled}
+				activeOpacity={0.8}
+				onPressIn={() => setIsPressed(true)}
+				onPressOut={() => setIsPressed(false)}
+				className={containerClasses}
+				style={platformStyles.button}
+				{...touchableProps}
+			>
+				{iconLeft && !iconOnly && renderIcon(iconLeft)}
+				{iconOnly && iconLeft && renderIcon(iconLeft)}
+				{!iconOnly && <Text className={textClasses}>{children}</Text>}
+				{iconRight && !iconOnly && renderIcon(iconRight)}
+			</TouchableOpacity>
+		)
+	}
 )
 
 Button.displayName = 'Button'
 
 // Platform-specific стили для теней
 const platformStyles = StyleSheet.create({
-    button: Platform.select({
-        ios: {
-            shadowColor: '#000',
-            shadowOffset: {
-                width: 0,
-                height: 2,
-            },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-        },
-        android: {
-            elevation: 3,
-        },
-        default: {},
-    }),
+	button: Platform.select({
+		ios: {
+			shadowColor: '#000',
+			shadowOffset: {
+				width: 0,
+				height: 2,
+			},
+			shadowOpacity: 0.1,
+			shadowRadius: 4,
+		},
+		android: {
+			elevation: 3,
+		},
+		default: {},
+	}),
 })

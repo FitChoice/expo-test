@@ -11,8 +11,8 @@ import type { PoseAnalysis, PoseData, PoseLandmark } from '../model/types'
  * @returns True if landmark meets minimum requirements
  */
 export const isLandmarkValid = (landmark: PoseLandmark): boolean => {
-    const { MIN_VISIBILITY } = constants.POSE_DETECTION
-    return landmark.visibility >= MIN_VISIBILITY
+	const { MIN_VISIBILITY } = constants.POSE_DETECTION
+	return landmark.visibility >= MIN_VISIBILITY
 }
 
 /**
@@ -22,10 +22,10 @@ export const isLandmarkValid = (landmark: PoseLandmark): boolean => {
  * @returns Distance between points
  */
 export const calculateDistance = (point1: PoseLandmark, point2: PoseLandmark): number => {
-    const dx = point2.x - point1.x
-    const dy = point2.y - point1.y
-    const dz = point2.z - point1.z
-    return Math.sqrt(dx * dx + dy * dy + dz * dz)
+	const dx = point2.x - point1.x
+	const dy = point2.y - point1.y
+	const dz = point2.z - point1.z
+	return Math.sqrt(dx * dx + dy * dy + dz * dz)
 }
 
 /**
@@ -36,20 +36,20 @@ export const calculateDistance = (point1: PoseLandmark, point2: PoseLandmark): n
  * @returns Angle in degrees
  */
 export const calculateAngle = (
-    point1: PoseLandmark,
-    point2: PoseLandmark,
-    point3: PoseLandmark
+	point1: PoseLandmark,
+	point2: PoseLandmark,
+	point3: PoseLandmark
 ): number => {
-    const radians =
+	const radians =
 		Math.atan2(point3.y - point2.y, point3.x - point2.x) -
 		Math.atan2(point1.y - point2.y, point1.x - point2.x)
-    let angle = Math.abs((radians * 180.0) / Math.PI)
+	let angle = Math.abs((radians * 180.0) / Math.PI)
 
-    if (angle > 180.0) {
-        angle = 360 - angle
-    }
+	if (angle > 180.0) {
+		angle = 360 - angle
+	}
 
-    return angle
+	return angle
 }
 
 /**
@@ -58,30 +58,30 @@ export const calculateAngle = (
  * @returns Analysis result with validation status
  */
 export const validatePose = (poseData: PoseData): PoseAnalysis => {
-    if (!poseData.landmarks || poseData.landmarks.length === 0) {
-        return {
-            isValid: false,
-            confidence: 0,
-            message: 'No landmarks detected',
-        }
-    }
+	if (!poseData.landmarks || poseData.landmarks.length === 0) {
+		return {
+			isValid: false,
+			confidence: 0,
+			message: 'No landmarks detected',
+		}
+	}
 
-    // Count valid landmarks
-    const validLandmarks = poseData.landmarks.filter(isLandmarkValid).length
-    const confidence = validLandmarks / poseData.landmarks.length
+	// Count valid landmarks
+	const validLandmarks = poseData.landmarks.filter(isLandmarkValid).length
+	const confidence = validLandmarks / poseData.landmarks.length
 
-    if (confidence < constants.POSE_DETECTION.MIN_CONFIDENCE) {
-        return {
-            isValid: false,
-            confidence,
-            message: 'Pose confidence too low',
-        }
-    }
+	if (confidence < constants.POSE_DETECTION.MIN_CONFIDENCE) {
+		return {
+			isValid: false,
+			confidence,
+			message: 'Pose confidence too low',
+		}
+	}
 
-    return {
-        isValid: true,
-        confidence,
-    }
+	return {
+		isValid: true,
+		confidence,
+	}
 }
 
 /**
@@ -89,11 +89,11 @@ export const validatePose = (poseData: PoseData): PoseAnalysis => {
  * @param landmarks - Array of pose landmarks
  */
 export const logLandmarks = (landmarks: PoseLandmark[]): void => {
-    if (__DEV__) {
-        landmarks.forEach((point, idx) => {
-            console.warn(
-                `Точка ${idx}: x=${point.x.toFixed(3)}, y=${point.y.toFixed(3)}, z=${point.z.toFixed(3)}, vis=${point.visibility.toFixed(3)}`
-            )
-        })
-    }
+	if (__DEV__) {
+		landmarks.forEach((point, idx) => {
+			console.warn(
+				`Точка ${idx}: x=${point.x.toFixed(3)}, y=${point.y.toFixed(3)}, z=${point.z.toFixed(3)}, vis=${point.visibility.toFixed(3)}`
+			)
+		})
+	}
 }

@@ -17,58 +17,58 @@ interface FontLoaderProps {
  * Работает с Expo Go и Development builds
  */
 export const FontLoader = ({ children }: FontLoaderProps) => {
-    const [loaded, error] = useFonts({
-        // На Android используем имя файла без расширения
-        // На iOS используем PostScript name
-        Rimma_sans_android: rimmaSansAndroidFont,
-        Rimma_sans: rimmaSansFont,
-    })
+	const [loaded, error] = useFonts({
+		// На Android используем имя файла без расширения
+		// На iOS используем PostScript name
+		Rimma_sans_android: rimmaSansAndroidFont,
+		Rimma_sans: rimmaSansFont,
+	})
 
-    useEffect(() => {
-        if (loaded || error) {
-            SplashScreen.hideAsync()
-        }
-    }, [loaded, error])
+	useEffect(() => {
+		if (loaded || error) {
+			SplashScreen.hideAsync()
+		}
+	}, [loaded, error])
 
-    if (!loaded && !error) {
-        return null
-    }
+	if (!loaded && !error) {
+		return null
+	}
 
-    // Показываем fallback UI только если есть ошибка
-    if (error) {
-        return (
-            <View
-                style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: '#151515',
-                }}
-            >
-                <ActivityIndicator size="large" color="#8BC34A" />
-                <Text
-                    style={{
-                        color: '#FFFFFF',
-                        marginTop: 16,
-                        fontFamily: 'System',
-                    }}
-                >
+	// Показываем fallback UI только если есть ошибка
+	if (error) {
+		return (
+			<View
+				style={{
+					flex: 1,
+					justifyContent: 'center',
+					alignItems: 'center',
+					backgroundColor: '#151515',
+				}}
+			>
+				<ActivityIndicator size="large" color="#8BC34A" />
+				<Text
+					style={{
+						color: '#FFFFFF',
+						marginTop: 16,
+						fontFamily: 'System',
+					}}
+				>
 					Загрузка...
-                </Text>
-                <Text
-                    style={{
-                        color: '#FF514F',
-                        marginTop: 8,
-                        fontSize: 12,
-                        textAlign: 'center',
-                        fontFamily: 'System',
-                    }}
-                >
+				</Text>
+				<Text
+					style={{
+						color: '#FF514F',
+						marginTop: 8,
+						fontSize: 12,
+						textAlign: 'center',
+						fontFamily: 'System',
+					}}
+				>
 					Ошибка загрузки шрифтов
-                </Text>
-            </View>
-        )
-    }
+				</Text>
+			</View>
+		)
+	}
 
-    return <>{children}</>
+	return <>{children}</>
 }

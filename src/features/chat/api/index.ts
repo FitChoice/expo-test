@@ -1,6 +1,1 @@
-export {
-    getChatHistory,
-    getChatLatest,
-    sendChatMessage,
-    uploadFile,
-} from './chatApi'
+export { getChatHistory, getChatLatest, sendChatMessage, uploadFile } from './chatApi'

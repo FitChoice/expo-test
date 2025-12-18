@@ -9,13 +9,13 @@ import * as SecureStore from 'expo-secure-store'
  * @returns User ID or null if not found
  */
 export const getUserId = async (): Promise<number | null> => {
-    try {
-        const userId = await SecureStore.getItemAsync('user_id')
-        return userId ? parseInt(userId, 10) : null
-    } catch (error) {
-        console.error('Failed to get user ID:', error)
-        return null
-    }
+	try {
+		const userId = await SecureStore.getItemAsync('user_id')
+		return userId ? parseInt(userId, 10) : null
+	} catch (error) {
+		console.error('Failed to get user ID:', error)
+		return null
+	}
 }
 
 /**
@@ -23,22 +23,22 @@ export const getUserId = async (): Promise<number | null> => {
  * @param userId - User ID to save
  */
 export const saveUserId = async (userId: number): Promise<void> => {
-    try {
-        await SecureStore.setItemAsync('user_id', userId.toString())
-    } catch (error) {
-        console.error('Failed to save user ID:', error)
-    }
+	try {
+		await SecureStore.setItemAsync('user_id', userId.toString())
+	} catch (error) {
+		console.error('Failed to save user ID:', error)
+	}
 }
 
 /**
  * Clear user ID from SecureStore
  */
 export const clearUserId = async (): Promise<void> => {
-    try {
-        await SecureStore.deleteItemAsync('user_id')
-    } catch (error) {
-        console.error('Failed to clear user ID:', error)
-    }
+	try {
+		await SecureStore.deleteItemAsync('user_id')
+	} catch (error) {
+		console.error('Failed to clear user ID:', error)
+	}
 }
 
 /**
@@ -46,11 +46,11 @@ export const clearUserId = async (): Promise<void> => {
  * @param token - Auth token to save
  */
 export const saveAuthToken = async (token: string): Promise<void> => {
-    try {
-        await SecureStore.setItemAsync('auth_token', token)
-    } catch (error) {
-        console.error('Failed to save auth token:', error)
-    }
+	try {
+		await SecureStore.setItemAsync('auth_token', token)
+	} catch (error) {
+		console.error('Failed to save auth token:', error)
+	}
 }
 
 /**
@@ -58,23 +58,23 @@ export const saveAuthToken = async (token: string): Promise<void> => {
  * @returns Auth token or null if not found
  */
 export const getAuthToken = async (): Promise<string | null> => {
-    try {
-        return await SecureStore.getItemAsync('auth_token')
-    } catch (error) {
-        console.error('Failed to get auth token:', error)
-        return null
-    }
+	try {
+		return await SecureStore.getItemAsync('auth_token')
+	} catch (error) {
+		console.error('Failed to get auth token:', error)
+		return null
+	}
 }
 
 /**
  * Clear auth token from SecureStore
  */
 export const clearAuthToken = async (): Promise<void> => {
-    try {
-        await SecureStore.deleteItemAsync('auth_token')
-    } catch (error) {
-        console.error('Failed to clear auth token:', error)
-    }
+	try {
+		await SecureStore.deleteItemAsync('auth_token')
+	} catch (error) {
+		console.error('Failed to clear auth token:', error)
+	}
 }
 
 /**
@@ -82,11 +82,11 @@ export const clearAuthToken = async (): Promise<void> => {
  * @param refreshToken - Refresh token to save
  */
 export const saveRefreshToken = async (refreshToken: string): Promise<void> => {
-    try {
-        await SecureStore.setItemAsync('refresh_token', refreshToken)
-    } catch (error) {
-        console.error('Failed to save refresh token:', error)
-    }
+	try {
+		await SecureStore.setItemAsync('refresh_token', refreshToken)
+	} catch (error) {
+		console.error('Failed to save refresh token:', error)
+	}
 }
 
 /**
@@ -94,28 +94,28 @@ export const saveRefreshToken = async (refreshToken: string): Promise<void> => {
  * @returns Refresh token or null if not found
  */
 export const getRefreshToken = async (): Promise<string | null> => {
-    try {
-        return await SecureStore.getItemAsync('refresh_token')
-    } catch (error) {
-        console.error('Failed to get refresh token:', error)
-        return null
-    }
+	try {
+		return await SecureStore.getItemAsync('refresh_token')
+	} catch (error) {
+		console.error('Failed to get refresh token:', error)
+		return null
+	}
 }
 
 /**
  * Clear refresh token from SecureStore
  */
 export const clearRefreshToken = async (): Promise<void> => {
-    try {
-        await SecureStore.deleteItemAsync('refresh_token')
-    } catch (error) {
-        console.error('Failed to clear refresh token:', error)
-    }
+	try {
+		await SecureStore.deleteItemAsync('refresh_token')
+	} catch (error) {
+		console.error('Failed to clear refresh token:', error)
+	}
 }
 
 /**
  * Clear all auth data from SecureStore
  */
 export const clearAuthData = async (): Promise<void> => {
-    await Promise.all([clearUserId(), clearAuthToken(), clearRefreshToken()])
+	await Promise.all([clearUserId(), clearAuthToken(), clearRefreshToken()])
 }

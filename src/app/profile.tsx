@@ -5,5 +5,5 @@ import { ProfileScreen } from '@/pages/profile'
  * AuthGuard is already inside ProfileScreen
  */
 export default function ProfilePage() {
-    return <ProfileScreen />
+	return <ProfileScreen />
 }

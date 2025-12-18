@@ -5,12 +5,12 @@
  */
 //import * as ScreenOrientation from 'expo-screen-orientation'
 import {
-    View,
-    Text,
-    Animated,
-    type StyleProp,
-    type ViewStyle,
-    Platform,
+	View,
+	Text,
+	Animated,
+	type StyleProp,
+	type ViewStyle,
+	Platform,
 } from 'react-native'
 import { Accelerometer } from 'expo-sensors'
 import { useState, useEffect, useRef } from 'react'
@@ -29,196 +29,196 @@ interface GyroscopeLevelScreenProps {
 }
 
 export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScreenProps) {
-    const [angle, setAngle] = useState(0)
-    const [isCalibrated, setIsCalibrated] = useState(false)
-    const [isAvailable, setIsAvailable] = useState<boolean | null>(null)
+	const [angle, setAngle] = useState(0)
+	const [isCalibrated, setIsCalibrated] = useState(false)
+	const [isAvailable, setIsAvailable] = useState<boolean | null>(null)
 
-    // Анимация поворота — остаётся в Animated (натив)
-    const barRotation = useRef(new Animated.Value(0)).current
+	// Анимация поворота — остаётся в Animated (натив)
+	const barRotation = useRef(new Animated.Value(0)).current
 
-    // Цвет — уходим от Animated.Value, используем состояние
-    const [barStyle, setBarStyle] = useState<StyleProp<ViewStyle>>({
-        width: isVertical ? 170 : 450,
-        height: 4,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 2,
-    })
+	// Цвет — уходим от Animated.Value, используем состояние
+	const [barStyle, setBarStyle] = useState<StyleProp<ViewStyle>>({
+		width: isVertical ? 170 : 450,
+		height: 4,
+		backgroundColor: '#FFFFFF',
+		borderRadius: 2,
+	})
 
-    const isFocused = useIsFocused()
+	const isFocused = useIsFocused()
 
-    useEffect(() => {
-        let subscription: { remove: () => void } | null = null
-        let keepAwakeActivated = false
+	useEffect(() => {
+		let subscription: { remove: () => void } | null = null
+		let keepAwakeActivated = false
 
-        const init = async () => {
-            try {
-                await activateKeepAwakeAsync()
-                keepAwakeActivated = true
+		const init = async () => {
+			try {
+				await activateKeepAwakeAsync()
+				keepAwakeActivated = true
 
-                const available = await Accelerometer.isAvailableAsync()
-                setIsAvailable(available)
-                if (!available || !isFocused) return
+				const available = await Accelerometer.isAvailableAsync()
+				setIsAvailable(available)
+				if (!available || !isFocused) return
 
-                Accelerometer.setUpdateInterval(100)
+				Accelerometer.setUpdateInterval(100)
 
-                subscription = Accelerometer.addListener(({ x, y, z }) => {
-                    let angleDeg: number
-                    let isAligned: boolean
+				subscription = Accelerometer.addListener(({ x, y, z }) => {
+					let angleDeg: number
+					let isAligned: boolean
 
-                    if (isVertical) {
-                        // Угол наклона вперед-назад, когда телефон стоит вертикально
-                        // y ≈ -1 когда телефон вертикален, z показывает наклон вперед/назад
-                        const angleRad = Math.atan2(z, Math.abs(y))
-                        angleDeg = Math.round((angleRad * 180) / Math.PI)
+					if (isVertical) {
+						// Угол наклона вперед-назад, когда телефон стоит вертикально
+						// y ≈ -1 когда телефон вертикален, z показывает наклон вперед/назад
+						const angleRad = Math.atan2(z, Math.abs(y))
+						angleDeg = Math.round((angleRad * 180) / Math.PI)
 
-                        // Телефон вертикален, когда angleDeg близок к 0
-                        isAligned = Math.abs(angleDeg) <= 5
-                    } else {
-                        // Для горизонтального положения: проверяем перпендикулярность экрана к поверхности
-                        // Когда экран перпендикулярен поверхности, телефон повернут на 90° относительно горизонтали
-                        // Используем x и z для расчета угла наклона в горизонтальной плоскости
-                        const angleRad = Math.atan2(x, Math.abs(z))
-                        angleDeg = Math.round((angleRad * 180) / Math.PI)
+						// Телефон вертикален, когда angleDeg близок к 0
+						isAligned = Math.abs(angleDeg) <= 5
+					} else {
+						// Для горизонтального положения: проверяем перпендикулярность экрана к поверхности
+						// Когда экран перпендикулярен поверхности, телефон повернут на 90° относительно горизонтали
+						// Используем x и z для расчета угла наклона в горизонтальной плоскости
+						const angleRad = Math.atan2(x, Math.abs(z))
+						angleDeg = Math.round((angleRad * 180) / Math.PI)
 
-                        // Экран перпендикулярен поверхности, когда угол близок к 90° или -90°
-                        // Проверяем отклонение от 90° (или -90°)
-                        const deviationFrom90 = Math.abs(Math.abs(angleDeg) - 90)
-                        isAligned = deviationFrom90 <= 5
-                    }
+						// Экран перпендикулярен поверхности, когда угол близок к 90° или -90°
+						// Проверяем отклонение от 90° (или -90°)
+						const deviationFrom90 = Math.abs(Math.abs(angleDeg) - 90)
+						isAligned = deviationFrom90 <= 5
+					}
 
-                    setAngle(angleDeg)
+					setAngle(angleDeg)
 
-                    // Анимация полоски
-                    // Для горизонтального положения нормализуем угол, чтобы полоска была горизонтальной при 0°
-                    const normalizedAngle = isVertical
-                        ? angleDeg
-                        : angleDeg >= 0
-                            ? angleDeg - 90
-                            : angleDeg + 90
-                    Animated.timing(barRotation, {
-                        toValue: normalizedAngle,
-                        duration: 100,
-                        useNativeDriver: true,
-                    }).start()
+					// Анимация полоски
+					// Для горизонтального положения нормализуем угол, чтобы полоска была горизонтальной при 0°
+					const normalizedAngle = isVertical
+						? angleDeg
+						: angleDeg >= 0
+							? angleDeg - 90
+							: angleDeg + 90
+					Animated.timing(barRotation, {
+						toValue: normalizedAngle,
+						duration: 100,
+						useNativeDriver: true,
+					}).start()
 
-                    setIsCalibrated(isAligned)
+					setIsCalibrated(isAligned)
 
-                    setBarStyle({
-                        width: isVertical ? 170 : 450,
-                        height: 4,
-                        borderRadius: 2,
-                        backgroundColor: isAligned ? '#C5F680' : '#FFFFFF',
-                    })
-                })
-            } catch (error) {
-                setIsAvailable(false)
-                console.error('Accelerometer setup error:', error)
-            }
-        }
+					setBarStyle({
+						width: isVertical ? 170 : 450,
+						height: 4,
+						borderRadius: 2,
+						backgroundColor: isAligned ? '#C5F680' : '#FFFFFF',
+					})
+				})
+			} catch (error) {
+				setIsAvailable(false)
+				console.error('Accelerometer setup error:', error)
+			}
+		}
 
-        init()
+		init()
 
-        return () => {
-            if (subscription) subscription.remove()
-            if (keepAwakeActivated) {
-                deactivateKeepAwake()
-            }
-        }
-    }, [isFocused, isVertical])
+		return () => {
+			if (subscription) subscription.remove()
+			if (keepAwakeActivated) {
+				deactivateKeepAwake()
+			}
+		}
+	}, [isFocused, isVertical])
 
-    const handleStop = () => {
-        router.back()
-    }
+	const handleStop = () => {
+		router.back()
+	}
 
-    return (
-        <View className="flex-1 items-center">
-            {/* Close Button */}
-            <View className={`absolute ${isVertical ? 'right-5' : 'right-16 top-5'} z-10`}>
-                <CloseBtn handlePress={handleStop} classNames={'h-12 w-12 rounded-2xl'} />
-            </View>
+	return (
+		<View className="flex-1 items-center">
+			{/* Close Button */}
+			<View className={`absolute ${isVertical ? 'right-5' : 'right-16 top-5'} z-10`}>
+				<CloseBtn handlePress={handleStop} classNames={'h-12 w-12 rounded-2xl'} />
+			</View>
 
-            {/* Progress Dots */}
-            <View
-                className={`absolute left-1/2 -translate-x-1/2 ${isVertical ? 'top-10' : 'top-5'} z-10`}
-            >
-                <DotsProgress total={4} current={3} variant="onboarding" />
-            </View>
-            {/* Content */}
-            <View className="w-full flex-1 items-center justify-center pt-20">
-                {/* Gyroscope Visualizer */}
-                <View className="w-full flex-row items-center justify-center px-6">
-                    {/* Left side bar */}
-                    <View
-                        style={{
-                            width: 80,
-                            height: 4,
-                            backgroundColor: (barStyle as ViewStyle)?.backgroundColor || '#6e6e6e', //!isCalibrated ? 'green' : 'red',
-                            borderRadius: 2,
-                        }}
-                    />
+			{/* Progress Dots */}
+			<View
+				className={`absolute left-1/2 -translate-x-1/2 ${isVertical ? 'top-10' : 'top-5'} z-10`}
+			>
+				<DotsProgress total={4} current={3} variant="onboarding" />
+			</View>
+			{/* Content */}
+			<View className="w-full flex-1 items-center justify-center pt-20">
+				{/* Gyroscope Visualizer */}
+				<View className="w-full flex-row items-center justify-center px-6">
+					{/* Left side bar */}
+					<View
+						style={{
+							width: 80,
+							height: 4,
+							backgroundColor: (barStyle as ViewStyle)?.backgroundColor || '#6e6e6e', //!isCalibrated ? 'green' : 'red',
+							borderRadius: 2,
+						}}
+					/>
 
-                    {/* Main animated bar */}
-                    <Animated.View
-                        style={[
-                            {
-                                transform: [
-                                    {
-                                        rotate: barRotation.interpolate({
-                                            inputRange: [-45, 0, 45], // отклонения влево и вправо
-                                            outputRange: ['-45deg', '0deg', '45deg'],
-                                        }),
-                                    },
-                                ],
-                            },
-                            barStyle,
-                        ]}
-                    />
+					{/* Main animated bar */}
+					<Animated.View
+						style={[
+							{
+								transform: [
+									{
+										rotate: barRotation.interpolate({
+											inputRange: [-45, 0, 45], // отклонения влево и вправо
+											outputRange: ['-45deg', '0deg', '45deg'],
+										}),
+									},
+								],
+							},
+							barStyle,
+						]}
+					/>
 
-                    {/* Right side bar */}
-                    <View
-                        style={{
-                            width: 80,
-                            height: 4,
-                            backgroundColor: (barStyle as ViewStyle)?.backgroundColor || '#6e6e6e',
-                            borderRadius: 2,
-                        }}
-                    />
-                </View>
+					{/* Right side bar */}
+					<View
+						style={{
+							width: 80,
+							height: 4,
+							backgroundColor: (barStyle as ViewStyle)?.backgroundColor || '#6e6e6e',
+							borderRadius: 2,
+						}}
+					/>
+				</View>
 
-                <Text
-                    className={`text-center text-h1 ${isAvailable !== false && !isCalibrated ? 'text-light-text-100' : 'text-brand-green-500'} ${isVertical ? 'mb-12 mt-4' : ''}`}
-                >
-                    {isVertical ? angle : IS_IOS ? angle + 180 : angle - 90}°
-                </Text>
-            </View>
+				<Text
+					className={`text-center text-h1 ${isAvailable !== false && !isCalibrated ? 'text-light-text-100' : 'text-brand-green-500'} ${isVertical ? 'mb-12 mt-4' : ''}`}
+				>
+					{isVertical ? angle : IS_IOS ? angle + 180 : angle - 90}°
+				</Text>
+			</View>
 
-            {/* Text and Button Section */}
-            <View
-                className={`px-6 pb-10 ${isVertical ? 'w-full' : 'w-1/2 items-center justify-center'}`}
-            >
-                {/* Title */}
-                <Text className="mb-3 text-left text-h2 font-bold text-light-text-100">
+			{/* Text and Button Section */}
+			<View
+				className={`px-6 pb-10 ${isVertical ? 'w-full' : 'w-1/2 items-center justify-center'}`}
+			>
+				{/* Title */}
+				<Text className="mb-3 text-left text-h2 font-bold text-light-text-100">
 					Проверьте уровень
-                </Text>
+				</Text>
 
-                {/* Description */}
-                <Text
-                    className={`text-left text-t2 leading-6 text-light-text-500 ${isVertical ? 'mb-20' : 'mb-10'}`}
-                >
+				{/* Description */}
+				<Text
+					className={`text-left text-t2 leading-6 text-light-text-500 ${isVertical ? 'mb-20' : 'mb-10'}`}
+				>
 					Поставьте телефон так, чтобы он стоял ровно и градус наклона был равен 0
-                </Text>
+				</Text>
 
-                {/* Button */}
+				{/* Button */}
 
-                <Button
-                    variant="primary"
-                    onPress={onNext}
-                    disabled={isAvailable !== false && !isCalibrated}
-                    className={isVertical ? 'w-full' : 'w-1/2'}
-                >
+				<Button
+					variant="primary"
+					onPress={onNext}
+					disabled={isAvailable !== false && !isCalibrated}
+					className={isVertical ? 'w-full' : 'w-1/2'}
+				>
 					Далее
-                </Button>
-            </View>
-        </View>
-    )
+				</Button>
+			</View>
+		</View>
+	)
 }
