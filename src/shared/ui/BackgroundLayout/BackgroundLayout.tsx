@@ -26,9 +26,9 @@ export const BackgroundLayout = ({
 
 const styles = StyleSheet.create({
 	container: {
+		borderRadius: 30,
 		flex: 1,
 		backgroundColor: '#1E1E1E', // BG/Dark 500 BG - контентный контейнер
-		paddingHorizontal: '4%',
 		position: 'relative', // Для позиционирования элементов
 		zIndex: 3, // Поверх браслета и заголовка
 		overflow: 'hidden', // Для корректного отображения градиента

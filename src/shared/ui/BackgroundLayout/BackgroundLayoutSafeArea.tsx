@@ -9,7 +9,7 @@ import { GradientBg } from '@/shared/ui/GradientBG'
  */
 
 type Props = { children: React.ReactNode; hasSidePadding?: boolean; needBg?: boolean }
-export const BackgroundLayoutNoSidePadding = ({
+export const BackgroundLayoutSafeArea = ({
 	children,
 	hasSidePadding = true,
 	needBg = true,

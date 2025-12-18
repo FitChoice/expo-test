@@ -32,7 +32,7 @@ interface SafeAreaContainerProps {
 
 export const SafeAreaContainer = ({
 	children,
-	edges = ['top', 'left', 'right'],
+	edges = ['top', 'left', 'right', 'bottom'],
 	style,
 }: SafeAreaContainerProps) => {
 	return (

@@ -8,10 +8,11 @@ import {
 	Text,
 	Keyboard,
 	TouchableWithoutFeedback,
+	StatusBar,
 } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SecureStore from 'expo-secure-store'
-import { Button, BackButton, MaskedText, BackgroundLayout, Input } from '@/shared/ui'
+import { Button, BackButton, MaskedText, BackgroundLayout, Input, BackgroundLayoutNoSidePadding } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { authApi } from '@/features/auth'
@@ -19,13 +20,18 @@ import { authApi } from '@/features/auth'
 import braceletImage from '../../../../assets/images/ultra-realistic-silicone.png'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Loader } from '@/shared/ui/Loader/Loader'
+import VkIcon from '@/assets/social_icons/VK.svg'
+import TelegramIcon from '@/assets/social_icons/Telegram.svg'
+import YandexIcon from '@/assets/social_icons/Yandex.svg'
+import GoogleIcon from '@/assets/social_icons/Google.svg'
 
 // Константы для MaskedText
 const TEXT_CONFIG = {
-	width: 400,
-	height: 40,
-	y: 20,
-	fontSize: 29.64,
+	// Опираемся на tailwind h1 (48px) из tailwind.config.cjs
+	width: 360,
+	height: 60,
+	y: 48,
+	fontSize: 30,
 	fill: '#FFFFFF',
 	letterSpacing: '-0.03',
 	textAlign: 'middle' as const,
@@ -33,10 +39,11 @@ const TEXT_CONFIG = {
 }
 
 const MASK_RECT = {
-	x: 160, // 40% от 400px
+	// ~40% от ширины, чтобы "подсветка" совпадала с макетом
+	x: 144, // 40% от 360px
 	y: 0,
-	width: 240, // 60% от 400px
-	height: 160,
+	width: 216, // 60% от 360px
+	height: 200,
 }
 
 /**
@@ -110,83 +117,64 @@ export const AuthScreen = () => {
 	}
 
 	return (
-		<View className="flex-1 bg-bg-dark-900 px-2 py-4">
-			<BackgroundLayout styles={{ borderRadius: 32 }}>
+		<BackgroundLayoutNoSidePadding needBg={false} >
+			<View className='flex-1'>
+	          <BackgroundLayout>
+	
 				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-					<View className="flex-1 justify-between px-4 pt-[14px]">
+					<View className="flex-1 justify-between px-4 py-4">
 						{/* Кнопка возврата назад */}
-						<BackButton onPress={() => router.push('/')} />
+						{/* Мы уже добавили спейсер на высоту safe-area сверху, поэтому не дублируем insets внутри BackButton */}
+						<BackButton onPress={() => router.push('/')} style={{ top: 14, left:10 }} />
 
 						{/* Основной контент */}
 						<View className="relative z-[3] flex-1">
-							{/* Группа с браслетом и заголовком */}
-							<Animated.View
-								style={{
-									position: 'absolute',
-									top: '-35%',
-									left: '42%',
-									height: '120%',
-									width: '110%',
-									transform: [{ translateX: '-50%' }],
-									alignItems: 'center',
-									justifyContent: 'flex-start',
-									zIndex: 1,
-									opacity: braceletOpacity,
-								}}
-							>
-								{/* Текст позади изображения */}
-								<View
-									style={{
-										position: 'absolute',
-										top: '45%',
-										left: 0,
-										right: 0,
-										height: TEXT_CONFIG.height,
-										alignItems: 'center',
-										justifyContent: 'center',
-									}}
-								>
-									<MaskedText text="вход в аккаунт" {...TEXT_CONFIG} />
-								</View>
+							{/* Группа с браслетом и заголовком (центрируем, не тянем картинку слишком сильно) */}
+							<Animated.View className="items-center" style={{ opacity: braceletOpacity }}>
+								<View className="relative w-full items-center" style={{ height: 260 }}>
+									{/* Текст позади изображения */}
+									<View
+										style={{
+											position: 'absolute',
+											top: 120,
+											left: '50%',
+											width: TEXT_CONFIG.width,
+											height: TEXT_CONFIG.height,
+											transform: [{ translateX: -TEXT_CONFIG.width / 2 }],
+										}}
+									>
+										<MaskedText text="ВХОД В АККАУНТ" {...TEXT_CONFIG} />
+									</View>
 
-								{/* Изображение браслета */}
-								<RNImage
-									source={braceletImage}
-									style={{
-										position: 'absolute',
-										top: '2%',
-										left: '8%',
-										width: '100%',
-										height: '100%',
-									}}
-									resizeMode="contain"
-								/>
-
-								{/* Текст перед изображением */}
-								<View
-									style={{
-										position: 'absolute',
-										top: '45%',
-										left: 0,
-										right: 0,
-										height: TEXT_CONFIG.height,
-										alignItems: 'center',
-										justifyContent: 'center',
-									}}
-								>
-									<MaskedText
-										text="вход в аккаунт"
-										{...TEXT_CONFIG}
-										maskRect={MASK_RECT}
+									{/* Изображение браслета */}
+									<RNImage
+										source={braceletImage}
+										style={{
+											width: 420,
+											height: 320,
+											marginTop: 45,
+										}}
+										resizeMode="contain"
 									/>
+
+									{/* Текст перед изображением (маска) */}
+									<View
+										style={{
+											position: 'absolute',
+											top: 120,
+											left: '50%',
+											width: TEXT_CONFIG.width,
+											height: TEXT_CONFIG.height,
+											transform: [{ translateX: -TEXT_CONFIG.width / 2 }],
+										}}
+									>
+										<MaskedText text="ВХОД В АККАУНТ" {...TEXT_CONFIG} maskRect={MASK_RECT} />
+									</View>
 								</View>
 							</Animated.View>
 
 							{/* Форма */}
-							<Animated.View
-								className="absolute top-[40%] z-10 w-[100%] gap-4"
-								style={{ transform: [{ translateY }] }}
-							>
+							<Animated.View className="gap-4" style={{ transform: [{ translateY }] }}>
 								<Input
 									label="Электронная почта"
 									placeholder="example@provider.com"
@@ -209,36 +197,79 @@ export const AuthScreen = () => {
 									size="default"
 								/>
 
+								{/* Отступ как в макете: 8px */}
 								<View className="flex-row justify-end">
-									<Pressable
-										onPress={() => router.push('/forgot-password')}
-										className="mt-1"
-									>
-										<Text className="text-sm text-light-text-200">Забыли пароль?</Text>
+									<Pressable onPress={() => router.push('/forgot-password')} className="mt-2">
+										<Text className="text-t3-regular text-light-text-200">Забыли пароль?</Text>
 									</Pressable>
 								</View>
 							</Animated.View>
 						</View>
 
 						{/* Кнопки внизу экрана */}
-						<View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
+						<View
+							className="gap-4"
+							
+						>
 							{/* Кнопка входа */}
 							<Animated.View className="w-full" style={{ transform: [{ translateY }] }}>
 								<Button
 									variant="primary"
-									size="l"
 									fullWidth
 									onPress={handleSubmit}
 									disabled={!email || !password || !!emailError || isLoading}
-									className="h-14"
 								>
 									{isLoading ? 'Вход...' : 'Войти'}
 								</Button>
 							</Animated.View>
+
+						
 						</View>
+						
 					</View>
+					
 				</TouchableWithoutFeedback>
-			</BackgroundLayout>
-		</View>
+				</BackgroundLayout>
+				</View>
+				{/* Социальный вход */}
+				<View className="flex-row justify-between pt-5">
+								<Pressable
+									onPress={() => Alert.alert('Скоро', 'Авторизация через VK будет добавлена позже')}
+									className="p-5  items-center justify-center rounded-full bg-white"
+									accessibilityRole="button"
+									accessibilityLabel="Continue with VK"
+								>
+									<VkIcon width={44} height={44}/>
+								</Pressable>
+
+								<Pressable
+									onPress={() => Alert.alert('Скоро', 'Авторизация через Telegram будет добавлена позже')}
+									className="p-5 items-center justify-center rounded-full bg-white"
+									accessibilityRole="button"
+									accessibilityLabel="Continue with Telegram"
+								>
+									<TelegramIcon width={44} height={44} />
+								</Pressable>
+
+								<Pressable
+									onPress={() => Alert.alert('Скоро', 'Авторизация через Яндекс будет добавлена позже')}
+									className="p-5  items-center justify-center rounded-full bg-white"
+									accessibilityRole="button"
+									accessibilityLabel="Continue with Yandex"
+								>
+									<YandexIcon width={44} height={44} />
+								</Pressable>
+
+								<Pressable
+									onPress={() => Alert.alert('Скоро', 'Авторизация через Google будет добавлена позже')}
+									className="p-5 items-center justify-center rounded-full bg-white"
+									accessibilityRole="button"
+									accessibilityLabel="Continue with Google"
+								>
+									<GoogleIcon width={44} height={44} />
+								</Pressable>
+				</View>
+
+		</BackgroundLayoutNoSidePadding>
 	)
 }
