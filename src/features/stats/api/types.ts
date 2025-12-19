@@ -50,10 +50,18 @@ export interface TrainingItem {
 }
 
 export interface TrainingsResponse {
-	limit: number
-	page: number
-	trainings: TrainingItem[]
-}
+	limit: number,
+	page: number,
+	trainings: [
+	  {
+		date: string,
+		duration: number,
+		id: number,
+		title: string,
+		type: string
+	  }
+	]
+  }
 
 export interface DayDiary {
 	filled: boolean

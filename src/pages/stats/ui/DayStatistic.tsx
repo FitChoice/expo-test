@@ -38,7 +38,7 @@ const OVERALL_STATS_CONFIG: OverallStatConfig[] = [
 	},
 	{
 		icon: <Morning color="#aaec4d" fill="#aaec4d" />,
-		label: 'Энергии',
+		label: 'Зарядок',
 		key: 'quality_growth',
 	},
 	{
