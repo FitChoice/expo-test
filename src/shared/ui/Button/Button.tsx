@@ -1,7 +1,7 @@
 import { forwardRef, useState, cloneElement, isValidElement } from 'react'
 import { Text, TouchableOpacity, type View, Platform, StyleSheet } from 'react-native'
 import { type ButtonProps } from './types'
-import { buttonVariantStyles, buttonSizeStyles, baseButtonStyles } from './styles'
+import { buttonVariantStyles, buttonSizeStyles, baseButtonStyles, baseButtonTextStyles } from './styles'
 
 // Универсальный компонент кнопки
 // Варианты: primary, secondary, special, tertiary, ghost
@@ -51,6 +51,7 @@ export const Button = forwardRef<View, ButtonProps>(
 
 		// Формируем классы для текста
 		const textClasses = [
+			baseButtonTextStyles,
 			sizeStyle.text,
 			variantStyle[
 				`text${currentState.charAt(0).toUpperCase() + currentState.slice(1)}` as keyof typeof variantStyle

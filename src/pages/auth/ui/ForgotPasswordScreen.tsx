@@ -6,9 +6,12 @@ import {
 	Alert,
 	TouchableWithoutFeedback,
 	Keyboard,
+	useWindowDimensions,
 } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
-import { Button, BackButton, BackgroundLayout, Input } from '@/shared/ui'
+import {
+	Button, BackButton, Input, SafeAreaContainer, BackgroundLayout,
+} from '@/shared/ui'
 import { useOrientation } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -16,6 +19,11 @@ import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 import { authApi } from '@/features/auth'
 import { Loader } from '@/shared/ui/Loader/Loader'
 import { userApi } from '@/features/user'
+import {
+	BackgroundLayoutSafeArea
+} from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
+
+
 
 /**
  * Страница восстановления пароля
@@ -24,6 +32,9 @@ import { userApi } from '@/features/user'
 type CurrentStep = 'enter_email' | 'enter_code' | 'new_password'
 export const ForgotPasswordScreen = () => {
 	const router = useRouter()
+
+	const { height: SCREEN_HEIGHT } = useWindowDimensions()
+
 	const [isLoading, setIsLoading] = useState(false)
 	const [email, setEmail] = useState('')
 	const [emailCode, setEmailCode] = useState('')
@@ -243,7 +254,7 @@ export const ForgotPasswordScreen = () => {
 			case 'enter_email':
 				return (
 					<>
-						<View className="flex-1 justify-start pt-40">
+						<View className="flex-1 justify-start pt-20">
 							<Animated.View className="gap-20">
 								<View className="gap-3">
 									<Text style={sharedStyles.titleCenter}>
@@ -428,15 +439,18 @@ export const ForgotPasswordScreen = () => {
 	}
 
 	return (
-		<View className="flex-1 bg-bg-dark-900 px-2 py-4">
-			<BackgroundLayout styles={{ borderRadius: 32 }}>
+		<BackgroundLayoutSafeArea needBg={false}>
+				<View className="flex-1">
+					<BackgroundLayout styles={{paddingHorizontal: 16}}>
 				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 					<View className="flex-1">
-						<BackButton onPress={() => router.back()} />
+
 						{renderContent()}
 					</View>
 				</TouchableWithoutFeedback>
-			</BackgroundLayout>
-		</View>
+					</BackgroundLayout>
+				</View>
+
+		</BackgroundLayoutSafeArea>
 	)
 }

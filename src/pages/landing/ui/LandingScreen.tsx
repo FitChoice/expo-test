@@ -36,7 +36,7 @@ export const LandingScreen = () => {
 			<View className="flex-1 bg-bg-dark-500">
 				<SafeAreaContainer>
 					{/* Верхний контейнер Frame 48097890 */}
-					<View className="relative h-[60%] w-[99%] overflow-hidden rounded-[40px] bg-bg-dark-900">
+					<View className="relative h-[64%] w-[99%] overflow-hidden rounded-[40px] bg-bg-dark-900">
 						<View
 							className="absolute items-center justify-center bg-bg-dark-400"
 							style={{
@@ -131,7 +131,7 @@ export const LandingScreen = () => {
 					</View>
 
 					{/* Нижний контейнер Frame 48097894 */}
-					<View className="relative mx-[3.6%] mb-[3.6%] h-[38.6%] w-[92.8%] rounded-[40px] bg-[#4B4B4B]">
+					<View className="relative mx-[3.6%] h-[38.6%] w-[92.8%]">
 						{/* Фотокарточка Group 310 */}
 						<View className="absolute left-0 top-0 h-full w-full overflow-hidden rounded-[40px]">
 							<RNImage

@@ -3,6 +3,7 @@ import { View, TextInput, Text, TouchableOpacity, Pressable, Image } from 'react
 import { type InputProps } from './types'
 import { SimpleIcon } from '../Icon/SimpleIcon'
 import { Icon } from '../Icon/Icon'
+import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 
 // Универсальный Input компонент
 // Варианты: text, password, dropdown, textarea
@@ -229,7 +230,7 @@ export const Input = forwardRef<TextInput, InputProps>(
 				{/* Label with optional tooltip */}
 				{label && (
 					<View className="mb-3 flex-row items-center gap-1">
-						<Text className="font-[Onest] text-sm text-light-text-200">{label}</Text>
+						<Text   className="font-inter text-light-text-200">{label}</Text>
 						{showTooltip && <SimpleIcon name="info" size={16} color="#FFFFFF" />}
 					</View>
 				)}

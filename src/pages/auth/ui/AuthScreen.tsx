@@ -9,6 +9,7 @@ import {
 	Keyboard,
 	TouchableWithoutFeedback,
 	StatusBar,
+	useWindowDimensions,
 } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SecureStore from 'expo-secure-store'
@@ -24,6 +25,9 @@ import VkIcon from '@/assets/social_icons/VK.svg'
 import TelegramIcon from '@/assets/social_icons/Telegram.svg'
 import YandexIcon from '@/assets/social_icons/Yandex.svg'
 import GoogleIcon from '@/assets/social_icons/Google.svg'
+import {
+	BackgroundLayoutSafeArea
+} from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
 
 // Константы для MaskedText
 const TEXT_CONFIG = {
@@ -51,16 +55,13 @@ const MASK_RECT = {
  */
 export const AuthScreen = () => {
 	const router = useRouter()
+	const { height: SCREEN_HEIGHT } = useWindowDimensions()
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [emailError, setEmailError] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
 	const insets = useSafeAreaInsets()
-	// Используем хук для анимации клавиатуры
-	const { translateY, opacity: braceletOpacity } = useKeyboardAnimation({
-		animateOpacity: true,
-		offsetMultiplier: 0.3,
-	})
+
 
 	// Блокируем поворот экрана в портретную ориентацию
 	useOrientation(ScreenOrientation.OrientationLock.PORTRAIT_UP)
@@ -117,159 +118,153 @@ export const AuthScreen = () => {
 	}
 
 	return (
-		<BackgroundLayoutNoSidePadding needBg={false} >
-			<View className='flex-1'>
-	          <BackgroundLayout>
-	
-				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-					<View className="flex-1 justify-between px-4 py-4">
-						{/* Кнопка возврата назад */}
-						{/* Мы уже добавили спейсер на высоту safe-area сверху, поэтому не дублируем insets внутри BackButton */}
-						<BackButton onPress={() => router.push('/')} style={{ top: 14, left:10 }} />
+		<BackgroundLayoutSafeArea needBg={false}>
+			<View style={{ height: SCREEN_HEIGHT - insets.top - insets.bottom }}>
+				<View className="flex-1">
+					<BackgroundLayout>
+						<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+							<View className="flex-1 justify-between px-4">
+								{/* Кнопка возврата назад */}
+								{/* Мы уже добавили спейсер на высоту safe-area сверху, поэтому не дублируем insets внутри BackButton */}
+								<BackButton onPress={() => router.push('/')} style={{ top: 14, left: 10 }} />
 
-						{/* Основной контент */}
-						<View className="relative z-[3] flex-1">
-							{/* Группа с браслетом и заголовком (центрируем, не тянем картинку слишком сильно) */}
-							<Animated.View className="items-center" style={{ opacity: braceletOpacity }}>
-								<View className="relative w-full items-center" style={{ height: 260 }}>
-									{/* Текст позади изображения */}
-									<View
-										style={{
-											position: 'absolute',
-											top: 120,
-											left: '50%',
-											width: TEXT_CONFIG.width,
-											height: TEXT_CONFIG.height,
-											transform: [{ translateX: -TEXT_CONFIG.width / 2 }],
-										}}
+								{/* Основной контент */}
+								<View className="relative z-[3] flex-1">
+									{/* Группа с браслетом и заголовком (центрируем, не тянем картинку слишком сильно) */}
+
+									<Animated.View
+										className="relative w-full items-center"
+										style={{ height: 260 }}
 									>
-										<MaskedText text="ВХОД В АККАУНТ" {...TEXT_CONFIG} />
-									</View>
+										{/* Текст позади изображения */}
+										<View
+											style={{
+												position: 'absolute',
+												top: 120,
+												left: '50%',
+												width: TEXT_CONFIG.width,
+												height: TEXT_CONFIG.height,
+												transform: [{ translateX: -TEXT_CONFIG.width / 2 }],
+											}}
+										>
+											<MaskedText text="ВХОД В АККАУНТ" {...TEXT_CONFIG} />
+										</View>
 
-									{/* Изображение браслета */}
-									<RNImage
-										source={braceletImage}
-										style={{
-											width: 420,
-											height: 320,
-											marginTop: 45,
-										}}
-										resizeMode="contain"
+										{/* Изображение браслета */}
+										<RNImage
+											source={braceletImage}
+											style={{
+												width: 420,
+												height: 320,
+												marginTop: 45,
+											}}
+											resizeMode="contain"
+										/>
+
+										{/* Текст перед изображением (маска) */}
+										<View
+											style={{
+												position: 'absolute',
+												top: 120,
+												left: '50%',
+												width: TEXT_CONFIG.width,
+												height: TEXT_CONFIG.height,
+												transform: [{ translateX: -TEXT_CONFIG.width / 2 }],
+											}}
+										>
+											<MaskedText text="ВХОД В АККАУНТ" {...TEXT_CONFIG} maskRect={MASK_RECT} />
+										</View>
+									</Animated.View>
+
+									{/* Форма */}
+
+									<Input
+										label="Электронная почта"
+										placeholder="example@provider.com"
+										value={email}
+										onChangeText={setEmail}
+										onFocus={handleEmailFocus}
+										onBlur={handleEmailBlur}
+										keyboardType="email-address"
+										variant="text"
+										size="default"
+										error={emailError}
 									/>
 
-									{/* Текст перед изображением (маска) */}
-									<View
-										style={{
-											position: 'absolute',
-											top: 120,
-											left: '50%',
-											width: TEXT_CONFIG.width,
-											height: TEXT_CONFIG.height,
-											transform: [{ translateX: -TEXT_CONFIG.width / 2 }],
-										}}
-									>
-										<MaskedText text="ВХОД В АККАУНТ" {...TEXT_CONFIG} maskRect={MASK_RECT} />
+									<Input
+										label="Пароль"
+										placeholder="Пароль"
+										value={password}
+										onChangeText={setPassword}
+										variant="password"
+										size="default"
+									/>
+
+									{/* Отступ как в макете: 8px */}
+									<View className="flex-row justify-end">
+										<Pressable onPress={() => router.push('/forgot-password')} className="mt-2">
+											<Text className="text-t3-regular text-light-text-200">Забыли пароль?</Text>
+										</Pressable>
 									</View>
 								</View>
-							</Animated.View>
 
-							{/* Форма */}
-							<Animated.View className="gap-4" style={{ transform: [{ translateY }] }}>
-								<Input
-									label="Электронная почта"
-									placeholder="example@provider.com"
-									value={email}
-									onChangeText={setEmail}
-									onFocus={handleEmailFocus}
-									onBlur={handleEmailBlur}
-									keyboardType="email-address"
-									variant="text"
-									size="default"
-									error={emailError}
-								/>
+								{/* Кнопки внизу экрана */}
+								<View className="gap-4">
+									{/* Кнопка входа */}
 
-								<Input
-									label="Пароль"
-									placeholder="Пароль"
-									value={password}
-									onChangeText={setPassword}
-									variant="password"
-									size="default"
-								/>
-
-								{/* Отступ как в макете: 8px */}
-								<View className="flex-row justify-end">
-									<Pressable onPress={() => router.push('/forgot-password')} className="mt-2">
-										<Text className="text-t3-regular text-light-text-200">Забыли пароль?</Text>
-									</Pressable>
+									<Button
+										variant="primary"
+										fullWidth
+										onPress={handleSubmit}
+										disabled={!email || !password || !!emailError || isLoading}
+									>
+										{isLoading ? 'Вход...' : 'Войти'}
+									</Button>
 								</View>
-							</Animated.View>
-						</View>
-
-						{/* Кнопки внизу экрана */}
-						<View
-							className="gap-4"
-							
-						>
-							{/* Кнопка входа */}
-							<Animated.View className="w-full" style={{ transform: [{ translateY }] }}>
-								<Button
-									variant="primary"
-									fullWidth
-									onPress={handleSubmit}
-									disabled={!email || !password || !!emailError || isLoading}
-								>
-									{isLoading ? 'Вход...' : 'Войти'}
-								</Button>
-							</Animated.View>
-
-						
-						</View>
-						
-					</View>
-					
-				</TouchableWithoutFeedback>
-				</BackgroundLayout>
+							</View>
+						</TouchableWithoutFeedback>
+					</BackgroundLayout>
 				</View>
+
 				{/* Социальный вход */}
-				<View className="flex-row justify-between pt-5">
-								<Pressable
-									onPress={() => Alert.alert('Скоро', 'Авторизация через VK будет добавлена позже')}
-									className="p-5  items-center justify-center rounded-full bg-white"
-									accessibilityRole="button"
-									accessibilityLabel="Continue with VK"
-								>
-									<VkIcon width={44} height={44}/>
-								</Pressable>
+				<View className="flex-row justify-between pb-4 pt-5">
+					<Pressable
+						onPress={() => Alert.alert('Скоро', 'Авторизация через VK будет добавлена позже')}
+						className="items-center justify-center rounded-full bg-white p-6"
+						accessibilityRole="button"
+						accessibilityLabel="Continue with VK"
+					>
+						<VkIcon width={44} height={44} />
+					</Pressable>
 
-								<Pressable
-									onPress={() => Alert.alert('Скоро', 'Авторизация через Telegram будет добавлена позже')}
-									className="p-5 items-center justify-center rounded-full bg-white"
-									accessibilityRole="button"
-									accessibilityLabel="Continue with Telegram"
-								>
-									<TelegramIcon width={44} height={44} />
-								</Pressable>
+					<Pressable
+						onPress={() => Alert.alert('Скоро', 'Авторизация через Telegram будет добавлена позже')}
+						className="items-center justify-center rounded-full bg-white p-6"
+						accessibilityRole="button"
+						accessibilityLabel="Continue with Telegram"
+					>
+						<TelegramIcon width={44} height={44} />
+					</Pressable>
 
-								<Pressable
-									onPress={() => Alert.alert('Скоро', 'Авторизация через Яндекс будет добавлена позже')}
-									className="p-5  items-center justify-center rounded-full bg-white"
-									accessibilityRole="button"
-									accessibilityLabel="Continue with Yandex"
-								>
-									<YandexIcon width={44} height={44} />
-								</Pressable>
+					<Pressable
+						onPress={() => Alert.alert('Скоро', 'Авторизация через Яндекс будет добавлена позже')}
+						className="items-center justify-center rounded-full bg-white p-6"
+						accessibilityRole="button"
+						accessibilityLabel="Continue with Yandex"
+					>
+						<YandexIcon width={44} height={44} />
+					</Pressable>
 
-								<Pressable
-									onPress={() => Alert.alert('Скоро', 'Авторизация через Google будет добавлена позже')}
-									className="p-5 items-center justify-center rounded-full bg-white"
-									accessibilityRole="button"
-									accessibilityLabel="Continue with Google"
-								>
-									<GoogleIcon width={44} height={44} />
-								</Pressable>
+					<Pressable
+						onPress={() => Alert.alert('Скоро', 'Авторизация через Google будет добавлена позже')}
+						className="items-center justify-center rounded-full bg-white p-6"
+						accessibilityRole="button"
+						accessibilityLabel="Continue with Google"
+					>
+						<GoogleIcon width={44} height={44} />
+					</Pressable>
 				</View>
-
-		</BackgroundLayoutNoSidePadding>
+			</View>
+		</BackgroundLayoutSafeArea>
 	)
 }

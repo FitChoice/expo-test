@@ -15,6 +15,12 @@ export const sharedStyles = StyleSheet.create({
 		color: '#FFFFFF',
 		textAlign: 'left',
 	},
+	formLabel: {
+		fontFamily: 'Inter',
+		fontSize: 24,
+		lineHeight: 1.2,
+		color: '#FFFFFF',
+	},
 	titleCenter: {
 		fontFamily: Platform.select({
 			ios: 'Rimma_sans',

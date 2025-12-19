@@ -78,7 +78,7 @@ export const buttonSizeStyles: Record<
 	},
 	s: {
 		container: 'h-12 min-h-[44px] rounded-2xl sm:h-[48px]',
-		text: 'text-base font-semibold', // Text/t2 bold
+		text: '', // Use default Inter semi-bold 15px
 		icon: 24,
 		padding: 'px-4 py-2 sm:px-6',
 		paddingIconLeft: 'pl-3 pr-4 py-2 sm:pl-4 sm:pr-6',
@@ -88,7 +88,7 @@ export const buttonSizeStyles: Record<
 	m: {
 		// Medium size mirrors "s" for now to keep backward compatibility
 		container: 'h-12 min-h-[44px] rounded-2xl sm:h-[48px]',
-		text: 'text-base font-semibold',
+		text: '',
 		icon: 24,
 		padding: 'px-4 py-2 sm:px-6',
 		paddingIconLeft: 'pl-3 pr-4 py-2 sm:pl-4 sm:pr-6',
@@ -97,7 +97,7 @@ export const buttonSizeStyles: Record<
 	},
 	l: {
 		container: 'h-14 min-h-[52px] rounded-2xl sm:h-[56px]',
-		text: 'text-base font-semibold', // Text/t2 bold
+		text: '', // Use default Inter semi-bold 15px
 		icon: 28,
 		padding: 'px-4 py-2 sm:px-6',
 		paddingIconLeft: 'pl-3 pr-4 py-2 sm:pl-4 sm:pr-6',
@@ -108,3 +108,6 @@ export const buttonSizeStyles: Record<
 
 // Базовые стили кнопки
 export const baseButtonStyles = 'flex-row items-center justify-center gap-2'
+
+// Базовые стили текста кнопки
+export const baseButtonTextStyles = 'font-inter font-semibold text-[15px]'
