@@ -1,2 +1,5 @@
 export { StatsScreen } from './ui/StatsScreen'
 export { DayDetailsScreen } from './ui/DayDetailsScreen'
+export { TrainingsCountScreen } from './ui/TrainingsCountScreen'
+export { QualityGrowthScreen } from './ui/QualityGrowthScreen'
+export { DiariesCountScreen } from './ui/DiariesCountScreen'

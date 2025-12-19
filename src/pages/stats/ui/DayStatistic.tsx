@@ -21,6 +21,7 @@ import EvilIcons from '@expo/vector-icons/EvilIcons'
 import { statsApi } from '@/features/stats/api/statsApi'
 import type { MainStatsResponse } from '@/features/stats/api/types'
 import { getUserId } from '@/shared/lib/auth'
+import { router } from 'expo-router'
 
 type OverallStatConfig = {
 	icon: React.ReactNode
@@ -111,9 +112,6 @@ export function DayStatistic() {
 
 			const result = await statsApi.getMainStats({ userId })
 
-			console.log('result')
-			console.log(result)
-
 			if (!isMounted) return
 
 			if (!result.success) {
@@ -144,10 +142,11 @@ export function DayStatistic() {
 							? formatter(value)
 							: String(value)
 
-				return { ...rest, value: formattedValue }
+				return { ...rest, value: formattedValue, key }
 			}),
 		[mainStats]
 	)
+
 
 	return (
 		<>
@@ -218,7 +217,7 @@ export function DayStatistic() {
 							<View
 								key={stat.label}
 								className={`rounded-2xl bg-[#1e1e1e] px-2 py-4 ${
-									idx === 2 ? 'basis-full' : 'basis-[47%]'
+									idx === 2 ? 'basis-full' : 'basis-[48%]'
 								}`}
 							>
 								<View className="mb-2 flex-row items-center justify-between">
@@ -226,9 +225,16 @@ export function DayStatistic() {
 										<Text> {stat.icon} </Text>
 										<Text className="text-h2 text-light-text-100">{stat.value}</Text>
 									</View>
-									<View className="items-center justify-center rounded-2xl bg-[#F4F4F4]/20 p-2">
-										<Feather name="arrow-right" size={24} color="white" />
-									</View>
+									{
+										stat.key === 'trainings_count' || stat.key === 'quality_growth' || stat.key === 'diaries_count' ? (
+											<TouchableOpacity onPress={() => router.push(`/${stat.key}`)}>
+												<View className="items-center justify-center rounded-2xl bg-[#F4F4F4]/20 p-2">
+													<Feather name="arrow-right" size={24} color="white" />
+												</View>
+											</TouchableOpacity>
+										) : null
+									}
+
 								</View>
 
 								<Text className="text-caption-regular text-light-text-500">
