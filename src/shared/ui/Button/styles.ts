@@ -10,47 +10,65 @@ export const buttonVariantStyles: Record<
 		textDefault: string
 		textPressed: string
 		textDisabled: string
+		iconDefault: string
+		iconPressed: string
+		iconDisabled: string
 	}
 > = {
 	primary: {
-		default: 'bg-[#C5F680]', // Brand/Green 500
-		pressed: 'bg-[#AAEC4D]', // Brand/Green 900
-		disabled: 'bg-[#C5F680] opacity-50',
-		textDefault: 'text-[#161616]', // Light text/900
-		textPressed: 'text-[#161616]',
-		textDisabled: 'text-[#161616]',
+		default: 'bg-brand-green-500',
+		pressed: 'bg-brand-green-900',
+		disabled: 'bg-brand-green-500 opacity-50',
+		textDefault: 'text-light-text-900',
+		textPressed: 'text-light-text-900',
+		textDisabled: 'text-light-text-900',
+		iconDefault: '#161616',
+		iconPressed: '#161616',
+		iconDisabled: '#161616',
 	},
 	secondary: {
-		default: 'bg-white', // Pure white
-		pressed: 'bg-[#EAEAEA]', // Fill/300
-		disabled: 'bg-[#F4F4F4] opacity-50', // Fill/200
-		textDefault: 'text-[#161616]', // Light text/900
-		textPressed: 'text-[#161616]',
-		textDisabled: 'text-[#161616]',
+		default: 'bg-color-pure-white',
+		pressed: 'bg-fill-300',
+		disabled: 'bg-fill-200 opacity-50',
+		textDefault: 'text-light-text-900',
+		textPressed: 'text-light-text-900',
+		textDisabled: 'text-light-text-900',
+		iconDefault: '#161616',
+		iconPressed: '#161616',
+		iconDisabled: '#161616',
 	},
 	special: {
-		default: 'bg-[#BA9BF7]', // Brand/Purple 500
-		pressed: 'bg-[#A172FF]', // Brand/Purple 900
-		disabled: 'bg-[#DDCDFB] opacity-50', // Brand/Purple 300
-		textDefault: 'text-white', // Light text/100
-		textPressed: 'text-white',
-		textDisabled: 'text-white',
+		default: 'bg-brand-purple-500',
+		pressed: 'bg-brand-purple-900',
+		disabled: 'bg-brand-purple-300 opacity-50',
+		textDefault: 'text-color-pure-white',
+		textPressed: 'text-color-pure-white',
+		textDisabled: 'text-color-pure-white',
+		iconDefault: '#FFFFFF',
+		iconPressed: '#FFFFFF',
+		iconDisabled: '#FFFFFF',
 	},
 	tertiary: {
-		default: 'bg-[#3F3F3F]', // Fill/700
-		pressed: 'bg-[#2B2B2B]', // Fill/800
-		disabled: 'bg-[#3F3F3F] opacity-50',
-		textDefault: 'text-white', // Light text/100
-		textPressed: 'text-white',
-		textDisabled: 'text-[#C1C1C1]', // Light text/200
+		default: 'bg-fill-700',
+		pressed: 'bg-fill-800',
+		disabled: 'bg-fill-700 opacity-50',
+		textDefault: 'text-color-pure-white',
+		textPressed: 'text-color-pure-white',
+		textDisabled: 'text-light-text-200',
+		iconDefault: '#FFFFFF',
+		iconPressed: '#FFFFFF',
+		iconDisabled: '#C1C1C1',
 	},
 	ghost: {
 		default: 'bg-transparent',
-		pressed: 'bg-[#F4F4F4]', // Fill/200
+		pressed: 'bg-fill-200',
 		disabled: 'bg-transparent opacity-50',
-		textDefault: 'text-[#949494]', // Light text/500
-		textPressed: 'text-[#161616]', // Light text/900
-		textDisabled: 'text-[#C1C1C1]', // Light text/200
+		textDefault: 'text-light-text-500',
+		textPressed: 'text-light-text-900',
+		textDisabled: 'text-light-text-200',
+		iconDefault: '#949494',
+		iconPressed: '#161616',
+		iconDisabled: '#C1C1C1',
 	},
 }
 
@@ -68,41 +86,40 @@ export const buttonSizeStyles: Record<
 	}
 > = {
 	xs: {
-		container: 'h-10 min-h-[36px] rounded-2xl sm:h-[40px]',
-		text: 'text-sm font-medium', // Text/t3
+		container: 'h-10 min-h-[40px] rounded-2xl',
+		text: 'text-t3 font-medium',
 		icon: 20,
-		padding: 'px-4 py-2 sm:px-6',
-		paddingIconLeft: 'pl-3 pr-4 py-2 sm:pl-4 sm:pr-6',
-		paddingIconRight: 'pl-4 pr-3 py-2 sm:pl-6 sm:pr-4',
-		paddingIconOnly: 'p-1.5 sm:p-2',
+		padding: 'px-6 py-2',
+		paddingIconLeft: 'pl-4 pr-6 py-2',
+		paddingIconRight: 'pl-6 pr-4 py-2',
+		paddingIconOnly: 'p-2',
 	},
 	s: {
-		container: 'h-12 min-h-[44px] rounded-2xl sm:h-[48px]',
-		text: '', // Use default Inter semi-bold 15px
+		container: 'h-12 min-h-[48px] rounded-2xl',
+		text: 'text-t2-bold',
 		icon: 24,
-		padding: 'px-4 py-2 sm:px-6',
-		paddingIconLeft: 'pl-3 pr-4 py-2 sm:pl-4 sm:pr-6',
-		paddingIconRight: 'pl-4 pr-3 py-2 sm:pl-6 sm:pr-4',
-		paddingIconOnly: 'p-1.5 sm:p-2',
+		padding: 'px-6 py-2',
+		paddingIconLeft: 'pl-4 pr-6 py-2',
+		paddingIconRight: 'pl-6 pr-4 py-2',
+		paddingIconOnly: 'p-2',
 	},
 	m: {
-		// Medium size mirrors "s" for now to keep backward compatibility
-		container: 'h-12 min-h-[44px] rounded-2xl sm:h-[48px]',
-		text: '',
-		icon: 24,
-		padding: 'px-4 py-2 sm:px-6',
-		paddingIconLeft: 'pl-3 pr-4 py-2 sm:pl-4 sm:pr-6',
-		paddingIconRight: 'pl-4 pr-3 py-2 sm:pl-6 sm:pr-4',
-		paddingIconOnly: 'p-1.5 sm:p-2',
+		container: 'h-13 min-h-[52px] rounded-2xl',
+		text: 'text-t2-bold',
+		icon: 28,
+		padding: 'px-6 py-2',
+		paddingIconLeft: 'pl-4 pr-6 py-2',
+		paddingIconRight: 'pl-6 pr-4 py-2',
+		paddingIconOnly: 'p-2',
 	},
 	l: {
-		container: 'h-14 min-h-[52px] rounded-2xl sm:h-[56px]',
-		text: '', // Use default Inter semi-bold 15px
-		icon: 28,
-		padding: 'px-4 py-2 sm:px-6',
-		paddingIconLeft: 'pl-3 pr-4 py-2 sm:pl-4 sm:pr-6',
-		paddingIconRight: 'pl-4 pr-3 py-2 sm:pl-6 sm:pr-4',
-		paddingIconOnly: 'p-1.5 sm:p-2',
+		container: 'h-14 min-h-[56px] rounded-2xl',
+		text: 'text-t2-bold',
+		icon: 32,
+		padding: 'px-6 py-2',
+		paddingIconLeft: 'pl-4 pr-6 py-2',
+		paddingIconRight: 'pl-6 pr-4 py-2',
+		paddingIconOnly: 'p-2',
 	},
 }
 
@@ -110,4 +127,4 @@ export const buttonSizeStyles: Record<
 export const baseButtonStyles = 'flex-row items-center justify-center gap-2'
 
 // Базовые стили текста кнопки
-export const baseButtonTextStyles = 'font-inter font-semibold text-[15px]'
+export const baseButtonTextStyles = 'font-inter font-semibold'

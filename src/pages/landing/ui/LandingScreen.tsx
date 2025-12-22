@@ -142,7 +142,7 @@ export const LandingScreen = () => {
 						</View>
 
 						{/* Кнопки Frame 48097895 */}
-						<View className="absolute bottom-[8%] w-full px-2">
+						<View className="absolute bottom-[13%] w-full px-2">
 							<View className="gap-2">
 								<Button
 									variant="primary"

@@ -65,15 +65,12 @@ export const Button = forwardRef<View, ButtonProps>(
 			if (!isValidElement(icon)) return icon
 
 			const iconColor = variantStyle[
-				`text${currentState.charAt(0).toUpperCase() + currentState.slice(1)}` as keyof typeof variantStyle
+				`icon${currentState.charAt(0).toUpperCase() + currentState.slice(1)}` as keyof typeof variantStyle
 			]
-				.replace('text-', '')
-				.replace('[', '')
-				.replace(']', '')
 
 			return cloneElement(icon as React.ReactElement<{ size?: number; color?: string }>, {
 				size: sizeStyle.icon,
-				color: iconColor.startsWith('#') ? iconColor : 'white',
+				color: iconColor,
 			})
 		}
 

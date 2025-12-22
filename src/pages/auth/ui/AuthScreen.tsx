@@ -119,7 +119,7 @@ export const AuthScreen = () => {
 
 	return (
 		<BackgroundLayoutSafeArea needBg={false}>
-			<View style={{ height: SCREEN_HEIGHT - insets.top - insets.bottom }}>
+			<View style={{ height: SCREEN_HEIGHT }}>
 				<View className="flex-1">
 					<BackgroundLayout>
 						<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -209,7 +209,7 @@ export const AuthScreen = () => {
 								</View>
 
 								{/* Кнопки внизу экрана */}
-								<View className="gap-4">
+								<View className=" mb-4">
 									{/* Кнопка входа */}
 
 									<Button

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, type ReactNode } from 'react'
 import {
 	View,
 	Text,
@@ -7,6 +7,8 @@ import {
 	TouchableWithoutFeedback,
 	Keyboard,
 	useWindowDimensions,
+	KeyboardAvoidingView,
+	Platform,
 } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import {
@@ -30,6 +32,10 @@ import {
  */
 
 type CurrentStep = 'enter_email' | 'enter_code' | 'new_password'
+type StepContent = {
+	body: ReactNode
+	footer: ReactNode
+}
 export const ForgotPasswordScreen = () => {
 	const router = useRouter()
 
@@ -249,11 +255,11 @@ export const ForgotPasswordScreen = () => {
 		return <Loader />
 	}
 
-	const renderContent = () => {
+	const renderContent = (): StepContent => {
 		switch (currentStep) {
 			case 'enter_email':
-				return (
-					<>
+				return {
+					body: (
 						<View className="flex-1 justify-start pt-20">
 							<Animated.View className="gap-20">
 								<View className="gap-3">
@@ -278,8 +284,9 @@ export const ForgotPasswordScreen = () => {
 								/>
 							</Animated.View>
 						</View>
-
-						<View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
+					),
+					footer: (
+						<View className="gap-4 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
 							<Animated.View className="w-full">
 								<Button
 									variant="primary"
@@ -294,7 +301,7 @@ export const ForgotPasswordScreen = () => {
 							</Animated.View>
 
 							<Button
-								variant="secondary"
+								variant="tertiary"
 								size="l"
 								fullWidth
 								onPress={() => router.back()}
@@ -303,12 +310,12 @@ export const ForgotPasswordScreen = () => {
 								Назад
 							</Button>
 						</View>
-					</>
-				)
+					),
+				}
 
 			case 'enter_code':
-				return (
-					<>
+				return {
+					body: (
 						<View className="flex-1 justify-start pt-40">
 							<Animated.View className="gap-20">
 								<View className="gap-3">
@@ -330,23 +337,22 @@ export const ForgotPasswordScreen = () => {
 								/>
 							</Animated.View>
 						</View>
-
-						<View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
-							<Animated.View className="w-full">
-								<Button
-									variant="primary"
-									size="l"
-									fullWidth
-									onPress={handleSubmitEmailCode}
-									disabled={!email || !!emailError}
-									className="h-14"
-								>
-									Отправить
-								</Button>
-							</Animated.View>
+					),
+					footer: (
+						<View className="gap-4 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
+							<Button
+								variant="primary"
+								size="l"
+								fullWidth
+								onPress={handleSubmitEmailCode}
+								disabled={!email || !!emailError}
+								className="h-14"
+							>
+								Отправить
+							</Button>
 
 							<Button
-								variant="secondary"
+								variant="tertiary"
 								size="l"
 								fullWidth
 								onPress={() => router.back()}
@@ -355,12 +361,12 @@ export const ForgotPasswordScreen = () => {
 								Назад
 							</Button>
 						</View>
-					</>
-				)
+					),
+				}
 
 			case 'new_password':
-				return (
-					<>
+				return {
+					body: (
 						<View className="flex-1 justify-start pt-40">
 							<Animated.View className="gap-20">
 								<View className="gap-3">
@@ -402,7 +408,8 @@ export const ForgotPasswordScreen = () => {
 								/>
 							</Animated.View>
 						</View>
-
+					),
+					footer: (
 						<View className="gap-2 pt-8" style={{ paddingBottom: insets.bottom + 10 }}>
 							<Animated.View className="w-full">
 								<Button
@@ -433,24 +440,30 @@ export const ForgotPasswordScreen = () => {
 								Назад
 							</Button>
 						</View>
-					</>
-				)
+					),
+				}
 		}
 	}
 
+	const { body, footer } = renderContent()
+
 	return (
 		<BackgroundLayoutSafeArea needBg={false}>
-				<View className="flex-1">
-					<BackgroundLayout styles={{paddingHorizontal: 16}}>
+			<BackgroundLayout styles={{ paddingHorizontal: 16 }}>
 				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 					<View className="flex-1">
+						<KeyboardAvoidingView
+							style={{ flex: 1 }}
+							behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+							keyboardVerticalOffset={Platform.select({ ios: insets.top, android: 0 }) ?? 0}
+						>
+							{body}
+						</KeyboardAvoidingView>
 
-						{renderContent()}
+						{footer}
 					</View>
 				</TouchableWithoutFeedback>
-					</BackgroundLayout>
-				</View>
-
+			</BackgroundLayout>
 		</BackgroundLayoutSafeArea>
 	)
 }
