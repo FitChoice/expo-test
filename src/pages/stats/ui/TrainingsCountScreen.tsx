@@ -22,7 +22,7 @@ export const TrainingsCountScreen = () => {
 		queryKey: ['trainings', userId],
 		queryFn: async () => {
 			if (!userId) return []
-			const result = await statsApi.getTrainings({ userId, limit: 100 })
+			const result = await statsApi.getTrainings({ userId, kind: 't', limit: 100 })
 			if (result.success) {
 				return result.data.trainings
 			}

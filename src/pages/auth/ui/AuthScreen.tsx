@@ -119,7 +119,7 @@ export const AuthScreen = () => {
 
 	return (
 		<BackgroundLayoutSafeArea needBg={false}>
-			<View style={{ height: SCREEN_HEIGHT }}>
+			<View style={{ height: SCREEN_HEIGHT - insets.top - insets.bottom}}>
 				<View className="flex-1">
 					<BackgroundLayout>
 						<TouchableWithoutFeedback onPress={Keyboard.dismiss}>

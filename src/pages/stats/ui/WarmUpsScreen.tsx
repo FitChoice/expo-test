@@ -1,5 +1,6 @@
 import React from 'react'
 import { Text, View, FlatList } from 'react-native'
+
 import {
 	StatsDetailPageLayout
 } from '@/shared/ui/StatsDetailPageLayout/StatsDetailPageLayout'
@@ -8,8 +9,7 @@ import { getUserId } from '@/shared/lib'
 import { statsApi } from '@/features/stats'
 import { ActivityCard } from '@/shared/ui'
 
-export const DiariesCountScreen = () => {
-
+export const WarmUpsScreen = () => {
 
 	const { data: userId } = useQuery({
 		queryKey: ['userId'],
@@ -17,12 +17,12 @@ export const DiariesCountScreen = () => {
 	})
 
 	const { data: trainings, isLoading } = useQuery({
-		queryKey: ['diaries', userId],
+		queryKey: ['warmups', userId],
 		queryFn: async () => {
 			if (!userId) return []
-			const result = await statsApi.getDiaries({ userId, limit: 100 })
+			const result = await statsApi.getTrainings({ userId, kind: 'w', limit: 100 })
 			if (result.success) {
-				return result.data.diaries
+				return result.data.trainings
 			}
 			return []
 		},
@@ -39,15 +39,15 @@ export const DiariesCountScreen = () => {
 	}
 
 	return (
-		<StatsDetailPageLayout isLoading={isLoading} title={'Записи в дневнике'}>
+		<StatsDetailPageLayout isLoading={isLoading} title={'Зарядки'}>
 			<FlatList
 				data={trainings}
 				keyExtractor={(item) => item.id.toString()}
 				renderItem={({ item }) => (
 					<ActivityCard
-						label={''}
+						label={item.title}
 						date={formatDate(item.date)}
-					//	minutes={`${item.duration} minutes`}
+						minutes={`${item.duration} minutes`}
 						onPress={() => {}}
 					/>
 				)}
@@ -58,7 +58,7 @@ export const DiariesCountScreen = () => {
 				ListEmptyComponent={
 					<View className="flex-1 items-center justify-center pt-10">
 						<Text className="text-t2 text-white opacity-50">
-							Записей пока нет
+							Зарядок пока нет
 						</Text>
 					</View>
 				}
