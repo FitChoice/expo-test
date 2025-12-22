@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { FlatList, Image, Text, View } from 'react-native'
 
 import { ProgressCaptureFlow } from '@/features/progress-capture'
-import { useProgressListQuery } from '@/entities/progress'
+import { useProgressListQuery, useResetProgressMutation } from '@/entities/progress'
 import { Button, StatsDetailPageLayout, Loader } from '@/shared/ui'
 
 export const PhotoProgressScreen = () => {
 	const [isCapturing, setIsCapturing] = useState(false)
 	const { data, isLoading, refetch } = useProgressListQuery()
+	const { mutateAsync: resetProgress, isPending: isResetting } = useResetProgressMutation()
 
 	if (isCapturing) {
 		return (
@@ -23,9 +24,9 @@ export const PhotoProgressScreen = () => {
 
 	return (
 		<StatsDetailPageLayout isLoading={false} title="Фото-прогресс">
-			<View className="flex-1 gap-6 px-4 py-4">
+			<View className="flex-1 gap-6">
 				{isLoading ? (
-					<View className="flex-1 items-center justify-center">
+					<View className="flex-1 w-full items-center justify-center">
 						<Loader />
 					</View>
 				) : !data || data.length === 0 ? (
@@ -59,7 +60,15 @@ export const PhotoProgressScreen = () => {
 							)}
 							keyExtractor={(item) => item.id}
 						/>
-						<Button onPress={() => setIsCapturing(true)}>Переснять</Button>
+						<Button
+							onPress={async () => {
+								await resetProgress()
+								setIsCapturing(true)
+							}}
+							disabled={isResetting}
+						>
+							{isResetting ? 'Очищаем...' : 'Переснять'}
+						</Button>
 					</View>
 				)}
 			</View>

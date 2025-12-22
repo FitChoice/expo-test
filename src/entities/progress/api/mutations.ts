@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as MediaLibrary from 'expo-media-library'
 
 import { progressKeys } from '@/entities/progress/api/queryKeys'
-import { deleteProgressPhoto, saveProgressBatch } from '@/entities/progress/lib/storage'
+import { deleteProgressPhoto, resetProgressPhotos, saveProgressBatch } from '@/entities/progress/lib/storage'
 import type { TempCapturedPhoto } from '@/entities/progress/model/types'
 import { getUserId } from '@/shared/lib/auth'
 
@@ -46,6 +46,24 @@ export const useDeleteProgressPhotoMutation = () => {
 			const userId = await getUserId()
 			if (!userId) throw new Error('Не удалось определить пользователя')
 			await deleteProgressPhoto(userId, photoId)
+		},
+		onSuccess: async () => {
+			const userId = await getUserId()
+			if (userId) {
+				await queryClient.invalidateQueries({ queryKey: progressKeys.list(userId) })
+			}
+		},
+	})
+}
+
+export const useResetProgressMutation = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: async () => {
+			const userId = await getUserId()
+			if (!userId) throw new Error('Не удалось определить пользователя')
+			await resetProgressPhotos(userId)
 		},
 		onSuccess: async () => {
 			const userId = await getUserId()

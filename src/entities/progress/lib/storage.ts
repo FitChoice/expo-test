@@ -135,3 +135,12 @@ export const deleteProgressPhoto = async (userId: string, photoId: string) => {
 	}
 }
 
+export const resetProgressPhotos = async (userId: string) => {
+	const baseDir = getUserBaseDir(userId)
+	const info = await FileSystem.getInfoAsync(baseDir)
+
+	if (info.exists) {
+		await FileSystem.deleteAsync(baseDir, { idempotent: true })
+	}
+}
+
