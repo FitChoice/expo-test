@@ -46,146 +46,6 @@ src/
 
 ---
 
-## 📂 Основные модули
-
-### App Layer
-
-- **`_layout.tsx`** — корневой layout (Expo Router + ErrorBoundary)
-- **`_providers/`** — глобальные провайдеры (SafeArea, TanStack Query, FontLoader)
-- **Роуты**: `landing`, `auth`, `register`, `forgot-password`, `verification`, `survey`, `home`, `chat`, `diary`, `stats`, `profile`, `settings`, `change-password`, `privacy-policy`, `terms`, `training`
-
-### Pages
-
-- `landing/` — Onboarding screen
-- `auth/` — Экраны авторизации (`AuthScreen`, `RegisterScreen`, `ForgotPasswordScreen`)
-- `verification/` — Экран верификации кода
-- `survey/` — Многошаговый опрос (компоненты шагов в `ui/components/steps/`)
-- `home/` — Главный экран
-- `chat/` — ИИ-ассистент чат
-- `diary/` — Дневник тренировок
-- `stats/` — Статистика пользователя
-- `profile/` — Модуль профиля пользователя (`ProfileScreen`, `SettingsScreen`, `ChangePasswordScreen`, `PrivacyPolicyScreen`, `TermsOfServiceScreen`)
-- `(training)/` — Тренировки (`session`, `report`, `[trainingId]`)
-
-### Features
-
-**`auth/`**
-
-- API: `authApi` (регистрация, вход, отправка кода)
-
-**`survey-flow/`**
-
-- `useSurveyFlow` — хук управления опросом
-- `surveyApi` — отправка данных опроса
-
-**`chat/`**
-
-- `chatApi` — API чата (real-only: `/chat`, `/chat/latest`, `/chat/message`, `/chat/upload`; `env.API_URL` задаёт базу)
-- `model` — хуки `useChatQueries` (offset/limit infiniteQuery), `useSendMessage` (оптимистичный user + ответ ассистента), `useAttachmentUpload` (upload + прогресс), `useChatStore` (pending attachments)
-
-**`training/`**
-
-- `trainingApi` — API тренировок
-- `queryKeys` — ключи для React Query
-
-**`user/`**
-
-- `userApi` — API пользователя (профиль, аватар, пароль, уведомления)
-- `useProfileQuery` — хук получения профиля
-
-**`dairy/`**
-
-- `dairyApi` — API дневника тренировок
-
-### Widgets
-
-**`chat/`**
-
-- UI: `ChatHeader`, `MessageList`, `MessageBubble`, `MessageInput`, `AttachmentPicker`, `TypingIndicator`, `AudioPlayer`, `FileAttachment`
-- Lib: `useAudioRecorder`, `useAudioPlayer`, `useFilePicker`
-
-**`profile/`**
-
-- UI: `ProfileHeader`, `SettingsSection`, `FAQAccordion`
-
-**`training-session/`**
-
-- `OnboardingFlow` — подготовка к тренировке (камера, звук, положение)
-- `ExerciseFlow` — основной флоу выполнения упражнений (FSM):
-  - Инициализация: стартовый шаг `theory` (если `showTutorial`), иначе `position`. Состояния: текущий шаг, сторона (`right/left`), тип отдыха (`rep/set/exercise`), фаза отдыха (`main/practice`), счётчики повторов/сетов, индекс упражнения.
-  - Ориентация: перед стартом сверяет требуемую ориентацию (`is_horizontal`). Если не совпадает, показывает `rotate`, затем возвращает в стартовый шаг.
-  - Базовый маршрут шагов: `theory → position → execution → rest` (без смены стороны) либо `theory → position → execution → rest → side_switch → execution → rest` (для зеркальных `is_mirror`).
-  - Выполнение (`execution`): после завершения подхода сбрасывает повторы. Для зеркальных упражнений: первая сторона уводит в `rest (rep)` с флагом смены стороны → `side_switch` → вторая сторона завершает сет и либо уходит на `rest (set/exercise)`, либо завершает тренировку. Для не-зеркальных: завершает сет и идёт в `rest (set/exercise)` или завершает тренировку.
-  - Отдых (`rest`): тип зависит от контекста (`rep`=5с, `set`=`rest_between_sets` или 15с по умолчанию, `exercise`=`rest_after_exercise` или 30с). Теоретический экран во время отдыха (практическая фаза на 10с) показывается **только** если длительность отдыха >10с и это отдых **между повторениями одного упражнения** (`rep`), при этом если повторение последнее — экран не показываем.
-  - Переходы отдыха: `rep` → сброс повторов, для зеркальных обязательно `side_switch`, иначе обратно в `execution`; `set` → сброс повторов и стороны на `right`, переход в `position`; `exercise` → следующее упражнение или `finishTraining()`.
-  - Экранные компоненты по шагам: `rotate` → `RotateScreen`; `theory/practice` → `ExerciseTheoryScreen`; `position/side_switch` → `BodyPositionScreen` (со спец. заголовком для смены стороны); `execution` → `ExerciseExecutionScreen`; `rest` (main) → `RestScreen`.
-- `TrainingInfo`, `TrainingAnalytics` — инфо-панели
-- Экраны: `AIExerciseScreen`, `BodyPositionScreen` (кастомные заголовок/подзаголовок через пропсы), `ExerciseTheoryScreen`, `RestScreen`, `ExerciseSuccess`
-
-**`pose-camera/`**
-
-- `PoseCamera` — камера с анализом движений
-- `usePoseCameraSetup` — настройка камеры
-
-**`navigation-bar/`**, **`header/`**, **`footer/`** — Навигационные компоненты
-
-### Entities
-
-**`chat/`**
-
-- `types.ts`, `mappers.ts` — типы и мапперы сообщений
-
-**`survey/`**
-
-- `calculator.ts`, `validator.ts` — логика расчета ИМТ и валидации
-- `constants.ts` — константы конфигурации
-
-**`pose/`**
-
-- `analyzer.ts` — анализ keypoints
-
-**`training/`**
-
-- `useTrainingStore.ts` — Zustand store тренировки
-- `types.ts` — типы тренировок
-
-### Shared
-
-**`api/`**
-
-- `client.ts` — Axios/Fetch клиент с интерцепторами
-
-**`ui/`** — UI Kit (частичный список):
-
-- Кнопки: `Button`, `GlowButton`, `BackButton`, `BottomActionBtn`, `CloseBtn`, `ControlButton`, `CircleIconButton`
-- Ввод: `Input`, `Checkbox`, `Switch`, `RadioSelect`, `CheckboxSelect`
-- Индикаторы: `Loader`, `DotsProgress`, `StepProgress`, `ProgressBar`, `VideoProgressBar`
-- Карточки: `FeatureCard`, `MetricCard`, `StatCard`, `ExerciseInfoCard`
-- Лейаут: `Container`, `SafeAreaContainer`, `BackgroundLayout`, `GradientBG`
-- Разное: `Icon`, `Avatar`, `Chip`, `InfoTag`, `Toast`, `ConfirmModal`, `LargeNumberDisplay`
-
-**`lib/`**
-
-- `auth.ts` — управление токенами
-- `formatters.ts` — форматирование данных
-- `useFonts.ts` — загрузка шрифтов
-- `useOrientation.ts`, `useStatusBar.ts`, `useNavbarLayout.ts`
-- `useBeepSound.ts` — звуковые эффекты
-- `media/pickAvatarImage.ts` — выбор аватара
-
----
-
-## 🏋️ PoseFlow-JS Engine
-
-Движок анализа упражнений с FSM для подсчёта повторений (`poseflow-js/`):
-
-- **Core**: `ExerciseEngine.ts`, `normalizer.ts`, `smoothers.ts`
-- **Features**: расчет углов (`angles.ts`), осей (`axes.ts`), высот (`heights.ts`)
-- **FSM**: `RepCounterFSM.ts` — конечный автомат повторений
-- **Rules**: JSON конфигурации упражнений (`crunch`, `squat`, `hip_bridge` и др.)
-
----
-
 ## 🎨 Стилизация
 
 Используется **NativeWind 4** (Tailwind CSS для React Native).
@@ -210,6 +70,60 @@ src/
 | **Computer Vision** | MediaPipe, TensorFlow.js          |
 | **Media**           | expo-av, expo-camera, expo-video  |
 | **Package Manager** | pnpm 10.19.0                      |
+
+---
+
+## 📂 Текущая структура и ключевые модули (FSD)
+
+### App (Expo Router)
+- `_layout.tsx` — корневой layout, ErrorBoundary
+- `_providers/` — SafeArea, TanStack Query, FontLoader
+- Роуты: `landing`, `auth`, `register`, `forgot-password`, `verification`, `survey`, `home`, `chat`, `diary`, `stats`, `profile`, `settings`, `change-password`, `privacy-policy`, `terms`, `training`, `photo-progress`
+
+### Pages
+- `photo-progress/` — экран фото-прогресса: миниатюры 4 ракурсов, запуск флоу съёмки
+- `stats/` — статистика, карточка “Фото-прогресс” ведёт на `/photo-progress`
+- Остальные: `landing`, `auth`, `survey`, `home`, `chat`, `diary`, `profile`, `(training)/...`
+
+### Features
+- `progress-capture/` — флоу съёмки 4 ракурсов (permission → вертикаль → позиция → отсчёт 5s → кадр → превью → финальный экран с сохранением/галереей)
+- `auth/`, `survey-flow/`, `chat/`, `training/`, `user/`, `dairy/`, `stats/` — API и бизнес-логика по доменам
+
+### Entities
+- `progress/` — локальный домен фото-прогресса: типы, файловое хранение в `documentDirectory`, метаданные `progress/index.json`, TanStack Query (список, сохранение батчем, удаление)
+- `chat/`, `survey/`, `pose/`, `training/` — типы, хранилища, вспомогательные функции
+
+### Widgets
+- `training-session/` — онбординг/выполнение тренировок (FSM), экраны `BodyPositionScreen`, `ExerciseTheoryScreen`, `RestScreen` и др.
+- `chat/`, `profile/`, `navigation-bar/` и пр. — составные UI-блоки
+
+### Shared
+- `ui/` — UI Kit (кнопки, инпуты, индикаторы, карточки, лейауты, тосты и др.)
+- `api/client.ts` — HTTP-клиент с интерцепторами
+- `lib/` — утилиты и хуки (`auth`, `formatters`, `useOrientation`, `useBeepSound`, media helpers)
+
+---
+
+## 📸 Фото-прогресс (актуальное состояние)
+- Локальное хранение файлов: `documentDirectory/progress/<userId>/<side>/<timestamp>.jpg`
+- Метаданные: `progress/index.json` на пользователя (список `ProgressPhoto[]`)
+- Ракурсы: `front`, `back`, `left`, `right`
+- Флоу:
+  1) `CameraPermissionScreen` — запрос камеры
+  2) `PhonePositionScreen` — проверка портретной ориентации устройства
+  3) Экран готовности (силуэт без PoseCamera): “Примите исходное положение”, через 2с “Начнём”
+  4) Съёмка 4 сторон: отсчёт 5s, кадр, превью с “Переснять/Далее”, цикл по ракурсам
+  5) Финальный экран: миниатюры, тумблер “Сохранить в галерею” (MediaLibrary), кнопка “Сохранить”
+- Просмотр: `/photo-progress` — заглушка без фото, миниатюры при наличии; из stats карточка ведёт на этот роут
+
+---
+
+## 🧩 Публичные API слоёв
+
+- Entities: импортируются через `@/entities/<name>` (например, `progress`: `useProgressListQuery`, `useSaveProgressBatchMutation`, типы)
+- Features: через `@/features/<name>` (например, `progress-capture`: `ProgressCaptureFlow`)
+- Pages: через `@/pages/<name>`
+- Shared UI/lib/api: через `@/shared/*`
 
 ---
 

@@ -247,19 +247,20 @@ export function DayStatistic() {
 			</View>
 
 			{/* Photo progress */}
-			<View className="overflow-hidden rounded-3xl bg-[#1b1b1b]">
-				<View className="flex-row items-center gap-4 p-5">
-					<View className="h-48 flex-1 justify-between">
+			<View className="rounded-3xl bg-[#1b1b1b]">
+				<View className="flex-row">
+					<View className="h-48 flex-1 justify-between pt-6 pl-4 pb-2">
 						<Text className="text-t1.1 text-white">Фото-прогресс</Text>
 						<TouchableOpacity
 							className="h-20 w-20 items-center justify-center rounded-full bg-brand-purple-500"
 							activeOpacity={0.9}
+							onPress={() => router.push('/photo-progress')}
 						>
 							<Icon name="chevrons-right" size={28} color="#FFFFFF" />
 						</TouchableOpacity>
 					</View>
 
-					<Image source={girlSample} className="h-48 w-44" resizeMode="contain" />
+					<Image source={girlSample} className="h-50 w-50" resizeMode="contain" />
 				</View>
 			</View>
 

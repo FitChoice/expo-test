@@ -21,6 +21,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { Loader } from '@/shared/ui/Loader/Loader'
+import Entypo from '@expo/vector-icons/Entypo'
+
 
 import MorningExercise from '@/assets/images/morning_ex.svg'
 import Stretching from '@/assets/images/stretching.svg'
@@ -129,6 +131,7 @@ const MobileContent = () => {
 				dateKey,
 				dayNumber: safeDate ? String(safeDate.getDate()) : '--',
 				dayName: safeDate ? weekDayFormatter.format(safeDate).replace('.', '') : '',
+				isDone: day.activities.every((activity) => !activity.Progress.includes(0)),
 			}
 		})
 	}, [trainingDays, weekDayFormatter])
@@ -276,7 +279,14 @@ const MobileContent = () => {
 										}}
 									>
 										<View style={[styles.dayCard, isSelected && styles.dayCardSelected]}>
-											<Icon name="barbell" size={16} color="#FFFFFF" />
+
+											{
+
+												day.isDone ? 		<View style={styles.calendarIcon}>
+													<Icon name="barbell" size={16} color="#AAEC4D" />
+												</View> : 		<Entypo name="dot-single" size={16} color="white" />
+											}
+
 											<View style={styles.dayInfo}>
 												<Text style={styles.dayNumber}>{day.dayNumber}</Text>
 												<Text style={styles.dayName}>{day.dayName}</Text>
@@ -610,6 +620,9 @@ const styles = StyleSheet.create({
 	topIconBow: {
 		opacity: 0.2,
 	},
+	calendarIcon: {
+		transform: [{ rotate: '-45deg' }],
+	}
 })
 
 /**
