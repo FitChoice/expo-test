@@ -23,7 +23,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
 			className="flex-row items-center justify-between rounded-[32px] bg-fill-900 p-5"
 		>
 			<View className="flex-1 gap-4">
-				<Text className="text-t1 font-rimma-bold text-white">
+				<Text className="text-t2  text-white">
 					{label}
 				</Text>
 				<View className="flex-row gap-2">

@@ -30,7 +30,7 @@ export const BackButton: React.FC<BackButtonProps> = ({
 
 	return (
 		<TouchableOpacity
-			className={`z-10 h-12 w-12 items-center justify-center rounded-2xl ${backgroundClass} ${positionClass}`}
+			className={`z-10 p-3 items-center justify-center rounded-2xl ${backgroundClass} ${positionClass}`}
 			style={[spacingStyle, style]}
 			onPress={onPress}
 			activeOpacity={0.8}

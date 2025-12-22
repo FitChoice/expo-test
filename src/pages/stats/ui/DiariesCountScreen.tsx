@@ -1,5 +1,6 @@
 import React from 'react'
 import { Text, View, FlatList } from 'react-native'
+import { router } from 'expo-router'
 import {
 	StatsDetailPageLayout
 } from '@/shared/ui/StatsDetailPageLayout/StatsDetailPageLayout'
@@ -16,7 +17,7 @@ export const DiariesCountScreen = () => {
 		queryFn: getUserId,
 	})
 
-	const { data: trainings, isLoading } = useQuery({
+	const { data: diaries, isLoading } = useQuery({
 		queryKey: ['diaries', userId],
 		queryFn: async () => {
 			if (!userId) return []
@@ -29,7 +30,6 @@ export const DiariesCountScreen = () => {
 		enabled: !!userId,
 	})
 
-
 	const formatDate = (dateString: string) => {
 		const date = new Date(dateString)
 		const day = String(date.getDate()).padStart(2, '0')
@@ -41,14 +41,22 @@ export const DiariesCountScreen = () => {
 	return (
 		<StatsDetailPageLayout isLoading={isLoading} title={'Записи в дневнике'}>
 			<FlatList
-				data={trainings}
+				data={diaries}
 				keyExtractor={(item) => item.id.toString()}
 				renderItem={({ item }) => (
 					<ActivityCard
-						label={''}
+						label={'Запись'}
 						date={formatDate(item.date)}
 					//	minutes={`${item.duration} minutes`}
-						onPress={() => {}}
+						onPress={() =>
+							router.push({
+								pathname: '/diary/completed',
+								params: {
+									id: String(item.id),
+									date: formatDate(item.date),
+								},
+							})
+						}
 					/>
 				)}
 				contentContainerStyle={{

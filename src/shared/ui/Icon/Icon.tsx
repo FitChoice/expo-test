@@ -1,5 +1,6 @@
 import React from 'react'
 import { View, StyleSheet } from 'react-native'
+import { type SvgProps } from 'react-native-svg'
 import { type IconName } from './types'
 
 // Импорт SVG иконок
@@ -83,6 +84,17 @@ import Stop from './assets/stop.svg'
 import AiAssistant from './assets/ai-assistant.svg'
 import AiChat from './assets/ai-chat.svg'
 import Lock from './assets/lock.svg'
+import CardioPurple from './assets/cardio-purple.svg'
+import DumbbellPurple from './assets/dumbbell-purple.svg'
+import EnergyPurple from './assets/energy-purple.svg'
+import FlexibilityPurple from './assets/flexibility-purple.svg'
+import LowStressPurple from './assets/low-stress-purple.svg'
+import PainReliefPurple from './assets/pain-relief-purple.svg'
+import PosturePurple from './assets/posture-purple.svg'
+import StrengthPurple from './assets/strength-purple.svg'
+import StretchingPurple from './assets/stretching-purple.svg'
+import WeightLossPurple from './assets/weight-loss-purple.svg'
+import WelnessPurple from './assets/welness-purple.svg'
 
 interface IconProps {
 	name: IconName
@@ -91,11 +103,30 @@ interface IconProps {
 	style?: object
 }
 
+const applyColor = (
+	element: React.ReactElement<SvgProps>,
+	color: string,
+): React.ReactElement<SvgProps> => {
+	const { children, fill, stroke } = element.props
+
+	const nextChildren = React.Children.map(children, (child) => {
+		if (!React.isValidElement(child)) {
+			return child
+		}
+
+		return applyColor(child as React.ReactElement<SvgProps>, color)
+	})
+
+	return React.cloneElement(element, {
+		color,
+		...(fill !== 'none' ? { fill: color } : {}),
+		...(stroke !== 'none' ? { stroke: color } : {}),
+		children: nextChildren,
+	})
+}
+
 // Маппинг имен иконок на SVG компоненты
-const iconMap: Record<
-	IconName,
-	React.FC<{ width?: number; height?: number; fill?: string; style?: object }>
-> = {
+const iconMap: Record<IconName, React.FC<SvgProps>> = {
 	'chevron-down': ChevronDown,
 	'chevron-left': ChevronLeft,
 	'chevron-right': ChevronRight,
@@ -184,13 +215,24 @@ const iconMap: Record<
 	'ai-assistant': AiAssistant,
 	'ai-chat': AiChat,
 	lock: Lock,
+	'cardio-purple': CardioPurple,
+	'dumbbell-purple': DumbbellPurple,
+	'energy-purple': EnergyPurple,
+	'flexibility-purple': FlexibilityPurple,
+	'low-stress-purple': LowStressPurple,
+	'pain-relief-purple': PainReliefPurple,
+	'posture-purple': PosturePurple,
+	'strength-purple': StrengthPurple,
+	'stretching-purple': StretchingPurple,
+	'weight-loss-purple': WeightLossPurple,
+	'welness-purple': WelnessPurple,
 }
 
 // Компонент иконок
 export const Icon: React.FC<IconProps> = ({
 	name,
 	size = 24,
-	color = '#000000',
+	color,
 	style,
 }) => {
 	const IconComponent = iconMap[name]
@@ -200,15 +242,19 @@ export const Icon: React.FC<IconProps> = ({
 		return null
 	}
 
+	// Call the component directly to get the rendered SVG tree so we can
+	// traverse and force-fill colors inside nested paths.
+	const iconElement = IconComponent({
+		width: size,
+		height: size,
+		color,
+	}) as React.ReactElement<SvgProps>
+
+	const coloredIcon = color ? applyColor(iconElement, color) : iconElement
+
 	return (
 		<View style={[styles.container, { width: size, height: size }, style]}>
-			<IconComponent
-				width={size}
-				height={size}
-				fill={color}
-				// Переопределяем currentColor для React Native
-				style={{ color: color }}
-			/>
+			{coloredIcon}
 		</View>
 	)
 }

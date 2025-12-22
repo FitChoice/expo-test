@@ -31,17 +31,18 @@ export const formatFileSize = (bytes: number): string => {
 }
 
 /**
- * Форматирует время из строки "HH:MM:SS" в "HH:MM"
- * @param time - строка времени
- * @returns строка в формате "HH:MM"
+ * Форматирует ISO-дату (UTC) в строку "HH:MM"
+ * @param time - дата/время в формате ISO 8601 (UTC)
+ * @returns строка в формате "HH:MM" или пустая строка при неверном вводе
  */
 export const formatTime = (time: string): string => {
 	if (!time) return ''
-	// Берем первые 5 символов для формата HH:MM
-	// Это работает для строк вида "08:30:00" или "08:30"
-	if (time.includes(':')) {
-		const parts = time.split(':')
-		return `${parts[0]}:${parts[1]}`
-	}
-	return time
+
+	const date = new Date(time)
+	if (Number.isNaN(date.getTime())) return ''
+
+	const hours = date.getUTCHours().toString().padStart(2, '0')
+	const minutes = date.getUTCMinutes().toString().padStart(2, '0')
+
+	return `${hours}:${minutes}`
 }

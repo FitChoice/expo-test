@@ -76,7 +76,7 @@ export const DiaryCompletedScreen = () => {
 						marginRight: 16,
 					}}
 				>
-					<Icon width={32} height={32} />
+					<Icon width={32} height={32} color={color} />
 				</View>
 				<Text className="text-lg font-semibold text-white">{label}</Text>
 			</View>

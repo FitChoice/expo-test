@@ -5,12 +5,13 @@
  */
 
 import React from 'react'
-import { View, Text, Pressable } from 'react-native'
+import { View, Text } from 'react-native'
 import { BlurView } from 'expo-blur'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { Icon, BackButton } from '@/shared/ui'
+import { BackButton } from '@/shared/ui'
 import { GradientHeader } from '@/shared/ui/GradientBG/GradientHeader'
+import LogoGreen from '@/assets/images/logo_green.svg'
 
 interface ChatHeaderProps {
 	title?: string
@@ -27,7 +28,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ title = 'ИИ-ассис
 	}
 
 	return (
-		<View className="relative overflow-hidden rounded-b-3xl">
+		<View className="relative overflow-hidden rounded-b-3xl py-2">
 			{/* Градиентный фон */}
 			<View className="absolute inset-0">
 				<GradientHeader />
@@ -44,31 +45,17 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ title = 'ИИ-ассис
 						onPress={handleBack}
 						variant="translucent"
 						position="relative"
-						style={{ marginTop: 0 }}
+						style={{ marginTop: 0, padding: 12 }}
 					/>
-
 					{/* Title */}
-					<Pressable className="flex-row items-center">
 						<Text
-							className="text-light-text-100"
-							style={{
-								fontFamily: 'Inter',
-								fontWeight: '600',
-								fontSize: 17,
-							}}
-						>
+							className=" text-t1 text-light-text-100">
 							{title}
 						</Text>
-					</Pressable>
 
 					<View
-						className="h-12 w-12 items-center justify-center rounded-2xl border-2"
-						style={{
-							borderColor: '#8BC34A',
-							backgroundColor: 'transparent',
-						}}
-					>
-						<Icon name="ai-chat" size={24} color="#8BC34A" />
+						className="p-2 items-center justify-center rounded-3xl bg-[#2E322D]">
+						<LogoGreen width={30} height={30} />
 					</View>
 				</View>
 			</View>
