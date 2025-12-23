@@ -67,7 +67,7 @@ export function StepProgress({
 					<View
 						key={index}
 						className={`h-1.5 flex-1 rounded-full ${
-							isActive ? 'bg-brand-green-500' : 'bg-white/30'
+							index <= current ? 'bg-brand-green-500' : 'bg-white/30'
 						}`}
 					/>
 				)
