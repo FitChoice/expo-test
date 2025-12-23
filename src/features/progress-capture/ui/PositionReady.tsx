@@ -2,22 +2,20 @@ import {
 	BackgroundLayoutSafeArea
 } from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
 import {
-	Dimensions,
-	Text,
-	useWindowDimensions,
-	View,
+	Dimensions, StyleSheet, Text, useWindowDimensions, View,
 } from 'react-native'
 import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
 import { PoseCamera } from '@/widgets/pose-camera'
 import Svg, { Circle } from 'react-native-svg'
 import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
-import { useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import type {
 	ProgressCaptureFlowState
 } from '@/features/progress-capture/ui/ProgressCaptureFlow'
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
+import { GradientBg } from '@/shared/ui/GradientBG'
 
 
 interface PositionReadyProps extends ProgressCaptureFlowState {
@@ -55,14 +53,15 @@ export const PositionReady = ({model, setStep}: PositionReadyProps) => {
 	const handleStop = () => {
 		router.push('/stats')
 	}
-	return <BackgroundLayoutSafeArea hasSidePadding={false}>
-			<View className="flex-1 bg-transparent">
+	return 		<View className="flex-1">
+		<View style={styles.background} pointerEvents="none">
+			<GradientBg />
+		</View>
 
-				<View className="absolute right-4 z-10">
-					<CloseBtn handlePress={handleStop} classNames="h-12 w-12 rounded-2xl" />
-				</View>
-
-
+		<View style={styles.content}>
+			<View className="absolute right-4 z-10 top-10">
+				<CloseBtn handlePress={handleStop} classNames="h-12 w-12 rounded-2xl" />
+			</View>
 					<View
 						style={{
 							height: CAM_PREVIEW_HEIGHT,
@@ -102,7 +101,7 @@ export const PositionReady = ({model, setStep}: PositionReadyProps) => {
 					</View>
 
 					{/* Body Silhouette Overlay */}
-						<View className="absolute inset-0 items-center justify-start pt-10">
+						<View className="absolute inset-0 items-center justify-start pt-20">
 							{
 								<BodySilhouetteDefault
 									stroke={showSuccess ? '#8BC34A' : 'white'}
@@ -112,7 +111,7 @@ export const PositionReady = ({model, setStep}: PositionReadyProps) => {
 						</View>
 
 
-					<View className="pl-2 pt-10">
+					<View className=" pt-10 pl-4">
 						<Text
 							className={'mb-2 text-left text-h2 text-light-text-100'}
 						>
@@ -134,7 +133,22 @@ export const PositionReady = ({model, setStep}: PositionReadyProps) => {
 
 
 					</View>
+		</View>
 
 		</View>
-	</BackgroundLayoutSafeArea>
+
 }
+
+		const styles = StyleSheet.create({
+		background: {
+		...StyleSheet.absoluteFillObject,
+		zIndex: 0,
+		bottom: -200,
+	},
+
+		content: {
+		flex: 1,
+		position: 'relative',
+		zIndex: 1,
+	},
+	})

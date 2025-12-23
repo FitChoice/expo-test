@@ -115,14 +115,6 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 
 	useOrientation(ScreenOrientation.OrientationLock.PORTRAIT_UP, true)
 
-	// useEffect(() => {
-	// 	if (tfReady && !permission) {
-	// 		setStep('permission')
-	// 	}
-	// 	if (tfReady && permission) {
-	// 		setStep('phone')
-	// 	}
-	// }, [tfReady, permission])
 
 	const {
 		mutateAsync: saveBatch,

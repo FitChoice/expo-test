@@ -112,6 +112,7 @@ export function DayStatistic() {
 
 			const result = await statsApi.getMainStats({ userId })
 
+		
 			if (!isMounted) return
 
 			if (!result.success) {
@@ -196,7 +197,7 @@ export function DayStatistic() {
 
 			{/* All time stats */}
 			<View className="mb-6">
-				<Text className="text-t.1 text-white">За все время</Text>
+				<Text className="text-t.1 text-white">За всё время</Text>
 
 				<View className="flex-row flex-wrap gap-3">
 					{isStatsLoading ? (

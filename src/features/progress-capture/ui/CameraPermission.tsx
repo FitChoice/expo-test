@@ -13,7 +13,7 @@ import {
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
 import {
-	ProgressCaptureFlowState
+	type ProgressCaptureFlowState
 } from '@/features/progress-capture/ui/ProgressCaptureFlow'
 
 

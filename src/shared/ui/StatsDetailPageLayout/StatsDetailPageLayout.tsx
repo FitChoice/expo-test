@@ -7,7 +7,7 @@ import { router } from 'expo-router'
 export  function StatsDetailPageLayout({children, isLoading, title}: {children: React.ReactNode, isLoading: boolean, title: string}) {
 	return (
 		<View className="flex-1 bg-black">
-			<View className="h-32 overflow-hidden rounded-b-3xl">
+			<View className="h-32 overflow-hidden rounded-b-3xl ">
 				<PurpleGradient />
 				<View className="relative flex-row items-center justify-center px-4 pb-6 pt-12">
 					<TouchableOpacity
