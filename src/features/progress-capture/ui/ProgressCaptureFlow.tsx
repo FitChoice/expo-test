@@ -84,6 +84,7 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 
 	if (step === 'position' && model) {
 		return (<PositionReady
+			side={side}
 			handleStop={handleStop}
 			model={model}
 			setStep={setStep}

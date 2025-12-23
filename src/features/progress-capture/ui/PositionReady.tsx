@@ -1,28 +1,29 @@
-import {
-	BackgroundLayoutSafeArea
-} from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
+
 import {
 	Dimensions, StyleSheet, Text, useWindowDimensions, View,
 } from 'react-native'
-import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
+
 import { PoseCamera } from '@/widgets/pose-camera'
 import Svg, { Circle } from 'react-native-svg'
 import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
+import BodySilhouetteSide from '@/assets/images/body_silhouette_side.svg'
 import React, { useRef, useState } from 'react'
 
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
-import { router } from 'expo-router'
+
 import { GradientBg } from '@/shared/ui/GradientBG'
 import {
-	ProgressCaptureFlowState
+	type ProgressCaptureFlowState
 } from '@/features/progress-capture/ui/PhonePosition'
+import { type ProgressSide } from '@/entities/progress'
 
 
 interface PositionReadyProps extends ProgressCaptureFlowState {
  	model: posedetection.PoseDetector
+	side : ProgressSide
 }
-export const PositionReady = ({model, setStep, handleStop}: PositionReadyProps) => {
+export const PositionReady = ({model, setStep, handleStop, side}: PositionReadyProps) => {
 
 
 	const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height * 0.6
@@ -31,6 +32,7 @@ export const PositionReady = ({model, setStep, handleStop}: PositionReadyProps) 
 	const [showSuccess, setShowSuccess] = useState(false)
 	const successTimerRef = useRef<NodeJS.Timeout | null>(null)
 	const allKeypointsDetectedRef = useRef(false)
+	const isLeftSide = side === 'left'
 
 	const handleAllKeypointsDetected = (allDetected: boolean) => {
 		if (allDetected && !allKeypointsDetectedRef.current) {
@@ -102,10 +104,16 @@ export const PositionReady = ({model, setStep, handleStop}: PositionReadyProps) 
 					{/* Body Silhouette Overlay */}
 						<View className="absolute inset-0 items-center justify-start pt-20">
 							{
+
+								side == 'front' || side == 'back' ?
 								<BodySilhouetteDefault
 									stroke={showSuccess ? '#8BC34A' : 'white'}
 									fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
-								/>
+								/> : <BodySilhouetteSide
+										style={isLeftSide ? { transform: [{ scaleX: -1 }] } : undefined}
+										stroke={showSuccess ? '#8BC34A' : 'white'}
+										fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
+									/>
 							}
 						</View>
 

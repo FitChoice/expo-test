@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { View } from 'react-native'
+import { View, Text } from 'react-native'
 
 import { ProgressCaptureFlow } from '@/features/progress-capture'
-import { useProgressSeriesQuery } from '@/entities/progress'
-import { StatsDetailPageLayout, Loader } from '@/shared/ui'
+import { useProgressSeriesQuery, useResetProgressMutation } from '@/entities/progress'
+import { StatsDetailPageLayout, Loader, Button } from '@/shared/ui'
 import {
 	ExistingPhotosScreen
 } from '@/pages/photo-progress/ui/ExistingPhotosScreen'

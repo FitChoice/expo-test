@@ -101,6 +101,7 @@ export const CountdownCapture = ({ side, onCaptured, onCancel, currentSideIndex,
 					<CameraView
 						style={{ flex: 1 }}
 						facing="front"
+						mirror={false}
 						ref={(ref) => {
 							cameraRef.current = ref
 						}}

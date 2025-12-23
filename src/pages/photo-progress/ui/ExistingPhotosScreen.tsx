@@ -5,6 +5,7 @@ import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 import { PROGRESS_SIDE_ORDER } from '@/entities/progress/lib/series'
 import { router } from 'expo-router'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
+import { useProgressSeriesQuery, useResetProgressMutation } from '@/entities/progress'
 
 type Props = {
 	data: ProgressSeries[]
@@ -28,6 +29,8 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 	if (nowRef.current === null) {
 		nowRef.current = Date.now()
 	}
+	const { mutateAsync: resetProgress, isPending: isResetting } = useResetProgressMutation()
+	const {  refetch } = useProgressSeriesQuery()
 
 	const latestPhotoTimestamp = useMemo(
 		() =>
@@ -126,6 +129,23 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 				</View>
 			</View>
 
+			{/* <View className="gap-3">
+				<Text className="text-center text-body-medium text-light-text-300">
+					Удаление очистит все сохраненные фото-прогресса на устройстве
+				</Text>
+				<Button
+					variant="secondary"
+					size="s"
+					fullWidth
+					disabled={isResetting}
+					onPress={async () => {
+						await resetProgress()
+						await refetch()
+					}}
+				>
+					{isResetting ? 'Удаляем...' : 'Удалить все фото'}
+				</Button>
+			</View> */}
 			<View className="gap-3 px-2">
 				<View className="rounded-[18px] bg-[#444444] px-6 py-4">
 					<Text className="text-center text-body-medium text-light-text-100">
