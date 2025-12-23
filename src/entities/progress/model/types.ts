@@ -10,6 +10,11 @@ export type ProgressPhoto = {
 	size?: number
 }
 
+export type ProgressSeries = {
+	dateId: string
+	photos: ProgressPhoto[]
+}
+
 export type TempCapturedPhoto = {
 	side: ProgressSide
 	tempUri: string

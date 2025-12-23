@@ -71,7 +71,7 @@ export const FinalScreen = ({
 			</View> */}
 
 			<Button className="" onPress={onSave} disabled={isSaving || items.length < 4}>
-				{isSaving ? 'Сохраняем...' : items.length < 4 ? 'Сделайте 4 снимка' : 'Сохранить'}
+				{isSaving ? 'Сохраняем...' : items.length < 4 ? 'Сделайте 4 снимка' : 'Добавить фото в архив'}
 			</Button>
 			{/*<Button variant="ghost" onPress={onRestart} disabled={isSaving}>*/}
 			{/*	Начать заново*/}

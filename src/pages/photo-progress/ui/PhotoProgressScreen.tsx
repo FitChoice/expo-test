@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 
 import { ProgressCaptureFlow } from '@/features/progress-capture'
-import { useProgressListQuery, useResetProgressMutation } from '@/entities/progress'
+import { useProgressSeriesQuery } from '@/entities/progress'
 import { StatsDetailPageLayout, Loader } from '@/shared/ui'
 import {
 	ExistingPhotosScreen
@@ -10,8 +10,7 @@ import {
 
 export const PhotoProgressScreen = () => {
 	const [isCapturing, setIsCapturing] = useState(false)
-	const { data, isLoading, refetch, isFetched } = useProgressListQuery()
-	const { mutateAsync: resetProgress, isPending: isResetting } = useResetProgressMutation()
+	const { data, isLoading, refetch, isFetched } = useProgressSeriesQuery()
 
 	useEffect(() => {
 		if (isCapturing || isLoading || !isFetched) return
@@ -38,9 +37,6 @@ export const PhotoProgressScreen = () => {
 			<View className="flex-1 gap-6">
 				{isLoading ? <Loader /> : <ExistingPhotosScreen
 					data={data ?? []}
-					resetProgress={resetProgress}
-					setIsCapturing={setIsCapturing}
-					isResetting={isResetting}
 				/>
 				}
 			</View>

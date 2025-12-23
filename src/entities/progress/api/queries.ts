@@ -3,10 +3,15 @@ import { useQuery } from '@tanstack/react-query'
 
 import { listProgressPhotos } from '@/entities/progress/lib/storage'
 import { progressKeys } from '@/entities/progress/api/queryKeys'
-import type { ProgressPhoto } from '@/entities/progress/model/types'
+import type { ProgressPhoto, ProgressSeries } from '@/entities/progress/model/types'
 import { getUserId } from '@/shared/lib/auth'
+import { groupPhotosByDate } from '@/entities/progress/lib/series'
 
-export const useProgressListQuery = () => {
+type UseProgressListQueryOptions<TData> = {
+	select?: (data: ProgressPhoto[]) => TData
+}
+
+export const useProgressListQuery = <TData = ProgressPhoto[]>(options?: UseProgressListQueryOptions<TData>) => {
 	const [userId, setUserId] = useState<string | null>(null)
 
 	useEffect(() => {
@@ -24,6 +29,12 @@ export const useProgressListQuery = () => {
 			if (!userId) throw new Error('Не удалось определить пользователя')
 			return listProgressPhotos(userId)
 		},
+		select: options?.select,
 	})
 }
+
+export const useProgressSeriesQuery = () =>
+	useProgressListQuery<ProgressSeries[]>({
+		select: groupPhotosByDate,
+	})
 

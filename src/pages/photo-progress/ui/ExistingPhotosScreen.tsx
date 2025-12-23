@@ -1,18 +1,16 @@
-import { Image, Text, View } from 'react-native'
-import type { ProgressPhoto, ProgressSide } from '@/entities/progress/model/types'
-import { Button } from '@/shared/ui'
+import { useMemo, useRef } from 'react'
+import { Image, Text, TouchableOpacity, View } from 'react-native'
+import type { ProgressSeries } from '@/entities/progress/model/types'
 import { sharedStyles } from '@/shared/ui/styles/shared-styles'
+import { PROGRESS_SIDE_ORDER } from '@/entities/progress/lib/series'
+import { router } from 'expo-router'
 
 type Props = {
-	data: ProgressPhoto[]
-	resetProgress: () => Promise<void>
-	setIsCapturing: (value: boolean) => void
-	isResetting: boolean
+	data: ProgressSeries[]
 }
 
 const DAYS_INTERVAL = 30
 const MS_IN_DAY = 1000 * 60 * 60 * 24
-const PHOTO_SIDES_ORDER: ProgressSide[] = ['front', 'left', 'right', 'back']
 
 const getDayWord = (value: number) => {
 	const mod10 = value % 10
@@ -23,26 +21,25 @@ const getDayWord = (value: number) => {
 	return 'дней'
 }
 
-export const ExistingPhotosScreen = ({ data, resetProgress, setIsCapturing, isResetting }: Props) => {
-	const latestPhotoTimestamp = Math.max(
-		...data.map((item) => new Date(item.createdAt).getTime()),
-		0
+export const ExistingPhotosScreen = ({ data }: Props) => {
+	const nowRef = useRef<number | null>(null)
+	if (nowRef.current === null) {
+		nowRef.current = Date.now()
+	}
+
+	const latestPhotoTimestamp = useMemo(
+		() =>
+			Math.max(
+				...data.flatMap((series) => series.photos.map((item) => new Date(item.createdAt).getTime())),
+				0
+			),
+		[data]
 	)
 
 	const daysSinceLast = latestPhotoTimestamp
-		? Math.floor((Date.now() - latestPhotoTimestamp) / MS_IN_DAY)
+		? Math.floor(((nowRef.current ?? Date.now()) - latestPhotoTimestamp) / MS_IN_DAY)
 		: 0
 	const daysUntilNext = Math.max(0, DAYS_INTERVAL - daysSinceLast)
-
-	const orderedPhotos = PHOTO_SIDES_ORDER.map((side) => ({
-		side,
-		photo: data.find((item) => item.side === side),
-	}))
-
-	const handleRetake = async () => {
-		await resetProgress()
-		setIsCapturing(true)
-	}
 
 	return (
 		<View className="flex-1 justify-between py-6">
@@ -57,23 +54,47 @@ export const ExistingPhotosScreen = ({ data, resetProgress, setIsCapturing, isRe
 							{'\n'}следующего{'\n'} фото
 						</Text>
 					</View>
-					<View className="w-[124px] flex-row flex-wrap gap-2">
-						{orderedPhotos.map(({ side, photo }) => (
-							<View
-								key={side}
-								className="h-14 w-14 overflow-hidden rounded-lg bg-[#c7c7c7]"
-							>
-								{photo ? (
-									<Image
-										source={{ uri: photo.uri }}
-										className="h-full w-full"
-										resizeMode="cover"
-									/>
-								) : (
-									<View className="flex-1" />
-								)}
-							</View>
-						))}
+					<View className="gap-3">
+						{data.map((series) => {
+							const orderedSeries = PROGRESS_SIDE_ORDER.map((side) => ({
+								side,
+								photo: series.photos.find((item) => item.side === side),
+							}))
+
+							return (
+								<View key={series.dateId} nativeID={series.dateId} testID={series.dateId}>
+									<TouchableOpacity
+										accessibilityRole="button"
+										activeOpacity={0.8}
+										onPress={() =>
+											router.push({
+												pathname: '/photo-progress/[dateId]',
+												params: { dateId: series.dateId },
+											})
+										}
+									>
+										<View className="w-[124px] flex-row flex-wrap gap-2">
+											{orderedSeries.map(({ side, photo }) => (
+												<View
+													key={`${series.dateId}-${side}`}
+													className="h-14 w-14 overflow-hidden rounded-lg bg-[#c7c7c7]"
+												>
+													{photo ? (
+														<Image
+															source={{ uri: photo.uri }}
+															className="h-full w-full"
+															resizeMode="cover"
+														/>
+													) : (
+														<View className="flex-1" />
+													)}
+												</View>
+											))}
+										</View>
+									</TouchableOpacity>
+								</View>
+							)
+						})}
 					</View>
 				</View>
 
@@ -89,16 +110,6 @@ export const ExistingPhotosScreen = ({ data, resetProgress, setIsCapturing, isRe
 			</View>
 
 			<View className="gap-3 px-2">
-				{/*<Button*/}
-				{/*	onPress={handleRetake}*/}
-				{/*	disabled={isResetting}*/}
-				{/*	variant="tertiary"*/}
-				{/*	size="m"*/}
-				{/*	fullWidth*/}
-				{/*	className="rounded-[18px]"*/}
-				{/*>*/}
-				{/*	{isResetting ? 'Очищаем...' : 'Переснять'}*/}
-				{/*</Button>*/}
 				<View className="rounded-[18px] bg-[#444444] px-6 py-4">
 					<Text className="text-center text-body-medium text-light-text-100">
 						Мы подскажем, когда будет время сделать следующее фото

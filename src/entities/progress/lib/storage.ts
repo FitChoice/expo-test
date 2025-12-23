@@ -89,6 +89,7 @@ export const saveProgressBatch = async ({
 			: [...meta]
 
 	const saved: ProgressPhoto[] = []
+	const capturedAt = new Date().toISOString()
 
 	for (const item of items) {
 		await ensureDir(getSideDir(userId, item.side))
@@ -103,7 +104,7 @@ export const saveProgressBatch = async ({
 			id,
 			side: item.side,
 			uri: targetUri,
-			createdAt: new Date().toISOString(),
+			createdAt: capturedAt,
 			width: item.width,
 			height: item.height,
 			size: item.size,
