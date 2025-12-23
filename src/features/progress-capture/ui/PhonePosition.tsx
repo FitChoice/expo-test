@@ -6,13 +6,15 @@ import {
 import { router } from 'expo-router'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { CameraView } from 'expo-camera'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import * as ScreenOrientation from 'expo-screen-orientation'
-import {
-	type ProgressCaptureFlowState
-} from '@/features/progress-capture/ui/ProgressCaptureFlow'
 
-export const PhonePosition =   ({ setStep }: ProgressCaptureFlowState) => {
+export type ProgressCaptureFlowState = {
+	setStep: (value: React.SetStateAction<'loading' | 'permission' | 'phone' | 'position' | 'capture' | 'preview' | 'final'>) => void
+	handleStop: () => void
+}
+
+export const PhonePosition =   ({ setStep, handleStop }: ProgressCaptureFlowState) => {
 
 
 	const isPortrait = (o: ScreenOrientation.Orientation | null) =>
@@ -21,9 +23,6 @@ export const PhonePosition =   ({ setStep }: ProgressCaptureFlowState) => {
 
 
 
-	const handleStop = () => {
-		router.push('/stats')
-	}
 
 	const [isReady, setIsReady] = useState(false)
 

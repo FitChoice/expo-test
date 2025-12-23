@@ -9,19 +9,20 @@ import { PoseCamera } from '@/widgets/pose-camera'
 import Svg, { Circle } from 'react-native-svg'
 import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
 import React, { useRef, useState } from 'react'
-import type {
-	ProgressCaptureFlowState
-} from '@/features/progress-capture/ui/ProgressCaptureFlow'
+
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
 import { GradientBg } from '@/shared/ui/GradientBG'
+import {
+	ProgressCaptureFlowState
+} from '@/features/progress-capture/ui/PhonePosition'
 
 
 interface PositionReadyProps extends ProgressCaptureFlowState {
  	model: posedetection.PoseDetector
 }
-export const PositionReady = ({model, setStep}: PositionReadyProps) => {
+export const PositionReady = ({model, setStep, handleStop}: PositionReadyProps) => {
 
 
 	const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height * 0.6
@@ -50,9 +51,7 @@ export const PositionReady = ({model, setStep}: PositionReadyProps) => {
 		}
 	}
 
-	const handleStop = () => {
-		router.push('/stats')
-	}
+
 	return 		<View className="flex-1">
 		<View style={styles.background} pointerEvents="none">
 			<GradientBg />

@@ -2,36 +2,29 @@ import type { ProgressSide, TempCapturedPhoto } from '@/entities/progress'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { CameraView } from 'expo-camera'
 import * as FileSystem from 'expo-file-system'
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { Button, DotsProgress, Icon, StepProgress } from '@/shared/ui'
+import { Dimensions, StyleSheet, Text, View } from 'react-native'
+import {  StepProgress } from '@/shared/ui'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
-import {
-	BackgroundLayoutSafeArea
-} from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
-import { PoseCamera } from '@/widgets/pose-camera'
-import Svg, { Circle } from 'react-native-svg'
-import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
+
 import { router } from 'expo-router'
 import { GradientBg } from '@/shared/ui/GradientBG'
+import { sideTitle } from '@/shared/constants/labels'
 
 type CountdownCaptureProps = {
 	side: ProgressSide
 	onCaptured: (photo: TempCapturedPhoto) => void
 	onCancel: () => void
+	handleStop: () => void
+	currentSideIndex: number
 }
 
-export const CountdownCapture = ({ side, onCaptured, onCancel }: CountdownCaptureProps) => {
+export const CountdownCapture = ({ side, onCaptured, onCancel, currentSideIndex, handleStop }: CountdownCaptureProps) => {
 	const [countdown, setCountdown] = useState(5)
 	const [isCounting, setIsCounting] = useState(true)
 	const cameraRef = useRef<CameraView | null>(null)
 
-	const sideTitle: Record<ProgressSide, string> = {
-		front: 'Спереди',
-		back: 'Сзади',
-		left: 'Слева',
-		right: 'Справа',
-	}
 	const sideLabel = useMemo(() => sideTitle[side], [side])
+
 
 	useEffect(() => {
 		if (!isCounting) return
@@ -83,9 +76,7 @@ export const CountdownCapture = ({ side, onCaptured, onCancel }: CountdownCaptur
 		capture()
 	}, [isCounting, countdown, onCancel, onCaptured, side])
 
-	const handleStop = () => {
-		router.push('/stats')
-	}
+
 	const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height * 0.7
 
 	return (
@@ -118,7 +109,7 @@ export const CountdownCapture = ({ side, onCaptured, onCancel }: CountdownCaptur
 				</View>
 
 				<View className="pl-2 pt-5">
-					<StepProgress isVertical={true} current={0} total={5} />
+					<StepProgress isVertical={true} current={currentSideIndex} total={4} secondsForStepProgress={5}/>
 					<Text className="mt-2 text-[20px] text-light-text-100 text-center">{sideLabel}</Text>
 					<View className="mt-6 items-center">
 						<Text className="text-h1 text-brand-green-500">{isCounting ? countdown : 'Снимаем...'}</Text>

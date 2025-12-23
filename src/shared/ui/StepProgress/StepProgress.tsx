@@ -1,9 +1,5 @@
-/**
- * StepProgress - индикатор прогресса шагов
- * Показывает активный шаг в виде яркого зеленого круга и последующие шаги в виде белых полупрозрачных прямоугольников
- */
-
-import { View, type ViewProps } from 'react-native'
+import { useEffect, useRef } from 'react'
+import { Animated, Easing, View, type ViewProps } from 'react-native'
 
 export interface StepProgressProps extends ViewProps {
 	/** Текущий шаг (начинается с 0) */
@@ -11,15 +7,39 @@ export interface StepProgressProps extends ViewProps {
 	/** Общее количество шагов */
 	total: number
 	isVertical?: boolean
+	secondsForStepProgress?: number
 }
 
 export function StepProgress({
-	current,
 	total,
-	className,
+	current,
+	secondsForStepProgress,
 	isVertical,
 	...props
 }: StepProgressProps) {
+	const progress = useRef(new Animated.Value(1)).current
+	useEffect(() => {
+		// Если не задано время — сразу показываем заполненный активный шаг
+		if (!secondsForStepProgress || secondsForStepProgress <= 0) {
+			progress.setValue(1)
+			return
+		}
+
+		// Сбрасываем и запускаем анимацию заполнения для активного шага
+		progress.setValue(0)
+		Animated.timing(progress, {
+			toValue: 1,
+			duration: secondsForStepProgress * 1000,
+			easing: Easing.linear,
+			useNativeDriver: false, // анимируем width, поэтому только без native driver
+		}).start()
+	}, [current, progress, secondsForStepProgress])
+
+	const animatedWidth = progress.interpolate({
+		inputRange: [0, 1],
+		outputRange: ['0%', '100%'],
+	})
+
 	return (
 		<View
 			{...props}
@@ -28,26 +48,29 @@ export function StepProgress({
 			{Array.from({ length: total }).map((_, index) => {
 				const isActive = index === current
 
-				// if (isActive) {
-				// 	// Активный шаг - яркий зеленый круг с эффектом свечения
-				// 	return (
-				// 		<View key={index} className="flex-1 items-center">
-				// 			<View
-				// 				className="w-3 h-3 rounded-full bg-brand-green-500"
-				// 				style={{
-				// 					shadowColor: '#4ADE80',
-				// 					shadowOffset: { width: 0, height: 0 },
-				// 					shadowOpacity: 0.8,
-				// 					shadowRadius: 4,
-				// 					elevation: 4,
-				// 				}}
-				// 			/>
-				// 		</View>
-				// 	)
-				// }
+				if (isActive && secondsForStepProgress) {
+					return (
+						<View
+							key={index}
+							className="h-1.5 flex-1 rounded-full overflow-hidden bg-white/30"
+						>
+							<Animated.View
+								className="absolute left-0 top-0 bottom-0 rounded-full bg-brand-green-500"
+								style={{ width: animatedWidth }}
+							/>
+						</View>
+					)
+				}
 
 				// Неактивные шаги - белые полупрозрачные прямоугольники с закругленными краями
-				return <View key={index} className="h-1.5 flex-1 rounded-full bg-white/30" />
+				return (
+					<View
+						key={index}
+						className={`h-1.5 flex-1 rounded-full ${
+							isActive ? 'bg-brand-green-500' : 'bg-white/30'
+						}`}
+					/>
+				)
 			})}
 		</View>
 	)

@@ -1,15 +1,15 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { CameraView, useCameraPermissions } from 'expo-camera'
+import React, { useMemo, useState } from 'react'
+import { useCameraPermissions } from 'expo-camera'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as MediaLibrary from 'expo-media-library'
-import { Image, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { View } from 'react-native'
 
 import {
 	useSaveProgressBatchMutation,
 	type TempCapturedPhoto,
 	type ProgressSide,
 } from '@/entities/progress'
-import { Button, BackgroundLayoutNoSidePadding, Icon, Loader } from '@/shared/ui'
+import { Loader } from '@/shared/ui'
 import { useOrientation } from '@/shared/lib/useOrientation'
 import {
 	CameraPermission
@@ -20,93 +20,23 @@ import { usePoseCameraSetup } from '@/widgets/pose-camera'
 import {
 	CountdownCapture
 } from '@/features/progress-capture/ui/CountDownCapture'
+import { PreviewScreen } from '@/features/progress-capture/ui/PreviewScreen'
+import { sideTitle } from '@/shared/constants/labels'
+import { router } from 'expo-router'
+import { FinalScreen } from '@/features/progress-capture/ui/FinalScreen'
 
 type ProgressCaptureFlowProps = {
 	onFinished: () => void
 	onCancel: () => void
 }
 
-export type ProgressCaptureFlowState = {
-	 setStep: (value: React.SetStateAction<'loading' | 'permission' | 'phone' | 'position' | 'capture' | 'preview' | 'final'>) => void
-}
 
 const sidesOrder: ProgressSide[] = ['front', 'back', 'left', 'right']
 
-type PreviewProps = {
-	photo: TempCapturedPhoto
-	onRetake: () => void
-	onConfirm: () => void
-}
-
-const PreviewScreen = ({ photo, onRetake, onConfirm }: PreviewProps) => (
-	<View className="flex-1 bg-black">
-		<Image source={{ uri: photo.tempUri }} className="h-full w-full" resizeMode="contain" />
-		<View className="absolute bottom-0 left-0 right-0 flex-row gap-3 bg-black/70 px-4 py-4">
-			<Button variant="secondary" onPress={onRetake} className="flex-1">
-				Переснять
-			</Button>
-			<Button onPress={onConfirm} className="flex-1">
-				Далее
-			</Button>
-		</View>
-	</View>
-)
-
-const FinalScreen = ({
-	items,
-	onSave,
-	onRestart,
-	saveToGallery,
-	onToggleSaveToGallery,
-	isSaving,
-}: {
-	items: TempCapturedPhoto[]
-	onSave: () => void
-	onRestart: () => void
-	saveToGallery: boolean
-	onToggleSaveToGallery: () => void
-	isSaving: boolean
-}) => (
-	<BackgroundLayoutNoSidePadding>
-		<ScrollView className="flex-1 px-4 py-6" contentContainerStyle={{ gap: 12 }}>
-			<Text className="text-h2 text-light-text-100">Готово! Проверьте фото</Text>
-			<View className="flex-row flex-wrap gap-3">
-				{items.map((item) => (
-					<View
-						key={`${item.side}-${item.tempUri}`}
-						className="w-[47%] overflow-hidden rounded-2xl border border-[#2a2a2a]"
-					>
-						<Image source={{ uri: item.tempUri }} className="h-40 w-full" resizeMode="cover" />
-						<Text className="px-3 py-2 text-body-medium text-light-text-100">
-							{sideTitle[item.side]}
-						</Text>
-					</View>
-				))}
-			</View>
-			<View className="mt-2 flex-row items-center justify-between rounded-2xl bg-[#1f1f1f] px-4 py-3">
-				<Text className="text-body-medium text-light-text-100">Сохранить в галерею</Text>
-				<Pressable
-					onPress={onToggleSaveToGallery}
-					className={`h-6 w-12 rounded-full ${saveToGallery ? 'bg-brand-green-500' : 'bg-[#555]'}`}
-				>
-					<View
-						className={`h-6 w-6 rounded-full bg-white ${saveToGallery ? 'ml-6' : 'ml-0'}`}
-					/>
-				</Pressable>
-			</View>
-			<Button onPress={onSave} disabled={isSaving || items.length < 4}>
-				{isSaving ? 'Сохраняем...' : items.length < 4 ? 'Сделайте 4 снимка' : 'Сохранить'}
-			</Button>
-			<Button variant="ghost" onPress={onRestart} disabled={isSaving}>
-				Начать заново
-			</Button>
-		</ScrollView>
-	</BackgroundLayoutNoSidePadding>
-)
 
 export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlowProps) => {
 	const [permission] = useCameraPermissions()
-	const { tfReady, model, error } = usePoseCameraSetup()
+	const { tfReady, model } = usePoseCameraSetup()
 	const [step, setStep] = useState<'loading' | 'permission' | 'phone' | 'position' | 'capture' | 'preview' | 'final'>('permission')
 	const [currentSideIndex, setCurrentSideIndex] = useState(0)
 	const [currentPhoto, setCurrentPhoto] = useState<TempCapturedPhoto | null>(null)
@@ -123,18 +53,25 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 	const [mediaPermissionChecked, setMediaPermissionChecked] = useState(false)
 
 
+	const handleStop = () => {
+		router.push('/stats')
+	}
+
 	const side = sidesOrder[currentSideIndex]
+
+	const sideLabel = useMemo(() => sideTitle[side], [side])
 
 	if (!permission || !permission.granted || step === 'permission' ) {
 		return <CameraPermission setStep={setStep} />
 	}
 
 	if (step === 'phone') {
-		return <PhonePosition setStep={setStep} />
+		return <PhonePosition setStep={setStep} handleStop={handleStop}/>
 	}
 
 	if (step === 'position' && model) {
 		return (<PositionReady
+			handleStop={handleStop}
 			model={model}
 			setStep={setStep}
 			/>)
@@ -142,7 +79,9 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 
 	if (step === 'capture') {
 		return (<CountdownCapture
-				side={side}
+			handleStop={handleStop}
+			currentSideIndex={currentSideIndex}
+			  side={side}
 				onCaptured={(photo) => {
 					setCurrentPhoto(photo)
 					setStep('preview')
@@ -153,6 +92,9 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 
 	if (step === 'preview' && currentPhoto) {
 		return (<PreviewScreen
+			currentSideIndex={currentSideIndex}
+			handleStop={handleStop}
+			  sideLabel={sideLabel}
 				photo={currentPhoto}
 				onRetake={() => setStep('phone')}
 				onConfirm={() => {
@@ -194,9 +136,9 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 					await saveBatch({ items: pendingPhotos, saveToGallery })
 					onFinished()
 				}}
-				onRestart={() => {
-					setPendingPhotos([])
-					setCurrentSideIndex(0)
+				onRestart={(side) => {
+					setPendingPhotos((prev) => prev.filter((p) => p.side !== side))
+					setCurrentSideIndex(sidesOrder[side])
 					setCurrentPhoto(null)
 					setStep('position')
 				}}
@@ -204,9 +146,7 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 	}
 
 	if (step === 'loading' || !tfReady) {
-		return (<View className="flex-1 items-center justify-center w-full bg-red-500">
-				<Loader />
-			</View>)
+		return 	<Loader />
 	}
 }
 
