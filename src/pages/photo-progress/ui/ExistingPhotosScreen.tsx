@@ -4,9 +4,11 @@ import type { ProgressSeries } from '@/entities/progress/model/types'
 import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 import { PROGRESS_SIDE_ORDER } from '@/entities/progress/lib/series'
 import { router } from 'expo-router'
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 
 type Props = {
 	data: ProgressSeries[]
+	onAddPress: () => void
 }
 
 const DAYS_INTERVAL = 30
@@ -21,7 +23,7 @@ const getDayWord = (value: number) => {
 	return 'дней'
 }
 
-export const ExistingPhotosScreen = ({ data }: Props) => {
+export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 	const nowRef = useRef<number | null>(null)
 	if (nowRef.current === null) {
 		nowRef.current = Date.now()
@@ -44,8 +46,8 @@ export const ExistingPhotosScreen = ({ data }: Props) => {
 	return (
 		<View className="flex-1 justify-between py-6">
 			<View className="gap-8">
-				<View className="flex-row items-center gap-4 px-1">
-					<View className=" justify-between rounded-3xl border border-[#2a2a2a] bg-[#1a1a1a] px-3 py-5">
+				<View className="flex-row  gap-4 px-1">
+					<View className=" justify-between rounded-3xl bg-[#1a1a1a] px-3 py-5">
 						<Text style={sharedStyles.titleCenter}>
 							{daysUntilNext}
 						</Text>
@@ -53,6 +55,21 @@ export const ExistingPhotosScreen = ({ data }: Props) => {
 							{`${getDayWord(daysUntilNext)} до`}
 							{'\n'}следующего{'\n'} фото
 						</Text>
+					</View>
+
+					<View className="rounded-3xl  bg-[#1a1a1a] px-3 py-5">
+					<TouchableOpacity
+						className=" items-center"
+						onPress={onAddPress}
+						accessibilityRole="button"
+						activeOpacity={0.8}
+						testID="add-progress-photo"
+					>
+						<FontAwesome6 name="plus" size={24} color="#AAEC4D" />
+						<Text className="text-center text-caption-regular leading-4 text-brand-green-900 mt-3">
+							Добавить{'\n'} фото
+						</Text>
+					</TouchableOpacity>
 					</View>
 					<View className="gap-3">
 						{data.map((series) => {

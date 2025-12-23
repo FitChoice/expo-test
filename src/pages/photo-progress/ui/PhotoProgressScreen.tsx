@@ -37,6 +37,7 @@ export const PhotoProgressScreen = () => {
 			<View className="flex-1 gap-6">
 				{isLoading ? <Loader /> : <ExistingPhotosScreen
 					data={data ?? []}
+					onAddPress={() => setIsCapturing(true)}
 				/>
 				}
 			</View>

@@ -22,7 +22,7 @@ export const useProgressListQuery = <TData = ProgressPhoto[]>(options?: UseProgr
 		read()
 	}, [])
 
-	return useQuery<ProgressPhoto[]>({
+	return useQuery<ProgressPhoto[], Error, TData>({
 		queryKey: userId ? progressKeys.list(userId) : progressKeys.all,
 		enabled: Boolean(userId),
 		queryFn: async () => {
