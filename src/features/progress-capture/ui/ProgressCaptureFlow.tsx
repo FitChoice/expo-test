@@ -2,8 +2,6 @@ import React, { useMemo, useState } from 'react'
 import { useCameraPermissions } from 'expo-camera'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as MediaLibrary from 'expo-media-library'
-import { View } from 'react-native'
-
 import {
 	useSaveProgressBatchMutation,
 	type TempCapturedPhoto,
@@ -32,6 +30,13 @@ type ProgressCaptureFlowProps = {
 
 
 const sidesOrder: ProgressSide[] = ['front', 'back', 'left', 'right']
+const sideIndexMap: Record<ProgressSide, number> = sidesOrder.reduce(
+	(acc, current, index) => {
+		acc[current] = index
+		return acc
+	},
+	{} as Record<ProgressSide, number>,
+)
 
 
 export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlowProps) => {
@@ -41,6 +46,7 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 	const [currentSideIndex, setCurrentSideIndex] = useState(0)
 	const [currentPhoto, setCurrentPhoto] = useState<TempCapturedPhoto | null>(null)
 	const [pendingPhotos, setPendingPhotos] = useState<TempCapturedPhoto[]>([])
+	const [retakeSide, setRetakeSide] = useState<ProgressSide | null>(null)
 	const [saveToGallery, setSaveToGallery] = useState(false)
 
 	useOrientation(ScreenOrientation.OrientationLock.PORTRAIT_UP, true)
@@ -57,7 +63,14 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 		router.push('/stats')
 	}
 
-	const side = sidesOrder[currentSideIndex]
+	const startCaptureForSide = (targetSide: ProgressSide, isRetake: boolean) => {
+		setCurrentPhoto(null)
+		setCurrentSideIndex(sideIndexMap[targetSide])
+		setRetakeSide(isRetake ? targetSide : null)
+		setStep('position')
+	}
+
+	const side = useMemo<ProgressSide>(() => sidesOrder[currentSideIndex] ?? 'front', [currentSideIndex])
 
 	const sideLabel = useMemo(() => sideTitle[side], [side])
 
@@ -96,20 +109,29 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 			handleStop={handleStop}
 			  sideLabel={sideLabel}
 				photo={currentPhoto}
-				onRetake={() => setStep('phone')}
+				onRetake={() => setStep('position')}
 				onConfirm={() => {
 					setPendingPhotos((prev) => {
 						const filtered = prev.filter((p) => p.side !== currentPhoto.side)
 						return [...filtered, currentPhoto]
 					})
+
+					if (retakeSide) {
+						setRetakeSide(null)
+						setCurrentPhoto(null)
+						setStep('final')
+						return
+					}
+
 					const nextSide = currentSideIndex + 1
 					if (nextSide >= sidesOrder.length) {
 						setStep('final')
-					} else {
-						setCurrentSideIndex(nextSide)
-						setCurrentPhoto(null)
-						setStep('position')
+						return
 					}
+
+					setCurrentSideIndex(nextSide)
+					setCurrentPhoto(null)
+					setStep('position')
 				}}
 			/>)
 	}
@@ -138,9 +160,7 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 				}}
 				onRestart={(side) => {
 					setPendingPhotos((prev) => prev.filter((p) => p.side !== side))
-					setCurrentSideIndex(sidesOrder[side])
-					setCurrentPhoto(null)
-					setStep('position')
+					startCaptureForSide(side, true)
 				}}
 			/>)
 	}
@@ -148,5 +168,7 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 	if (step === 'loading' || !tfReady) {
 		return 	<Loader />
 	}
+
+	return null
 }
 

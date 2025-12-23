@@ -4,7 +4,6 @@ import React from 'react'
 import type { TempCapturedPhoto } from '@/entities/progress'
 import { GradientBg } from '@/shared/ui/GradientBG'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
-import { router } from 'expo-router'
 
 
 type PreviewProps = {

@@ -6,7 +6,6 @@ import { Dimensions, StyleSheet, Text, View } from 'react-native'
 import {  StepProgress } from '@/shared/ui'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 
-import { router } from 'expo-router'
 import { GradientBg } from '@/shared/ui/GradientBG'
 import { sideTitle } from '@/shared/constants/labels'
 
@@ -118,35 +117,6 @@ export const CountdownCapture = ({ side, onCaptured, onCancel, currentSideIndex,
 			</View>
 		</View>
 
-		// <View className="flex-1 bg-black">
-		// 	<CameraView
-		// 		style={{ flex: 1 }}
-		// 		facing="front"
-		// 		ref={(ref) => {
-		// 			cameraRef.current = ref
-		// 		}}
-		// 	>
-		// 		<View className="absolute inset-0 items-center justify-center bg-black/30">
-		// 			<Text className="text-h1 text-white">{isCounting ? countdown : 'Снимаем...'}</Text>
-		// 			<Text className="mt-2 text-body-medium text-white/80">{sideLabel}</Text>
-		// 		</View>
-		// 		<View className="absolute bottom-8 left-0 right-0 flex-row items-center justify-between px-6">
-		// 			<View className="w-12" />
-		// 			<TouchableOpacity
-		// 				onPress={() => {
-		// 					setIsCounting(true)
-		// 					setCountdown(5)
-		// 				}}
-		// 				className="h-12 rounded-full bg-white/20 px-4"
-		// 			>
-		// 				<Text className="text-body-medium text-white">Перезапуск</Text>
-		// 			</TouchableOpacity>
-		// 			<TouchableOpacity onPress={onCancel} className="h-12 w-12 items-center justify-center rounded-full bg-white/20">
-		// 				<Icon name="x" color="#fff" size={20} />
-		// 			</TouchableOpacity>
-		// 		</View>
-		// 	</CameraView>
-		// </View>
 	)
 }
 

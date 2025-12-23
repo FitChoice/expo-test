@@ -1,9 +1,7 @@
 import type { ProgressSide, TempCapturedPhoto } from '@/entities/progress'
-import { BackgroundLayoutNoSidePadding, Button, Icon } from '@/shared/ui'
+import { Button, Switch } from '@/shared/ui'
 import {
 	Image,
-	Pressable,
-	ScrollView,
 	Text,
 	TouchableOpacity,
 	View,
@@ -17,13 +15,13 @@ import {
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 
 export const FinalScreen = ({
-											 items,
-											 onSave,
-											 onRestart,
-											 saveToGallery,
-											 onToggleSaveToGallery,
-											 isSaving,
-										 }: {
+	items,
+	onSave,
+	onRestart,
+	saveToGallery,
+	onToggleSaveToGallery,
+	isSaving,
+}: {
 	items: TempCapturedPhoto[]
 	onSave: () => void
 	onRestart: (side: ProgressSide) => void
@@ -39,14 +37,16 @@ export const FinalScreen = ({
 
 			<View className="flex-row flex-wrap gap-3  flex-1">
 				{items.map((item, idx) => (
-					<View className={`w-[48%] h-[260px] mb-${idx == 0 || idx == 1 ? 20 : 0}`} >
+					<View
+						key={`${item.side}-${item.tempUri}`}
+						className={`w-[48%] h-[260px] mb-${idx == 0 || idx == 1 ? 20 : 0}`}
+					>
 						<View className="py-2 px-4 rounded-3xl bg-[#454545]/70 mb-2" >
 							<Text className=" text-t4 text-light-text-100">
 								{sideTitle[item.side]}
 							</Text>
 						</View>
 						<View
-							key={`${item.side}-${item.tempUri}`}
 							className=" overflow-hidden rounded-2xl border border-[#2a2a2a] position-relative"
 						>
 
@@ -64,6 +64,11 @@ export const FinalScreen = ({
 					</View>
 				))}
 			</View>
+
+			{/* <View className="my-6 flex-row items-center justify-between px-1">
+				<Text className="text-t3 text-light-text-100">Сохранить в галерею</Text>
+				<Switch checked={saveToGallery} onChange={onToggleSaveToGallery} />
+			</View> */}
 
 			<Button className="" onPress={onSave} disabled={isSaving || items.length < 4}>
 				{isSaving ? 'Сохраняем...' : items.length < 4 ? 'Сделайте 4 снимка' : 'Сохранить'}

@@ -89,16 +89,16 @@ export const ExistingPhotosScreen = ({ data, resetProgress, setIsCapturing, isRe
 			</View>
 
 			<View className="gap-3 px-2">
-				<Button
-					onPress={handleRetake}
-					disabled={isResetting}
-					variant="tertiary"
-					size="m"
-					fullWidth
-					className="rounded-[18px]"
-				>
-					{isResetting ? 'Очищаем...' : 'Переснять'}
-				</Button>
+				{/*<Button*/}
+				{/*	onPress={handleRetake}*/}
+				{/*	disabled={isResetting}*/}
+				{/*	variant="tertiary"*/}
+				{/*	size="m"*/}
+				{/*	fullWidth*/}
+				{/*	className="rounded-[18px]"*/}
+				{/*>*/}
+				{/*	{isResetting ? 'Очищаем...' : 'Переснять'}*/}
+				{/*</Button>*/}
 				<View className="rounded-[18px] bg-[#444444] px-6 py-4">
 					<Text className="text-center text-body-medium text-light-text-100">
 						Мы подскажем, когда будет время сделать следующее фото
