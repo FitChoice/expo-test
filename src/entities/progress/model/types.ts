@@ -5,6 +5,7 @@ export type ProgressPhoto = {
 	side: ProgressSide
 	uri: string
 	createdAt: string
+	batchId: string
 	width: number
 	height: number
 	size?: number
@@ -12,6 +13,7 @@ export type ProgressPhoto = {
 
 export type ProgressSeries = {
 	dateId: string
+	batchId: string
 	photos: ProgressPhoto[]
 }
 

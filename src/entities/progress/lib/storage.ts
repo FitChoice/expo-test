@@ -24,6 +24,21 @@ const ensureDir = async (dir: string) => {
 	}
 }
 
+const normalizePhoto = (photo: ProgressPhoto): ProgressPhoto => ({
+	...photo,
+	batchId:
+		photo.batchId ??
+		Math.trunc(new Date(photo.createdAt).getTime() / 1000).toString(),
+})
+
+const sortPhotos = (items: ProgressPhoto[]): ProgressPhoto[] =>
+	[...items].sort((a, b) => {
+		const dateDiff = Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
+		if (dateDiff !== 0) return dateDiff
+		if (b.batchId !== a.batchId) return b.batchId.localeCompare(a.batchId)
+		return a.side.localeCompare(b.side)
+	})
+
 const readMeta = async (userId: string): Promise<ProgressPhoto[]> => {
 	const path = getMetaPath(userId)
 	const info = await FileSystem.getInfoAsync(path)
@@ -32,7 +47,8 @@ const readMeta = async (userId: string): Promise<ProgressPhoto[]> => {
 	try {
 		const content = await FileSystem.readAsStringAsync(path)
 		const parsed = JSON.parse(content) as ProgressPhoto[]
-		return Array.isArray(parsed) ? parsed : []
+		const normalized = Array.isArray(parsed) ? parsed.map(normalizePhoto) : []
+		return sortPhotos(normalized)
 	} catch {
 		return []
 	}
@@ -40,7 +56,8 @@ const readMeta = async (userId: string): Promise<ProgressPhoto[]> => {
 
 const writeMeta = async (userId: string, photos: ProgressPhoto[]) => {
 	await ensureDir(getUserBaseDir(userId))
-	await FileSystem.writeAsStringAsync(getMetaPath(userId), JSON.stringify(photos))
+	const sorted = sortPhotos(photos.map(normalizePhoto))
+	await FileSystem.writeAsStringAsync(getMetaPath(userId), JSON.stringify(sorted))
 }
 
 const buildTargetUri = (userId: string, side: ProgressSide, id: string, ext?: string) => {
@@ -70,26 +87,21 @@ export const listProgressPhotos = async (userId: string): Promise<ProgressPhoto[
 type SaveBatchParams = {
 	userId: string
 	items: TempCapturedPhoto[]
-	replaceStrategy?: 'last-per-side' | 'append'
 	saveToGallery?: (uri: string) => Promise<void> | void
 }
 
 export const saveProgressBatch = async ({
 	userId,
 	items,
-	replaceStrategy = 'last-per-side',
 	saveToGallery,
 }: SaveBatchParams): Promise<ProgressPhoto[]> => {
 	if (!items.length) return []
 
 	const meta = await readMeta(userId)
-	const bySide =
-		replaceStrategy === 'last-per-side'
-			? meta.filter((item) => !items.some((p) => p.side === item.side))
-			: [...meta]
-
+	const bySide = [...meta]
 	const saved: ProgressPhoto[] = []
 	const capturedAt = new Date().toISOString()
+	const batchId = Date.now().toString()
 
 	for (const item of items) {
 		await ensureDir(getSideDir(userId, item.side))
@@ -105,6 +117,7 @@ export const saveProgressBatch = async ({
 			side: item.side,
 			uri: targetUri,
 			createdAt: capturedAt,
+			batchId,
 			width: item.width,
 			height: item.height,
 			size: item.size,

@@ -5,7 +5,7 @@ import { listProgressPhotos } from '@/entities/progress/lib/storage'
 import { progressKeys } from '@/entities/progress/api/queryKeys'
 import type { ProgressPhoto, ProgressSeries } from '@/entities/progress/model/types'
 import { getUserId } from '@/shared/lib/auth'
-import { groupPhotosByDate } from '@/entities/progress/lib/series'
+import { groupPhotosByBatches } from '@/entities/progress/lib/series'
 
 type UseProgressListQueryOptions<TData> = {
 	select?: (data: ProgressPhoto[]) => TData
@@ -35,6 +35,6 @@ export const useProgressListQuery = <TData = ProgressPhoto[]>(options?: UseProgr
 
 export const useProgressSeriesQuery = () =>
 	useProgressListQuery<ProgressSeries[]>({
-		select: groupPhotosByDate,
+		select: groupPhotosByBatches,
 	})
 

@@ -1,11 +1,18 @@
-import { useMemo, useRef } from 'react'
-import { Image, Text, TouchableOpacity, View } from 'react-native'
+import { useMemo, useRef, useState } from 'react'
+import {
+	Image,
+	ScrollView,
+	StyleSheet,
+	Text,
+	TouchableOpacity,
+	View,
+} from 'react-native'
 import type { ProgressSeries } from '@/entities/progress/model/types'
 import { sharedStyles } from '@/shared/ui/styles/shared-styles'
-import { PROGRESS_SIDE_ORDER } from '@/entities/progress/lib/series'
 import { router } from 'expo-router'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import { useProgressSeriesQuery, useResetProgressMutation } from '@/entities/progress'
+import { Button } from '@/shared/ui'
 
 type Props = {
 	data: ProgressSeries[]
@@ -25,12 +32,11 @@ const getDayWord = (value: number) => {
 }
 
 export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
-	const nowRef = useRef<number | null>(null)
-	if (nowRef.current === null) {
-		nowRef.current = Date.now()
-	}
+	const [now] = useState(() => Date.now())
 	const { mutateAsync: resetProgress, isPending: isResetting } = useResetProgressMutation()
-	const {  refetch } = useProgressSeriesQuery()
+	const { refetch } = useProgressSeriesQuery()
+	const scrollRef = useRef<ScrollView>(null)
+
 
 	const latestPhotoTimestamp = useMemo(
 		() =>
@@ -41,9 +47,7 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 		[data]
 	)
 
-	const daysSinceLast = latestPhotoTimestamp
-		? Math.floor(((nowRef.current ?? Date.now()) - latestPhotoTimestamp) / MS_IN_DAY)
-		: 0
+	const daysSinceLast = latestPhotoTimestamp ? Math.floor((now - latestPhotoTimestamp) / MS_IN_DAY) : 0
 	const daysUntilNext = Math.max(0, DAYS_INTERVAL - daysSinceLast)
 
 	return (
@@ -74,40 +78,41 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 						</Text>
 					</TouchableOpacity>
 					</View>
-					<View className="gap-3">
+					<ScrollView
+						ref={scrollRef}
+						horizontal
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={styles.calendarDays}
+					>
+					<View className="gap-3 flex-row">
 						{data.map((series) => {
-							const orderedSeries = PROGRESS_SIDE_ORDER.map((side) => ({
-								side,
-								photo: series.photos.find((item) => item.side === side),
-							}))
-
 							return (
-								<View key={series.dateId} nativeID={series.dateId} testID={series.dateId}>
+								<View
+									key={`${series.dateId}-${series.batchId}`}
+									nativeID={series.dateId}
+									testID={series.dateId}
+								>
 									<TouchableOpacity
 										accessibilityRole="button"
 										activeOpacity={0.8}
 										onPress={() =>
 											router.push({
 												pathname: '/photo-progress/[dateId]',
-												params: { dateId: series.dateId },
+												params: { dateId: series.dateId, batchId: series.batchId },
 											})
 										}
 									>
 										<View className="w-[124px] flex-row flex-wrap gap-2">
-											{orderedSeries.map(({ side, photo }) => (
+											{series.photos.map((photo) => (
 												<View
-													key={`${series.dateId}-${side}`}
+													key={`${series.dateId}-${photo.id}`}
 													className="h-14 w-14 overflow-hidden rounded-lg bg-[#c7c7c7]"
 												>
-													{photo ? (
-														<Image
-															source={{ uri: photo.uri }}
-															className="h-full w-full"
-															resizeMode="cover"
-														/>
-													) : (
-														<View className="flex-1" />
-													)}
+													<Image
+														source={{ uri: photo.uri }}
+														className="h-full w-full"
+														resizeMode="cover"
+													/>
 												</View>
 											))}
 										</View>
@@ -116,6 +121,7 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 							)
 						})}
 					</View>
+					</ScrollView>
 				</View>
 
 				<View className="items-center gap-3 px-8">
@@ -129,7 +135,7 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 				</View>
 			</View>
 
-			{/* <View className="gap-3">
+			 <View className="gap-3">
 				<Text className="text-center text-body-medium text-light-text-300">
 					Удаление очистит все сохраненные фото-прогресса на устройстве
 				</Text>
@@ -145,7 +151,7 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 				>
 					{isResetting ? 'Удаляем...' : 'Удалить все фото'}
 				</Button>
-			</View> */}
+			</View>
 			<View className="gap-3 px-2">
 				<View className="rounded-[18px] bg-[#444444] px-6 py-4">
 					<Text className="text-center text-body-medium text-light-text-100">
@@ -156,3 +162,13 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 		</View>
 	)
 }
+
+const styles = StyleSheet.create({
+	calendarDays: {
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+		gap: 16,
+		paddingHorizontal: 10,
+	}
+})

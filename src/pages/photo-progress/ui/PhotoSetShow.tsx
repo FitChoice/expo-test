@@ -6,20 +6,32 @@ import { Loader } from '@/shared/ui'
 import { BackgroundLayoutSafeArea } from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
 import Entypo from '@expo/vector-icons/Entypo'
 import { useProgressSeriesQuery } from '@/entities/progress'
+import { PROGRESS_SIDE_ORDER } from '@/entities/progress/lib/series'
 
 type ScreenParams = {
 	dateId?: string
+	batchId?: string
 }
 
 export const PhotoSetShow = () => {
-	const { dateId } = useLocalSearchParams<ScreenParams>()
+	const { dateId, batchId } = useLocalSearchParams<ScreenParams>()
 	const resolvedDateId = Array.isArray(dateId) ? dateId[0] : dateId
+	const resolvedBatchId = Array.isArray(batchId) ? batchId[0] : batchId
 	const { data, isLoading } = useProgressSeriesQuery()
 
-	const currentSeries = useMemo(
-		() => data?.find((series) => series.dateId === resolvedDateId),
-		[data, resolvedDateId],
-	)
+	const currentSeries = useMemo(() => {
+		if (!resolvedDateId || !resolvedBatchId) return undefined
+		const series = data?.find(
+			(item) => item.dateId === resolvedDateId && item.batchId === resolvedBatchId,
+		)
+		if (!series) return undefined
+
+		const orderedPhotos = PROGRESS_SIDE_ORDER.map((side) =>
+			series.photos.find((item) => item.side === side),
+		).filter(Boolean) as typeof series.photos
+
+		return { ...series, photos: orderedPhotos }
+	}, [data, resolvedBatchId, resolvedDateId])
 
 	if (isLoading) {
 		return (
@@ -31,7 +43,7 @@ export const PhotoSetShow = () => {
 		)
 	}
 
-	if (!resolvedDateId || !currentSeries) {
+	if (!resolvedDateId || !resolvedBatchId || !currentSeries) {
 		return (
 			<BackgroundLayoutSafeArea needBg={false}>
 				<View className="flex-1 items-center justify-center px-6">
@@ -61,7 +73,9 @@ export const PhotoSetShow = () => {
 			</TouchableOpacity>
 
 			<View className="mb-10">
-				<Text className="text-center text-t1.1 text-light-text-100">{resolvedDateId}</Text>
+				<Text className="text-center text-t1.1 text-light-text-100">
+					{resolvedDateId} · {resolvedBatchId}
+				</Text>
 			</View>
 
 			<View className="flex-1 flex-row flex-wrap gap-3">
