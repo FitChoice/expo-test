@@ -340,7 +340,7 @@ export function DayStatistic() {
 
 			{/* CTA */}
 			<View className="overflow-hidden rounded-3xl bg-[#1b1b1b]">
-				<View className="flex-row items-center gap-4 px-5">
+				<View className="flex-row items-center gap-2 px-5">
 					<View className="h-48 flex-1 justify-between py-2">
 						<Text className="text-t1.1 text-white">Внести изменения за этот месяц</Text>
 						<TouchableOpacity

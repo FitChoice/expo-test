@@ -1,6 +1,6 @@
 
 import {
-	Dimensions, StyleSheet, Text, useWindowDimensions, View,
+	Dimensions, Platform, StyleSheet, Text, useWindowDimensions, View,
 } from 'react-native'
 
 import { PoseCamera } from '@/widgets/pose-camera'
@@ -102,7 +102,7 @@ export const PositionReady = ({model, setStep, handleStop, side}: PositionReadyP
 					</View>
 
 					{/* Body Silhouette Overlay */}
-						<View className="absolute inset-0 items-center justify-start pt-20">
+						<View className={`absolute inset-0 items-center justify-start pt-${Platform.OS === 'android' ? 1 : 2}0`}>
 							{
 
 								side == 'front' || side == 'back' ?

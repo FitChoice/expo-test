@@ -6,26 +6,31 @@
 
 import { View, Text, TouchableOpacity } from 'react-native'
 import { router } from 'expo-router'
-import { Button, MetricCard, TrainingTags } from '@/shared/ui'
+import { Button, Loader, MetricCard, TrainingTags } from '@/shared/ui'
 import { useTrainingStore } from '@/entities/training'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Fontisto from '@expo/vector-icons/Fontisto'
+import { useQuery } from '@tanstack/react-query'
+import type { ApiResult } from '@/shared/api'
+import { trainingApi } from '@/features/training/api'
+import { type TrainingReport } from '@/features/training/api/trainingApi'
 
 export default function TrainingReportScreen() {
 	const training = useTrainingStore((state) => state.training)
-	const elapsedTime = useTrainingStore((state) => state.elapsedTime)
-	const activeTime = useTrainingStore((state) => state.activeTime)
-	const caloriesBurned = useTrainingStore((state) => state.caloriesBurned)
-	const averageFormQuality = useTrainingStore((state) => state.averageFormQuality)
-	const totalReps = useTrainingStore((state) => state.totalReps)
-	const completedExercises = useTrainingStore((state) => state.completedExercises)
 	const goToAnalytics = useTrainingStore((state) => state.setAnalytics)
 	const reset = useTrainingStore((state) => state.reset)
 
-	// Format time in minutes
-	const formatMinutes = (seconds: number) => {
-		return `${Math.floor(seconds / 60)} мин`
-	}
+
+	const { data: trainingReport, isLoading } = useQuery<ApiResult<TrainingReport>, Error>({
+		queryKey: ['trainingReport', training?.id],
+		queryFn: async () => {
+			if (!training?.id) throw new Error('training ID is required')
+			return await trainingApi.getTrainingReport(training.id)
+		},
+		staleTime: 5 * 60 * 1000,
+		enabled: !!training?.id,
+		retry: false,
+	})
 
 	// Format date as DD.MM.YYYY
 	const formatDate = (date: Date) => {
@@ -45,11 +50,9 @@ export default function TrainingReportScreen() {
 		router.replace('/home')
 	}
 
-	if (!training) {
+	if (!training || isLoading) {
 		return (
-			<View className="bg-background-primary flex-1 items-center justify-center">
-				<Text className="text-text-primary">Loading...</Text>
-			</View>
+			<Loader />
 		)
 	}
 
@@ -91,7 +94,7 @@ export default function TrainingReportScreen() {
 					icon={
 						<MaterialCommunityIcons name="clock-time-eight" size={24} color="#689F38" />
 					}
-					displayNumber={10}
+					displayNumber={trainingReport?.data?.report_active_time}
 					title={'минут'}
 					description={'Активного времени'}
 				/>
@@ -101,7 +104,7 @@ export default function TrainingReportScreen() {
 				<View className="flex-1">
 					<MetricCard
 						icon={<MaterialCommunityIcons name="run-fast" size={24} color="#689F38" />}
-						displayNumber={130}
+						displayNumber={trainingReport?.data?.cals}
 						title={'ккал'}
 						description={'Каллорий сожжено'}
 					/>
@@ -110,7 +113,7 @@ export default function TrainingReportScreen() {
 				<View className="flex-1">
 					<MetricCard
 						icon={<Fontisto name="fire" size={24} color="#689F38" />}
-						displayNumber={80}
+						displayNumber={trainingReport?.data?.report_technique_quality}
 						title={'%'}
 						description={'Читстота техники'}
 					/>

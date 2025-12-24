@@ -32,9 +32,11 @@ export type TrainingPlanTraining = {
 // Types for training responses
 export type TrainingPlan = TrainingPlanTraining[]
 
-interface TrainingReport {
-	// TODO: Define based on actual API response
-	[key: string]: unknown
+export interface TrainingReport {
+	report_active_time: number,
+	report_cals: number,
+	report_duration: number,
+	report_technique_quality: number
 }
 
 // NOTE: используем доменные типы из entities/training, не дублируем.
