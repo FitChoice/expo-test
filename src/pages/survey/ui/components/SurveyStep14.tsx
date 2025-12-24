@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, Image } from 'react-native'
-import { useRouter } from 'expo-router'
+import { router, useRouter } from 'expo-router'
 import type { Gender } from '@/entities/survey'
 import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 import { Chip, CircleIconButton } from '@/shared/ui'
@@ -64,7 +64,7 @@ export const SurveyStep14: React.FC<SurveyStep14Props> = ({ userName, gender }) 
 							<CircleIconButton
 								icon="chevrons-right"
 								size="large"
-								onPress={() => router.push('/stats')}
+								onPress={() => router.push('/photo-progress')}
 							/>
 						</View>
 					</View>

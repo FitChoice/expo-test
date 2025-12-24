@@ -43,31 +43,7 @@ export const SettingsScreen = () => {
 	// Profile query
 	const { data: profile, isLoading: isProfileLoading } = useProfileQuery(userId)
 
-	// Notifications query
-	const { data: notifications } = useQuery({
-		queryKey: ['notifications', userId],
-		queryFn: async () => {
-			if (!userId) throw new Error('User ID required')
-			const result = await userApi.getNotifications(userId.toString())
-			if (!result.success) throw new Error(result.error)
-			return result.data
-		},
-		enabled: !!userId,
-	})
 
-	// Update notifications mutation
-	const updateNotificationsMutation = useMutation({
-		mutationFn: async (settings: NotificationSettings) => {
-			if (!userId) throw new Error('Required')
-			return userApi.updateNotifications(userId.toString(), settings)
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['notifications', userId] })
-		},
-		onError: () => {
-			showToast.error('Ошибка сохранения настроек')
-		},
-	})
 
 	// Delete mutation
 	const deleteAccountMutation = useMutation({
@@ -85,16 +61,11 @@ export const SettingsScreen = () => {
 	})
 
 	const handleNotificationToggle = (key: keyof NotificationSettings) => {
-		if (!notifications) return
-		updateNotificationsMutation.mutate({
-			...notifications,
-			[key]: !notifications[key],
-		})
+
 	}
 
 	const handleLogout = async () => {
 		setShowLogoutModal(false)
-		await userApi.logout()
 		await clearAuthData()
 		router.replace('/auth')
 	}
@@ -143,7 +114,7 @@ export const SettingsScreen = () => {
 	}
 
 	// Default notifications if not loaded
-	const currentNotifications: NotificationSettings = notifications ?? {
+	const currentNotifications: NotificationSettings = {
 		basic: true,
 		progress: true,
 		reports: true,
@@ -170,7 +141,7 @@ export const SettingsScreen = () => {
 						<View className="items-center py-6">
 							<View className="h-[132px] w-[132px] items-center justify-center rounded-full bg-[#1F1F1F]">
 								<Avatar
-									source={profile.avatar}
+									source={profile.avatar_url}
 									size={96}
 									editable
 									onPress={handleAvatarPress}

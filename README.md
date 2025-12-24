@@ -1,104 +1,73 @@
 # Fitchoice Mobile App
 
-Мобильное фитнес‑приложение на **Expo + React Native**: тренировки с контролем позы, дневник, чат с ИИ‑тренером, статистика и фото‑прогресс. Роутинг — **Expo Router**, архитектура — **Feature‑Sliced Design**.
+Мобильное фитнес‑приложение на **Expo + React Native** (FSD): тренировки с контролем позы, дневник, чат, статистика и фото‑прогресс. Роутинг — **Expo Router**, состояние сервера — **TanStack Query**.
 
-## 📦 Быстрый старт
+## Быстрый старт
 
 ```bash
 pnpm install          # зависимости
-pnpm start            # dev-сервер Metro
-pnpm android          # сборка/запуск для Android
-pnpm ios              # сборка/запуск для iOS
-pnpm web              # web
+pnpm start            # Metro
+pnpm android | pnpm ios | pnpm web
 
 pnpm run check        # format + lint (+warn≤10) + type-check
 make start | make check | make clean | make doctor
 ```
 
-Требования: `pnpm 10.19.0`, Expo SDK 54, Node 18+ (рекомендуется LTS).
+Требования: `pnpm 10.19.0`, Node 18+, Expo SDK 54.
 
-## 🏗️ Архитектура и роутинг
+## Архитектура
 
-- Слои FSD: `app/` (инициализация, провайдеры, маршруты), `pages/` (композиция), `widgets/` (составные блоки), `features/` (бизнес‑флоу), `entities/` (данные/домены), `shared/` (UI kit, lib, api, constants).
+- FSD слои: `app/` (инит, провайдеры, маршруты), `pages/` (композиция), `widgets/` (составные блоки), `features/` (бизнес-флоу), `entities/` (доменные данные/стороны), `shared/` (UI kit, lib, api, constants).
 - Алиас путей: `@/*`.
-- Глобальные провайдеры (`app/_layout.tsx`): ErrorBoundary → SafeAreaProvider → FontLoader → TanStack Query (`staleTime` 5 мин, `gcTime` 10 мин, toast на ошибках).
-- Основные роуты Expo Router: `landing`, `auth`, `register`, `forgot-password`, `verification`, `survey`, `home`, `chat`, `diary`, `stats`, `stats-day`, `photo-progress`, `profile`, `settings`, `change-password`, `privacy-policy`, `terms`, `(training)/[trainingId|session|report]` и вспомогательные `*_count` страницы.
+- Провайдеры (`app/_layout.tsx`): ErrorBoundary → SafeAreaProvider → FontLoader → TanStack Query (staleTime 5 мин, gcTime 10 мин, toasts на ошибках).
+- Основные роуты: `landing`, `auth`, `register`, `forgot-password`, `verification`, `survey`, `home`, `chat`, `diary`, `stats`, `stats-day`, `photo-progress`, `profile`, `settings`, `change-password`, `privacy-policy`, `terms`, `(training)/[trainingId|session|report]` и вспомогательные `*_count`.
 
-## 📚 Технологический стек
+## Технологии
 
-| Категория           | Технология                                      |
-| ------------------- | ----------------------------------------------- |
-| Core                | React Native 0.81.5, React 19.1.0               |
-| Framework           | Expo SDK 54, Expo Router 6                      |
-| Язык                | TypeScript 5.9                                  |
-| Стили               | NativeWind 4 (Tailwind для RN), Rimma Sans      |
-| Server State        | TanStack Query 5 (QueryProvider с преднастройкой) |
-| Client State        | Zustand 5 (точечное использование)              |
-| CV / Pose           | TensorFlow.js + MoveNet, poseflow-js, MediaPipe |
-| Media               | expo-camera, expo-media-library, expo-av/video  |
-| Интеграции          | expo-notifications, expo-secure-store           |
+- React Native 0.81.5, React 19.1.0, TypeScript 5.9
+- Expo SDK 54, Expo Router 6
+- Стили: NativeWind 4 (Tailwind для RN), шрифты Rimma Sans
+- Server state: TanStack Query 5; Client state: точечно Zustand 5
+- CV/Pose: TensorFlow.js + MoveNet, poseflow-js, MediaPipe
+- Media: expo-camera, expo-media-library, expo-av/video
+- Интеграции: expo-notifications, expo-secure-store
 
-## 🔒 Данные и состояние
+## API и данные
 
-- Серверное состояние: TanStack Query (общий клиент с retry=3, без refetch on focus).
-- Auth util (`shared/lib/auth`): user_id, токены и refresh в SecureStore.
-- Конфигурация приложения (`app.json`): портретная ориентация, iOS bundle `com.yzned.Fitchoice`, Android package `com.yzned.Fitchoice`, minSdk 24 / targetSdk 35, iOS deployment 15.1, разрешения на камеру/микрофон/галерею.
+- HTTP клиент: `shared/api/apiClient` (REST); user API в `features/user/api`.
+- Auth: user_id и токены в SecureStore (`shared/lib/auth`); без user_id запросы профиля не стартуют.
+- Аватар: `useUploadAvatar` — presign → PUT в бакет по presign URL → финальный CDN `https://storage.yandexcloud.net/fitdb/{fileName}` → `updateUser`; кэш профиля `['profile', userId]` обновляется и инвалидируется.
 
-## 📸 Фото‑прогресс
+## Фото‑прогресс (кратко)
 
-### Данные и хранилище (`entities/progress`)
-- Пользователь определяется через `getUserId()` (SecureStore). Без user_id запросы не стартуют.
-- Файлы: `expo-file-system/legacy`, путь `documentDirectory/progress/<userId>/<side>/<id>.<ext>`.
-- Метаданные: `index.json` в корне пользователя; при чтении битые ссылки удаляются; записи сортируются детерминированно.
-- `saveProgressBatch` всегда добавляет снимки батча (append), ставит общий `batchId`/`createdAt`, при необходимости создаёт `MediaLibrary` asset, обновляет meta и инвалидирует кэш.
-- Мутации/квери: `useProgressListQuery`, `useSaveProgressBatchMutation`, `useDeleteProgressPhotoMutation`, `useResetProgressMutation` с автоматическим `invalidateQueries`.
-- `useProgressSeriesQuery` возвращает батчи вида `{ dateId, batchId, photos (до 4 кадров) }`.
+- Хранилище: `expo-file-system/legacy`, путь `documentDirectory/progress/<userId>/<side>/<id>.<ext>`, мета `index.json`.
+- Запросы/мутации: `useProgressListQuery`, `useSaveProgressBatchMutation`, `useDeleteProgressPhotoMutation`, `useResetProgressMutation`, `useProgressSeriesQuery`; все с invalidate.
+- Флоу съёмки (`features/progress-capture`): шаги CameraPermission → PhonePosition → PositionReady (PoseCamera) → CountdownCapture → PreviewScreen → FinalScreen (пересъёмка стороны, опционально сохранение в галерею).
+- Просмотр (`pages/photo-progress`): если данных нет — старт съёмки; иначе `ExistingPhotosScreen` с батчами и окнами в 30 дней; `PhotoSetShow` показывает выбранный батч.
 
-### Просмотр (`pages/photo-progress`)
-- `PhotoProgressScreen`: если нет данных — сразу открывает флоу съёмки; иначе рендерит `ExistingPhotosScreen`.
-- `ExistingPhotosScreen`: считает 30-дневный интервал между сериями, показывает оставшиеся дни до следующего окна съёмки, отображает батчи по 4 фото; переход передаёт `dateId` и `batchId`.
-- `PhotoSetShow`: показывает выбранный батч (4 фото) для переданных `dateId`/`batchId`.
+## Стили
 
-### Съёмка (`features/progress-capture/ProgressCaptureFlow`)
-Порядок ракурсов: `front → back → left → right`. Ориентация принудительно портретная (`useOrientation`).
-1. **CameraPermission** — фото остаются на устройстве; «Далее» активно только при разрешении камеры; закрытие ведёт на `/stats`.
-2. **PhonePosition** — превью с фронтальной камерой, слушает `expo-screen-orientation`; «Далее» только в портретной ориентации.
-3. **PositionReady** — `PoseCamera` (MoveNet) с сеткой и силуэтом; после детекта 17 keypoints 2 секунды показывается «Начнём!» и автопереход к съёмке.
-4. **CountdownCapture** — 5‑секундный отсчёт, фронтальная камера (`CameraView`), `StepProgress` по текущему ракурсу; снимает кадр и передаёт во временное состояние.
-5. **PreviewScreen** — превью кадра, `StepProgress`, кнопки «Переснять» (возврат к позиции) и «Далее» (фиксирует снимок и идёт к следующей стороне в основном потоке).
-6. **FinalScreen** — миниатюры всех сторон, пересъёмка конкретного ракурса: запускает только выбранную сторону (старт с шага `position`, затем отсчёт/съёмка/превью, возврат на финал, остальные фото сохраняются). Тумблер «Сохранить в галерею» (через `MediaLibrary` по запросу). «Сохранить» активно только при 4 снимках; `onSave` вызывает `useSaveProgressBatchMutation` и возвращает в вызывающий экран.
+- NativeWind с кастомной палитрой (`brand-*`, `light-text`, `bg-dark`).
+- UI kit в `shared/ui` (кнопки, лейауты, тосты, StepProgress, BackgroundLayout и др.).
+- Градиенты/фоновые компоненты для онбординга и фото-флоу; шрифты грузятся через `FontLoader`.
 
-## 🧩 Основные домены
-
-- **training-session** — FSM для упражнений, интеграция с poseflow-js и PoseCamera.
-- **survey-flow** — анкета/вопросы, конфиги в `entities/survey`.
-- **chat** — API + UI‑виджеты, поддержка микрофона/медиа.
-- **diary** — трекинг дневника и настроений.
-- **stats / stats-day** — карточки метрик, навигация к фото‑прогрессу.
-- **auth/user** — API‑обёртки, хранение user_id/токенов в SecureStore.
-
-## 🎨 Стили
-
-- **NativeWind** с кастомной палитрой (`brand-green`, `brand-purple`, `light-text`, `bg-dark`).
-- UI kit в `shared/ui` (кнопки, лейауты, индикаторы, тосты, StepProgress, BackgroundLayout и др.).
-- Градиенты/фоновые компоненты для онбординга и фото‑флоу; шрифты Rimma Sans загружаются через `FontLoader`.
-
-## 🔧 Скрипты и утилиты
+## Скрипты
 
 - `pnpm run lint` — `eslint src --ext .ts,.tsx --max-warnings 10`
-- `pnpm run format` / `format:check` — prettier (с tailwind plugin)
+- `pnpm run format` / `format:check` — Prettier (tailwind plugin)
 - `pnpm run type-check` — `tsc --noEmit`
 - EAS: `pnpm run deploy`, `pnpm run update:preview`, `pnpm run update:production`, `pnpm run build:preview:*` (см. `package.json`).
 
-## 🚀 Платформы и ориентация
+## Платформы
 
 - Портрет по умолчанию (Expo `orientation: "portrait"`).
-- iOS: deployment target 15.1, поддержка iPad; разрешения на камеру/микрофон/галерею описаны в `app.json`.
-- Android: minSdk 24, targetSdk 35, edge-to-edge, Proguard/shrink включены в release.
+- iOS: deployment target 15.1, разрешения на камеру/микрофон/галерею в `app.json`.
+- Android: minSdk 24, targetSdk 35, edge-to-edge, Proguard/shrink в release.
 
 ## Полезные пути
 
-- `src/entities/progress/lib/storage.ts` — логика работы с файлами фото‑прогресса.
+- `src/features/user/hooks/useUploadAvatar.ts` — загрузка аватара (presign → PUT → updateUser).
+- `src/entities/progress/lib/storage.ts` — файловое хранилище фото‑прогресса.
 - `src/features/progress-capture/ui/*` — шаги флоу съёмки.
-- `src/widgets/pose-camera` — PoseCamera и подготовка MoveNet.
+- `src/widgets/pose-camera` — PoseCamera и MoveNet.
 - `src/app/_providers` — конфигурация провайдеров и QueryClient.

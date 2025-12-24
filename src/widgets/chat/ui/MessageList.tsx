@@ -3,7 +3,7 @@
  * Стандартный порядок: старые сверху, новые снизу
  */
 
-import React, { useCallback, useRef, useEffect } from 'react'
+import React, { useCallback, useRef, useEffect, useMemo } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { FlashList, type FlashListRef } from '@shopify/flash-list'
 import type { Message } from '@/entities/chat'
@@ -41,6 +41,24 @@ export const MessageList: React.FC<MessageListProps> = ({
 	onPauseAudio,
 }) => {
 	const listRef = useRef<FlashListRef<Message>>(null)
+
+	const displayMessages = useMemo<Message[]>(() => {
+		if (messages.length > 0) {
+			return messages
+		}
+
+		return [
+			{
+				id: 'welcome-message',
+				role: 'assistant',
+				content:
+					'Привет! 👋\n\nЯ твой ИИ-тренер. Помогу улучшить технику, подобрать подходящие упражнения и держать мотивацию на уровне.\n\nС чего начнём сегодня? 💪',
+				createdAt: new Date(),
+				attachments: [],
+				isStreaming: false,
+			},
+		]
+	}, [messages])
 
 	// Автоскролл к новым сообщениям
 	useEffect(() => {
@@ -110,7 +128,7 @@ export const MessageList: React.FC<MessageListProps> = ({
 	return (
 		<FlashList<Message>
 			ref={listRef}
-			data={messages}
+			data={displayMessages}
 			renderItem={renderItem}
 			keyExtractor={keyExtractor}
 			contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16 }}

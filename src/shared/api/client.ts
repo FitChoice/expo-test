@@ -56,6 +56,8 @@ class ApiClient {
 				body: JSON.stringify(data),
 			})
 
+			console.log('API Response:', response)
+
 			// Handle 401 - unauthorized (skip for public endpoints like login)
 			if (response.status === 401 && !options?.skipAuthHandler) {
 				await this.handleUnauthorized()
@@ -201,7 +203,7 @@ class ApiClient {
 	 */
 	async put<TRequest, TResponse>(
 		endpoint: string,
-		data: TRequest,
+		data?: TRequest,
 		options?: { skipAuthHandler?: boolean }
 	): Promise<ApiResult<TResponse>> {
 		const authHeaders = await this.getAuthHeaders()
@@ -218,8 +220,8 @@ class ApiClient {
 
 			// console.log('url')
 			// console.log(`${this.baseUrl}${endpoint}`)
-			// console.log('response')
-			// console.log(response)
+			console.log('put response')
+			console.log(response)
 
 			// Handle 401 - unauthorized (skip for public endpoints)
 			if (response.status === 401 && !options?.skipAuthHandler) {
@@ -520,3 +522,5 @@ class ApiClient {
 
 // Export singleton instance
 export const apiClient = new ApiClient(API_BASE_URL)
+
+

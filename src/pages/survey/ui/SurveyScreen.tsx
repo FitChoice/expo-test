@@ -392,6 +392,9 @@ export const SurveyScreen = () => {
 								color="#989898"
 								variant="transparent"
 								position="relative"
+								style={{
+									right: '45%'
+								}}
 							/>
 						</View>
 					)}

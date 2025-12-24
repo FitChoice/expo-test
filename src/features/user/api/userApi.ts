@@ -38,19 +38,14 @@ export const userApi = {
 	/**
 	 * Get presigned URL for avatar upload
 	 */
-	async getAvatarPresignUrl(
-		userId: string,
-		filename: string
-	): Promise<ApiResult<AvatarPresignUrlResponse>> {
+	async getImagePresignUrl(filename: string): Promise<ApiResult<AvatarPresignUrlResponse>> {
 		const safeName = filename.trim() || 'avatar.jpg'
-		const prefixedFilename = `${userId}-${safeName}`
-		const endpoint = `/user/presign-url?filename=${encodeURIComponent(prefixedFilename)}`
 
-		// API expects filename in query params (see swagger), body is not used
-		return apiClient.put<undefined, AvatarPresignUrlResponse>(
-			endpoint,
-			undefined as undefined
-		)
+		console.log('filename')
+		console.log(filename)
+
+		// Backend presign endpoint expects POST with JSON body { filename }
+		return apiClient.put<{ filename: string }, AvatarPresignUrlResponse>(`/user/presign-url?filename=${filename}`)
 	},
 
 	/**
@@ -83,27 +78,6 @@ export const userApi = {
 		return apiClient.put('/user/update-password', args)
 	},
 
-	/**
-	 * Get notification settings
-	 */
-	async getNotifications(userId: string): Promise<ApiResult<NotificationSettings>> {
-		return apiClient.get(`/user/${userId}/notifications`)
-	},
 
-	/**
-	 * Update notification settings
-	 */
-	async updateNotifications(
-		userId: string,
-		settings: NotificationSettings
-	): Promise<ApiResult<void>> {
-		return apiClient.put(`/user/${userId}/notifications`, settings)
-	},
 
-	/**
-	 * Logout user
-	 */
-	async logout(): Promise<ApiResult<void>> {
-		return apiClient.post('/auth/logout', {})
-	},
 }
