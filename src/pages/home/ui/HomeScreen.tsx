@@ -329,6 +329,7 @@ const MobileContent = () => {
 					{selectedDayTraining.map((training, idx) => (
 						<View key={training.ID} style={styles.actionButtons}>
 							<TouchableOpacity
+								disabled={isFinishedTraining(training)}
 								style={styles.actionButton}
 								onPress={() => handleOpenTraining(training.ID)}
 							>

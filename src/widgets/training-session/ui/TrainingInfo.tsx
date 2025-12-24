@@ -49,8 +49,12 @@ export const TrainingInfo = () => {
 		if (training?.exercises) {
 			const firstExerciseId = training?.exercises?.find(
 				(exercise) => exercise.progress == 0
-			).id as number
-			setCurrentExerciseId(firstExerciseId)
+			)?.id
+
+			if (firstExerciseId) {
+				setCurrentExerciseId(firstExerciseId)
+			}
+
 		}
 	}, [training?.exercises])
 	// Calculate training duration in minutes
