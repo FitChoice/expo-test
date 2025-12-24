@@ -11,8 +11,6 @@ import type { ProgressSeries } from '@/entities/progress/model/types'
 import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 import { router } from 'expo-router'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
-import { useProgressSeriesQuery, useResetProgressMutation } from '@/entities/progress'
-import { Button } from '@/shared/ui'
 import { PhotoProgressLabels } from '@/shared/constants/labels'
 import { MonthChanges } from '@/pages/photo-progress/ui/MonthChanges'
 
@@ -35,8 +33,7 @@ const getDayWord = (value: number) => {
 
 export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 	const [now] = useState(() => Date.now())
-	const { mutateAsync: resetProgress, isPending: isResetting } = useResetProgressMutation()
-	const { refetch } = useProgressSeriesQuery()
+
 	const scrollRef = useRef<ScrollView>(null)
 
 
@@ -162,20 +159,20 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 				}
 			</View>
 
-			 <View className="gap-3">
-				<Button
-					variant="secondary"
-					size="s"
-					fullWidth
-					disabled={isResetting}
-					onPress={async () => {
-						await resetProgress()
-						await refetch()
-					}}
-				>
-					{isResetting ? 'Удаляем...' : 'Удалить все фото'}
-				</Button>
-			</View>
+			{/* <View className="gap-3">*/}
+			{/*	<Button*/}
+			{/*		variant="secondary"*/}
+			{/*		size="s"*/}
+			{/*		fullWidth*/}
+			{/*		disabled={isResetting}*/}
+			{/*		onPress={async () => {*/}
+			{/*			await resetProgress()*/}
+			{/*			await refetch()*/}
+			{/*		}}*/}
+			{/*	>*/}
+			{/*		{isResetting ? 'Удаляем...' : 'Удалить все фото'}*/}
+			{/*	</Button>*/}
+			{/*</View>*/}
 			<View className="gap-3 px-2">
 				<View className="rounded-[18px] bg-[#444444] px-6 py-4">
 					<Text className="text-center text-body-medium text-light-text-100">

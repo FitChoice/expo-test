@@ -74,7 +74,7 @@ export const PhotoSetShow = () => {
 
 			<View className="mb-10">
 				<Text className="text-center text-t1.1 text-light-text-100">
-					{resolvedDateId} · {resolvedBatchId}
+					{resolvedDateId}
 				</Text>
 			</View>
 

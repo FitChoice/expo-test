@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Image, Text, TouchableOpacity, View } from 'react-native'
 
 import { type ProgressSeries, type ProgressSide } from '@/entities/progress'
 import { PROGRESS_SIDE_ORDER } from '@/entities/progress/lib/series'
 import { sideTitle } from '@/shared/constants/labels'
+import { GlowButton } from '@/shared/ui'
 
 type Props = {
 	photos: ProgressSeries[]
@@ -74,22 +75,22 @@ export const MonthChanges = ({ photos }: Props) => {
 				{SIDE_BUTTON_ORDER.map((side) => {
 					const isActive = selectedSide === side
 					return (
-						<TouchableOpacity
-							key={side}
+						<GlowButton
+							isSelected={isActive}
 							onPress={() => setSelectedSide(side)}
-							activeOpacity={0.9}
-							className={`rounded-3xl px-5 py-5 ${
-								isActive ? 'bg-[#AAEC4D]' : 'bg-[#2f2f2f]'
-							}`}
-							accessibilityRole="button"
-							accessibilityState={{ selected: isActive }}
+							style={{ flex: 1, height: 40 }}
+							contentStyle={{
+								flex: 1,
+								justifyContent: 'center',
+								alignItems: 'center',
+							}}
 						>
 							<Text
 								className={'text-t3 text-light-text-100'}
 							>
 								{SIDE_LABELS[side].split(' ')[1]}
 							</Text>
-						</TouchableOpacity>
+						</GlowButton>
 					)
 				})}
 			</View>
