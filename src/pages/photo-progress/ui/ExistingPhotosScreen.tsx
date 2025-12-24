@@ -13,6 +13,8 @@ import { router } from 'expo-router'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import { useProgressSeriesQuery, useResetProgressMutation } from '@/entities/progress'
 import { Button } from '@/shared/ui'
+import { PhotoProgressLabels } from '@/shared/constants/labels'
+import { MonthChanges } from '@/pages/photo-progress/ui/MonthChanges'
 
 type Props = {
 	data: ProgressSeries[]
@@ -50,34 +52,59 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 	const daysSinceLast = latestPhotoTimestamp ? Math.floor((now - latestPhotoTimestamp) / MS_IN_DAY) : 0
 	const daysUntilNext = Math.max(0, DAYS_INTERVAL - daysSinceLast)
 
+
+	const getBottomLabel = () => {
+		return data.length == 1 ? PhotoProgressLabels.SinglePhoto : daysUntilNext > 0 ? PhotoProgressLabels.MoreThanOnePhoto : PhotoProgressLabels.LoadMore
+	}
 	return (
 		<View className="flex-1 justify-between py-6">
 			<View className="gap-8">
+
+				{data.length > 1 ? <MonthChanges photos={data}/> : null}
+
 				<View className="flex-row  gap-4 px-1">
-					<View className=" justify-between rounded-3xl bg-[#1a1a1a] px-3 py-5">
+
+					{
+
+						daysUntilNext > 0	? <View className=" justify-between rounded-3xl bg-[#1a1a1a] px-3 py-5">
 						<Text style={sharedStyles.titleCenter}>
-							{daysUntilNext}
+					{daysUntilNext}
 						</Text>
 						<Text className="text-center text-caption-regular leading-4 text-light-text-500 mt-3">
-							{`${getDayWord(daysUntilNext)} до`}
-							{'\n'}следующего{'\n'} фото
-						</Text>
-					</View>
+					{`${getDayWord(daysUntilNext)} до`}
+					{'\n'}следующего{'\n'} фото
+				</Text>
+			</View> : 		<View className="rounded-3xl  bg-[#1a1a1a] px-3 py-5">
+							<TouchableOpacity
+								className=" items-center"
+								onPress={onAddPress}
+								accessibilityRole="button"
+								activeOpacity={0.8}
+								testID="add-progress-photo"
+							>
+								<FontAwesome6 name="plus" size={24} color="#AAEC4D" />
+								<Text className="text-center text-caption-regular leading-4 text-brand-green-900 mt-3">
+									Добавить{'\n'} фото
+								</Text>
+							</TouchableOpacity>
+						</View>
+					}
 
 					<View className="rounded-3xl  bg-[#1a1a1a] px-3 py-5">
-					<TouchableOpacity
-						className=" items-center"
-						onPress={onAddPress}
-						accessibilityRole="button"
-						activeOpacity={0.8}
-						testID="add-progress-photo"
-					>
-						<FontAwesome6 name="plus" size={24} color="#AAEC4D" />
-						<Text className="text-center text-caption-regular leading-4 text-brand-green-900 mt-3">
-							Добавить{'\n'} фото
-						</Text>
-					</TouchableOpacity>
+						<TouchableOpacity
+							className=" items-center"
+							onPress={onAddPress}
+							accessibilityRole="button"
+							activeOpacity={0.8}
+							testID="add-progress-photo"
+						>
+							<FontAwesome6 name="plus" size={24} color="#AAEC4D" />
+							<Text className="text-center text-caption-regular leading-4 text-brand-green-900 mt-3">
+								Добавить{'\n'} фото
+							</Text>
+						</TouchableOpacity>
 					</View>
+
 					<ScrollView
 						ref={scrollRef}
 						horizontal
@@ -124,21 +151,18 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 					</ScrollView>
 				</View>
 
-				<View className="items-center gap-3 px-8">
-					<Text style={sharedStyles.titleCenter}>
-						Отличное начало!
-					</Text>
-					<Text className="text-center text-t2 text-light-text-200">
-						Через месяц вы сможете добавить новое фото — и увидеть коллаж, который покажет,
-						как изменилась ваша форма
-					</Text>
-				</View>
+				{data.length == 1 ? 		<View className="items-center gap-3 px-8">
+						<Text style={sharedStyles.titleCenter}>
+							Отличное начало!
+						</Text>
+						<Text className="text-center text-t2 text-light-text-200">
+							{PhotoProgressLabels.SinglePhotoMotivation}
+						</Text>
+					</View> : null
+				}
 			</View>
 
 			 <View className="gap-3">
-				<Text className="text-center text-body-medium text-light-text-300">
-					Удаление очистит все сохраненные фото-прогресса на устройстве
-				</Text>
 				<Button
 					variant="secondary"
 					size="s"
@@ -155,7 +179,7 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 			<View className="gap-3 px-2">
 				<View className="rounded-[18px] bg-[#444444] px-6 py-4">
 					<Text className="text-center text-body-medium text-light-text-100">
-						Мы подскажем, когда будет время сделать следующее фото
+						{	getBottomLabel()}
 					</Text>
 				</View>
 			</View>
