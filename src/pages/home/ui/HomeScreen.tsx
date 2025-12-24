@@ -31,6 +31,19 @@ import Diary from '@/assets/images/diary_white.svg'
 
 import { Feather } from '@expo/vector-icons'
 
+const getDateKey = (value?: string | Date | null) => {
+	if (!value) return ''
+	if (typeof value === 'string') return value.slice(0, 10)
+
+	const dateObj = value
+	if (Number.isNaN(dateObj.getTime())) return ''
+
+	const year = dateObj.getFullYear()
+	const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+	const day = String(dateObj.getDate()).padStart(2, '0')
+	return `${year}-${month}-${day}`
+}
+
 /**
  * Home screen - main page according to Figma design
  */
@@ -51,12 +64,10 @@ const MobileContent = () => {
 	const setTrainingStatus = useTrainingStore((state) => state.setStatus)
 
 	const [userId, setUserId] = useState<number | null>(null)
-	const [selectedDayIdx, setSelectedDayIdx] = useState(1)
+	const [selectedDayIdx, setSelectedDayIdx] = useState(0)
 	const [selectedDayId, setSelectedDayId] = useState(0)
-	const [selectedDateInternal, setSelectedDateInternal] = useState<string>(() => {
-		const d = new Date()
-		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-	})
+
+	const [selectedDateInternal, setSelectedDateInternal] = useState<string>(() => getDateKey(new Date()))
 
 	const { data: trainingDays, isLoading } = useQuery<ApiResult<TrainingPlan>, Error>({
 		queryKey: ['trainingPlan', userId],
@@ -70,17 +81,6 @@ const MobileContent = () => {
 	})
 
 	const [selectedDayTraining, setSelectedDayTraining] = useState<Activity[]>([])
-
-	useEffect(() => {
-		if (!trainingDays?.success) return
-		const trainingByDayIdx = trainingDays.data.findIndex(
-			(day) => day.date.slice(0, 10) == selectedDateInternal
-		)
-		setSelectedDayTraining(trainingDays.data[trainingByDayIdx]?.activities ?? [])
-
-		setSelectedDayIdx(trainingByDayIdx)
-		setSelectedDayId(trainingDays.data[trainingByDayIdx]?.id)
-	}, [selectedDateInternal, trainingDays])
 
 	const [calendarWidth, setCalendarWidth] = useState(0)
 	const scrollRef = useRef<ScrollView>(null)
@@ -103,34 +103,25 @@ const MobileContent = () => {
 			}),
 		[]
 	)
-
-	const getDateKey = (value?: string | Date | null) => {
-		if (!value) return ''
-		if (typeof value === 'string') return value.slice(0, 10)
-
-		const dateObj = value
-		if (Number.isNaN(dateObj.getTime())) return ''
-
-		const year = dateObj.getFullYear()
-		const month = String(dateObj.getMonth() + 1).padStart(2, '0')
-		const day = String(dateObj.getDate()).padStart(2, '0')
-		return `${year}-${month}-${day}`
-	}
-
 	const calendarDays = useMemo(() => {
 		if (!trainingDays?.success) return []
 		return trainingDays?.data?.map((day, index) => {
-			const parsedDate = day.date ? new Date(day.date) : null
-			const isValidDate = parsedDate && !Number.isNaN(parsedDate.getTime())
-			const safeDate = isValidDate ? parsedDate : null
-			const dateKey = day.date ? day.date.slice(0, 10) : getDateKey(safeDate)
+			const dateKey = getDateKey(day.date)
+			const dateFromKey = dateKey ? new Date(`${dateKey}T00:00:00Z`) : null
+			const isValidDate = dateFromKey && !Number.isNaN(dateFromKey.getTime())
+		const safeDate = isValidDate ? dateFromKey : null
+		const normalizedDayNumber = safeDate
+			? String(safeDate.getUTCDate()).padStart(2, '0')
+			: dateKey
+				? dateKey.slice(-2)
+				: '--'
 
 			return {
 				key: String(day.id ?? day.date ?? index),
 				id: day.id,
 				dateKey,
-				dayNumber: safeDate ? String(safeDate.getDate()) : '--',
-				dayName: safeDate ? weekDayFormatter.format(safeDate).replace('.', '') : '',
+			dayNumber: normalizedDayNumber,
+			dayName: safeDate ? weekDayFormatter.format(safeDate).replace('.', '') : '',
 				isDone: day.activities.every((activity) => !activity.Progress.includes(0)),
 			}
 		})
@@ -148,6 +139,21 @@ const MobileContent = () => {
 
 		return calendarDays[0]?.dateKey ?? selectedDateInternal
 	}, [calendarDays, selectedDateInternal])
+
+	useEffect(() => {
+		if (!trainingDays?.success || !calendarDays.length) return
+
+		const targetDateKey = resolvedSelectedDate || getDateKey(new Date())
+		const trainingByDayIdx = trainingDays.data.findIndex(
+			(day) => getDateKey(day.date) === targetDateKey
+		)
+		const safeIndex = trainingByDayIdx >= 0 ? trainingByDayIdx : 0
+		const day = trainingDays.data[safeIndex]
+
+		setSelectedDayTraining(day?.activities ?? [])
+		setSelectedDayIdx(safeIndex)
+		setSelectedDayId(day?.id ?? 0)
+	}, [calendarDays, resolvedSelectedDate, trainingDays])
 
 	const scrollToDate = (dateKey: string) => {
 		if (!dateKey || !calendarWidth) return
@@ -188,6 +194,8 @@ const MobileContent = () => {
 	}
 
 	const isFinishedTraining = (activity: Activity) => !activity?.Progress.includes(0)
+
+	const displayDayNumber = selectedDayIdx + 1
 
 	const getTrainingIcon = (activity: Activity): React.ReactNode => {
 		if (isFinishedTraining(activity)) {
@@ -256,7 +264,7 @@ const MobileContent = () => {
 							contentContainerStyle={styles.calendarDays}
 							onLayout={(event) => setCalendarWidth(event.nativeEvent.layout.width)}
 						>
-							{calendarDays?.map((day, idx) => {
+							{calendarDays?.map((day) => {
 								const isSelected = day.dateKey === resolvedSelectedDate
 								return (
 									<TouchableOpacity
@@ -310,7 +318,7 @@ const MobileContent = () => {
 						</View>
 
 						<View style={styles.cardHeader}>
-							<Text style={styles.dayTitle}>День {selectedDayIdx}</Text>
+							<Text style={styles.dayTitle}>День {displayDayNumber}</Text>
 							<Text style={styles.dayDescription}>
 								Самое время начать{'\n'}Тренировка уже ждёт тебя
 							</Text>
@@ -379,17 +387,18 @@ const MobileContent = () => {
 											style={[
 												styles.buttonIcon,
 												{
-													backgroundColor: trainingDays?.data[selectedDayIdx]
-														.is_diary_complete
-														? '#aaec4d'
-														: '#a172ff',
+													backgroundColor:
+														trainingDays?.success &&
+														trainingDays.data[selectedDayIdx]?.is_diary_complete
+															? '#aaec4d'
+															: '#a172ff',
 												},
 											]}
 										>
 											{training.is_diary_complete ? (
 												<Feather name="check" size={24} color="black" />
 											) : (
-												<Diary h={24} fill="white" />
+												<Diary height={24} fill="white" />
 											)}
 										</View>
 									</View>
