@@ -1,5 +1,5 @@
 import type { ProgressSide, TempCapturedPhoto } from '@/entities/progress'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CameraView } from 'expo-camera'
 import * as FileSystem from 'expo-file-system'
 import { Dimensions, StyleSheet, Text, View } from 'react-native'
@@ -19,15 +19,25 @@ type CountdownCaptureProps = {
 
 export const CountdownCapture = ({ side, onCaptured, onCancel, currentSideIndex, handleStop }: CountdownCaptureProps) => {
 	const [countdown, setCountdown] = useState(5)
-	const [isCounting, setIsCounting] = useState(true)
+	const [isCounting, setIsCounting] = useState(false)
+	const [isCameraReady, setIsCameraReady] = useState(false)
+	const [isCapturing, setIsCapturing] = useState(false)
+	const [captureError, setCaptureError] = useState<string | null>(null)
+	const [mountError, setMountError] = useState<string | null>(null)
 	const cameraRef = useRef<CameraView | null>(null)
 
 	const sideLabel = useMemo(() => sideTitle[side], [side])
 
 
+	// запускаем отсчёт только после готовности камеры
+	useEffect(() => {
+		if (!isCameraReady || mountError) return
+		setCountdown(5)
+		setIsCounting(true)
+	}, [isCameraReady, mountError])
+
 	useEffect(() => {
 		if (!isCounting) return
-		setCountdown(5)
 		const interval = setInterval(() => {
 			setCountdown((prev) => {
 				if (prev <= 1) {
@@ -42,10 +52,20 @@ export const CountdownCapture = ({ side, onCaptured, onCancel, currentSideIndex,
 	}, [isCounting])
 
 	useEffect(() => {
-		if (isCounting || countdown > 0) return
+		if (isCounting || countdown > 0 || !isCameraReady || isCapturing || mountError) return
 		const capture = async () => {
+			if (!cameraRef.current) {
+				setCaptureError('Камера не готова, попробуйте ещё раз')
+				setCountdown(5)
+				setIsCounting(true)
+				return
+			}
 			try {
-				const result = await cameraRef.current?.takePictureAsync({
+				// на Android съемка может падать, если превью приостановлено
+				await cameraRef.current.resumePreview?.()
+				setIsCapturing(true)
+				setCaptureError(null)
+				const result = await cameraRef.current.takePictureAsync({
 					quality: 0.8,
 					skipProcessing: false,
 				})
@@ -67,16 +87,35 @@ export const CountdownCapture = ({ side, onCaptured, onCancel, currentSideIndex,
 						height: result.height,
 						size: fileSize,
 					})
+				} else {
+					setCaptureError('Не удалось сделать снимок')
+					setCountdown(5)
+					setIsCounting(true)
 				}
-			} catch {
-				onCancel()
+			} catch (err) {
+				const message = err instanceof Error ? err.message : 'Ошибка камеры'
+				setCaptureError(message === 'Failed to capture image' ? 'Камера занята или не готова, пробуем снова' : message)
+				setCountdown(5)
+				setIsCounting(true)
+			} finally {
+				setIsCapturing(false)
 			}
 		}
 		capture()
-	}, [isCounting, countdown, onCancel, onCaptured, side])
+	}, [isCounting, countdown, onCaptured, side, isCameraReady, isCapturing])
 
 
 	const CAM_PREVIEW_HEIGHT = Dimensions.get('window').height * 0.7
+
+	const handleCameraReady = useCallback(() => {
+		setIsCameraReady(true)
+	}, [])
+
+	const handleMountError = useCallback(() => {
+		setMountError('Не удалось инициализировать камеру')
+		setIsCounting(false)
+		onCancel()
+	}, [onCancel])
 
 	return (
 		<View className="flex-1">
@@ -102,6 +141,10 @@ export const CountdownCapture = ({ side, onCaptured, onCancel, currentSideIndex,
 						style={{ flex: 1 }}
 						facing="front"
 						mirror={false}
+						mode="picture"
+						active
+						onCameraReady={handleCameraReady}
+						onMountError={handleMountError}
 						ref={(ref) => {
 							cameraRef.current = ref
 						}}
@@ -112,7 +155,19 @@ export const CountdownCapture = ({ side, onCaptured, onCancel, currentSideIndex,
 					<StepProgress isVertical={true} current={currentSideIndex} total={4} secondsForStepProgress={5}/>
 					<Text className="mt-2 text-[20px] text-light-text-100 text-center">{sideLabel}</Text>
 					<View className="mt-6 items-center">
-						<Text className="text-h1 text-brand-green-500">{isCounting ? countdown : 'Снимаем...'}</Text>
+							<Text className="text-h1 text-brand-green-500">
+								{mountError
+									? 'Ошибка камеры'
+									: isCameraReady
+										? (isCounting ? countdown : 'Снимаем...')
+										: 'Готовим камеру...'}
+							</Text>
+							{mountError ? (
+								<Text className="mt-2 text-center text-light-text-200">{mountError}</Text>
+							) : null}
+							{captureError && !mountError ? (
+								<Text className="mt-2 text-center text-light-text-200">{captureError}</Text>
+							) : null}
 					</View>
 				</View>
 			</View>

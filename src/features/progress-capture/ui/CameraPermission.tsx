@@ -6,7 +6,6 @@ import { Text, View } from 'react-native'
 
 import CameraIcon from '@/assets/icons/large/camera.svg'
 import { useCameraPermissions } from 'expo-camera'
-import { useEffect } from 'react'
 import {
 	BackgroundLayoutSafeArea
 } from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
@@ -14,27 +13,25 @@ import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
 import {
 	type ProgressCaptureFlowState
-} from '@/features/progress-capture/ui/ProgressCaptureFlow'
+} from '@/features/progress-capture/ui/PhonePosition'
 
 
 
 
 export const CameraPermission =  ({ setStep }: ProgressCaptureFlowState) => {
-
-
 	const [permission, requestPermission] = useCameraPermissions()
 
-
-	useEffect(() => {
-		if (permission?.granted) {
-			requestPermission()
-		}
-	}, [permission])
-
-
 	const handleNext = async () => {
-		setStep('phone')
+		// если уже выданы — идём дальше без повторного запроса
+		if (permission?.granted) {
+			setStep('phone')
+			return
+		}
 
+		const res = await requestPermission()
+		if (res.granted) {
+			setStep('phone')
+		}
 	}
 
 	const handleStop = () => {

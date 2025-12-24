@@ -25,6 +25,8 @@ export const PhonePosition =   ({ setStep, handleStop }: ProgressCaptureFlowStat
 
 
 	const [isReady, setIsReady] = useState(false)
+	const [isCameraReady, setIsCameraReady] = useState(false)
+	const [mountError, setMountError] = useState<string | null>(null)
 
 	useEffect(() => {
 		const read = async () => {
@@ -66,6 +68,8 @@ export const PhonePosition =   ({ setStep, handleStop }: ProgressCaptureFlowStat
 						facing="front"
 						className="flex-1"
 						style={{ width: '100%', height: '100%' }}
+						onCameraReady={() => setIsCameraReady(true)}
+						onMountError={() => setMountError('Не удалось инициализировать камеру')}
 					/>
 				</View>
 
@@ -78,6 +82,11 @@ export const PhonePosition =   ({ setStep, handleStop }: ProgressCaptureFlowStat
 				<Text className=" text-left text-t2 font-bold text-light-text-500">
 					Поставьте смартфон на пол, слегка наклонив его к стене, чтобы камера хорошо фиксировала ваше положение
 				</Text>
+				{mountError && (
+					<Text className="mt-4 text-center text-t3 text-light-text-200">
+						{mountError}
+					</Text>
+				)}
 			</View>
 
 			{/* Button */}
@@ -85,7 +94,7 @@ export const PhonePosition =   ({ setStep, handleStop }: ProgressCaptureFlowStat
 				<Button
 					variant="primary"
 					onPress={onNext}
-					disabled={!isReady}
+					disabled={!isReady || !isCameraReady || !!mountError}
 					className="w-full"
 				>
 					Далее
