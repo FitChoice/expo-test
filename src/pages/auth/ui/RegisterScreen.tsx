@@ -8,6 +8,7 @@ import {
 	Text,
 	InteractionManager,
 	TouchableWithoutFeedback,
+	useWindowDimensions,
 } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import { Button, BackButton, MaskedText, Input, BackgroundLayout } from '@/shared/ui'
@@ -17,6 +18,10 @@ import { authApi } from '@/features/auth'
 // Импорт изображения браслета
 import braceletImage from '../../../../assets/images/ultra-realistic-silicone.png'
 import { Loader } from '@/shared/ui/Loader/Loader'
+import {
+	BackgroundLayoutSafeArea
+} from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 // Константы для MaskedText
 const TEXT_CONFIG = {
@@ -52,6 +57,9 @@ export const RegisterScreen = () => {
 	const [passwordHelperText, setPasswordHelperText] = useState('')
 	const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
+
+	const { height: SCREEN_HEIGHT } = useWindowDimensions()
+	const insets = useSafeAreaInsets()
 
 	// Очистка формы при размонтировании компонента
 	useEffect(() => {
@@ -266,10 +274,12 @@ export const RegisterScreen = () => {
 	}
 
 	return (
-		<View className="flex-1 bg-bg-dark-900 px-2 py-4">
-			<BackgroundLayout styles={{ borderRadius: 32 }}>
-				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-					<View className="flex-1 justify-between bg-transparent px-4">
+		<BackgroundLayoutSafeArea needBg={false}>
+			<View style={{ height: SCREEN_HEIGHT - insets.top - insets.bottom}}>
+				<View className="flex-1">
+					<BackgroundLayout>
+						<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+							<View className="flex-1 justify-between px-4">
 						{/* Кнопка возврата назад */}
 						<BackButton onPress={() => router.push('/')} />
 
@@ -277,6 +287,7 @@ export const RegisterScreen = () => {
 						<View className="relative z-[3] flex-1 bg-transparent">
 							{/* Группа с браслетом и заголовком */}
 							<Animated.View
+								className="relative w-full items-center"
 								style={{
 									position: 'absolute',
 									top: '-35%',
@@ -295,7 +306,7 @@ export const RegisterScreen = () => {
 									style={{
 										position: 'absolute',
 										top: '45%',
-										left: 0,
+										left: '5%',
 										right: 0,
 										height: TEXT_CONFIG.height,
 										alignItems: 'center',
@@ -323,7 +334,7 @@ export const RegisterScreen = () => {
 									style={{
 										position: 'absolute',
 										top: '45%',
-										left: 0,
+										left: '5%',
 										right: 0,
 										height: TEXT_CONFIG.height,
 										alignItems: 'center',
@@ -429,6 +440,8 @@ export const RegisterScreen = () => {
 					</View>
 				</TouchableWithoutFeedback>
 			</BackgroundLayout>
+				</View>
 		</View>
+		</BackgroundLayoutSafeArea>
 	)
 }
