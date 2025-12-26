@@ -1,7 +1,7 @@
 import { PoseNormalizer } from './normalizer'
 import { EMASmoother, OneEuroFilter, type Smoother } from './smoothers'
 import { FeatureBuilder } from './features/FeatureBuilder'
-import { RepCounterFSM } from './fsm/RepCounterFSM'
+import { RepCounterFSM, type FSMParams } from './fsm/RepCounterFSM'
 import { toCocoKeypoints } from './utils/keypoints'
 import type { EngineConfig, EngineTelemetry, ExerciseRule, RawKeypoint } from './types'
 
@@ -54,6 +54,52 @@ export class ExerciseEngine {
         this.fsm = this.buildFsm()
     }
 
+    /**
+     * Update thresholds without resetting FSM state.
+     * Useful for live threshold tuning during debugging.
+     */
+    updateThresholds(thresholds: Partial<ExerciseRule['thresholds']>): void {
+        this.rule = {
+            ...this.rule,
+            thresholds: { ...this.rule.thresholds, ...thresholds },
+        }
+        // Rebuild FSM with new thresholds but preserve rep count
+        const currentReps = this.fsm.getReps()
+        this.fsm = this.buildFsm()
+        this.fsm.setReps(currentReps)
+    }
+
+    /**
+     * Update hysteresis value for FSM transitions.
+     */
+    updateHysteresis(hysteresis: number): void {
+        this.rule = { ...this.rule, hysteresis }
+        const currentReps = this.fsm.getReps()
+        this.fsm = this.buildFsm()
+        this.fsm.setReps(currentReps)
+    }
+
+    /**
+     * Update partial ROM detection thresholds.
+     */
+    updatePartialRomThresholds(up?: number, down?: number): void {
+        this.rule = {
+            ...this.rule,
+            partial_rom_threshold_up: up,
+            partial_rom_threshold_down: down,
+        }
+        const currentReps = this.fsm.getReps()
+        this.fsm = this.buildFsm()
+        this.fsm.setReps(currentReps)
+    }
+
+    /**
+     * Get current rule configuration.
+     */
+    getRule(): ExerciseRule {
+        return { ...this.rule }
+    }
+
     reset(): void {
         this.features.reset()
         this.smoother?.reset()
@@ -80,6 +126,8 @@ export class ExerciseEngine {
             yawRejected: step.yaw_rejected,
             frameDropped: step.frame_dropped,
             transitionRecovered: step.transition_recovered,
+            // Partial ROM detection: incomplete amplitude warning
+            partialRom: step.partial_rom,
             traceback: DEFAULT_TRACEBACK,
         }
     }
@@ -90,6 +138,11 @@ export class ExerciseEngine {
             min_dwell_ms: this.rule.thresholds.min_dwell_ms ?? 0,
             hysteresis: this.rule.hysteresis ?? 0.01,
             anti_yaw_max: this.rule.anti_yaw_max,
+            // Phases per rep: for compound exercises (e.g., left+right lunge)
+            phases_per_rep: this.rule.phases_per_rep,
+            // Partial ROM detection thresholds
+            partial_rom_threshold_down: this.rule.partial_rom_threshold_down,
+            partial_rom_threshold_up: this.rule.partial_rom_threshold_up,
         }
         return new RepCounterFSM(this.rule.axis, params, this.config.fps)
     }
@@ -115,6 +168,7 @@ export class ExerciseEngine {
             yawRejected: false,
             frameDropped: true,
             transitionRecovered: false,
+            partialRom: null,
             traceback: DEFAULT_TRACEBACK,
         }
     }
