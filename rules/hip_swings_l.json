@@ -1,0 +1,24 @@
+{
+  "exercise": "hip_swings_l",
+  "axis": "hip_delta_x_norm",
+  "states": [
+    "Top",
+    "Down",
+    "Bottom",
+    "Up"
+  ],
+  "thresholds": {
+    "down_enter": -0.04,
+    "bottom_enter": -0.3,
+    "up_enter": 0.01,
+    "top_enter": 0.022,
+    "min_dwell_ms": 12
+  },
+  "rep_on_transition": "Up->Top",
+  "hysteresis": 0.01,
+  "anti_yaw_max": 1.0,
+  "partial_rom_threshold_up": 0.2,
+  "quality": {
+    "torso_lean_max": 30
+  }
+}

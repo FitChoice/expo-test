@@ -1,5 +1,5 @@
 {
-  "exercise": "hip_bridge_rubber",
+  "exercise": "hip_bridge_from_hill",
   "axis": "hip_extension_angle",
   "states": [
     "Top",
@@ -8,18 +8,18 @@
     "Up"
   ],
   "thresholds": {
-    "down_enter": 145,
-    "bottom_enter": 130,
-    "up_enter": 172,
-    "top_enter": 179,
-    "min_dwell_ms": 350
+    "down_enter": 115,
+    "bottom_enter": 95,
+    "up_enter": 145,
+    "top_enter": 160,
+    "min_dwell_ms": 400
   },
   "rep_on_transition": "Up->Top",
-  "hysteresis": 4.0,
-  "anti_yaw_max": 1.0,
+  "hysteresis": 5.0,
+  "anti_yaw_max": 0.2,
   "partial_rom_threshold_up": 0.2,
   "quality": {
-    "rom_angle_min": 30,
+    "rom_angle_min": 35,
     "torso_lean_max": 20
   }
 }

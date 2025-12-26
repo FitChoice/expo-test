@@ -1,0 +1,24 @@
+{
+  "exercise": "pigeon_pose_stretch_front_thigh",
+  "axis": "pushup_depth",
+  "states": [
+    "Top",
+    "Down",
+    "Bottom",
+    "Up"
+  ],
+  "thresholds": {
+    "down_enter": 1.28,
+    "bottom_enter": 1.27,
+    "up_enter": 1.34,
+    "top_enter": 1.36,
+    "min_dwell_ms": 100
+  },
+  "rep_on_transition": "Up->Top",
+  "hysteresis": 0.02,
+  "anti_yaw_max": 1.0,
+  "partial_rom_threshold_up": 0.2,
+  "quality": {
+    "torso_lean_max": 30
+  }
+}

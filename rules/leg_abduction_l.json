@@ -12,6 +12,7 @@
   "rep_on_transition": "Up->Top",
   "hysteresis": 0.02,
   "anti_yaw_max": 1.0,
+  "partial_rom_threshold_up": 0.2,
   "quality": {
     "rom_angle_min": 0.20,
     "torso_lean_max": 20
