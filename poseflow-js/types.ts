@@ -26,6 +26,33 @@ export interface ExerciseRule {
     }
     hysteresis?: number
     anti_yaw_max?: number
+    // Number of complete phases (Top->Top) required to count one rep
+    // For compound exercises (e.g., left+right lunge), set to 2
+    phases_per_rep?: number
+    // Threshold (0-1) for detecting partial ROM on down phase (Down->Bottom)
+    // If user reaches this % of depth but doesn't complete transition, it's flagged
+    partial_rom_threshold_down?: number
+    // Threshold (0-1) for detecting partial ROM on up phase (Up->Top)
+    // If user reaches this % of height but doesn't complete transition, it's flagged
+    partial_rom_threshold_up?: number
+}
+
+/**
+ * Event for incomplete range of motion (partial amplitude).
+ * Detected when user almost reaches a threshold but doesn't cross it.
+ * Can be triggered for both down phase (Down->Bottom) and up phase (Up->Top).
+ */
+export interface PartialROMEvent {
+    // Type of partial ROM: "down" (didn't reach Bottom) or "up" (didn't reach Top)
+    phase_type: 'down' | 'up'
+    // Percentage of required depth/height achieved (0.0 - 1.0)
+    depth_achieved: number
+    // Actual axis value reached (min for down, max for up)
+    axis_value: number
+    // Required threshold (bottom_enter for down, top_enter for up)
+    required_threshold: number
+    // How much was missing to reach the threshold
+    deficit: number
 }
 
 export interface EngineConfig {
@@ -49,6 +76,8 @@ export interface EngineStep {
     yawRejected: boolean
     frameDropped: boolean
     transitionRecovered: boolean
+    // Partial ROM event if detected (incomplete amplitude)
+    partialRom: PartialROMEvent | null
     traceback: string // placeholder for downstream exercise diagnostics
 }
 
