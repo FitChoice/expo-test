@@ -1,0 +1,24 @@
+{
+  "exercise": "pigeon_pose_bend_body_through_wave_l",
+  "axis": "pushup_depth",
+  "states": [
+    "Top",
+    "Down",
+    "Bottom",
+    "Up"
+  ],
+  "thresholds": {
+    "down_enter": -0.66,
+    "bottom_enter": -0.91,
+    "up_enter": 0.46,
+    "top_enter": 0.76,
+    "min_dwell_ms": 1000
+  },
+  "rep_on_transition": "Up->Top",
+  "hysteresis": 0.02,
+  "anti_yaw_max": 1.0,
+  "partial_rom_threshold_up": 0.2,
+  "quality": {
+    "torso_lean_max": 30
+  }
+}

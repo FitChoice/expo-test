@@ -1,0 +1,24 @@
+{
+  "exercise": "arms_rotate_on_stomach",
+  "axis": "left_shoulder_angle",
+  "сс": [
+    "Top",
+    "Down",
+    "Bottom",
+    "Up"
+  ],
+  "thresholds": {
+    "down_enter": 110,
+    "bottom_enter": 90,
+    "up_enter": 150,
+    "top_enter": 175,
+    "min_dwell_ms": 150
+  },
+  "rep_on_transition": "Up->Top",
+  "hysteresis": 2.0,
+  "anti_yaw_max": 1.0,
+  "quality": {
+    "rom_angle_min": 25,
+    "torso_lean_max": 25
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "exercise": "pigeon_pose_bends_to_leg_r",
+  "axis": "pushup_depth",
+  "states": [
+    "Top",
+    "Down",
+    "Bottom",
+    "Up"
+  ],
+  "thresholds": {
+    "down_enter": 0.5,
+    "bottom_enter": 0.2,
+    "up_enter": 1.0,
+    "top_enter": 1.2,
+    "min_dwell_ms": 1000
+  },
+  "rep_on_transition": "Up->Top",
+  "hysteresis": 0.02,
+  "anti_yaw_max": 1.0,
+  "partial_rom_threshold_up": 0.2,
+  "quality": {
+    "torso_lean_max": 30
+  }
+}

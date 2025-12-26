@@ -1,0 +1,25 @@
+{
+  "exercise": "quadruped_back_hip_extension_r",
+  "axis": "quadruped_hip_extension_progress_r",
+  "states": [
+    "Top",
+    "Down",
+    "Bottom",
+    "Up"
+  ],
+  "thresholds": {
+    "down_enter": 70.0,
+    "bottom_enter": 20.0,
+    "up_enter": 90.0,
+    "top_enter": 110.0,
+    "min_dwell_ms": 200
+  },
+  "rep_on_transition": "Up->Top",
+  "hysteresis": 5.0,
+  "anti_yaw_max": 1.0,
+  "partial_rom_threshold_up": 0.2,
+  "quality": {
+    "rom_angle_min": 20.0,
+    "torso_lean_max": 20
+  }
+}

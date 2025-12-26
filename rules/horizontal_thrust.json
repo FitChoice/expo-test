@@ -1,0 +1,25 @@
+{
+  "exercise": "horizontal_thrust",
+  "axis": "left_elbow_angle",
+  "states": [
+    "Top",
+    "Down",
+    "Bottom",
+    "Up"
+  ],
+  "thresholds": {
+    "down_enter": 126.3,
+    "bottom_enter": 106.3,
+    "up_enter": 128.3,
+    "top_enter": 156.3,
+    "min_dwell_ms": 27
+  },
+  "rep_on_transition": "Up->Top",
+  "hysteresis": 1.0,
+  "anti_yaw_max": 1.0,
+  "partial_rom_threshold_up": 0.2,
+  "quality": {
+    "rom_angle_min": 20,
+    "torso_lean_max": 25
+  }
+}
