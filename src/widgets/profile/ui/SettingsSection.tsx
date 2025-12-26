@@ -13,9 +13,12 @@ interface SettingsSectionProps {
 
 export const SettingsSection: React.FC<SettingsSectionProps> = ({ title, children }) => {
 	return (
-		<View className="bg-dark-500 mb-4 rounded-2xl p-6">
-			<Text className="mb-4 text-t1.1 font-medium text-white">{title}</Text>
-			{children}
+		<View>
+			<Text className="mb-4 pl-3 text-t1.1 font-medium text-white">{title}</Text>
+			<View className=" mb-4 rounded-3xl p-6 bg-bg-dark-500">
+				{children}
+			</View>
+
 		</View>
 	)
 }

@@ -45,7 +45,7 @@ export const Switch: React.FC<SwitchProps> = ({
 		>
 			<View
 				className={`rounded-full ${
-					checked ? 'bg-[#C5F680]' : 'bg-[#3F3F3F]'
+					checked ? 'bg-[#31C859]' : 'bg-[#3F3F3F]'
 				} ${disabled ? 'opacity-50' : ''}`}
 				style={{
 					width: TRACK_WIDTH,

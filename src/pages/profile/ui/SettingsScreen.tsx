@@ -35,6 +35,12 @@ export const SettingsScreen = () => {
 	const [showDeleteModal, setShowDeleteModal] = useState(false)
 	const [showLogoutModal, setShowLogoutModal] = useState(false)
 	const uploadAvatarMutation = useUploadAvatar()
+	const [notifications, setNotifications] = useState<NotificationSettings>({
+		basic: true,
+		progress: true,
+		reports: true,
+		system: true,
+	})
 
 	useEffect(() => {
 		getUserId().then(setUserId)
@@ -61,7 +67,10 @@ export const SettingsScreen = () => {
 	})
 
 	const handleNotificationToggle = (key: keyof NotificationSettings) => {
-
+		setNotifications((prev) => ({
+			...prev,
+			[key]: !prev[key],
+		}))
 	}
 
 	const handleLogout = async () => {
@@ -113,14 +122,6 @@ export const SettingsScreen = () => {
 		})
 	}
 
-	// Default notifications if not loaded
-	const currentNotifications: NotificationSettings = {
-		basic: true,
-		progress: true,
-		reports: true,
-		system: true,
-	}
-
 	return (
 		<View style={styles.container}>
 			<View className="flex-1">
@@ -161,7 +162,7 @@ export const SettingsScreen = () => {
 							description="Ежедневные напоминания, связанные с базовой активностью"
 							rightElement={
 								<Switch
-									checked={currentNotifications.basic}
+									checked={notifications.basic}
 									onChange={() => handleNotificationToggle('basic')}
 								/>
 							}
@@ -173,7 +174,7 @@ export const SettingsScreen = () => {
 							}
 							rightElement={
 								<Switch
-									checked={currentNotifications.progress}
+									checked={notifications.progress}
 									onChange={() => handleNotificationToggle('progress')}
 								/>
 							}
@@ -183,7 +184,7 @@ export const SettingsScreen = () => {
 							description="Помогают отслеживать результаты и обновлять личные данные"
 							rightElement={
 								<Switch
-									checked={currentNotifications.reports}
+									checked={notifications.reports}
 									onChange={() => handleNotificationToggle('reports')}
 								/>
 							}
@@ -194,7 +195,7 @@ export const SettingsScreen = () => {
 							showDivider={false}
 							rightElement={
 								<Switch
-									checked={currentNotifications.system}
+									checked={notifications.system}
 									onChange={() => handleNotificationToggle('system')}
 								/>
 							}

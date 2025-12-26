@@ -30,6 +30,7 @@ import Barbell from '@/assets/images/barbell.svg'
 import Diary from '@/assets/images/diary_white.svg'
 
 import { Feather } from '@expo/vector-icons'
+import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 
 const getDateKey = (value?: string | Date | null) => {
 	if (!value) return ''
@@ -288,12 +289,9 @@ const MobileContent = () => {
 									>
 										<View style={[styles.dayCard, isSelected && styles.dayCardSelected]}>
 
-											{
-
-												day.isDone ? 		<View style={styles.calendarIcon}>
+											{day.isDone ? <View style={styles.calendarIcon}>
 													<Icon name="barbell" size={16} color="#AAEC4D" />
-												</View> : 		<Entypo name="dot-single" size={16} color="white" />
-											}
+												</View> : <Entypo name="dot-single" size={16} color="white" />}
 
 											<View style={styles.dayInfo}>
 												<Text style={styles.dayNumber}>{day.dayNumber}</Text>
@@ -318,7 +316,16 @@ const MobileContent = () => {
 						</View>
 
 						<View style={styles.cardHeader}>
-							<Text style={styles.dayTitle}>День {displayDayNumber}</Text>
+
+
+
+
+							<Text style={sharedStyles.title}>День {displayDayNumber}</Text>
+
+
+
+
+
 							<Text style={styles.dayDescription}>
 								Самое время начать{'\n'}Тренировка уже ждёт тебя
 							</Text>
