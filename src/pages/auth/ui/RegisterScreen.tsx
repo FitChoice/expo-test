@@ -101,7 +101,7 @@ export const RegisterScreen = () => {
 		}
 
 		if (!isPasswordStrong(password)) {
-			setPasswordError('Пароль недостаточно надежный')
+			setPasswordError('Минимум 8 символов, цифра, заглавная и строчная буквы')
 			setShowPasswordHelper(false)
 			setPasswordHelperText('')
 		} else {
@@ -146,7 +146,7 @@ export const RegisterScreen = () => {
 	// Обработчик фокуса на поле пароля
 	const handlePasswordFocus = () => {
 		// Показываем подсказку если есть ошибка валидации пароля
-		if (passwordError === 'Пароль недостаточно надежный') {
+		if (passwordError === 'Минимум 8 символов, цифра, заглавная и строчная буквы') {
 			setShowPasswordHelper(true)
 			setPasswordHelperText('Минимум 8 символов, цифра, заглавная и строчная буквы')
 			// Временно скрываем ошибку при показе подсказки
@@ -281,7 +281,7 @@ export const RegisterScreen = () => {
 						<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 							<View className="flex-1 justify-between px-4">
 						{/* Кнопка возврата назад */}
-						<BackButton onPress={() => router.push('/')} />
+						<BackButton style={{ top: 14, left: 10 }} onPress={() => router.push('/')} />
 
 						{/* Основной контент */}
 						<View className="relative z-[3] flex-1 bg-transparent">

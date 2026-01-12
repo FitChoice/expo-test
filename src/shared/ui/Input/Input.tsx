@@ -52,7 +52,7 @@ export const Input = forwardRef<TextInput, InputProps>(
 		const containerClassNames = useMemo(() => {
 			const baseClasses = [
 				'flex-row items-center bg-fill-800',
-				size === 'settings' ? 'rounded-lg px-2 py-2' : 'rounded-2xl px-4 py-3',
+				size === 'settings' ? 'rounded-lg px-2 py-2' : 'rounded-2xl px-4 py-5',
 			]
 
 			if (disabled) {

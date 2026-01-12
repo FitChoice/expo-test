@@ -6,9 +6,8 @@ import {
 	TouchableOpacity,
 	Keyboard,
 	Alert,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
+	TouchableWithoutFeedback,
+	useWindowDimensions,
 } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -16,6 +15,7 @@ import { Button, BackgroundLayout, Input } from '@/shared/ui'
 import { useOrientation } from '@/shared/lib'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { authApi } from '@/features/auth'
+import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 
 /**
  * Страница проверки кода подтверждения
@@ -23,6 +23,7 @@ import { authApi } from '@/features/auth'
 export const VerificationScreen = () => {
 	const router = useRouter()
 	const insets = useSafeAreaInsets()
+	const { height: SCREEN_HEIGHT } = useWindowDimensions()
 	const { email, password } = useLocalSearchParams<{ email: string; password: string }>()
 	const [code, setCode] = useState('')
 	const [timer, setTimer] = useState(59) // Таймер для повторной отправки
@@ -117,25 +118,16 @@ export const VerificationScreen = () => {
 	}
 
 	return (
-		<View style={styles.pageContainer}>
+		<View style={styles.pageContainer} >
 			<BackgroundLayout>
-				<View style={[styles.mainContainer, { paddingTop: insets.top + 14 }]}>
-					<KeyboardAvoidingView
-						style={{ flex: 1 }}
-						behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-						keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-					>
-						<ScrollView
-							contentContainerStyle={{ flexGrow: 1 }}
-							keyboardShouldPersistTaps="handled"
-							showsVerticalScrollIndicator={false}
-							bounces={false}
-						>
+				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+					<View style={{ height: SCREEN_HEIGHT, paddingTop: insets.top + 14, paddingBottom: insets.bottom, }} >
+						<View style={[styles.mainContainer, { flex: 1,paddingTop: 0 }]}>
 							{/* Основной контент */}
 							<View style={styles.contentContainer}>
 								{/* Заголовок и описание */}
 								<View style={styles.headerSection}>
-									<Text style={styles.title}>введите код{'\n'}подтверждения</Text>
+									<Text style={sharedStyles.titleCenter}>ВВЕДИТЕ КОД ПОДТВЕРЖДЕНИЯ</Text>s
 									<Text style={styles.description}>
 										На вашу почту {email || 'example@gmail.com'}
 										{'\n'}отправлен код подтверждения
@@ -205,9 +197,9 @@ export const VerificationScreen = () => {
 									Назад
 								</Button>
 							</View>
-						</ScrollView>
-					</KeyboardAvoidingView>
-				</View>
+						</View>
+					</View>
+				</TouchableWithoutFeedback>
 			</BackgroundLayout>
 		</View>
 	)
@@ -249,11 +241,10 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 	},
 	inputSection: {
-		marginBottom: 40,
+
 	},
 	bottomButtons: {
-		paddingTop: 32,
-		paddingBottom: 50,
+
 		gap: 8,
 	},
 	questionText: {
@@ -284,6 +275,6 @@ const styles = StyleSheet.create({
 		opacity: 0.75,
 	},
 	submitButton: {
-		height: 56,
+
 	},
 })

@@ -149,7 +149,7 @@ export const ForgotPasswordScreen = () => {
 		}
 
 		if (!isPasswordStrong(password)) {
-			setPasswordError('Пароль недостаточно надежный')
+			setPasswordError('Минимум 8 символов, цифра, заглавная и строчная буквы')
 			setShowPasswordHelper(false)
 			setPasswordHelperText('')
 		} else {
@@ -194,7 +194,7 @@ export const ForgotPasswordScreen = () => {
 	// Обработчик фокуса на поле пароля
 	const handlePasswordFocus = () => {
 		// Показываем подсказку если есть ошибка валидации пароля
-		if (passwordError === 'Пароль недостаточно надежный') {
+		if (passwordError === 'Минимум 8 символов, цифра, заглавная и строчная буквы') {
 			setShowPasswordHelper(true)
 			setPasswordHelperText('Минимум 8 символов, цифра, заглавная и строчная буквы')
 			// Временно скрываем ошибку при показе подсказки
@@ -319,7 +319,7 @@ export const ForgotPasswordScreen = () => {
 						<View className="flex-1 justify-start pt-40">
 							<Animated.View className="gap-20">
 								<View className="gap-3">
-									<Text style={sharedStyles.titleCenter}>ВВЕДИТЕ КОД ПОДТВЕРЖДЕНИЯ</Text>
+											<Text style={sharedStyles.titleCenter}>ВВЕДИТЕ КОД ПОДТВЕРЖДЕНИЯ</Text>
 									<Text className="text-center text-t2 text-light-text-200">
 										На вашу почту отправлен код подтверждения
 									</Text>
