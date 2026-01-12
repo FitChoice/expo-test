@@ -340,7 +340,14 @@ export const SurveyScreen = () => {
 			case 3:
 				return getAgeGroupAsString() !== null
 			case 4:
-				return surveyData.height !== null && surveyData.weight !== null
+				return (
+					surveyData.height !== null &&
+					surveyData.height >= 150 &&
+					surveyData.height <= 200 &&
+					surveyData.weight !== null &&
+					surveyData.weight >= 40 &&
+					surveyData.weight <= 120
+				)
 			case 5:
 				return false // На экране загрузки кнопка не показывается
 			case 6:

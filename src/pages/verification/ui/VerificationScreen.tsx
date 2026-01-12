@@ -127,7 +127,7 @@ export const VerificationScreen = () => {
 							<View style={styles.contentContainer}>
 								{/* Заголовок и описание */}
 								<View style={styles.headerSection}>
-									<Text style={sharedStyles.titleCenter}>ВВЕДИТЕ КОД ПОДТВЕРЖДЕНИЯ</Text>s
+									<Text style={sharedStyles.titleCenter}>ВВЕДИТЕ КОД ПОДТВЕРЖДЕНИЯ</Text>
 									<Text style={styles.description}>
 										На вашу почту {email || 'example@gmail.com'}
 										{'\n'}отправлен код подтверждения

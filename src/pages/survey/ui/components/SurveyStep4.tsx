@@ -19,6 +19,16 @@ export const SurveyStep4: React.FC<SurveyStep4Props> = ({
 	onHeightChange,
 	onWeightChange,
 }) => {
+	const heightError =
+		height !== null && height.toString().length >= 3 && (height < 150 || height > 200)
+			? 'введено неверное значение'
+			: undefined
+
+	const weightError =
+		weight !== null && weight.toString().length >= 2 && (weight < 40 || weight > 120)
+			? 'введено неверное значение'
+			: undefined
+
 	return (
 		<>
 			<Text style={sharedStyles.title}>параметры</Text>
@@ -27,20 +37,30 @@ export const SurveyStep4: React.FC<SurveyStep4Props> = ({
 					label="Рост"
 					placeholder="В сантиметрах"
 					value={height?.toString() || ''}
-					onChangeText={(text) => onHeightChange(text ? parseFloat(text) : null)}
+					onChangeText={(text) => {
+						const cleaned = text.replace(/[^0-9]/g, '')
+						onHeightChange(cleaned ? parseFloat(cleaned) : null)
+					}}
 					variant="text"
 					size="default"
 					keyboardType="numeric"
+					maxLength={3}
+					error={heightError}
 					leftIcon={<Icon name="ruler" size={16} color="#FFFFFF" />}
 				/>
 				<Input
 					label="Вес"
 					placeholder="В килограммах"
 					value={weight?.toString() || ''}
-					onChangeText={(text) => onWeightChange(text ? parseFloat(text) : null)}
+					onChangeText={(text) => {
+						const cleaned = text.replace(/[^0-9]/g, '')
+						onWeightChange(cleaned ? parseFloat(cleaned) : null)
+					}}
 					variant="text"
 					size="default"
 					keyboardType="numeric"
+					maxLength={3}
+					error={weightError}
 					leftIcon={<Icon name="barbell" size={16} color="#FFFFFF" />}
 				/>
 			</View>

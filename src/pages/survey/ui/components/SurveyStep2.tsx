@@ -23,12 +23,12 @@ export const SurveyStep2: React.FC<SurveyStep2Props> = ({ gender, onGenderChange
 						{
 							value: 'male',
 							label: 'Мужчина',
-							icon: <Icon name="gender-male" size={40} color="#FFFFFF" />,
+							icon: <Icon name="gender-male" size={40} color="#3E63DD" />,
 						},
 						{
 							value: 'female',
 							label: 'Женщина',
-							icon: <Icon name="gender-female" size={40} color="#FFFFFF" />,
+							icon: <Icon name="gender-female" size={40} color="#E93D82" />,
 						},
 					]}
 					value={gender || ''}
