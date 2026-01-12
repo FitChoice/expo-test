@@ -96,17 +96,11 @@ export const authApi = {
 	 * Register new user
 	 */
 	async registration(data: RegistrationInput): Promise<ApiResult<TokenResponse>> {
-		let result: ApiResult<TokenResponse>
-
-		if (MOCK_MODE) {
-			result = await mockRegistration(data)
-		} else {
-			result = await apiClient.post<RegistrationInput, TokenResponse>(
+		const result = await apiClient.post<RegistrationInput, TokenResponse>(
 				'/auth/registration',
 				data,
 				{ skipAuthHandler: true }
 			)
-		}
 
 		// Save user_id and tokens to SecureStore on successful registration
 		if (result.success && result.data) {
@@ -128,15 +122,10 @@ export const authApi = {
 	 * Login user
 	 */
 	async login(data: LoginRequest): Promise<ApiResult<TokenResponse>> {
-		let result: ApiResult<TokenResponse>
-
-		if (MOCK_MODE) {
-			result = await mockLogin(data)
-		} else {
-			result = await apiClient.post<LoginRequest, TokenResponse>('/auth/login', data, {
+		const result = await apiClient.post<LoginRequest, TokenResponse>('/auth/login', data, {
 				skipAuthHandler: true,
 			})
-		}
+
 
 		// Save user_id and tokens to SecureStore on successful login
 		if (result.success && result.data) {
