@@ -2,7 +2,7 @@
 
 # dependencies
 node_modules/
-temp-docs/
+tempDocs/
 # Expo
 .expo/
 dist/

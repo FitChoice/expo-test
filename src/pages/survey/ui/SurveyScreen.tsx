@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { View, Animated, Platform } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as Notifications from 'expo-notifications'
-import { Button, BackButton, Icon } from '@/shared/ui'
+import { Button, BackButton, Icon, BackgroundLayout } from '@/shared/ui'
 import { useOrientation, useKeyboardAnimation, getUserId } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { useSurveyFlow } from '@/features/survey-flow'
@@ -378,22 +378,36 @@ export const SurveyScreen = () => {
 		[currentStep]
 	)
 
-	// Выбираем компонент Layout в зависимости от шага
-	const isNoPaddingLayout = currentStep == 6
-	const sectionPadding = isNoPaddingLayout ? { paddingHorizontal: '4%' as const } : {}
-	//  const LayoutComponent = isNoPaddingLayout ? BackgroundLayoutNoSidePadding : BackgroundLayout
+	// Конфигурация лэйаута для разных шагов
+	const layoutConfig = useMemo(() => {
+		// Шаги, использующие градиентный фон BackgroundLayout
+		const gradientSteps = [5, 6, 13, 14]
+		const isGradient = gradientSteps.includes(currentStep)
+		const isNoPadding = currentStep === 6
+
+		return {
+			WrapperComponent: isGradient ? BackgroundLayout : View,
+			wrapperProps: isGradient
+				? { styles: { flex: 1 } }
+				: { className: 'flex-1 bg-[#151515] px-4' },
+			// Внутренний отступ для контента при использовании BackgroundLayout
+			contentPadding: isGradient ? (isNoPadding ? 'px-[4%]' : 'px-4') : '',
+		}
+	}, [currentStep])
 
 	// Для экрана загрузки и ошибки используем flex-1 для центрирования
 	const isFullHeightContent = currentStep === 14 && (isSubmitting || submitError)
 
+	const { WrapperComponent, wrapperProps, contentPadding } = layoutConfig
+
 	return (
-		<View className="flex-1 bg-[#151515] px-4">
-			<View className={'flex-1 justify-between bg-transparent'}>
+		<WrapperComponent {...(wrapperProps as any)}>
+			<View className={`flex-1 justify-between bg-transparent ${contentPadding}`}>
 				{/* Верхний контент */}
 				<View className={isFullHeightContent ? 'flex-1' : 'flex-shrink'}>
 					{/* Header section with back button */}
 					{!notShowProgress && (
-						<View className="mb-2" style={sectionPadding}>
+						<View className="mb-2">
 							<BackButton
 								onPress={handleBack}
 								color="#989898"
@@ -407,7 +421,7 @@ export const SurveyScreen = () => {
 					)}
 
 					{/* Content section with progress bar and main content */}
-					<View className="mb-6 bg-transparent" style={sectionPadding}>
+					<View className="mb-6 bg-transparent">
 						{/* Индикатор прогресса */}
 						{!notShowProgress && (
 							<View className="mb-6 h-2 w-full rounded-lg bg-fill-800">
@@ -436,7 +450,6 @@ export const SurveyScreen = () => {
 					className="gap-2 pt-8"
 					style={[
 						Platform.OS === 'ios' ? { transform: [{ translateY }] } : {},
-						sectionPadding,
 						{
 							paddingBottom: insets.bottom + 10,
 						},
@@ -490,6 +503,6 @@ export const SurveyScreen = () => {
 					)}
 				</Animated.View>
 			</View>
-		</View>
+		</WrapperComponent>
 	)
 }
