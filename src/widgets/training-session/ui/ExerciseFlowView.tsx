@@ -8,15 +8,8 @@ import { RotateScreen } from './exercise/RotateScreen'
 import { ExerciseExecutionScreen } from './exercise/ExerciseExecutionScreen'
 import { ExerciseTheoryScreen } from './exercise/ExerciseTheoryScreen'
 import type { ExerciseInfoResponse } from '@/entities/training'
+import type { ExerciseStep } from '@/features/training-session'
 import { ExerciseWithCounterWrapper } from './ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
-
-type ExerciseStep =
-	| 'theory'
-	| 'position'
-	| 'execution'
-	| 'side_switch'
-	| 'rest'
-	| 'rotate'
 
 type ExerciseFlowViewProps = {
 	model: posedetection.PoseDetector
@@ -25,6 +18,7 @@ type ExerciseFlowViewProps = {
 	currentStep: ExerciseStep
 	exercise: ExerciseInfoResponse
 	currentSet: number
+	currentSide: 'left' | 'right'
 	executionKey: string
 	restPhase: 'main' | 'practice'
 	mainRestDuration: number
@@ -45,6 +39,7 @@ export function ExerciseFlowView({
 	currentStep,
 	exercise,
 	currentSet,
+	currentSide,
 	executionKey,
 	restPhase,
 	mainRestDuration,
@@ -102,11 +97,11 @@ export function ExerciseFlowView({
 						key="side-switch"
 						onComplete={onSideSwitchComplete}
 						model={model}
-						type="side_switch"
 						orientation={orientation}
+						targetSide={currentSide}
 						title="Смена рабочей стороны"
 						titleClassName="mb-2 text-left text-h1 text-brand-green-500"
-						subtitle=""
+						subtitle="Повернитесь другой стороной к камере"
 						isVertical={!exercise.is_horizontal}
 					/>
 				)}

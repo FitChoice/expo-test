@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import type { ExerciseInfoResponse, ExecuteExerciseInput, CompleteTrainingInput } from '@/entities/training'
 import { useTrainingStore } from '@/entities/training'
@@ -36,6 +36,9 @@ export function useTrainingFlow({
 	const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
 	const [shouldSwitchSide, setShouldSwitchSide] = useState(false)
 
+	// Ref для хранения целевого шага после ротации (избегаем closure issues)
+	const postRotateStepRef = useRef<ExerciseStep | null>(null)
+
 	const currentExercise = currentExerciseDetail ?? (exercises.length > 0 ? exercises[currentExerciseIndex] : null)
 	const isLastExercise = currentExerciseIndex === exercises.length - 1
 	const setsPerExercise = currentExercise?.sets ?? 1
@@ -67,11 +70,14 @@ export function useTrainingFlow({
 			const needsRotate = (exerciseIsVertical && !isPortrait) || (!exerciseIsVertical && !isLandscape)
 
 			if (needsRotate) {
+				postRotateStepRef.current = nextStep // Сохраняем целевой шаг
 				setCurrentStep('rotate')
 				return
 			}
+			postRotateStepRef.current = null
 			setCurrentStep(nextStep)
 		} catch {
+			postRotateStepRef.current = null
 			setCurrentStep(nextStep)
 		}
 	}, [])
@@ -81,6 +87,23 @@ export function useTrainingFlow({
 		resetExerciseProgress()
 		void startExercise(currentExercise, entryStep)
 	}, [currentExercise?.id, entryStep, resetExerciseProgress, startExercise])
+
+	// Handler для завершения ротации — использует ref для избежания stale closure
+	const handleRotateComplete = useCallback(() => {
+		const targetStep = postRotateStepRef.current ?? entryStep
+		postRotateStepRef.current = null
+		setCurrentStep(targetStep)
+	}, [entryStep])
+
+	// Handler для завершения теории — переход к позиционированию
+	const handleTheoryComplete = useCallback(() => {
+		setCurrentStep('position')
+	}, [])
+
+	// Handler для завершения позиционирования — переход к выполнению
+	const handlePositionComplete = useCallback(() => {
+		setCurrentStep('execution')
+	}, [])
 
 	const buildCompleteTrainingPayload = useCallback((): CompleteTrainingInput => ({
 		report_active_time: activeTime,
@@ -122,6 +145,7 @@ export function useTrainingFlow({
 	}, [currentExerciseIndex, exercises, resetExerciseProgress, setCurrentExerciseId])
 
 	const setCurrentSide = useTrainingStore((state) => state.setCurrentSide)
+	const setCurrentReps = useTrainingStore((state) => state.setCurrentReps)
 	const nextSet = useTrainingStore((state) => state.nextSet)
 
 	const handleExecutionComplete = useCallback(() => {
@@ -131,6 +155,7 @@ export function useTrainingFlow({
 			if (currentSideState === 'right') {
 				setCurrentSideState('left')
 				setCurrentSide('left')
+				setCurrentReps(0) // Явный сброс счётчика перед сменой стороны
 				setRestType('rep')
 				setShouldSwitchSide(true)
 				setCurrentStep('rest')
@@ -173,7 +198,7 @@ export function useTrainingFlow({
 				setCurrentStep('rest')
 			}
 		}
-	}, [currentExercise, requiresSideSwitch, currentSideState, setNumber, setsPerExercise, sendExerciseCompletion, isLastExercise, setCurrentSide, nextSet])
+	}, [currentExercise, requiresSideSwitch, currentSideState, setNumber, setsPerExercise, sendExerciseCompletion, isLastExercise, setCurrentSide, setCurrentReps, nextSet])
 
 	const handleRestComplete = useCallback(() => {
 		if (restType === 'rep') {
@@ -234,22 +259,27 @@ export function useTrainingFlow({
 
 	const executionKey = `${currentExercise?.id}-${setNumber}-${currentSideState}`
 
+	// Handler для завершения side_switch — сбрасывает счётчик и переходит к execution
+	const handleSideSwitchComplete = useCallback(() => {
+		setCurrentReps(0) // Гарантированный сброс перед execution на второй стороне
+		setCurrentStep('execution')
+	}, [setCurrentReps])
+
 	return {
 		currentStep,
-		setCurrentStep,
 		currentExercise,
 		currentSideState,
-		setNumber,
 		restPhase,
-		restType,
-		entryStep,
 		displayCurrentSet,
 		practiceVideoUrl,
 		mainRestDuration,
 		executionKey,
+		handleRotateComplete,
+		handleTheoryComplete,
+		handlePositionComplete,
 		handleExecutionComplete,
 		handleRestComplete,
 		handleRestPhaseComplete,
-		resetExerciseProgress,
+		handleSideSwitchComplete,
 	}
 }

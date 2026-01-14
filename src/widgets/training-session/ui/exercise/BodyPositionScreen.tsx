@@ -5,6 +5,7 @@ import type * as posedetection from '@tensorflow-models/pose-detection'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import Svg, { Circle } from 'react-native-svg'
 import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
+import BodySilhouetteSide from '@/assets/images/body_silhouette_side.svg'
 import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
 
 type BodyPositionScreenProps = {
@@ -17,7 +18,8 @@ type BodyPositionScreenProps = {
 	titleClassName?: string
 	subtitleClassName?: string
 	successText?: string
-	type?: 'side_switch'
+	/** Для side_switch: целевая сторона (left/right) — показывает боковой силуэт */
+	targetSide?: 'left' | 'right'
 }
 
 export const BodyPositionScreen = ({
@@ -30,6 +32,7 @@ export const BodyPositionScreen = ({
 	titleClassName,
 	subtitleClassName,
 	successText = 'Вперёд!',
+	targetSide,
 }: BodyPositionScreenProps) => {
 	const [showSuccess, setShowSuccess] = useState(false)
 	const isCompletedRef = useRef(false)
@@ -119,12 +122,22 @@ export const BodyPositionScreen = ({
 
 				{/* Body Silhouette Overlay */}
 				<View className="absolute inset-0 items-center justify-start pt-20" style={{ pointerEvents: 'none' }}>
-					<View style={{ transform: isVertical ? [] : [{ rotate: '90deg' }] }}>
-						<BodySilhouetteDefault
+					{targetSide ? (
+						// Боковой силуэт для side_switch с flip для левой стороны
+						<BodySilhouetteSide
+							style={targetSide === 'left' ? { transform: [{ scaleX: -1 }] } : undefined}
 							stroke={showSuccess ? '#8BC34A' : 'white'}
 							fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
 						/>
-					</View>
+					) : (
+						// Стандартный силуэт с поворотом для горизонтальной ориентации
+						<View style={{ transform: isVertical ? [] : [{ rotate: '90deg' }] }}>
+							<BodySilhouetteDefault
+								stroke={showSuccess ? '#8BC34A' : 'white'}
+								fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
+							/>
+						</View>
+					)}
 				</View>
 
 				<View className="pl-2 pt-10">

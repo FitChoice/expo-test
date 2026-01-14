@@ -14,7 +14,7 @@ import {
 	type ExecuteExerciseInput,
 } from '@/entities/training'
 import { ExerciseFlowView } from './ExerciseFlowView'
-import { useTrainingFlow } from '@/features/training-session/model/useTrainingFlow'
+import { useTrainingFlow } from '@/features/training-session'
 
 type ExerciseFlowProps = {
 	model: posedetection.PoseDetector
@@ -34,20 +34,23 @@ export function ExerciseFlow({
 	const exercises = useTrainingStore((state) => state.exerciseDetails)
 	const training = useTrainingStore((state) => state.training)
 
-	// Use our new feature hook for FSM logic
+	// FSM logic from feature hook
 	const {
 		currentStep,
-		setCurrentStep,
 		currentExercise,
+		currentSideState,
 		restPhase,
-		entryStep,
 		displayCurrentSet,
 		practiceVideoUrl,
 		mainRestDuration,
 		executionKey,
+		handleRotateComplete,
+		handleTheoryComplete,
+		handlePositionComplete,
 		handleExecutionComplete,
 		handleRestComplete,
 		handleRestPhaseComplete,
+		handleSideSwitchComplete,
 	} = useTrainingFlow({
 		exercises,
 		onExecuteExercise,
@@ -63,15 +66,16 @@ export function ExerciseFlow({
 			currentStep={currentStep}
 			exercise={currentExercise}
 			currentSet={displayCurrentSet}
+			currentSide={currentSideState}
 			executionKey={executionKey}
 			restPhase={restPhase}
 			mainRestDuration={mainRestDuration}
 			practiceVideoUrl={practiceVideoUrl}
-			onRotateComplete={() => setCurrentStep(entryStep)}
-			onCountdownComplete={() => setCurrentStep('position')}
-			onPositionComplete={() => setCurrentStep('execution')}
+			onRotateComplete={handleRotateComplete}
+			onCountdownComplete={handleTheoryComplete}
+			onPositionComplete={handlePositionComplete}
 			onExecutionComplete={handleExecutionComplete}
-			onSideSwitchComplete={() => setCurrentStep('execution')}
+			onSideSwitchComplete={handleSideSwitchComplete}
 			onRestPhaseComplete={handleRestPhaseComplete}
 			onRestComplete={handleRestComplete}
 		/>
