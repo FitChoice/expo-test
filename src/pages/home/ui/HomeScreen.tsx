@@ -50,7 +50,7 @@ const getDateKey = (value?: string | Date | null) => {
  */
 export const HomeScreen = () => {
 	return (
-		<BackgroundLayoutNoSidePadding edges={['top', 'left', 'right']}>
+		<BackgroundLayoutNoSidePadding edges={['top', 'left', 'right']} hasSidePadding={false}>
 			{Platform.OS === 'web' ? <WebContent /> : <MobileContent />}
 		</BackgroundLayoutNoSidePadding>
 	)
@@ -217,7 +217,7 @@ const MobileContent = () => {
 	}
 
 	return (
-		<View className="flex-1">
+		<View className="flex-1 px-2">
 				{/* Header with progress */}
 				<View className="pt-4">
 					<View style={styles.progressSection}>

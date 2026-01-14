@@ -95,6 +95,8 @@ import StrengthPurple from './assets/strength-purple.svg'
 import StretchingPurple from './assets/stretching-purple.svg'
 import WeightLossPurple from './assets/weight-loss-purple.svg'
 import WelnessPurple from './assets/welness-purple.svg'
+import MessageIcon from './assets/message.svg'
+import PieChart from './assets/pie-chat.svg'
 
 interface IconProps {
 	name: IconName
@@ -161,6 +163,8 @@ const iconMap: Record<IconName, React.FC<SvgProps>> = {
 	fire: Fire,
 	lightning: Lightning,
 	'calendar-dots': CalendarDots,
+	'message': MessageIcon,
+	'pie-chart': PieChart,
 	ruler: Ruler,
 	barbell: Barbell,
 	clock: Timer, // Using timer as clock placeholder

@@ -44,20 +44,20 @@ export const NavigationBar = () => {
 	}
 
 	const renderIcon = (route: string, active: boolean) => {
-		const color = active ? '#000000' : '#FFFFFF'
-		const size = 32
+		const color = active ?  '#3f3f3f' :  '#FFFFFF'
+		const size = 30
 
 		switch (route) {
 			case '/home':
 				return <Icon name="house" size={size} color={color} />
 			case '/chat':
 				return (
-					<MaterialCommunityIcons name="message-processing" size={size} color={color} />
+					<Icon name="message" size={size} color={color} />
 				)
 			case '/stats':
-				return <Fontisto name="pie-chart-2" size={size} color={color} />
+				return <Icon name="pie-chart" size={size} color={color} />
 			case '/profile':
-				return <FontAwesome6 name="user-large" size={size} color={color} />
+				return <Icon name="user" size={size} color={color} />
 			default:
 				return null
 		}
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'space-between',
-		backgroundColor: '#3F3F3F',
+		backgroundColor: '#5c5c5c',
 		borderRadius: 99,
 		paddingHorizontal: 20,
 		paddingVertical: 12,

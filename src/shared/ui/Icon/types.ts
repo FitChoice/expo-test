@@ -89,6 +89,8 @@ export type IconName =
 	| 'additional'
 	| 'diary'
 	| 'back'
+	| 'message'
+	| 'pie-chart'
 	// Чат
 	| 'microphone'
 	| 'send'
