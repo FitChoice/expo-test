@@ -163,11 +163,14 @@ const ProfileContent = () => {
 					style={{ minHeight: 150, padding: 20 }}
 				>
 					<View className="flex-1 pr-16">
-						<Text className="text-[16px] font-semibold text-white">
-							Изменить программу тренировок
+						<Text className="text-t3 text-white">
+							Изменить программу
 						</Text>
-						<View className="mt-5 h-12 w-12 items-center justify-center rounded-full bg-[#A96CF5]">
-							<Feather name="chevrons-right" size={24} color="white" />
+						<Text className="text-t3 text-white">
+							тренировок
+						</Text>
+						<View className="mt-10 h-20 w-20 items-center justify-center rounded-full bg-[#A172FF]">
+							<Feather name="chevrons-right" size={45} color="white" />
 						</View>
 					</View>
 
@@ -175,10 +178,10 @@ const ProfileContent = () => {
 						source={boySample}
 						style={{
 							position: 'absolute',
-							right: -8,
-							bottom: -6,
-							width: 160,
-							height: 160,
+							right: 0,
+							bottom: -20,
+							width: 200,
+							height: 200,
 							resizeMode: 'contain',
 						}}
 					/>
