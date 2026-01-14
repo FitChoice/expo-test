@@ -62,6 +62,7 @@ export const HomeScreen = () => {
 const MobileContent = () => {
 	const router = useRouter()
 	const { contentPaddingBottom } = useNavbarLayout()
+
 	const setTrainingStatus = useTrainingStore((state) => state.setStatus)
 
 	const [userId, setUserId] = useState<number | null>(null)
@@ -217,7 +218,6 @@ const MobileContent = () => {
 
 	return (
 		<View className="flex-1">
-
 				{/* Header with progress */}
 				<View className="pt-4">
 					<View style={styles.progressSection}>
@@ -281,7 +281,6 @@ const MobileContent = () => {
 										}}
 									>
 										<View style={[styles.dayCard, isSelected && styles.dayCardSelected]}>
-
 											{day.isDone ? <View style={styles.calendarIcon}>
 													<Icon name="barbell" size={16} color="#AAEC4D" />
 												</View> : <Entypo name="dot-single" size={16} color="white" />}
@@ -300,7 +299,7 @@ const MobileContent = () => {
 				</View>
 
 				{/* Main Content Card */}
-				<View style={styles.mainCard}>
+				<View style={[styles.mainCard, { marginBottom: contentPaddingBottom }]}>
 					<View >
 						{/* Progress Tag - moved to top */}
 						<View style={styles.progressTag}>
@@ -318,55 +317,20 @@ const MobileContent = () => {
 						</View>
 					</View>
 					{/* Action Buttons */}
-
-					{selectedDayTraining.map((training, idx) => (
-						<View key={training.ID} style={styles.actionButtons}>
-							<TouchableOpacity
-								disabled={isFinishedTraining(training)}
-								style={styles.actionButton}
-								onPress={() => handleOpenTraining(training.ID)}
-							>
-								<View style={styles.buttonContent}>
-									<View style={styles.buttonInfo}>
-										<Text style={styles.buttonTitle}>{getTrainingTitle(training)}</Text>
-										<TrainingTags
-											icon1={<MaterialIcons name="timer" size={16} color="white" />}
-											title1={`${training.Duration} мин.`}
-											icon2={
-												<MaterialCommunityIcons
-													name="bow-arrow"
-													size={16}
-													color="white"
-												/>
-											}
-											title2={`+${training.Experience} опыт`}
-										/>
-									</View>
-									<View
-										style={[
-											styles.buttonIcon,
-											isFinishedTraining(training)
-												? { backgroundColor: '#aaec4d' }
-												: { backgroundColor: '#a172ff' },
-										]}
-									>
-										{/*<Icon name="barbell" size={32} color="white" />*/}
-										{getTrainingIcon(training)}
-									</View>
-								</View>
-							</TouchableOpacity>
-
-							{selectedDayTraining.length - 1 == idx && (
+					<View>
+						{selectedDayTraining.map((training, idx) => (
+							<View key={training.ID} style={styles.actionButtons}>
 								<TouchableOpacity
+									disabled={isFinishedTraining(training)}
 									style={styles.actionButton}
-									onPress={() => handleOpenDiary(selectedDayId)}
+									onPress={() => handleOpenTraining(training.ID)}
 								>
 									<View style={styles.buttonContent}>
 										<View style={styles.buttonInfo}>
-											<Text style={styles.buttonTitle}>Дневник</Text>
+											<Text style={styles.buttonTitle}>{getTrainingTitle(training)}</Text>
 											<TrainingTags
 												icon1={<MaterialIcons name="timer" size={16} color="white" />}
-												title1={'40 минут'}
+												title1={`${training.Duration} мин.`}
 												icon2={
 													<MaterialCommunityIcons
 														name="bow-arrow"
@@ -374,32 +338,68 @@ const MobileContent = () => {
 														color="white"
 													/>
 												}
-												title2={'+20 опыта'}
+												title2={`+${training.Experience} опыт`}
 											/>
 										</View>
 										<View
 											style={[
 												styles.buttonIcon,
-												{
-													backgroundColor:
-														trainingDays?.success &&
-														trainingDays.data[selectedDayIdx]?.is_diary_complete
-															? '#aaec4d'
-															: '#a172ff',
-												},
+												isFinishedTraining(training)
+													? { backgroundColor: '#aaec4d' }
+													: { backgroundColor: '#a172ff' },
 											]}
 										>
-											{training.is_diary_complete ? (
-												<Feather name="check" size={24} color="black" />
-											) : (
-												<Diary height={24} fill="white" />
-											)}
+											{/*<Icon name="barbell" size={32} color="white" />*/}
+											{getTrainingIcon(training)}
 										</View>
 									</View>
 								</TouchableOpacity>
-							)}
-						</View>
-					))}
+
+								{selectedDayTraining.length - 1 == idx && (
+									<TouchableOpacity
+										style={styles.actionButton}
+										onPress={() => handleOpenDiary(selectedDayId)}
+									>
+										<View style={styles.buttonContent}>
+											<View style={styles.buttonInfo}>
+												<Text style={styles.buttonTitle}>Дневник</Text>
+												<TrainingTags
+													icon1={<MaterialIcons name="timer" size={16} color="white" />}
+													title1={'40 минут'}
+													icon2={
+														<MaterialCommunityIcons
+															name="bow-arrow"
+															size={16}
+															color="white"
+														/>
+													}
+													title2={'+20 опыта'}
+												/>
+											</View>
+											<View
+												style={[
+													styles.buttonIcon,
+													{
+														backgroundColor:
+															trainingDays?.success &&
+															trainingDays.data[selectedDayIdx]?.is_diary_complete
+																? '#aaec4d'
+																: '#a172ff',
+													},
+												]}
+											>
+												{training.is_diary_complete ? (
+													<Feather name="check" size={24} color="black" />
+												) : (
+													<Diary height={24} fill="white" />
+												)}
+											</View>
+										</View>
+									</TouchableOpacity>
+								)}
+							</View>
+						))}
+					</View>
 				</View>
 
 			{/* Navigation Bar */}
@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
 	calendarContainer: {
 		height: 120,
 		justifyContent: 'center',
-		marginBottom: 70,
+		marginBottom: 20,
 	},
 	calendarDays: {
 		flexDirection: 'row',
@@ -520,6 +520,7 @@ const styles = StyleSheet.create({
 		paddingVertical: 10,
 		paddingHorizontal: 5,
 		justifyContent: 'space-between',
+		flex: 1,
 	},
 	cardHeader: {
 		alignItems: 'center',
