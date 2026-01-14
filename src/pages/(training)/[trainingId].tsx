@@ -149,7 +149,7 @@ export default function TrainingEntryScreen() {
 				return <TrainingInfo />
 			case 'onboarding':
 				return (
-					<BackgroundLayoutNoSidePadding>
+					<BackgroundLayoutNoSidePadding hasSidePadding={false} >
 						<OnboardingFlow />
 					</BackgroundLayoutNoSidePadding>
 				)

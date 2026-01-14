@@ -13,8 +13,8 @@ export const ExerciseInfoCard: React.FC<ExerciseInfoCardProps> = ({ exercise }) 
 
 	return (
 		<View className={'mb-2'}>
-			<View className="flex-row">
-				<View className="mr-2 items-center justify-center rounded-b-xl rounded-t-xl bg-[#6B6B6F] p-2">
+			<View className="flex-row gap-2">
+				<View className="mr-2 aspect-square self-start items-center justify-center rounded-xl bg-[#6B6B6F] p-2">
 					<MaterialIcons name="sports-gymnastics" size={40} color="#8BC34A" />
 				</View>
 

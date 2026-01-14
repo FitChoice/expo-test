@@ -25,7 +25,7 @@ export function SoundCheckScreen({ onNext }: SoundCheckScreenProps) {
 			{/* Gradient Background */}
 
 			{/* Close Button */}
-			<View className="absolute right-4 z-10">
+			<View className="absolute right-0 z-10">
 				<CloseBtn handlePress={handleStop} classNames={'h-12 w-12 rounded-2xl'} />
 			</View>
 
@@ -37,7 +37,7 @@ export function SoundCheckScreen({ onNext }: SoundCheckScreenProps) {
 
 			{/* Icon Section */}
 			<View className="flex-1 items-center justify-center">
-				<SoundIcon width={194} height={186} />
+				<SoundIcon />
 			</View>
 
 			{/* Text and Button Section */}

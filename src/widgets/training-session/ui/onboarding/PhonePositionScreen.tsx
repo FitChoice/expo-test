@@ -52,7 +52,7 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
 	return (
 		<View className="flex-1">
 			{/* Close Button */}
-			<View className="absolute right-4 z-10">
+			<View className="absolute right-0 z-10">
 				<CloseBtn handlePress={handleStop} classNames={'h-12 w-12 rounded-2xl'} />
 			</View>
 
@@ -62,15 +62,17 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
 			</View>
 
 			{/* Content */}
-			<View className="mb-10 mt-20 flex-1 items-center justify-center px-6">
+			<View className="mb-10 mt-20 flex-1 items-center justify-center px-4">
 				{/* Camera Preview */}
-				<View className="h-96 w-full overflow-hidden rounded-3xl bg-black">
+				<View className="w-full overflow-hidden rounded-3xl bg-black mb-5">
 					<CameraView
 						facing="front"
 						className="flex-1"
 						style={{ width: '100%', height: '100%' }}
 					/>
 				</View>
+
+
 
 				{/* Title */}
 				<Text className="mb-3 text-left text-h2 font-bold text-light-text-100">
@@ -82,10 +84,11 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
 					Поверните телефон на 90°, снизьте наклона его в стену, чтобы камера хорошо
 					распознала движения
 				</Text>
+
 			</View>
 
 			{/* Button */}
-			<View className="p-6 pb-12">
+			<View className="p-2 pb-4">
 				<Button
 					variant="primary"
 					onPress={onNext}
