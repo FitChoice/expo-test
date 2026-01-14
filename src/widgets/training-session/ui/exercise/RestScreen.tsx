@@ -5,10 +5,12 @@
  */
 
 import { View, Text, useWindowDimensions } from 'react-native'
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { LargeNumberDisplay } from '@/shared/ui'
-import { ExerciseWithCounterWrapper } from '@/widgets/training-session/ui/ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 import type { ExerciseInfoResponse } from '@/entities/training'
+import { useCountdown } from '@/shared/hooks/useCountdown'
+
+import { ExerciseSetInfo } from './components/ExerciseSetInfo'
 
 interface RestScreenProps {
 	onComplete: () => void
@@ -26,56 +28,35 @@ export function RestScreen({
 	const { width, height } = useWindowDimensions()
 	const isVertical = height > width
 
-	const [remainingTime, setRemainingTime] = useState(duration)
+	const { remainingTime } = useCountdown(duration, {
+		onComplete,
+		autoStart: true,
+	})
 
-	useEffect(() => {
-		if (remainingTime <= 0) {
-			onComplete()
-			return
-		}
-
-		const timer = setInterval(() => {
-			setRemainingTime((prev) => prev - 1)
-		}, 1000)
-
-		return () => clearInterval(timer)
-	}, [remainingTime, onComplete])
+	const displayTime = useMemo(() => {
+		const mins = Math.floor(remainingTime / 60)
+			.toString()
+			.padStart(2, '0')
+		const secs = (remainingTime % 60).toString().padStart(2, '0')
+		return `${mins}:${secs}`
+	}, [remainingTime])
 
 	return (
-		<ExerciseWithCounterWrapper isShowActionButtons={false}>
-			<View className="padding-4 flex-1 items-center justify-center gap-10 pb-5 pt-5">
-				<View className="mt-6 items-center">
-					<Text className="text-h1 text-brand-green-500">Отдых</Text>
-				</View>
-
-				<View className={isVertical ? 'mb-2 items-center' : 'items-center'}>
-					<LargeNumberDisplay
-						value={`${Math.floor(remainingTime / 60)
-							.toString()
-							.padStart(2, '0')}:${(remainingTime % 60).toString().padStart(2, '0')}`}
-						size="large"
-					/>
-				</View>
-
-				<View className="flex-row gap-2 px-1">
-					<View className="flex-1 basis-0 items-center rounded-3xl bg-fill-800 p-2">
-						<Text className="text-[64px] leading-[72px] text-light-text-200">
-							{currentSet}
-							<Text className="text-[32px] leading-[36px] color-[#949494]">
-								{' '}
-								/ {exercise.sets}
-							</Text>
-						</Text>
-						<Text className="mb-1 text-t2 color-[#949494]">подход</Text>
-					</View>
-					<View className="flex-1 basis-0 items-center rounded-3xl bg-fill-800 p-2">
-						<Text className="text-[64px] leading-[72px] text-light-text-200">
-							{exercise.reps || exercise.duration}
-						</Text>
-						<Text className="mb-1 text-t2 color-[#949494]">повторения</Text>
-					</View>
-				</View>
+		<View className="padding-4 flex-1 items-center justify-center gap-10 pb-5 pt-5">
+			<View className="mt-6 items-center">
+				<Text className="text-h1 text-brand-green-500">Отдых</Text>
 			</View>
-		</ExerciseWithCounterWrapper>
+
+			<View className={isVertical ? 'mb-2 items-center' : 'items-center'}>
+				<LargeNumberDisplay value={displayTime} size="large" />
+			</View>
+
+			<ExerciseSetInfo
+				currentSet={currentSet}
+				totalSets={exercise.sets ?? 1}
+				reps={exercise.reps}
+				duration={exercise.duration}
+			/>
+		</View>
 	)
 }

@@ -61,6 +61,8 @@ interface TrainingState {
 	nextSet: () => void
 	completeSet: (setData: SetData) => void
 	finishTraining: () => void
+	setCurrentReps: (reps: number) => void
+	setCurrentSide: (side: ExerciseSide | null) => void
 	setExerciseDetail: (detail: ExerciseInfoResponse | null) => void
 	setExerciseLoading: (loading: boolean) => void
 	setExerciseDetails: (successfulExercises: ExerciseInfoResponse[]) => void
@@ -166,6 +168,14 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
 
 	finishTraining: () => {
 		set({ status: 'finished' })
+	},
+
+	setCurrentReps: (reps) => {
+		set({ currentReps: reps })
+	},
+
+	setCurrentSide: (side) => {
+		set({ currentSide: side })
 	},
 
 	setAnalytics: () => {

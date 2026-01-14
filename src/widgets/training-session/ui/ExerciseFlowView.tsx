@@ -8,6 +8,7 @@ import { RotateScreen } from './exercise/RotateScreen'
 import { ExerciseExecutionScreen } from './exercise/ExerciseExecutionScreen'
 import { ExerciseTheoryScreen } from './exercise/ExerciseTheoryScreen'
 import type { ExerciseInfoResponse } from '@/entities/training'
+import { ExerciseWithCounterWrapper } from './ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
 
 type ExerciseStep =
 	| 'theory'
@@ -56,80 +57,82 @@ export function ExerciseFlowView({
 	onRestPhaseComplete,
 	onRestComplete,
 }: ExerciseFlowViewProps) {
+	// Action buttons should be hidden during rest to match existing design
+	const isShowActionButtons = currentStep !== 'rest'
+
 	return (
-		<View className="flex-1">
-			{currentStep === 'rotate' && (
-				<RotateScreen
-					isVertical={!exercise.is_horizontal}
-					onComplete={onRotateComplete}
-				/>
-			)}
-			{currentStep === 'position' && (
-				<BodyPositionScreen
-					isVertical={!exercise.is_horizontal}
-					key="position-check"
-					onComplete={onPositionComplete}
-					model={model}
-					orientation={orientation}
-				/>
-			)}
+		<ExerciseWithCounterWrapper isShowActionButtons={isShowActionButtons}>
+			<View className="flex-1">
+				{currentStep === 'rotate' && (
+					<RotateScreen isVertical={!exercise.is_horizontal} onComplete={onRotateComplete} />
+				)}
+				{currentStep === 'position' && (
+					<BodyPositionScreen
+						isVertical={!exercise.is_horizontal}
+						key="position-check"
+						onComplete={onPositionComplete}
+						model={model}
+						orientation={orientation}
+					/>
+				)}
 
-			{currentStep === 'theory' && (
-				<ExerciseTheoryScreen
-					exercise={exercise}
-					currentSet={currentSet}
-					onComplete={onCountdownComplete}
-					isVertical={!exercise.is_horizontal}
-				/>
-			)}
+				{currentStep === 'theory' && (
+					<ExerciseTheoryScreen
+						exercise={exercise}
+						currentSet={currentSet}
+						onComplete={onCountdownComplete}
+						isVertical={!exercise.is_horizontal}
+					/>
+				)}
 
-			{currentStep === 'execution' && (
-				<ExerciseExecutionScreen
-					key={executionKey}
-					model={model}
-					orientation={orientation}
-					onComplete={onExecutionComplete}
-					exercise={exercise}
-					isVertical={!exercise.is_horizontal}
-					practiceVideoUrl={practiceVideoUrl ?? exercise.video_practice}
-				/>
-			)}
+				{currentStep === 'execution' && (
+					<ExerciseExecutionScreen
+						key={executionKey}
+						model={model}
+						orientation={orientation}
+						onComplete={onExecutionComplete}
+						exercise={exercise}
+						isVertical={!exercise.is_horizontal}
+						practiceVideoUrl={practiceVideoUrl ?? exercise.video_practice}
+					/>
+				)}
 
-			{currentStep === 'side_switch' && (
-				<BodyPositionScreen
-					key="side-switch"
-					onComplete={onSideSwitchComplete}
-					model={model}
-					type="side_switch"
-					orientation={orientation}
-					title="Смена рабочей стороны"
-					titleClassName="mb-2 text-left text-h1 text-brand-green-500"
-					subtitle=""
-					isVertical={!exercise.is_horizontal}
-				/>
-			)}
-			{currentStep === 'rest' && (
-				<>
-					{restPhase === 'main' && (
-						<RestScreen
-							onComplete={onRestPhaseComplete}
-							duration={mainRestDuration}
-							exercise={exercise}
-							currentSet={currentSet}
-						/>
-					)}
-					{restPhase === 'practice' && (
-						<ExerciseTheoryScreen
-							exercise={exercise}
-							currentSet={currentSet}
-							onComplete={onRestComplete}
-							isVertical
-							videoUrlOverride={practiceVideoUrl ?? exercise.video_practice}
-							durationOverrideSeconds={10}
-						/>
-					)}
-				</>
-			)}
-		</View>
+				{currentStep === 'side_switch' && (
+					<BodyPositionScreen
+						key="side-switch"
+						onComplete={onSideSwitchComplete}
+						model={model}
+						type="side_switch"
+						orientation={orientation}
+						title="Смена рабочей стороны"
+						titleClassName="mb-2 text-left text-h1 text-brand-green-500"
+						subtitle=""
+						isVertical={!exercise.is_horizontal}
+					/>
+				)}
+				{currentStep === 'rest' && (
+					<>
+						{restPhase === 'main' && (
+							<RestScreen
+								onComplete={onRestPhaseComplete}
+								duration={mainRestDuration}
+								exercise={exercise}
+								currentSet={currentSet}
+							/>
+						)}
+						{restPhase === 'practice' && (
+							<ExerciseTheoryScreen
+								exercise={exercise}
+								currentSet={currentSet}
+								onComplete={onRestComplete}
+								isVertical
+								videoUrlOverride={practiceVideoUrl ?? exercise.video_practice}
+								durationOverrideSeconds={10}
+							/>
+						)}
+					</>
+				)}
+			</View>
+		</ExerciseWithCounterWrapper>
 	)
 }

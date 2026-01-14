@@ -1,11 +1,12 @@
 import { PoseCamera } from '@/widgets/pose-camera'
 import { View, Text, Dimensions, useWindowDimensions } from 'react-native'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import Svg, { Circle } from 'react-native-svg'
 import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
 import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
+
 type BodyPositionScreenProps = {
 	isVertical?: boolean
 	onComplete: () => void
@@ -30,73 +31,51 @@ export const BodyPositionScreen = ({
 	subtitleClassName,
 	successText = 'Вперёд!',
 }: BodyPositionScreenProps) => {
-	const isPortrait = () => {
+	const [showSuccess, setShowSuccess] = useState(false)
+	const isCompletedRef = useRef(false)
+	const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+	const completionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+	const isPortrait = useCallback(() => {
 		return (
 			orientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
 			orientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
 		)
-	}
+	}, [orientation])
 
+	const { width } = useWindowDimensions()
 	const CAM_PREVIEW_HEIGHT = isPortrait()
 		? Dimensions.get('window').height * 0.6
 		: Dimensions.get('window').height
 
-	const [showSuccess, setShowSuccess] = useState(false)
-	const successTimerRef = useRef<NodeJS.Timeout | null>(null)
-	const allKeypointsDetectedRef = useRef(false)
+	const handleAllKeypointsDetected = useCallback((allDetected: boolean) => {
+		if (allDetected && !showSuccess && !isCompletedRef.current) {
+			if (successTimerRef.current) return // Already counting
 
-	const handleAllKeypointsDetected = (allDetected: boolean) => {
-		if (allDetected && !allKeypointsDetectedRef.current) {
-			allKeypointsDetectedRef.current = true
-
-			// Clear any existing timer
-			if (successTimerRef.current) {
-				clearTimeout(successTimerRef.current)
-			}
-
-			// Set success after 2 seconds
 			successTimerRef.current = setTimeout(() => {
 				setShowSuccess(true)
-			}, 2000)
-			successTimerRef.current = setTimeout(() => {
-				onComplete()
-			}, 2200)
+				completionTimerRef.current = setTimeout(() => {
+					if (!isCompletedRef.current) {
+						isCompletedRef.current = true
+						onComplete()
+					}
+				}, 500) // Small delay after success text shows
+			}, 1500)
+		} else if (!allDetected && !showSuccess) {
+			// Reset if lost during countdown
+			if (successTimerRef.current) {
+				clearTimeout(successTimerRef.current)
+				successTimerRef.current = null
+			}
 		}
-	}
+	}, [onComplete, showSuccess])
 
 	useEffect(() => {
 		return () => {
-			if (successTimerRef.current) {
-				clearTimeout(successTimerRef.current)
-			}
+			if (successTimerRef.current) clearTimeout(successTimerRef.current)
+			if (completionTimerRef.current) clearTimeout(completionTimerRef.current)
 		}
 	}, [])
-
-	const { width } = useWindowDimensions()
-
-	// Настройка статус-бара: светлые иконки для темного градиента
-	// useStatusBar({
-	//     style: 'light',
-	//     backgroundColor: '#BA9BF7', // Цвет фона статус-бара на Android (совпадает с градиентом)
-	// })
-
-	// useEffect(() => {
-	//     // Reset state when component mounts
-	//     setShowSuccess(false)
-	//
-	//     const successTimer = setTimeout(() => {
-	//         setShowSuccess(true)
-	//     }, 7000)
-	//
-	//     const completeTimer = setTimeout(() => {
-	//         onComplete()
-	//     }, 8000)
-	//
-	//     return () => {
-	//         clearTimeout(successTimer)
-	//         clearTimeout(completeTimer)
-	//     }
-	// }, [onComplete])
 
 	return (
 		<View className="flex-1 bg-transparent">
@@ -115,7 +94,7 @@ export const BodyPositionScreen = ({
 						onAllKeypointsDetected={handleAllKeypointsDetected}
 					/>
 
-					{/* Grid pattern overlay - inside camera view */}
+					{/* Grid pattern overlay */}
 					<View className="absolute inset-0" style={{ pointerEvents: 'none' }}>
 						<Svg
 							width={width}
@@ -139,36 +118,21 @@ export const BodyPositionScreen = ({
 				</View>
 
 				{/* Body Silhouette Overlay */}
-				{isVertical ? (
-					<View className="absolute inset-0 items-center justify-start pt-20">
-						{
-							<BodySilhouetteDefault
-								stroke={showSuccess ? '#8BC34A' : 'white'}
-								fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
-							/>
-						}
+				<View className="absolute inset-0 items-center justify-start pt-20" style={{ pointerEvents: 'none' }}>
+					<View style={{ transform: isVertical ? [] : [{ rotate: '90deg' }] }}>
+						<BodySilhouetteDefault
+							stroke={showSuccess ? '#8BC34A' : 'white'}
+							fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
+						/>
 					</View>
-				) : (
-					<View className="absolute inset-0 items-center justify-center">
-						<View style={{ transform: [{ rotate: '90deg' }] }}>
-							<BodySilhouetteDefault
-								stroke={showSuccess ? '#8BC34A' : 'white'}
-								fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
-							/>
-						</View>
-					</View>
-				)}
+				</View>
 
 				<View className="pl-2 pt-10">
-					<Text
-						className={titleClassName ?? 'mb-2 text-left text-h2 text-light-text-100'}
-					>
+					<Text className={titleClassName ?? 'mb-2 text-left text-h2 text-light-text-100'}>
 						{title}
 					</Text>
 					{subtitle && (
-						<Text
-							className={subtitleClassName ?? 'text-left text-t2 text-light-text-200'}
-						>
+						<Text className={subtitleClassName ?? 'text-left text-t2 text-light-text-200'}>
 							{subtitle}
 						</Text>
 					)}
@@ -176,29 +140,6 @@ export const BodyPositionScreen = ({
 					{showSuccess && (
 						<View className="mt-6 items-center">
 							<Text className="text-h1 text-brand-green-500">{successText}</Text>
-						</View>
-					)}
-
-					{!isVertical && (
-						<View className="absolute bottom-0 left-0 right-0 z-10 items-center justify-center bg-black opacity-50">
-							<Text
-								className={titleClassName ?? 'mb-2 text-left text-h2 text-light-text-100'}
-							>
-								{title}
-							</Text>
-							{subtitle && (
-								<Text
-									className={subtitleClassName ?? 'text-left text-t2 text-light-text-200'}
-								>
-									{subtitle}
-								</Text>
-							)}
-
-							{showSuccess && (
-								<View className="mb-2 mt-2 items-center">
-									<Text className="text-h1 text-brand-green-500">Вперёд!</Text>
-								</View>
-							)}
 						</View>
 					)}
 				</View>

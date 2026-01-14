@@ -1,6 +1,8 @@
-import { StyleSheet, View } from 'react-native'
+import { Platform, StyleSheet, View } from 'react-native'
 import { Button } from '@/shared/ui'
 import React from 'react'
+
+const IS_ANDROID = Platform.OS === 'android'
 
 type Props = {
 	handleClickBottomBtn: () => void
@@ -19,7 +21,7 @@ export const BottomActionBtn = ({ handleClickBottomBtn, title }: Props) => {
 const styles = StyleSheet.create({
 	container: {
 		position: 'absolute',
-		bottom: 15,
+		bottom: IS_ANDROID ? 55: 15,
 		left: 0,
 		right: 0,
 		paddingHorizontal: 20,

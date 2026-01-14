@@ -28,7 +28,6 @@ export const ExerciseWithCounterWrapper = ({
 }) => {
 	const [showPauseModal, setShowPauseModal] = useState(false)
 	const [showStopModal, setShowStopModal] = useState(false)
-	const [isPaused, setIsPaused] = useState(false)
 	const timerRef = useRef<number | null>(null)
 	const videoPlayersRef = useRef<Set<VideoPlayer>>(new Set())
 	const pausableHandlersRef = useRef<Set<PauseResumeHandler>>(new Set())
@@ -37,8 +36,8 @@ export const ExerciseWithCounterWrapper = ({
 		videoPlayersRef.current.forEach((player) => {
 			try {
 				player.pause()
-			} catch (e) {
-				console.error('Error pausing video:', e)
+			} catch {
+				// ignore error
 			}
 		})
 

@@ -6,6 +6,7 @@ import {
 	TouchableOpacity,
 	StyleSheet,
 	useWindowDimensions,
+	Platform,
 } from 'react-native'
 import { router } from 'expo-router'
 import { Switch, TrainingTags, ExerciseInfoCard } from '@/shared/ui'
@@ -17,7 +18,7 @@ import { BottomActionBtn } from '@/shared/ui/BottomActionBtn/BottomActionBtn'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { GradientBg } from '@/shared/ui/GradientBG'
 
- 
+const IS_ANDROID = Platform.OS === 'android'
 const trainingInfoBanner = require('@/assets/images/training_info_banner.png')
 
 // Динамический импорт картинок оборудования
@@ -83,7 +84,7 @@ export const TrainingInfo = () => {
 	}
 	return (
 		<View className="flex-1">
-			<View style={[styles.gradientContainer, { width: SCREEN_WIDTH }]}>
+			<View style={[styles.gradientContainer, { width: SCREEN_WIDTH }]}  >
 				<GradientBg />
 			</View>
 			<ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -158,7 +159,7 @@ export const TrainingInfo = () => {
 						</View>
 					}
 
-				<View className="rounded-[35px] bg-black px-6 pb-20 pt-6">
+				<View className="rounded-[35px] bg-black px-6 mb-40 py-6">
 					<Text className="mb-4 text-t1.1 text-white">
 						{training?.exercises.length} упражнения
 					</Text>
