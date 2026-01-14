@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, Keyboard, TouchableWithoutFeedback } from 'react-native'
+import { View, Text } from 'react-native'
 import { Input } from '@/shared/ui'
 import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 

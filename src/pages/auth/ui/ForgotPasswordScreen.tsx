@@ -12,7 +12,7 @@ import {
 } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import {
-	Button, BackButton, Input, SafeAreaContainer, BackgroundLayout,
+	Button, Input, BackgroundLayout,
 } from '@/shared/ui'
 import { useOrientation } from '@/shared/lib'
 import { useRouter } from 'expo-router'

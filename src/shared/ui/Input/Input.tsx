@@ -3,7 +3,6 @@ import { View, TextInput, Text, TouchableOpacity, Pressable, Image } from 'react
 import { type InputProps } from './types'
 import { SimpleIcon } from '../Icon/SimpleIcon'
 import { Icon } from '../Icon/Icon'
-import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 
 // Универсальный Input компонент
 // Варианты: text, password, dropdown, textarea

@@ -1,5 +1,5 @@
 import type { ProgressSide, TempCapturedPhoto } from '@/entities/progress'
-import { Button, Switch } from '@/shared/ui'
+import { Button } from '@/shared/ui'
 import {
 	Image,
 	Text,

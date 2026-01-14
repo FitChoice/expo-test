@@ -58,8 +58,8 @@ export const CheckboxSelectOption: React.FC<CheckboxSelectOptionProps> = ({
 const styles = StyleSheet.create({
 	optionContainer: {
 		paddingHorizontal: 16,
-		paddingVertical: 32,
-		minHeight: 80,
+		paddingVertical: 15,
+
 	},
 	contentContainer: {
 		flexDirection: 'row',

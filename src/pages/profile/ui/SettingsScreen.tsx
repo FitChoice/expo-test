@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react'
 import { View, ScrollView, Text, Linking, StyleSheet, Alert } from 'react-native'
 import { useRouter } from 'expo-router'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { BackButton, Switch, SettingsItem, ConfirmModal, Avatar } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { SettingsSection, FAQAccordion } from '@/widgets/profile'

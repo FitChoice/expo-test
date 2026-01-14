@@ -2,16 +2,18 @@ import React from 'react'
 import { StyleSheet, View, useWindowDimensions } from 'react-native'
 import { SafeAreaContainer } from '@/shared/ui'
 import { GradientBg } from '@/shared/ui/GradientBG'
+import { type Edge } from 'react-native-safe-area-context'
 
 /**
  * Компонент контентного контейнера без боковых отступов
  * Используется для создания общего фона для страниц с радиальным градиентом
  */
 
-type Props = { children: React.ReactNode; hasSidePadding?: boolean; needBg?: boolean }
+type Props = { children: React.ReactNode; hasSidePadding?: boolean; needBg?: boolean, edges?: Edge[] }
 export const BackgroundLayoutSafeArea = ({
 	children,
-	hasSidePadding = true,
+	hasSidePadding = true, 
+																					 edges,
 	needBg = true,
 }: Props) => {
 	const { width: SCREEN_WIDTH } = useWindowDimensions()
@@ -28,6 +30,7 @@ export const BackgroundLayoutSafeArea = ({
 
 			{/* Контент */}
 			<SafeAreaContainer
+				edges={edges}
 				style={[styles.contentContainer, hasSidePadding && styles.paddingContent]}
 			>
 				{children}

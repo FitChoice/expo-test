@@ -15,7 +15,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
 }) => {
 	const handlePress = () => {
 		if (!disabled) {
-			onChange(!checked)
+			onChange(!checked)	
 		}
 	}
 
@@ -32,7 +32,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
 			onPress={handlePress}
 			disabled={disabled}
 			className={`items-center justify-center rounded-full ${
-				checked ? 'bg-[#C5F680]' : 'border-2 border-white bg-black'
+				checked ? 'bg-[#C5F680]' : 'bg-black'
 			} ${disabled ? 'opacity-50' : 'bg-black'} ${className}`}
 			style={{
 				width: currentSize.size,

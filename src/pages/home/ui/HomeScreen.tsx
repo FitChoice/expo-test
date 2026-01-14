@@ -50,7 +50,7 @@ const getDateKey = (value?: string | Date | null) => {
  */
 export const HomeScreen = () => {
 	return (
-		<BackgroundLayoutNoSidePadding>
+		<BackgroundLayoutNoSidePadding edges={['top', 'left', 'right']}>
 			{Platform.OS === 'web' ? <WebContent /> : <MobileContent />}
 		</BackgroundLayoutNoSidePadding>
 	)
@@ -217,14 +217,7 @@ const MobileContent = () => {
 
 	return (
 		<View className="flex-1">
-			<ScrollView
-				style={styles.scrollView}
-				contentContainerStyle={[
-					styles.scrollContent,
-					{ paddingBottom: contentPaddingBottom },
-				]}
-				showsVerticalScrollIndicator={false}
-			>
+
 				{/* Header with progress */}
 				<View className="pt-4">
 					<View style={styles.progressSection}>
@@ -308,7 +301,7 @@ const MobileContent = () => {
 
 				{/* Main Content Card */}
 				<View style={styles.mainCard}>
-					<View style={{ marginBottom: 65 }}>
+					<View >
 						{/* Progress Tag - moved to top */}
 						<View style={styles.progressTag}>
 							<FontAwesome5 name="font-awesome-flag" size={16} color="white" />
@@ -317,14 +310,7 @@ const MobileContent = () => {
 
 						<View style={styles.cardHeader}>
 
-
-
-
 							<Text style={sharedStyles.title}>День {displayDayNumber}</Text>
-
-
-
-
 
 							<Text style={styles.dayDescription}>
 								Самое время начать{'\n'}Тренировка уже ждёт тебя
@@ -415,7 +401,6 @@ const MobileContent = () => {
 						</View>
 					))}
 				</View>
-			</ScrollView>
 
 			{/* Navigation Bar */}
 			<NavigationBar />

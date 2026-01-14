@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from 'react'
-import { Image, Text, TouchableOpacity, View } from 'react-native'
+import { Image, Text, View } from 'react-native'
 
 import { type ProgressSeries, type ProgressSide } from '@/entities/progress'
-import { PROGRESS_SIDE_ORDER } from '@/entities/progress/lib/series'
 import { sideTitle } from '@/shared/constants/labels'
 import { GlowButton } from '@/shared/ui'
 

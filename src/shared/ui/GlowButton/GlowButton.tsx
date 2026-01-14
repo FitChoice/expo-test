@@ -122,10 +122,10 @@ export const GlowButton: React.FC<GlowButtonProps> = ({
 			{isSelected && <View style={styles.checkLine} />}
 
 			{/* Чекбокс в верхнем правом углу для выбранного состояния */}
-			{isSelected && isNeedCheckbox && (
+			{ isNeedCheckbox && (
 				<View style={styles.checkboxContainer}>
 					<Checkbox
-						checked={true}
+						checked={isSelected}
 						onChange={() => {}} // Чекбокс только для отображения
 						size="sm"
 						disabled={true}

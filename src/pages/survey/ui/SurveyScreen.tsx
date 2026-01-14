@@ -381,7 +381,7 @@ export const SurveyScreen = () => {
 	// Конфигурация лэйаута для разных шагов
 	const layoutConfig = useMemo(() => {
 		// Шаги, использующие градиентный фон BackgroundLayout
-		const gradientSteps = [5, 6, 13, 14]
+		const gradientSteps = [5, 6, 8,13, 14]
 		const isGradient = gradientSteps.includes(currentStep)
 		const isNoPadding = currentStep === 6
 

@@ -8,13 +8,12 @@ import {
 	Text,
 	Keyboard,
 	TouchableWithoutFeedback,
-	StatusBar,
 	useWindowDimensions,
 } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SecureStore from 'expo-secure-store'
-import { Button, BackButton, MaskedText, BackgroundLayout, Input, BackgroundLayoutNoSidePadding } from '@/shared/ui'
-import { useOrientation, useKeyboardAnimation } from '@/shared/lib'
+import { Button, BackButton, MaskedText, BackgroundLayout, Input } from '@/shared/ui'
+import { useOrientation } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { authApi } from '@/features/auth'
 // Импорт изображения браслета

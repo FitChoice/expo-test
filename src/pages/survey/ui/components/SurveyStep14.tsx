@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, Image } from 'react-native'
-import { router, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import type { Gender } from '@/entities/survey'
 import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 import { Chip, CircleIconButton } from '@/shared/ui'

@@ -3,7 +3,6 @@ import { Button, DotsProgress } from '@/shared/ui'
 import {
 	BackgroundLayoutSafeArea
 } from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
-import { router } from 'expo-router'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { CameraView } from 'expo-camera'
 import React, { useEffect, useState } from 'react'

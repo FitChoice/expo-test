@@ -6,7 +6,6 @@ import { apiClient } from '@/shared/api'
 import type { ApiResult } from '@/shared/api/types'
 import type {
 	UserProfile,
-	NotificationSettings,
 	UpdateProfileInput,
 	AvatarPresignUrlResponse,
 } from './types'
