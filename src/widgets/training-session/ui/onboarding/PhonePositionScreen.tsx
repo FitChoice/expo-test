@@ -62,9 +62,9 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
 			</View>
 
 			{/* Content */}
-			<View className="mb-10 mt-20 flex-1 items-center justify-center px-4">
+			<View className="mb-10 mt-40 flex-1 items-center justify-center px-4">
 				{/* Camera Preview */}
-				<View className="w-full overflow-hidden rounded-3xl bg-black mb-5">
+				<View className="w-full h-3/4 overflow-hidden rounded-3xl bg-black mb-5">
 					<CameraView
 						facing="front"
 						className="flex-1"
@@ -81,8 +81,7 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
 
 				{/* Description */}
 				<Text className="mb-20 text-left text-t2 leading-6 text-light-text-500">
-					Поверните телефон на 90°, снизьте наклона его в стену, чтобы камера хорошо
-					распознала движения
+					Поставьте смартфон на пол, слегка наклонив его к стене, чтобы камера хорошо фиксировала движения
 				</Text>
 
 			</View>
