@@ -23,7 +23,7 @@ export const TrainingTags: React.FC<TrainingTagsProps> = ({
 				<Text className={`text-t4 text-white ${icon1 ? 'ml-1' : ''}`}>{title1}</Text>
 			</View>
 			<View
-				className={`rounded-lg bg-gray-500/50 px-3 py-1 ${icon2 ? 'flex-row items-center' : ''}`}
+				className={`rounded-full bg-gray-500/50 px-3 py-1 ${icon2 ? 'flex-row items-center' : ''}`}
 			>
 				{icon2 && icon2}
 				<Text className={`text-t4 text-white ${icon2 ? 'ml-1' : ''}`}>{title2}</Text>

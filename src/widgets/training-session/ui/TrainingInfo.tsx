@@ -101,10 +101,11 @@ export const TrainingInfo = () => {
 					</TouchableOpacity>
 				</View>
 
+				<View className="px-1" >
 				{/* Black Block with Text */}
 				<View style={{ marginTop: -180 }}>
 					{/* Tags */}
-					<View className="mb-2 rounded-3xl bg-black px-6 pb-6 pt-6">
+					<View className="mb-2 rounded-[35px] bg-black px-6 pb-6 pt-6">
 						<TrainingTags
 							icon1={
 								<MaterialCommunityIcons
@@ -129,33 +130,35 @@ export const TrainingInfo = () => {
 						</Text>
 
 						{/* Switch Section */}
-						<View className="flex-row items-center justify-between">
-							<Text className="text-t3 text-white">Обучение перед упражнением</Text>
+						<View className="flex-row items-center ">
+							<Text className="text-t3 text-white mr-6">Обучение перед упражнением</Text>
 							<Switch checked={showTutorial} onChange={setShowTutorial} />
 						</View>
 					</View>
 				</View>
 
 				{/* Equipment Section */}
-				<View className="mb-2 rounded-3xl bg-black px-6 pb-6 pt-6">
-					<Text className="mb-4 text-t1.1 text-white">Инвентарь</Text>
-					<ScrollView
-						horizontal
-						showsHorizontalScrollIndicator={false}
-						contentContainerStyle={{ gap: 16 }}
-					>
-						{training?.inventory.map((image, index) => (
-							<Image
-								key={index}
-								source={equipmentImages[image]}
-								className="h-16 w-16"
-								resizeMode="contain"
-							/>
-						))}
-					</ScrollView>
-				</View>
+					{
+						training?.inventory && training?.inventory.length > 0 && 		<View className="mb-2 rounded-[35px] bg-black px-6 pb-6 pt-6">
+							<Text className="mb-4 text-t1.1 text-white">Инвентарь</Text>
+							<ScrollView
+								horizontal
+								showsHorizontalScrollIndicator={false}
+								contentContainerStyle={{ gap: 16 }}
+							>
+								{training?.inventory.map((image, index) => (
+									<Image
+										key={index}
+										source={equipmentImages[image]}
+										className="h-16 w-16"
+										resizeMode="contain"
+									/>
+								))}
+							</ScrollView>
+						</View>
+					}
 
-				<View className="rounded-3xl bg-black px-6 pb-20 pt-6">
+				<View className="rounded-[35px] bg-black px-6 pb-20 pt-6">
 					<Text className="mb-4 text-t1.1 text-white">
 						{training?.exercises.length} упражнения
 					</Text>
@@ -163,6 +166,7 @@ export const TrainingInfo = () => {
 					{training?.exercises.map((exercise) => (
 						<ExerciseInfoCard key={exercise.id} exercise={exercise} />
 					))}
+				</View>
 				</View>
 			</ScrollView>
 
