@@ -38,6 +38,32 @@ make start | make check | make clean | make doctor
 - Auth: user_id и токены в SecureStore (`shared/lib/auth`); без user_id запросы профиля не стартуют.
 - Аватар: `useUploadAvatar` — presign → PUT в бакет по presign URL → финальный CDN `https://storage.yandexcloud.net/fitdb/{fileName}` → `updateUser`; кэш профиля `['profile', userId]` обновляется и инвалидируется.
 
+## Онбординг перед тренировкой
+
+Флоу отвечает за проверку условий перед стартом тренировки и живёт в `src/widgets/training-session/ui/OnboardingFlow.tsx`.
+
+1. **Проверка звука** (`sound`):
+   - Экран `SoundCheckScreen`.
+   - Пользователь подтверждает, что звук включён.
+2. **Разрешение камеры** (`camera`):
+   - Экран `CameraPermissionScreen`.
+   - Запрашивается доступ к камере, без него флоу не продолжает.
+3. **Поворот телефона (если нужно)** (`rotate`):
+   - Экран `RotatePhoneScreen`.
+   - Если первое упражнение горизонтальное (`currentExerciseDetail.is_horizontal`), просим повернуть телефон.
+4. **Позиционирование телефона** (`position`):
+   - Экран `PhonePositionScreen`.
+   - Для вертикальных упражнений: ставим телефон вертикально, камера направлена на пользователя.
+5. **Калибровка уровня** (`gyroscope`):
+   - Экран `GyroscopeLevelScreen`.
+   - Читаем сенсоры, нормализуем оси по ориентации, отображаем угол наклона.
+   - Условие готовности: угол близок к `0°` (|angle| ≤ 5).
+6. **Старт тренировки**:
+   - `resume()` переводит тренировку из `onboarding` в `running`.
+
+Порядок шагов:
+`sound` → `camera` → (`rotate` | `position`) → `gyroscope` → `running`
+
 ## Выполнение упражнения
 
 Процесс выполнения упражнения управляется через стейт-машину в `useTrainingFlow` и визуализируется в `ExerciseFlow`. Основные этапы:

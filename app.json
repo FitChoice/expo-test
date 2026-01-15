@@ -15,6 +15,7 @@
 				"NSCameraUsageDescription": "Нужно для сканирования QR-кодов и загрузки фото",
 				"NSMicrophoneUsageDescription": "Для записи голосовых сообщений в чате с ИИ-тренером",
 				"NSPhotoLibraryUsageDescription": "Для отправки фото и видео в чат с ИИ-тренером",
+				"NSMotionUsageDescription": "Нужно для определения положения телефона во время тренировки",
 				"NSUserNotificationsUsageDescription": "Мы будем напоминать о тренировках, чтобы вы ничего не пропустили",
 				"UILaunchStoryboardName": "SplashScreen"
 			}

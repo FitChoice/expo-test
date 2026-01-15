@@ -61,7 +61,7 @@ export function ExerciseExecutionScreen({
 	}, [telemetry?.reps, setCurrentReps])
 
 	useEffect(() => {
-		if (telemetry?.reps === exercise.reps && exercise.reps > 0) {
+		if (Number(telemetry?.reps) >= exercise.reps && exercise.reps > 0 ) {
 			const timeout = setTimeout(() => {
 				onComplete()
 			}, 2000)

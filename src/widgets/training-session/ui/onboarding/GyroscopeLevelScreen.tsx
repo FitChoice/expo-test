@@ -3,17 +3,16 @@
  * Четвертый шаг onboarding - калибровка уровня
  * Показывает текущий угол наклона телефона (вперёд-назад) и подсказку выровнять его
  */
-//import * as ScreenOrientation from 'expo-screen-orientation'
+import * as ScreenOrientation from 'expo-screen-orientation'
 import {
 	View,
 	Text,
 	Animated,
 	type StyleProp,
 	type ViewStyle,
-	Platform,
 } from 'react-native'
-import { Accelerometer } from 'expo-sensors'
-import { useState, useEffect, useRef } from 'react'
+import { Accelerometer, DeviceMotion } from 'expo-sensors'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useIsFocused } from '@react-navigation/native'
 import { Button } from '@/shared/ui'
 import { DotsProgress } from '@/shared/ui/DotsProgress'
@@ -21,7 +20,47 @@ import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
 
-const IS_IOS = Platform.OS === 'ios'
+type MotionOrientation = 0 | 90 | 180 | -90
+
+const toMotionOrientation = (
+	orientation: ScreenOrientation.Orientation | null
+): MotionOrientation | null => {
+	switch (orientation) {
+		case ScreenOrientation.Orientation.PORTRAIT_UP:
+			return 0
+		case ScreenOrientation.Orientation.LANDSCAPE_RIGHT:
+			return 90
+		case ScreenOrientation.Orientation.PORTRAIT_DOWN:
+			return 180
+		case ScreenOrientation.Orientation.LANDSCAPE_LEFT:
+			return -90
+		default:
+			return null
+	}
+}
+
+const normalizeToPortrait = (
+	x: number,
+	y: number,
+	z: number,
+	orientation: MotionOrientation | null
+) => {
+	if (orientation === 90) {
+		return { x: y, y: -x, z }
+	}
+	if (orientation === -90) {
+		return { x: -y, y: x, z }
+	}
+	if (orientation === 180) {
+		return { x: -x, y: -y, z }
+	}
+	return { x, y, z }
+}
+
+const computeTiltAngle = (x: number, y: number, z: number) => {
+	const angleRad = Math.atan2(z, Math.abs(y))
+	return Math.round((angleRad * 180) / Math.PI)
+}
 
 interface GyroscopeLevelScreenProps {
 	onNext: () => void
@@ -32,6 +71,7 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
 	const [angle, setAngle] = useState(0)
 	const [isCalibrated, setIsCalibrated] = useState(false)
 	const [isAvailable, setIsAvailable] = useState<boolean | null>(null)
+	const orientationRef = useRef<ScreenOrientation.Orientation | null>(null)
 
 	// Анимация поворота — остаётся в Animated (натив)
 	const barRotation = useRef(new Animated.Value(0)).current
@@ -46,8 +86,30 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
 
 	const isFocused = useIsFocused()
 
+	const updateCalibration = useCallback((angleDeg: number) => {
+		const isAligned = Math.abs(angleDeg) <= 5
+
+		setAngle(angleDeg)
+
+		Animated.timing(barRotation, {
+			toValue: angleDeg,
+			duration: 100,
+			useNativeDriver: true,
+		}).start()
+
+		setIsCalibrated(isAligned)
+
+		setBarStyle({
+			width: isVertical ? 170 : 450,
+			height: 4,
+			borderRadius: 2,
+			backgroundColor: isAligned ? '#C5F680' : '#FFFFFF',
+		})
+	}, [barRotation, isVertical])
+
 	useEffect(() => {
 		let subscription: { remove: () => void } | null = null
+		let orientationSubscription: { remove: () => void } | null = null
 		let keepAwakeActivated = false
 
 		const init = async () => {
@@ -55,60 +117,43 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
 				await activateKeepAwakeAsync()
 				keepAwakeActivated = true
 
+				const deviceMotionAvailable = await DeviceMotion.isAvailableAsync()
+				if (deviceMotionAvailable && isFocused) {
+					setIsAvailable(true)
+					DeviceMotion.setUpdateInterval(100)
+					subscription = DeviceMotion.addListener((measurement) => {
+						const accel = measurement.accelerationIncludingGravity
+						if (!accel) return
+
+						const motionOrientation =
+							typeof measurement.orientation === 'number'
+								? (measurement.orientation as MotionOrientation)
+								: null
+						const oriented = normalizeToPortrait(
+							accel.x,
+							accel.y,
+							accel.z,
+							motionOrientation
+						)
+						updateCalibration(computeTiltAngle(oriented.x, oriented.y, oriented.z))
+					})
+					return
+				}
+
 				const available = await Accelerometer.isAvailableAsync()
 				setIsAvailable(available)
 				if (!available || !isFocused) return
 
+				orientationRef.current = await ScreenOrientation.getOrientationAsync()
+				orientationSubscription = ScreenOrientation.addOrientationChangeListener((event) => {
+					orientationRef.current = event.orientationInfo.orientation
+				})
+
 				Accelerometer.setUpdateInterval(100)
-
 				subscription = Accelerometer.addListener(({ x, y, z }) => {
-					let angleDeg: number
-					let isAligned: boolean
-
-					if (isVertical) {
-						// Угол наклона вперед-назад, когда телефон стоит вертикально
-						// y ≈ -1 когда телефон вертикален, z показывает наклон вперед/назад
-						const angleRad = Math.atan2(z, Math.abs(y))
-						angleDeg = Math.round((angleRad * 180) / Math.PI)
-
-						// Телефон вертикален, когда angleDeg близок к 0
-						isAligned = Math.abs(angleDeg) <= 5
-					} else {
-						// Для горизонтального положения: проверяем перпендикулярность экрана к поверхности
-						// Когда экран перпендикулярен поверхности, телефон повернут на 90° относительно горизонтали
-						// Используем x и z для расчета угла наклона в горизонтальной плоскости
-						const angleRad = Math.atan2(x, Math.abs(z))
-						angleDeg = Math.round((angleRad * 180) / Math.PI)
-
-						// Экран перпендикулярен поверхности, когда угол близок к 90° или -90°
-						// Проверяем отклонение от 90° (или -90°)
-						const deviationFrom90 = Math.abs(Math.abs(angleDeg) - 90)
-						isAligned = deviationFrom90 <= 5
-					}
-
-					setAngle(angleDeg)
-
-					// Анимация полоски
-					// Для горизонтального положения нормализуем угол, чтобы полоска была горизонтальной при 0°
-					const normalizedAngle = isVertical
-						? angleDeg
-						: angleDeg >= 0
-							? angleDeg - 90
-							: angleDeg + 90
-					Animated.timing(barRotation, {
-						toValue: normalizedAngle,
-						duration: 100,
-						useNativeDriver: true,
-					}).start()
-
-					setIsCalibrated(isAligned)
-
-					setBarStyle({
-						width: isVertical ? 170 : 450,
-						height: 4,
-						borderRadius: 2,
-						backgroundColor: isAligned ? '#C5F680' : '#FFFFFF',
-					})
+					const motionOrientation = toMotionOrientation(orientationRef.current)
+					const oriented = normalizeToPortrait(x, y, z, motionOrientation)
+					updateCalibration(computeTiltAngle(oriented.x, oriented.y, oriented.z))
 				})
 			} catch (error) {
 				setIsAvailable(false)
@@ -120,11 +165,14 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
 
 		return () => {
 			if (subscription) subscription.remove()
+			if (orientationSubscription) {
+				ScreenOrientation.removeOrientationChangeListener(orientationSubscription)
+			}
 			if (keepAwakeActivated) {
 				deactivateKeepAwake()
 			}
 		}
-	}, [isFocused, isVertical])
+	}, [isFocused, isVertical, updateCalibration])
 
 	const handleStop = () => {
 		router.back()
@@ -188,7 +236,7 @@ export function GyroscopeLevelScreen({ onNext, isVertical }: GyroscopeLevelScree
 				<Text
 					className={`text-center text-h1 ${isAvailable !== false && !isCalibrated ? 'text-light-text-100' : 'text-brand-green-500'} ${isVertical ? 'mb-12 mt-4' : ''}`}
 				>
-					{isVertical ? angle : IS_IOS ? angle + 180 : angle - 90}°
+				{angle}°
 				</Text>
 			</View>
 

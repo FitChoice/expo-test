@@ -19,11 +19,11 @@ export const ExerciseInfoCard: React.FC<ExerciseInfoCardProps> = ({ exercise }) 
 				</View>
 
 				<View className="flex-1">
-					<View className="flex-row items-center gap-3">
+					<View className="flex-row  gap-3">
 						<Text className="mb-4 text-pretty text-t2-bold text-white">{name}</Text>
 						{!!progress && (
-							<View className="h-5 w-5 rounded-full bg-brand-green-500">
-								<FontAwesome6 name="check" size={4} color="black" />
+							<View className="h-5 w-5 rounded-full bg-brand-green-500 items-center justify-center ">
+								<FontAwesome6 name="check" size={10} color="black" />
 							</View>
 						)}
 					</View>
