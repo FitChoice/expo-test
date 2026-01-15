@@ -6,7 +6,6 @@ import {
 	TouchableOpacity,
 	StyleSheet,
 	useWindowDimensions,
-	Platform,
 } from 'react-native'
 import { router } from 'expo-router'
 import { Switch, TrainingTags, ExerciseInfoCard } from '@/shared/ui'
@@ -18,7 +17,6 @@ import { BottomActionBtn } from '@/shared/ui/BottomActionBtn/BottomActionBtn'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { GradientBg } from '@/shared/ui/GradientBG'
 
-const IS_ANDROID = Platform.OS === 'android'
 const trainingInfoBanner = require('@/assets/images/training_info_banner.png')
 
 // Динамический импорт картинок оборудования

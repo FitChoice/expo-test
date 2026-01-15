@@ -3,7 +3,7 @@ import { ControlButton } from '@/shared/ui'
 import AntDesign from '@expo/vector-icons/AntDesign'
 import Entypo from '@expo/vector-icons/Entypo'
 import React, { type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { router } from 'expo-router'
 import type { VideoPlayer } from 'expo-video'
 import {
@@ -13,11 +13,15 @@ import {
 } from '@/shared/hooks/useVideoPlayerContext'
 
 import { PauseModal, StopModal } from '../modals'
+import {useWindowDimensions} from 'react-native';
 
 /**
  * Training-session specific wrapper.
  * NOTE: This is NOT shared UI because it depends on training-session modals.
  */
+
+const IS_ANDROID = Platform.OS === 'android'
+
 export const ExerciseWithCounterWrapper = ({
 	children,
 	isShowActionButtons = true,
@@ -31,6 +35,11 @@ export const ExerciseWithCounterWrapper = ({
 	const timerRef = useRef<number | null>(null)
 	const videoPlayersRef = useRef<Set<VideoPlayer>>(new Set())
 	const pausableHandlersRef = useRef<Set<PauseResumeHandler>>(new Set())
+
+
+
+	const {width, height} = useWindowDimensions();
+	const isPortrait = height >= width;
 
 	const pauseAll = useCallback(() => {
 		videoPlayersRef.current.forEach((player) => {
@@ -73,7 +82,7 @@ export const ExerciseWithCounterWrapper = ({
 		if (timerRef.current !== null) {
 			clearInterval(timerRef.current)
 			timerRef.current = null
-			setIsPaused(true)
+			//setIsPaused(true)
 		}
 		pauseAll()
 	}, [pauseAll])
@@ -137,7 +146,7 @@ export const ExerciseWithCounterWrapper = ({
 
 				{/* Control Buttons */}
 				{isShowActionButtons && (
-					<View className={'absolute right-4 top-10 z-10 flex-row justify-end gap-2'}>
+					<View className={`absolute top-10 z-10 flex-row justify-end gap-2 right-${IS_ANDROID && !isPortrait ? 14 : 4 }`}>
 						<ControlButton
 							icon={<AntDesign name="pause" size={24} color="#FFFFFF" />}
 							onPress={pauseTimer}

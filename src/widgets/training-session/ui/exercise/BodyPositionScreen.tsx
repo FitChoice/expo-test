@@ -1,5 +1,10 @@
 import { PoseCamera } from '@/widgets/pose-camera'
-import { View, Text, Dimensions, useWindowDimensions } from 'react-native'
+import {
+	View,
+	Text,
+	Dimensions,
+	useWindowDimensions,
+} from 'react-native'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type * as posedetection from '@tensorflow-models/pose-detection'
 import * as ScreenOrientation from 'expo-screen-orientation'
@@ -21,6 +26,7 @@ type BodyPositionScreenProps = {
 	/** Для side_switch: целевая сторона (left/right) — показывает боковой силуэт */
 	targetSide?: 'left' | 'right'
 }
+
 
 export const BodyPositionScreen = ({
 	isVertical,
@@ -82,10 +88,11 @@ export const BodyPositionScreen = ({
 
 	return (
 		<View className="flex-1 bg-transparent">
-			<BackgroundLayoutNoSidePadding>
+			<BackgroundLayoutNoSidePadding edges={['bottom', 'left', 'right']} hasSidePadding={false}>
 				<View
 					style={{
 						height: isVertical ? CAM_PREVIEW_HEIGHT : '100%',
+						width: '100%',
 						backgroundColor: 'transparent',
 						borderRadius: 24,
 						overflow: 'hidden',
@@ -121,18 +128,24 @@ export const BodyPositionScreen = ({
 				</View>
 
 				{/* Body Silhouette Overlay */}
-				<View className="absolute inset-0 items-center justify-start pt-20" style={{ pointerEvents: 'none' }}>
+				<View className="absolute inset-0 items-center justify-start" style={{ pointerEvents: 'none', top: isVertical ? 0 : '-40%' }}>
 					{targetSide ? (
 						// Боковой силуэт для side_switch с flip для левой стороны
-						<BodySilhouetteSide
-							style={targetSide === 'left' ? { transform: [{ scaleX: -1 }] } : undefined}
-							stroke={showSuccess ? '#8BC34A' : 'white'}
-							fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
+							<View style={{ transform: isVertical ? [] : [{ rotate: '90deg' }] }}>
+						   <BodySilhouetteSide
+								 width={650}
+								 height={650}
+								style={targetSide === 'left' ? { transform: [{ scaleX: -1 }] } : undefined}
+								stroke={showSuccess ? '#8BC34A' : 'white'}
+								fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
 						/>
+							</View>
 					) : (
 						// Стандартный силуэт с поворотом для горизонтальной ориентации
 						<View style={{ transform: isVertical ? [] : [{ rotate: '90deg' }] }}>
 							<BodySilhouetteDefault
+
+								height={CAM_PREVIEW_HEIGHT}
 								stroke={showSuccess ? '#8BC34A' : 'white'}
 								fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
 							/>
@@ -140,12 +153,12 @@ export const BodyPositionScreen = ({
 					)}
 				</View>
 
-				<View className="pl-2 pt-10">
-					<Text className={titleClassName ?? 'mb-2 text-left text-h2 text-light-text-100'}>
+				<View className={`${isVertical ? 'mt-10' : 'absolute  bottom-10  left-1/2 -translate-x-1/2'}`}>
+					<Text className={titleClassName ?? 'mb-2 text-center text-h2 text-light-text-100'}>
 						{title}
 					</Text>
 					{subtitle && (
-						<Text className={subtitleClassName ?? 'text-left text-t2 text-light-text-200'}>
+						<Text className={subtitleClassName ?? 'text-center text-t2 text-light-text-200'}>
 							{subtitle}
 						</Text>
 					)}
