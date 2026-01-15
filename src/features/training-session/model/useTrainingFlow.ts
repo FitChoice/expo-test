@@ -26,18 +26,20 @@ export function useTrainingFlow({
 	const averageFormQuality = useTrainingStore((state) => state.averageFormQuality)
 	const elapsedTime = useTrainingStore((state) => state.elapsedTime)
 
-	const entryStep: ExerciseStep = showTutorial ? 'theory' : 'position'
+	const setCurrentSide = useTrainingStore((state) => state.setCurrentSide)
+	const currentReps = useTrainingStore((state) => state.currentReps)
+	const setCurrentReps = useTrainingStore((state) => state.setCurrentReps)
+	const setCurrentSetStore = useTrainingStore((state) => state.setCurrentSet)
+	const nextSet = useTrainingStore((state) => state.nextSet)
 
-	const [currentStep, setCurrentStep] = useState<ExerciseStep>(entryStep)
+	const [currentStep, setCurrentStep] = useState<ExerciseStep>('rotate')
 	const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
-	const [restType, setRestType] = useState<'rep' | 'set' | 'exercise'>('set')
-	const [restPhase, setRestPhase] = useState<'main' | 'practice'>('main')
+	const [restType, setRestType] = useState<'set' | 'exercise'>('set')
 	const [setNumber, setSetNumber] = useState(0)
 	const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
-	const [shouldSwitchSide, setShouldSwitchSide] = useState(false)
 
-	// Ref для хранения целевого шага после ротации (избегаем closure issues)
-	const postRotateStepRef = useRef<ExerciseStep | null>(null)
+	// Накопленные повторы для текущего упражнения (включая все сеты и стороны)
+	const accumulatedExerciseReps = useRef(0)
 
 	const currentExercise = currentExerciseDetail ?? (exercises.length > 0 ? exercises[currentExerciseIndex] : null)
 	const isLastExercise = currentExerciseIndex === exercises.length - 1
@@ -50,50 +52,51 @@ export function useTrainingFlow({
 
 	const resetExerciseProgress = useCallback(() => {
 		setSetNumber(0)
+		setCurrentSetStore(0)
 		setCurrentSideState('right')
+		setCurrentSide('right')
 		setRestType('set')
-		setRestPhase('main')
-		setShouldSwitchSide(false)
-	}, [])
+	}, [setCurrentSetStore, setCurrentSide])
 
-	const startExercise = useCallback(async (exercise: ExerciseInfoResponse, nextStep: ExerciseStep) => {
+	const startExercise = useCallback(async (exercise: ExerciseInfoResponse) => {
 		const exerciseIsVertical = !exercise.is_horizontal
 		try {
 			const currentOrientation = await ScreenOrientation.getOrientationAsync()
 			const isPortrait =
 				currentOrientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
 				currentOrientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
-			const isLandscape =
-				currentOrientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
-				currentOrientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
 
-			const needsRotate = (exerciseIsVertical && !isPortrait) || (!exerciseIsVertical && !isLandscape)
+			const needsRotate = exerciseIsVertical ? !isPortrait : !exerciseIsVertical && isPortrait
 
 			if (needsRotate) {
-				postRotateStepRef.current = nextStep // Сохраняем целевой шаг
 				setCurrentStep('rotate')
 				return
 			}
-			postRotateStepRef.current = null
-			setCurrentStep(nextStep)
+			
+			if (showTutorial) {
+				setCurrentStep('theory')
+			} else {
+				setCurrentStep('position')
+			}
 		} catch {
-			postRotateStepRef.current = null
-			setCurrentStep(nextStep)
+			setCurrentStep(showTutorial ? 'theory' : 'position')
 		}
-	}, [])
+	}, [showTutorial])
 
 	useEffect(() => {
 		if (!currentExercise) return
 		resetExerciseProgress()
-		void startExercise(currentExercise, entryStep)
-	}, [currentExercise?.id, entryStep, resetExerciseProgress, startExercise])
+		void startExercise(currentExercise)
+	}, [currentExercise?.id, resetExerciseProgress, startExercise])
 
-	// Handler для завершения ротации — использует ref для избежания stale closure
+	// Handler для завершения ротации
 	const handleRotateComplete = useCallback(() => {
-		const targetStep = postRotateStepRef.current ?? entryStep
-		postRotateStepRef.current = null
-		setCurrentStep(targetStep)
-	}, [entryStep])
+		if (showTutorial) {
+			setCurrentStep('theory')
+		} else {
+			setCurrentStep('position')
+		}
+	}, [showTutorial])
 
 	// Handler для завершения теории — переход к позиционированию
 	const handleTheoryComplete = useCallback(() => {
@@ -114,15 +117,14 @@ export function useTrainingFlow({
 		training_id: training?.id ?? 0,
 	}), [activeTime, caloriesBurned, elapsedTime, averageFormQuality, training?.id])
 
-	const sendExerciseCompletion = useCallback(async (exercise: ExerciseInfoResponse, isFinal: boolean) => {
-		const totalSides = exercise.is_mirror ? 2 : 1
-		const totalReps = (exercise.reps ?? 0) * (exercise.sets ?? 1) * totalSides
+	const completeSet = useTrainingStore((state) => state.completeSet)
 
+	const sendExerciseCompletion = useCallback(async (exercise: ExerciseInfoResponse, isFinal: boolean) => {
 		const payload: ExecuteExerciseInput = {
 			id: exercise.id,
 			training_id: training?.id ?? 0,
-			reps: totalReps,
-			quality: 100,
+			reps: accumulatedExerciseReps.current,
+			quality: 100, // TODO: Получать реальное качество из Engine
 			recorded_errors: [],
 		}
 
@@ -140,55 +142,65 @@ export function useTrainingFlow({
 		const nextIndex = currentExerciseIndex + 1
 		if (!exercises[nextIndex]) return
 		resetExerciseProgress()
+		accumulatedExerciseReps.current = 0 // Сброс для нового упражнения
 		setCurrentExerciseIndex(nextIndex)
 		setCurrentExerciseId(exercises[nextIndex].id)
 	}, [currentExerciseIndex, exercises, resetExerciseProgress, setCurrentExerciseId])
 
-	const setCurrentSide = useTrainingStore((state) => state.setCurrentSide)
-	const setCurrentReps = useTrainingStore((state) => state.setCurrentReps)
-	const nextSet = useTrainingStore((state) => state.nextSet)
-
 	const handleExecutionComplete = useCallback(() => {
 		if (!currentExercise) return
 
+		const newSetNumber = setNumber + 1
+		
+		// Логируем завершение сета
+		const repsDone = currentReps
+		accumulatedExerciseReps.current += repsDone
+		
+		completeSet({
+			exerciseIndex: currentExerciseIndex,
+			setNumber: setNumber,
+			reps: repsDone,
+			formQuality: 100,
+			elapsedTime: 0,
+			errors: [],
+		})
+
 		if (requiresSideSwitch) {
-			if (currentSideState === 'right') {
-				setCurrentSideState('left')
-				setCurrentSide('left')
-				setCurrentReps(0) // Явный сброс счётчика перед сменой стороны
-				setRestType('rep')
-				setShouldSwitchSide(true)
-				setCurrentStep('rest')
-				return
-			}
-
-			const newSetNumber = setNumber + 1
-			setSetNumber(newSetNumber)
-			nextSet()
-			setCurrentSideState('right')
-			setCurrentSide('right')
-
+			// Логика для упражнений с зеркалированием сторон
 			if (newSetNumber < setsPerExercise) {
+				// Ещё остались сеты для текущей стороны
+				setSetNumber(newSetNumber)
+				nextSet()
 				setRestType('set')
-				setShouldSwitchSide(false)
 				setCurrentStep('rest')
 			} else {
-				void sendExerciseCompletion(currentExercise, isLastExercise)
-				if (!isLastExercise) {
-					setRestType('exercise')
-					setCurrentStep('rest')
+				// Все сеты для текущей стороны выполнены
+				if (currentSideState === 'right') {
+					// Закончили правую сторону, переходим к смене на левую
+					setCurrentSideState('left')
+					setCurrentSide('left')
+					setCurrentReps(0)
+					setSetNumber(0)
+					setCurrentSetStore(0)
+					setCurrentStep('side_switch')
+				} else {
+					// Закончили левую сторону (т.е. всё упражнение)
+					void sendExerciseCompletion(currentExercise, isLastExercise)
+					if (!isLastExercise) {
+						setRestType('exercise')
+						setCurrentStep('rest')
+					}
 				}
 			}
 			return
 		}
 
-		const newSetNumber = setNumber + 1
-		setSetNumber(newSetNumber)
-		nextSet()
-		setCurrentSideState('right')
-		setCurrentSide('right')
-
+		// Логика для обычных упражнений (без сторон)
 		if (newSetNumber < setsPerExercise) {
+			setSetNumber(newSetNumber)
+			nextSet()
+			setCurrentSideState('right')
+			setCurrentSide('right')
 			setRestType('set')
 			setCurrentStep('rest')
 		} else {
@@ -198,19 +210,9 @@ export function useTrainingFlow({
 				setCurrentStep('rest')
 			}
 		}
-	}, [currentExercise, requiresSideSwitch, currentSideState, setNumber, setsPerExercise, sendExerciseCompletion, isLastExercise, setCurrentSide, setCurrentReps, nextSet])
+	}, [currentExercise, currentReps, completeSet, currentExerciseIndex, setNumber, requiresSideSwitch, currentSideState, setsPerExercise, nextSet, setCurrentSide, setCurrentReps, setCurrentSetStore, sendExerciseCompletion, isLastExercise])
 
 	const handleRestComplete = useCallback(() => {
-		if (restType === 'rep') {
-			if (requiresSideSwitch && shouldSwitchSide) {
-				setShouldSwitchSide(false)
-				setCurrentStep('side_switch')
-				return
-			}
-			setCurrentStep('execution')
-			return
-		}
-
 		if (restType === 'set') {
 			setCurrentStep('position')
 			return
@@ -219,18 +221,7 @@ export function useTrainingFlow({
 		if (restType === 'exercise') {
 			void proceedToNextExercise()
 		}
-	}, [restType, requiresSideSwitch, shouldSwitchSide, proceedToNextExercise])
-
-	const handleRestPhaseComplete = useCallback(() => {
-		const baseRestDuration = restType === 'rep' ? 5 : restType === 'set' ? (currentExercise?.rest_between_sets ?? 15) : (currentExercise?.rest_after_exercise ?? 30)
-		const hasPracticePhase = restType === 'rep' && baseRestDuration > 10
-
-		if (hasPracticePhase && restPhase === 'main') {
-			setRestPhase('practice')
-			return
-		}
-		handleRestComplete()
-	}, [restType, currentExercise, restPhase, handleRestComplete])
+	}, [restType, proceedToNextExercise])
 
 	const displayCurrentSet = Math.max(
 		1,
@@ -247,39 +238,34 @@ export function useTrainingFlow({
 
 	const baseRestDuration = useMemo(() => {
 		if (!currentExercise) return 15
-		return restType === 'rep'
-			? 5
-			: restType === 'set'
-				? (currentExercise.rest_between_sets ?? 15)
-				: (currentExercise.rest_after_exercise ?? 30)
+		return restType === 'set'
+			? (currentExercise.rest_between_sets ?? 15)
+			: (currentExercise.rest_after_exercise ?? 30)
 	}, [restType, currentExercise])
-
-	const hasPracticePhase = restType === 'rep' && baseRestDuration > 10
-	const mainRestDuration = hasPracticePhase ? baseRestDuration - 10 : baseRestDuration
 
 	const executionKey = `${currentExercise?.id}-${setNumber}-${currentSideState}`
 
-	// Handler для завершения side_switch — сбрасывает счётчик и переходит к execution
+	// Handler для завершения side_switch — сбрасывает счётчик и переходит к position
 	const handleSideSwitchComplete = useCallback(() => {
-		setCurrentReps(0) // Гарантированный сброс перед execution на второй стороне
-		setCurrentStep('execution')
-	}, [setCurrentReps])
+		setCurrentReps(0)
+		setSetNumber(0)
+		setCurrentSetStore(0)
+		setCurrentStep('position')
+	}, [setCurrentReps, setCurrentSetStore])
 
 	return {
 		currentStep,
 		currentExercise,
 		currentSideState,
-		restPhase,
 		displayCurrentSet,
 		practiceVideoUrl,
-		mainRestDuration,
+		baseRestDuration,
 		executionKey,
 		handleRotateComplete,
 		handleTheoryComplete,
 		handlePositionComplete,
 		handleExecutionComplete,
 		handleRestComplete,
-		handleRestPhaseComplete,
 		handleSideSwitchComplete,
 	}
 }

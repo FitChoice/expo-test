@@ -39,17 +39,15 @@ export function ExerciseFlow({
 		currentStep,
 		currentExercise,
 		currentSideState,
-		restPhase,
 		displayCurrentSet,
 		practiceVideoUrl,
-		mainRestDuration,
+		baseRestDuration,
 		executionKey,
 		handleRotateComplete,
 		handleTheoryComplete,
 		handlePositionComplete,
 		handleExecutionComplete,
 		handleRestComplete,
-		handleRestPhaseComplete,
 		handleSideSwitchComplete,
 	} = useTrainingFlow({
 		exercises,
@@ -68,15 +66,13 @@ export function ExerciseFlow({
 			currentSet={displayCurrentSet}
 			currentSide={currentSideState}
 			executionKey={executionKey}
-			restPhase={restPhase}
-			mainRestDuration={mainRestDuration}
+			restDuration={baseRestDuration}
 			practiceVideoUrl={practiceVideoUrl}
 			onRotateComplete={handleRotateComplete}
 			onCountdownComplete={handleTheoryComplete}
 			onPositionComplete={handlePositionComplete}
 			onExecutionComplete={handleExecutionComplete}
 			onSideSwitchComplete={handleSideSwitchComplete}
-			onRestPhaseComplete={handleRestPhaseComplete}
 			onRestComplete={handleRestComplete}
 		/>
 	)

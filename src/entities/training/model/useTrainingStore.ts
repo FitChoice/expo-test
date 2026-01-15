@@ -62,6 +62,7 @@ interface TrainingState {
 	completeSet: (setData: SetData) => void
 	finishTraining: () => void
 	setCurrentReps: (reps: number) => void
+	setCurrentSet: (set: number) => void
 	setCurrentSide: (side: ExerciseSide | null) => void
 	setExerciseDetail: (detail: ExerciseInfoResponse | null) => void
 	setExerciseLoading: (loading: boolean) => void
@@ -174,6 +175,10 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
 		set({ currentReps: reps })
 	},
 
+	setCurrentSet: (currentSet) => {
+		set({ currentSet })
+	},
+
 	setCurrentSide: (side) => {
 		set({ currentSide: side })
 	},
@@ -211,25 +216,7 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
 	 * Move to next exercise
 	 */
 	nextExercise: () => {
-		// const { training, currentExerciseIndex, completedExercises } = get()
-		// if (!training) return
-		//
-		// const newIndex = currentExerciseIndex + 1
-		//
-		// const exerciseSide = training.exercises[newIndex]?.side || 'single'
-		// set({
-		//     currentExerciseIndex: newIndex,
-		//     currentSet: 1,
-		//     currentReps: 0,
-		//     currentSide:
-		// exerciseSide === 'single' ? null : (exerciseSide as ExerciseSide | null),
-		//     completedExercises: [...completedExercises, currentExerciseIndex],
-		// })
-		//
-		// // // Check if training is finished
-		// // if (newIndex >= training.exercises.length) {
-		// //     set({ status: 'finished' })
-		// // }
+		// Clean up or implement if needed
 	},
 
 	/**

@@ -20,8 +20,7 @@ type ExerciseFlowViewProps = {
 	currentSet: number
 	currentSide: 'left' | 'right'
 	executionKey: string
-	restPhase: 'main' | 'practice'
-	mainRestDuration: number
+	restDuration: number
 	practiceVideoUrl: string | null
 
 	onRotateComplete: () => void
@@ -29,7 +28,6 @@ type ExerciseFlowViewProps = {
 	onPositionComplete: () => void
 	onExecutionComplete: () => void
 	onSideSwitchComplete: () => void
-	onRestPhaseComplete: () => void
 	onRestComplete: () => void
 }
 
@@ -41,15 +39,13 @@ export function ExerciseFlowView({
 	currentSet,
 	currentSide,
 	executionKey,
-	restPhase,
-	mainRestDuration,
+	restDuration,
 	practiceVideoUrl,
 	onRotateComplete,
 	onCountdownComplete,
 	onPositionComplete,
 	onExecutionComplete,
 	onSideSwitchComplete,
-	onRestPhaseComplete,
 	onRestComplete,
 }: ExerciseFlowViewProps) {
 	// Action buttons should be hidden during rest to match existing design
@@ -106,26 +102,12 @@ export function ExerciseFlowView({
 					/>
 				)}
 				{currentStep === 'rest' && (
-					<>
-						{restPhase === 'main' && (
-							<RestScreen
-								onComplete={onRestPhaseComplete}
-								duration={mainRestDuration}
-								exercise={exercise}
-								currentSet={currentSet}
-							/>
-						)}
-						{restPhase === 'practice' && (
-							<ExerciseTheoryScreen
-								exercise={exercise}
-								currentSet={currentSet}
-								onComplete={onRestComplete}
-								isVertical
-								videoUrlOverride={practiceVideoUrl ?? exercise.video_practice}
-								durationOverrideSeconds={10}
-							/>
-						)}
-					</>
+					<RestScreen
+						onComplete={onRestComplete}
+						duration={restDuration}
+						exercise={exercise}
+						currentSet={currentSet}
+					/>
 				)}
 			</View>
 		</ExerciseWithCounterWrapper>

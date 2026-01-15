@@ -12,10 +12,6 @@ import { Image as RNImage } from 'react-native'
 import landingPhoto1 from 'src/assets/images/girl_success_screen.png'
 import { useTrainingStore } from '@/entities/training'
 
-interface ExerciseSuccessScreenProps {
-	onComplete: () => void
-	message?: string
-}
 
 const motivationalMessages = [
 	'Так держать!',
