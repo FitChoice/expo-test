@@ -30,6 +30,8 @@ export function StopModal({ visible, onResume, onStop }: PauseModalProps) {
 	return (
 		<RNModal
 			visible={visible}
+			statusBarTranslucent
+			navigationBarTranslucent
 			transparent
 			animationType="fade"
 			supportedOrientations={['portrait', 'landscape']}

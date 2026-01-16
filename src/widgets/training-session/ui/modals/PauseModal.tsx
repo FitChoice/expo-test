@@ -29,6 +29,8 @@ export function PauseModal({ visible, onResume }: PauseModalProps) {
 	return (
 		<RNModal
 			visible={visible}
+			statusBarTranslucent
+			navigationBarTranslucent
 			transparent
 			animationType="fade"
 			supportedOrientations={['portrait', 'landscape']}
@@ -46,7 +48,7 @@ export function PauseModal({ visible, onResume }: PauseModalProps) {
 				></BlurView>
 
 				{/* Content */}
-				<View className="flex-1 items-center justify-center px-6">
+				<View className="flex-1 items-center justify-center">
 					{/* Pause icon */}
 					<BigPauseIcon />
 
@@ -59,7 +61,7 @@ export function PauseModal({ visible, onResume }: PauseModalProps) {
 
 				{/* Button at bottom */}
 				<View
-					className={`absolute bottom-20 left-0 right-0 px-6 pb-safe-bottom ${isLandscape ? 'pb-6' : 'pb-6'}`}
+					className={'absolute bottom-12 left-0 right-0 px-6'}
 				>
 					<Button
 						onPress={onResume}

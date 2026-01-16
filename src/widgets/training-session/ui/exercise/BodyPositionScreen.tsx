@@ -1,9 +1,6 @@
 import { PoseCamera } from '@/widgets/pose-camera'
 import {
-	View,
-	Text,
-	Dimensions,
-	useWindowDimensions,
+	View, Text, Dimensions, useWindowDimensions, Platform,
 } from 'react-native'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type * as posedetection from '@tensorflow-models/pose-detection'
@@ -12,6 +9,8 @@ import Svg, { Circle } from 'react-native-svg'
 import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
 import BodySilhouetteSide from '@/assets/images/body_silhouette_side.svg'
 import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
+
+const IS_ANDROID = Platform.OS === 'android'
 
 type BodyPositionScreenProps = {
 	isVertical?: boolean
@@ -88,7 +87,7 @@ export const BodyPositionScreen = ({
 
 	return (
 		<View className="flex-1 bg-transparent">
-			<BackgroundLayoutNoSidePadding edges={['bottom', 'left', 'right']} hasSidePadding={false}>
+			<BackgroundLayoutNoSidePadding edges={IS_ANDROID ? ['right'] : []} hasSidePadding={false}>
 				<View
 					style={{
 						height: isVertical ? CAM_PREVIEW_HEIGHT : '100%',
@@ -128,7 +127,7 @@ export const BodyPositionScreen = ({
 				</View>
 
 				{/* Body Silhouette Overlay */}
-				<View className="absolute inset-0 items-center justify-start" style={{ pointerEvents: 'none', top: isVertical ? 0 : '-40%' }}>
+				<View className="absolute inset-0 items-center justify-start" style={{ pointerEvents: 'none', top: isVertical ? 0 : '0%' }}>
 					{targetSide ? (
 						// Боковой силуэт для side_switch с flip для левой стороны
 							<View style={{ transform: isVertical ? [] : [{ rotate: '90deg' }] }}>
@@ -144,7 +143,6 @@ export const BodyPositionScreen = ({
 						// Стандартный силуэт с поворотом для горизонтальной ориентации
 						<View style={{ transform: isVertical ? [] : [{ rotate: '90deg' }] }}>
 							<BodySilhouetteDefault
-
 								height={CAM_PREVIEW_HEIGHT}
 								stroke={showSuccess ? '#8BC34A' : 'white'}
 								fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
