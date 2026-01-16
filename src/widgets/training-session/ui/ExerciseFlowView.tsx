@@ -23,6 +23,10 @@ type ExerciseFlowViewProps = {
 	restDuration: number
 	practiceVideoUrl: string | null
 
+	currentExerciseIndex: number
+	totalExercises: number
+	exerciseProgressRatio: number
+
 	onRotateComplete: () => void
 	onCountdownComplete: () => void
 	onPositionComplete: () => void
@@ -41,6 +45,9 @@ export function ExerciseFlowView({
 	executionKey,
 	restDuration,
 	practiceVideoUrl,
+	currentExerciseIndex,
+	totalExercises,
+	exerciseProgressRatio,
 	onRotateComplete,
 	onCountdownComplete,
 	onPositionComplete,
@@ -73,6 +80,9 @@ export function ExerciseFlowView({
 						currentSet={currentSet}
 						onComplete={onCountdownComplete}
 						isVertical={!exercise.is_horizontal}
+						currentExerciseIndex={currentExerciseIndex}
+						totalExercises={totalExercises}
+						exerciseProgressRatio={exerciseProgressRatio}
 					/>
 				)}
 
@@ -85,6 +95,9 @@ export function ExerciseFlowView({
 						exercise={exercise}
 						isVertical={!exercise.is_horizontal}
 						practiceVideoUrl={practiceVideoUrl ?? exercise.video_practice}
+						currentExerciseIndex={currentExerciseIndex}
+						totalExercises={totalExercises}
+						exerciseProgressRatio={exerciseProgressRatio}
 					/>
 				)}
 

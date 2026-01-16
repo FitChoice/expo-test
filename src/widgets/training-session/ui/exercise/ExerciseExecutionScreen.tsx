@@ -17,6 +17,7 @@ import type {
 } from '../../../../../poseflow-js'
 import { useVideoPlayer, VideoView } from 'expo-video'
 import { useVideoPlayerContext } from '@/shared/hooks/useVideoPlayerContext'
+import { TrainingExerciseProgress } from '@/shared/ui'
 
 
 // =========================================================================
@@ -82,7 +83,7 @@ function PartialRomDebugBadge({ partialRomCount, lastPartialRom, isVisible }: Pa
  */
 function handlePartialRomError(event: PartialROMEvent, exerciseId: string | number): void {
 	// STUB: Логируем ошибку для отладки
-	console.log(`[PartialROM] Ошибка неполной амплитуды:`, {
+	console.warn(`[PartialROM] Ошибка неполной амплитуды:`, {
 		exerciseId,
 		phaseType: event.phase_type,
 		depthAchieved: `${Math.round(event.depth_achieved * 100)}%`,
@@ -99,6 +100,9 @@ interface TimerExerciseScreenProps {
 	model: posedetection.PoseDetector
 	orientation: ScreenOrientation.Orientation
 	practiceVideoUrl?: string
+	currentExerciseIndex: number
+	totalExercises: number
+	exerciseProgressRatio: number
 }
 
 export function ExerciseExecutionScreen({
@@ -108,6 +112,9 @@ export function ExerciseExecutionScreen({
 	model,
 	orientation,
 	practiceVideoUrl,
+	currentExerciseIndex,
+	totalExercises,
+	exerciseProgressRatio,
 }: TimerExerciseScreenProps) {
 	const player = useVideoPlayer(
 		practiceVideoUrl || exercise.video_practice || '',
@@ -183,7 +190,7 @@ export function ExerciseExecutionScreen({
 	}, [telemetry?.reps, setCurrentReps])
 
 	useEffect(() => {
-		if (Number(telemetry?.reps) >= exercise.reps && exercise.reps > 0 ) {
+		if (Number(telemetry?.reps) === exercise.reps && exercise.reps > 0 ) {
 			const timeout = setTimeout(() => {
 				onComplete()
 			}, 2000)
@@ -223,7 +230,6 @@ export function ExerciseExecutionScreen({
 				{!isVertical && (
 					<>
 						<View className="absolute left-0 right-0 top-10 items-center justify-center px-4">
-							{/*<VideoProgressBar player={player} className="mb-2" />*/}
 							<Text className="text-center text-t1 text-light-text-200">{exercise.name}</Text>
 						</View>
 
@@ -310,6 +316,32 @@ export function ExerciseExecutionScreen({
 					</View>
 				)}
 			</View>
+
+
+			 {/*Step Progress */}
+			{isVertical ? (
+			    <View
+			        className="justify-center items-center pt-10"
+			    >
+			        <View>
+								<TrainingExerciseProgress
+									totalExercises={totalExercises}
+									currentExerciseIndex={currentExerciseIndex}
+									progressRatio={exerciseProgressRatio}
+									isVertical={isVertical}
+								/>
+			        </View>
+			    </View>
+			) : (
+			    <View className="w-full px-4 py-4 items-center">
+						<TrainingExerciseProgress
+							totalExercises={totalExercises}
+							currentExerciseIndex={currentExerciseIndex}
+							progressRatio={exerciseProgressRatio}
+							isVertical={isVertical}
+						/>
+			    </View>
+			)}
 
 			{/* Exercise Info */}
 			<View className="p-6">

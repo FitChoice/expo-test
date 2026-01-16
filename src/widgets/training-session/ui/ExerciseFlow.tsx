@@ -43,6 +43,9 @@ export function ExerciseFlow({
 		practiceVideoUrl,
 		baseRestDuration,
 		executionKey,
+		currentExerciseIndex,
+		totalExercises,
+		exerciseProgressRatio,
 		handleRotateComplete,
 		handleTheoryComplete,
 		handlePositionComplete,
@@ -68,6 +71,9 @@ export function ExerciseFlow({
 			executionKey={executionKey}
 			restDuration={baseRestDuration}
 			practiceVideoUrl={practiceVideoUrl}
+			currentExerciseIndex={currentExerciseIndex}
+			totalExercises={totalExercises}
+			exerciseProgressRatio={exerciseProgressRatio}
 			onRotateComplete={handleRotateComplete}
 			onCountdownComplete={handleTheoryComplete}
 			onPositionComplete={handlePositionComplete}

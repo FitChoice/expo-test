@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { VideoView, useVideoPlayer } from 'expo-video'
 import { useEventListener } from 'expo'
 
-import { LargeNumberDisplay, VideoProgressBar } from '@/shared/ui'
+import { LargeNumberDisplay, TrainingExerciseProgress } from '@/shared/ui'
 import type { ExerciseInfoResponse } from '@/entities/training'
 import { useVideoPlayerContext } from '@/shared/hooks/useVideoPlayerContext'
 import { useCountdown } from '@/shared/hooks/useCountdown'
@@ -21,6 +21,9 @@ interface ExerciseTheoryScreenProps {
 	currentSet: number
 	onComplete: () => void
 	isVertical?: boolean
+	currentExerciseIndex: number
+	totalExercises: number
+	exerciseProgressRatio: number
 }
 
 export function ExerciseTheoryScreen({
@@ -28,6 +31,9 @@ export function ExerciseTheoryScreen({
 	currentSet,
 	onComplete,
 	isVertical,
+	currentExerciseIndex,
+	totalExercises,
+	exerciseProgressRatio,
 }: ExerciseTheoryScreenProps) {
 	const videoUrl = exercise.video_theory ?? ''
 	const player = useVideoPlayer(videoUrl, (p) => {
@@ -95,11 +101,18 @@ export function ExerciseTheoryScreen({
 	const renderOverlay = () => {
 		if (isVertical) {
 			return (
-				<View className="p-5">
-					<Text className="mb-2 text-center text-t1 text-light-text-200">{exercise.name}</Text>
-					<View className="px-4">
-						<VideoProgressBar player={player} />
+			<View className="p-5">
+				<Text className="mb-2 text-center text-t1 text-light-text-200">{exercise.name}</Text>
+
+				<View className="items-center justify-center py-4">
+						<TrainingExerciseProgress
+							totalExercises={totalExercises}
+							currentExerciseIndex={currentExerciseIndex}
+							progressRatio={exerciseProgressRatio}
+							isVertical={isVertical}
+						/>
 					</View>
+
 					<LargeNumberDisplay value={displayTime} size="large" />
 					<ExerciseSetInfo
 						currentSet={currentSet}
@@ -114,7 +127,14 @@ export function ExerciseTheoryScreen({
 		return (
 			<>
 				<View className="absolute left-0 right-0 top-10 items-center justify-center px-4">
-					<VideoProgressBar player={player} className="mb-2" />
+					<TrainingExerciseProgress
+						totalExercises={totalExercises}
+						currentExerciseIndex={currentExerciseIndex}
+						progressRatio={exerciseProgressRatio}
+						isVertical={isVertical}
+						className="mb-4"
+					/>
+
 					<Text className="text-center text-t1 text-light-text-200">{exercise.name}</Text>
 				</View>
 

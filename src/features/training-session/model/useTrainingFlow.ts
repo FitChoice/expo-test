@@ -34,6 +34,7 @@ export function useTrainingFlow({
 
 	const [currentStep, setCurrentStep] = useState<ExerciseStep>('rotate')
 	const [currentSideState, setCurrentSideState] = useState<'left' | 'right'>('right')
+	const [theoryCompleted, setTheoryCompleted] = useState(false)
 	const [restType, setRestType] = useState<'set' | 'exercise'>('set')
 	const [setNumber, setSetNumber] = useState(0)
 	const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
@@ -86,6 +87,7 @@ export function useTrainingFlow({
 	useEffect(() => {
 		if (!currentExercise) return
 		resetExerciseProgress()
+		setTheoryCompleted(false)
 		void startExercise(currentExercise)
 	}, [currentExercise?.id, resetExerciseProgress, startExercise])
 
@@ -100,6 +102,7 @@ export function useTrainingFlow({
 
 	// Handler для завершения теории — переход к позиционированию
 	const handleTheoryComplete = useCallback(() => {
+		setTheoryCompleted(true)
 		setCurrentStep('position')
 	}, [])
 
@@ -253,6 +256,23 @@ export function useTrainingFlow({
 		setCurrentStep('position')
 	}, [setCurrentReps, setCurrentSetStore])
 
+	const exerciseProgressRatio = useMemo(() => {
+		if (!currentExercise) return 0
+
+		const sideMultiplier = requiresSideSwitch ? 2 : 1
+		const totalReps = currentExercise.reps * currentExercise.sets * sideMultiplier
+		const theoryStep = showTutorial ? 1 : 0
+		const totalSteps = totalReps + theoryStep
+
+		if (totalSteps === 0) return 0
+
+		const completedReps = accumulatedExerciseReps.current + currentReps
+		const theoryCompletedStep = theoryCompleted ? 1 : 0
+		const completedSteps = completedReps + theoryCompletedStep
+
+		return Math.min(completedSteps / totalSteps, 1)
+	}, [currentExercise, requiresSideSwitch, showTutorial, currentReps, theoryCompleted])
+
 	return {
 		currentStep,
 		currentExercise,
@@ -261,6 +281,9 @@ export function useTrainingFlow({
 		practiceVideoUrl,
 		baseRestDuration,
 		executionKey,
+		currentExerciseIndex,
+		totalExercises: exercises.length,
+		exerciseProgressRatio,
 		handleRotateComplete,
 		handleTheoryComplete,
 		handlePositionComplete,
