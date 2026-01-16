@@ -89,10 +89,6 @@ function handlePartialRomError(event: PartialROMEvent, exerciseId: string | numb
 		deficit: event.deficit.toFixed(3),
 	})
 
-	// TODO: Здесь можно добавить:
-	// - analyticsService.trackPartialRomError(exerciseId, event)
-	// - notificationService.showWarning('Увеличьте амплитуду движения')
-	// - trainingStore.addFormError({ type: 'partial_rom', ...event })
 }
 
 

@@ -4,8 +4,9 @@
  */
 
 import { View, Text } from 'react-native'
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { VideoView, useVideoPlayer } from 'expo-video'
+import { useEventListener } from 'expo'
 
 import { LargeNumberDisplay, VideoProgressBar } from '@/shared/ui'
 import type { ExerciseInfoResponse } from '@/entities/training'
@@ -20,8 +21,6 @@ interface ExerciseTheoryScreenProps {
 	currentSet: number
 	onComplete: () => void
 	isVertical?: boolean
-	videoUrlOverride?: string
-	durationOverrideSeconds?: number
 }
 
 export function ExerciseTheoryScreen({
@@ -29,11 +28,9 @@ export function ExerciseTheoryScreen({
 	currentSet,
 	onComplete,
 	isVertical,
-	videoUrlOverride,
-	durationOverrideSeconds,
 }: ExerciseTheoryScreenProps) {
-	const videoUrl = videoUrlOverride ?? exercise.video_theory
-	const player = useVideoPlayer(videoUrl ?? '', (p) => {
+	const videoUrl = exercise.video_theory ?? ''
+	const player = useVideoPlayer(videoUrl, (p) => {
 		p.loop = false
 		p.play()
 	})
@@ -41,8 +38,13 @@ export function ExerciseTheoryScreen({
 	const videoPlayerContext = useVideoPlayerContext()
 	const { remainingTime, reset, pause, start } = useCountdown(0, {
 		onComplete,
-		autoStart: true,
+		autoStart: false,
 	})
+	const hasInitializedDurationRef = useRef(false)
+	const safeStart = useCallback(() => {
+		if (!hasInitializedDurationRef.current) return
+		start()
+	}, [start])
 
 	// Register player in context for global pause/resume
 	useEffect(() => {
@@ -57,30 +59,30 @@ export function ExerciseTheoryScreen({
 		if (videoPlayerContext) {
 			return videoPlayerContext.registerPausable({
 				pause,
-				resume: start,
+				resume: safeStart,
 			})
 		}
 		return undefined
-	}, [pause, start, videoPlayerContext])
+	}, [pause, safeStart, videoPlayerContext])
 
-	// Handle countdown initialization based on video duration or override
+	// Reset init flag if player instance changes (new source)
 	useEffect(() => {
-		if (!player) return
+		hasInitializedDurationRef.current = false
+	}, [player])
 
-		if (durationOverrideSeconds !== undefined) {
-			reset(durationOverrideSeconds)
-			return
+	// Initialize countdown once metadata is loaded
+	useEventListener(player, 'sourceLoad', () => {
+		if (!player || hasInitializedDurationRef.current) return
+		if (player.duration > 0) {
+			hasInitializedDurationRef.current = true
+			reset(Math.ceil(player.duration))
+			safeStart()
 		}
+	})
 
-		const checkDuration = setInterval(() => {
-			if (player.status === 'readyToPlay' && player.duration > 0) {
-				reset(Math.ceil(player.duration))
-				clearInterval(checkDuration)
-			}
-		}, 200)
-
-		return () => clearInterval(checkDuration)
-	}, [player, durationOverrideSeconds, reset])
+	if (!videoUrl) {
+		throw new Error('Exercise theory video is required but missing.')
+	}
 
 	const displayTime = useMemo(() => {
 		const mins = Math.floor(remainingTime / 60)
@@ -148,11 +150,7 @@ export function ExerciseTheoryScreen({
 	return (
 		<View className="flex-1">
 			<View style={{ height: isVertical ? height : '100%' }}>
-				{videoUrl ? (
-					<VideoView player={player} style={{ flex: 1 }} contentFit="cover" nativeControls={false} />
-				) : (
-					<View className="bg-brand-dark-300 flex-1" />
-				)}
+				<VideoView player={player} style={{ flex: 1 }} contentFit="cover" nativeControls={false} />
 			</View>
 			{renderOverlay()}
 		</View>
