@@ -55,11 +55,9 @@ export function ExerciseFlowView({
 	onSideSwitchComplete,
 	onRestComplete,
 }: ExerciseFlowViewProps) {
-	// Action buttons should be hidden during rest to match existing design
-	const isShowActionButtons = currentStep !== 'rest'
 
 	return (
-		<ExerciseWithCounterWrapper isShowActionButtons={isShowActionButtons}>
+		<ExerciseWithCounterWrapper>
 			<View className="flex-1">
 				{currentStep === 'rotate' && (
 					<RotateScreen isVertical={!exercise.is_horizontal} onComplete={onRotateComplete} />
@@ -116,6 +114,9 @@ export function ExerciseFlowView({
 				)}
 				{currentStep === 'rest' && (
 					<RestScreen
+						currentExerciseIndex={currentExerciseIndex}
+						totalExercises={totalExercises}
+						exerciseProgressRatio={exerciseProgressRatio}
 						onComplete={onRestComplete}
 						duration={restDuration}
 						exercise={exercise}
