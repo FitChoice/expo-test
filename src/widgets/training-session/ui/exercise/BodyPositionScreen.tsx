@@ -7,7 +7,7 @@ import type * as posedetection from '@tensorflow-models/pose-detection'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import Svg, { Circle } from 'react-native-svg'
 import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
-import BodySilhouetteSide from '@/assets/images/body_silhouette_side.svg'
+import BodySilhouetteSideVertical from '@/assets/images/body_silhouette_side.svg'
 import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
 
 const IS_ANDROID = Platform.OS === 'android'
@@ -85,6 +85,57 @@ export const BodyPositionScreen = ({
 		}
 	}, [])
 
+
+	const renderSilhouette = () => {
+		let res = <></>
+		const stroke = showSuccess ? '#8BC34A' : 'white'
+		const fill = showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'
+
+		if (isVertical && targetSide) {
+			res = 	<View>
+				<BodySilhouetteSideVertical
+					width={650}
+					height={650}
+					style={targetSide === 'left' ? { transform: [{ scaleX: -1 }] } : undefined}
+					stroke={stroke}
+					fill={fill}
+				/>
+			</View>
+		}
+	if (isVertical && !targetSide) {
+			res = 		<View>
+				<BodySilhouetteDefault
+					height={CAM_PREVIEW_HEIGHT}
+					stroke={stroke}
+					fill={fill}
+				/>
+			</View>
+		}
+
+		 if (!isVertical && targetSide) {
+			res =  <View style={{ transform: [{ rotate: '90deg' }] }}>
+				<BodySilhouetteDefault
+					style={targetSide === 'left' ? { transform: [{ scaleX: -1 }] } : undefined}
+					height={CAM_PREVIEW_HEIGHT}
+					stroke={stroke}
+					fill={fill}
+				/>
+			</View>
+		}
+
+	 if (!isVertical && !targetSide) {
+			res =  <View style={{ transform: [{ rotate: '90deg' }] }}>
+				<BodySilhouetteDefault
+					height={CAM_PREVIEW_HEIGHT}
+					stroke={stroke}
+					fill={fill}
+				/>
+			</View>
+		}
+
+		return res
+	}
+
 	return (
 		<View className="flex-1 bg-transparent">
 			<BackgroundLayoutNoSidePadding edges={IS_ANDROID ? ['right'] : []} hasSidePadding={false}>
@@ -127,28 +178,8 @@ export const BodyPositionScreen = ({
 				</View>
 
 				{/* Body Silhouette Overlay */}
-				<View className="absolute inset-0 items-center justify-start" style={{ pointerEvents: 'none', top: isVertical ? 0 : '0%' }}>
-					{targetSide ? (
-						// Боковой силуэт для side_switch с flip для левой стороны
-							<View style={{ transform: isVertical ? [] : [{ rotate: '90deg' }] }}>
-						   <BodySilhouetteSide
-								 width={650}
-								 height={650}
-								style={targetSide === 'left' ? { transform: [{ scaleX: -1 }] } : undefined}
-								stroke={showSuccess ? '#8BC34A' : 'white'}
-								fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
-						/>
-							</View>
-					) : (
-						// Стандартный силуэт с поворотом для горизонтальной ориентации
-						<View style={{ transform: isVertical ? [] : [{ rotate: '90deg' }] }}>
-							<BodySilhouetteDefault
-								height={CAM_PREVIEW_HEIGHT}
-								stroke={showSuccess ? '#8BC34A' : 'white'}
-								fill={showSuccess ? 'rgba(139,195,74,0.36)' : 'transparent'}
-							/>
-						</View>
-					)}
+				<View className="absolute inset-0 items-center justify-start" style={{ pointerEvents: 'none', top: 0 }}>
+					{renderSilhouette()}
 				</View>
 
 				<View className={`${isVertical ? 'mt-10' : 'absolute  bottom-10  left-1/2 -translate-x-1/2'}`}>
