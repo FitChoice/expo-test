@@ -1,6 +1,7 @@
 /**
  * Exercise Theory/Countdown Screen
- * Показывает видео упражнения (теория или практика) с обратным отсчетом.
+ * Показывает видео упражнения (теория) с обратным отсчетом.
+ * Переход на следующий экран происходит по событию playToEnd с fallback polling.
  */
 
 import { View, Text } from 'react-native'
@@ -42,15 +43,26 @@ export function ExerciseTheoryScreen({
 	})
 
 	const videoPlayerContext = useVideoPlayerContext()
+	
+	// Guard against double completion calls
+	const hasCompletedRef = useRef(false)
+	const hasInitializedDurationRef = useRef(false)
+
+	// Countdown only for UI display (no onComplete - transition handled by playToEnd)
 	const { remainingTime, reset, pause, start } = useCountdown(0, {
-		onComplete,
 		autoStart: false,
 	})
-	const hasInitializedDurationRef = useRef(false)
+
 	const safeStart = useCallback(() => {
 		if (!hasInitializedDurationRef.current) return
 		start()
 	}, [start])
+
+	const triggerComplete = useCallback(() => {
+		if (hasCompletedRef.current) return
+		hasCompletedRef.current = true
+		onComplete()
+	}, [onComplete])
 
 	// Register player in context for global pause/resume
 	useEffect(() => {
@@ -71,20 +83,37 @@ export function ExerciseTheoryScreen({
 		return undefined
 	}, [pause, safeStart, videoPlayerContext])
 
-	// Reset init flag if player instance changes (new source)
+	// Reset refs when player instance changes (new video source)
 	useEffect(() => {
 		hasInitializedDurationRef.current = false
+		hasCompletedRef.current = false
 	}, [player])
 
-	// Initialize countdown once metadata is loaded
-	useEventListener(player, 'sourceLoad', () => {
-		if (!player || hasInitializedDurationRef.current) return
-		if (player.duration > 0) {
+	// Primary completion trigger: playToEnd event
+	useEventListener(player, 'playToEnd', triggerComplete)
+
+	// Initialize countdown when player is ready (statusChange is more reliable than sourceLoad)
+	useEventListener(player, 'statusChange', ({ status }) => {
+		if (status === 'readyToPlay' && !hasInitializedDurationRef.current && player.duration > 0) {
 			hasInitializedDurationRef.current = true
 			reset(Math.ceil(player.duration))
 			safeStart()
 		}
 	})
+
+	// Fallback polling: some devices may not fire playToEnd reliably
+	useEffect(() => {
+		const interval = setInterval(() => {
+			if (
+				!hasCompletedRef.current &&
+				player.duration > 0 &&
+				player.currentTime >= player.duration - 0.1
+			) {
+				triggerComplete()
+			}
+		}, 500)
+		return () => clearInterval(interval)
+	}, [player, triggerComplete])
 
 	if (!videoUrl) {
 		throw new Error('Exercise theory video is required but missing.')
@@ -127,6 +156,7 @@ export function ExerciseTheoryScreen({
 		return (
 			<>
 				<View className="absolute left-0 right-0 top-10 items-center justify-center px-4">
+					<Text className="text-center text-t1 text-light-text-200">{exercise.name}</Text>
 					<TrainingExerciseProgress
 						totalExercises={totalExercises}
 						currentExerciseIndex={currentExerciseIndex}
@@ -135,7 +165,7 @@ export function ExerciseTheoryScreen({
 						className="mb-4"
 					/>
 
-					<Text className="text-center text-t1 text-light-text-200">{exercise.name}</Text>
+
 				</View>
 
 				<View className="absolute bottom-0 flex-row gap-2 px-1 pb-2">

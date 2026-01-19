@@ -14,6 +14,7 @@ import {
 
 import { PauseModal, StopModal } from '../modals'
 import {useWindowDimensions} from 'react-native';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 
 /**
  * Training-session specific wrapper.
@@ -148,7 +149,7 @@ export const ExerciseWithCounterWrapper = ({
 				{isShowActionButtons && (
 					<View className={`absolute top-10 z-10 flex-row justify-end gap-2 right-${IS_ANDROID && !isPortrait ? 6 : 4 }`}>
 						<ControlButton
-							icon={<AntDesign name="pause" size={24} color="#FFFFFF" />}
+							icon={<FontAwesome5 name="pause" size={24} color="#FFFFFF" />}
 							onPress={pauseTimer}
 						/>
 						<ControlButton
