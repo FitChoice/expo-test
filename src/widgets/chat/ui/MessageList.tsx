@@ -42,23 +42,7 @@ export const MessageList: React.FC<MessageListProps> = ({
 }) => {
 	const listRef = useRef<FlashListRef<Message>>(null)
 
-	const displayMessages = useMemo<Message[]>(() => {
-		if (messages.length > 0) {
-			return messages
-		}
-
-		return [
-			{
-				id: 'welcome-message',
-				role: 'assistant',
-				content:
-					'Привет! 👋\n\nЯ твой ИИ-тренер. Помогу улучшить технику, подобрать подходящие упражнения и держать мотивацию на уровне.\n\nС чего начнём сегодня? 💪',
-				createdAt: new Date(),
-				attachments: [],
-				isStreaming: false,
-			},
-		]
-	}, [messages])
+	const displayMessages = messages
 
 	// Автоскролл к новым сообщениям
 	useEffect(() => {

@@ -67,8 +67,18 @@ export const ChatScreen: React.FC = () => {
 	const { pickImages } = useFilePicker()
 
 	const messages = useMemo<Message[]>(() => {
-		if (!chatData?.pages) return []
-		return chatData.pages.flatMap((page) => page.messages)
+		const serverMessages = chatData?.pages.flatMap((page) => page.messages) ?? []
+		const welcomeMessage: Message = {
+			id: 'welcome-message',
+			role: 'assistant',
+			content:
+				'Привет! 👋\n\nЯ твой ИИ-тренер. Помогу улучшить технику, подобрать подходящие упражнения и держать мотивацию на уровне.\n\nС чего начнём сегодня? 💪',
+			createdAt: new Date(0),
+			attachments: [],
+			isStreaming: false,
+		}
+
+		return [welcomeMessage, ...serverMessages]
 	}, [chatData?.pages])
 
 	const lastServerMessageId = useMemo(() => {

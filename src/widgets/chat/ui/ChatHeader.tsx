@@ -28,7 +28,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ title = 'ИИ-ассис
 	}
 
 	return (
-		<View className="relative overflow-hidden rounded-b-3xl py-2">
+		<View className="relative overflow-hidden rounded-b-[40px] py-4">
 			{/* Градиентный фон */}
 			<View className="absolute inset-0">
 				<GradientHeader />
