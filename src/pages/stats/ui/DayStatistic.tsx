@@ -38,7 +38,7 @@ const OVERALL_STATS_CONFIG: OverallStatConfig[] = [
 	},
 	{
 		icon: <Morning color="#aaec4d" fill="#aaec4d" />,
-		label: 'Зарядок',
+		label: 'Энергии',
 		key: 'quality_growth',
 	},
 	{
@@ -68,7 +68,7 @@ const OVERALL_STATS_CONFIG: OverallStatConfig[] = [
 const moodPoints = [
 	{ day: 'пн', Icon: Emo3, color: '#FFB800', height: 180 },
 	{ day: 'вт', Icon: Emo2, color: '#FF69B4', height: 110 },
-	{ day: 'ср', Icon: Emo5, color: '#F5A524', height: 140 },
+	{ day: 'ср', Icon: Emo5, color: '#10B981', height: 140 },
 	{ day: 'чт', Icon: Emo1, color: '#FF4B6E', height: 100 },
 	{ day: 'пт', Icon: Emo3, color: '#FFB800', height: 220 },
 	{ day: 'сб', Icon: Emo4, color: '#6B7280', height: 180 },
@@ -157,17 +157,17 @@ export function DayStatistic() {
 				<View className="flex-row gap-3">
 					<View className="flex-1 overflow-hidden rounded-3xl">
 						<LinearGradient
-							colors={['#6a55c8', '#2b233c', '#0f0f0f']}
-							start={{ x: 0, y: 0 }}
-							end={{ x: 1, y: 1 }}
+							colors={['#A172FF', '#2b233c']}
+							start={{ x: -0.5, y: 0 }}
+							end={{ x: 0.6, y: 0.6 }}
 							style={{ flex: 1, padding: 16 }}
 						>
-							<View className="mt-3 items-center gap-3">
+							<View className="mt-3 items-start gap-3">
 								<View className="flex-row items-center gap-5">
 									<FontAwesome6 name="bolt" size={14} color="#a172ff" />
 									<Text className="text-h2 text-white">100</Text>
 								</View>
-								<Text className="text-caption-regular text-white/70">
+								<Text className="text-caption-regular text-light-text-500">
 									Тренировок подряд
 								</Text>
 							</View>
@@ -176,17 +176,17 @@ export function DayStatistic() {
 
 					<View className="flex-1 overflow-hidden rounded-3xl">
 						<LinearGradient
-							colors={['#8BC34A', '#2d3326', '#0f0f0f']}
-							start={{ x: 0, y: 0 }}
-							end={{ x: 1, y: 1 }}
+							colors={['#C5F680', '#2d3326']}
+							start={{ x: 3, y: -1 }}
+							end={{ x: 0.5, y: 1  }}
 							style={{ flex: 1, padding: 16 }}
 						>
-							<View className="mt-3 items-center gap-3">
+							<View className="mt-3 items-start gap-3">
 								<View className="flex-row items-center gap-5">
 									<Feather name="arrow-up" size={24} color="#aaec4d" />
 									<Text className="text-h2 text-brand-green-500">20%</Text>
 								</View>
-								<Text className="text-caption-regular text-white/70">
+								<Text className="text-caption-regular text-light-text-500">
 									Чистота техники
 								</Text>
 							</View>
@@ -197,7 +197,7 @@ export function DayStatistic() {
 
 			{/* All time stats */}
 			<View className="mb-6">
-				<Text className="text-t.1 text-white">За всё время</Text>
+				<Text className="text-t.1 text-white mb-2">За всё время</Text>
 
 				<View className="flex-row flex-wrap gap-3">
 					{isStatsLoading ? (
@@ -248,7 +248,7 @@ export function DayStatistic() {
 			</View>
 
 			{/* Photo progress */}
-			<View className="rounded-3xl bg-[#1b1b1b]">
+			<View className="bg-[#1b1b1b] mb-10 rounded-3xl ">
 				<View className="flex-row">
 					<View className="h-48 flex-1 justify-between pt-6 pl-4 pb-2">
 						<Text className="text-t1.1 text-white">Фото-прогресс</Text>
@@ -266,14 +266,14 @@ export function DayStatistic() {
 			</View>
 
 			{/* Mood chart */}
-			<View className="bg-brand-dark-400 mb-6 rounded-3xl p-4">
+			<View className="bg-[#1b1b1b] mb-6 p-4 rounded-[5%]">
 				<View className="mb-4 flex-row items-center justify-between">
 					<Text className="text-t1.1 text-white">Общее состояние</Text>
 					<Text className="text-t3 text-light-text-500">За эту неделю</Text>
 				</View>
 
 				<TouchableOpacity
-					className="w-40 flex-row items-center justify-center rounded-2xl bg-fill-700 py-5"
+					className="w-40 flex-row items-center justify-center rounded-2xl bg-fill-800 py-2"
 					activeOpacity={0.9}
 				>
 					<Text className="text-t3 text-light-text-200">Настроение</Text>
@@ -285,7 +285,7 @@ export function DayStatistic() {
 						<View key={day} className="items-center gap-2">
 							<MoodIcon width={24} height={24} />
 							<View
-								style={{ height, width: 24 }}
+								style={{ height, width: 40 }}
 								className="overflow-hidden rounded-2xl bg-[#3f3f3f]"
 							>
 								<View style={{ height: 8, backgroundColor: color, width: '100%' }} />
@@ -302,41 +302,53 @@ export function DayStatistic() {
 			</View>
 
 			{/* Body section */}
-			<View className="bg-brand-dark-400 mb-6 rounded-3xl p-4">
-				<View className="mb-4 flex-row items-center justify-between">
-					<Text className="text-t1.1 text-white">Тело</Text>
-					<Text className="text-t3 text-light-text-500">За этот год</Text>
-				</View>
+			<View className="bg-[#1b1b1b] mb-6  rounded-[5%]">
+		<View className="p-4">
 
-				<TouchableOpacity
-					className="mb-10 w-20 flex-row items-center justify-center rounded-2xl bg-fill-700 py-5"
-					activeOpacity={0.9}
-				>
-					<Text className="text-t3 text-light-text-200"> Вес</Text>
-					<EvilIcons name="chevron-right" size={24} color="white" />
-				</TouchableOpacity>
-
-				<View className="flex-row items-end justify-between gap-2">
-					{bodyWeightPoints.map(({ value, month }) => (
-						<View key={month} className="items-center gap-1">
-							<View
-								style={{
-									height: value,
-									width: 14,
-									backgroundColor: month === 'дк' ? '#9AE6B4' : '#3F3F46',
-								}}
-								className="rounded-2xl"
-							/>
-							<Text className="text-light-text-200">{month}</Text>
-						</View>
-					))}
-				</View>
+			<View className="mb-4 flex-row items-center justify-between">
+				<Text className="text-t1.1 text-white">Тело</Text>
+				<Text className="text-t3 text-light-text-500">За этот год</Text>
 			</View>
 
-			<View className="mb-4 mt-4 h-20 flex-row items-center justify-between gap-4 rounded-full bg-black px-4">
-				<Text className="text-t1 text-light-text-100">52 кг</Text>
-				<Text className="text-body-regular text-light-text-200">В ноябре</Text>
+			<TouchableOpacity
+				className="mb-10 w-20 flex-row items-center justify-center rounded-2xl bg-fill-800 py-2"
+				activeOpacity={0.9}
+			>
+				<Text className="text-t3 text-light-text-200"> Вес</Text>
+				<EvilIcons name="chevron-right" size={24} color="white" />
+			</TouchableOpacity>
+
+			<View className="flex-row items-end justify-between gap-2">
+				{bodyWeightPoints.map(({ value, month }) => (
+					<View key={month} className="items-center gap-1">
+						<View
+							style={{
+								height: value,
+								width: 14,
+								backgroundColor: month === 'дк' ? '#9AE6B4' : '#3F3F46',
+							}}
+							className="rounded-2xl"
+						/>
+						<Text className="text-light-text-200">{month}</Text>
+					</View>
+				))}
 			</View>
+
+
+
+		</View>
+
+
+			<View className="p-1" >
+				<View className=" mt-4 flex-row items-center justify-between gap-4 rounded-[20px] bg-black px-4 py-5">
+					<Text className="text-t1 text-light-text-100">52 кг</Text>
+					<Text className="text-body-regular text-light-text-200">В ноябре</Text>
+				</View>
+
+			</View>
+			</View>
+
+
 
 			{/* CTA */}
 			<View className="overflow-hidden rounded-3xl bg-[#1b1b1b]">

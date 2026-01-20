@@ -21,14 +21,14 @@ const Tabs = ({
 	value: TabKey
 	onChange: (tab: TabKey) => void
 }) => (
-	<View className="bg-brand-dark-400 mb-6 flex-row items-center rounded-full p-1">
+	<View className="mb-6 bg-[#1E1E1E] flex-row items-center rounded-r-full rounded-l-full p-1 ">
 		{tabs.map(({ key, label }) => {
 			const isActive = value === key
 			return (
 				<TouchableOpacity
 					key={key}
 					className={`flex-1 rounded-full px-4 py-3 ${
-						isActive ? 'bg-[#3f3f3f]' : '#1e1e1e'
+						isActive ? 'bg-[#3f3f3f]' : 'bg-[#1E1E1E]'
 					}`}
 					activeOpacity={0.9}
 					onPress={() => onChange(key)}
