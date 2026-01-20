@@ -4,12 +4,12 @@ import Entypo from '@expo/vector-icons/Entypo'
 import React from 'react'
 import { router } from 'expo-router'
 
-export  function StatsDetailPageLayout({children, isLoading, title}: {children: React.ReactNode, isLoading: boolean, title: string}) {
+export  function StatsDetailPageLayout({children, isLoading, title, needSubtitle = true}: {children: React.ReactNode, isLoading: boolean, title: string, needSubtitle?: boolean}) {
 	return (
 		<View className="flex-1 bg-black">
-			<View className="h-32 overflow-hidden rounded-b-3xl ">
+			<View className="h-[140px] overflow-hidden rounded-b-[40px]  justify-center">
 				<PurpleGradient />
-				<View className="relative flex-row items-center justify-center px-4 pb-6 pt-12">
+				<View className="flex-row items-center justify-center px-4">
 					<TouchableOpacity
 						onPress={() => router.back()}
 						className="absolute left-4 z-10 items-center justify-center rounded-2xl bg-white/10 p-4"
@@ -17,9 +17,9 @@ export  function StatsDetailPageLayout({children, isLoading, title}: {children: 
 						<Entypo name="chevron-small-left" size={24} color="white" />
 					</TouchableOpacity>
 
-					<View className="items-center">
+					<View>
 						<Text className="text-t1 text-white">{title}</Text>
-						<Text className="text-t3 text-light-text-500">За всё время</Text>
+						{ needSubtitle && <Text className="text-t3 text-center text-light-text-500">За всё время</Text> }
 					</View>
 				</View>
 			</View>

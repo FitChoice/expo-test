@@ -63,27 +63,29 @@ export const PhotoSetShow = () => {
 
 	return (
 		<BackgroundLayoutSafeArea needBg={false}>
-			<TouchableOpacity
-				onPress={() => router.back()}
-				className="absolute left-4 z-10 top-14 items-center justify-center rounded-2xl bg-white/10 p-4"
-				testID="photo-set-show-back"
-				accessibilityRole="button"
-			>
-				<Entypo name="chevron-left" size={24} color="white" />
-			</TouchableOpacity>
+<View className="flex-row items-center py-7" >
+	<TouchableOpacity
+		onPress={() => router.back()}
+		className="items-center justify-center rounded-2xl bg-white/10 p-4 mr-7"
+		testID="photo-set-show-back"
+		accessibilityRole="button"
+	>
+		<Entypo name="chevron-left" size={24} color="white" />
+	</TouchableOpacity>
 
-			<View className="mb-10">
-				<Text className="text-center text-t1.1 text-light-text-100">
-					{resolvedDateId}
-				</Text>
-			</View>
+	<View >
+		<Text className="text-t1.1 text-light-text-100">
+			{resolvedDateId}
+		</Text>
+	</View>
+</View>
 
 			<View className="flex-1 flex-row flex-wrap gap-3">
 				{currentSeries.photos.map((item, idx) => (
 					<View
 						key={`${item.side}-${item.id}`}
 						className="h-[260px] w-[48%]"
-						style={{ marginBottom: idx === 0 || idx === 1 ? 20 : 0 }}
+						style={{ marginBottom: idx === 0 || idx === 1 ? 40 : 0 }}
 					>
 						<View className="mb-2 rounded-3xl bg-[#454545]/70 px-4 py-2">
 							<Text className="text-t4 text-light-text-100">{sideTitle[item.side]}</Text>

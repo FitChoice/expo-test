@@ -1,4 +1,5 @@
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg'
+import React from 'react'
 
 export const PurpleGradient = () => {
 	return (
@@ -11,24 +12,20 @@ export const PurpleGradient = () => {
 		>
 			<Defs>
 				<RadialGradient
-					id="purpleGradientRight"
+					id="purpleGradient"
 					cx="0.5"
-					cy="-0.8"
-					r="3"
-					fx="-1"
-					fy="0.5"
+					cy="0.2"
+					r="1.2"
+					fx="0.5"
+					fy="0.9"
 					gradientUnits="objectBoundingBox"
 				>
-					<Stop offset="15%" stopColor="#BA9BF7" stopOpacity="0.9" />
-					<Stop offset="30%" stopColor="#8E7BC1" stopOpacity="0.7" />
-					<Stop offset="45%" stopColor="#5E5280" stopOpacity="0.5" />
-					<Stop offset="60%" stopColor="#2F2940" stopOpacity="0.3" />
-					<Stop offset="80%" stopColor="#000000" stopOpacity="0.1" />
+					<Stop offset="0%" stopColor="#675983" stopOpacity="1" />
 					<Stop offset="100%" stopColor="#000000" stopOpacity="1" />
 				</RadialGradient>
 			</Defs>
 			<Rect x="0" y="0" width="100" height="100" fill="#000000" />
-			<Rect x="0" y="0" width="100" height="100" fill="url(#purpleGradientRight)" />
+			<Rect x="0" y="0" width="100" height="100" fill="url(#purpleGradient)" />
 		</Svg>
 	)
 }

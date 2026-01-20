@@ -33,7 +33,7 @@ export const PhotoProgressScreen = () => {
 	}
 
 	return (
-		<StatsDetailPageLayout isLoading={false} title="Фото-прогресс">
+		<StatsDetailPageLayout isLoading={false} title="Фото-прогресс" needSubtitle={false}>
 			<View className="flex-1 gap-6">
 				{isLoading ? <Loader /> : <ExistingPhotosScreen
 					data={data ?? []}

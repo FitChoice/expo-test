@@ -14,6 +14,7 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import { PhotoProgressLabels } from '@/shared/constants/labels'
 import { MonthChanges } from '@/pages/photo-progress/ui/MonthChanges'
 
+
 type Props = {
 	data: ProgressSeries[]
 	onAddPress: () => void
@@ -87,20 +88,20 @@ export const ExistingPhotosScreen = ({ data, onAddPress }: Props) => {
 						</View>
 					}
 
-					<View className="rounded-3xl  bg-[#1a1a1a] px-3 py-5">
-						<TouchableOpacity
-							className=" items-center"
-							onPress={onAddPress}
-							accessibilityRole="button"
-							activeOpacity={0.8}
-							testID="add-progress-photo"
-						>
-							<FontAwesome6 name="plus" size={24} color="#AAEC4D" />
-							<Text className="text-center text-caption-regular leading-4 text-brand-green-900 mt-3">
-								Добавить{'\n'} фото
-							</Text>
-						</TouchableOpacity>
-					</View>
+					{/*<View className="rounded-3xl  bg-[#1a1a1a] px-3 py-5">*/}
+					{/*	<TouchableOpacity*/}
+					{/*		className=" items-center"*/}
+					{/*		onPress={onAddPress}*/}
+					{/*		accessibilityRole="button"*/}
+					{/*		activeOpacity={0.8}*/}
+					{/*		testID="add-progress-photo"*/}
+					{/*	>*/}
+					{/*		<FontAwesome6 name="plus" size={24} color="#AAEC4D" />*/}
+					{/*		<Text className="text-center text-caption-regular leading-4 text-brand-green-900 mt-3">*/}
+					{/*			Добавить{'\n'} фото*/}
+					{/*		</Text>*/}
+					{/*	</TouchableOpacity>*/}
+					{/*</View>*/}
 
 					<ScrollView
 						ref={scrollRef}
