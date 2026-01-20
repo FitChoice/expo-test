@@ -1,4 +1,5 @@
 export { statsApi } from './statsApi'
+export { statsKeys } from './queryKeys'
 export type {
 	BodyStatsInput,
 	BodyStatsResponse,
@@ -7,6 +8,8 @@ export type {
 	CalendarResponse,
 	DayDetailsParams,
 	DayDetailsResponse,
+	DayTraining,
+	DayDiary,
 	DiariesParams,
 	DiariesResponse,
 	MainStatsParams,

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import Feather from '@expo/vector-icons/Feather'
@@ -8,8 +8,8 @@ import MorningExercise from '@/assets/images/morning_ex.svg'
 import Stretching from '@/assets/images/stretching.svg'
 import Barbell from '@/assets/images/barbell.svg'
 import Diary from '@/assets/images/diary.svg'
-import { statsApi } from '@/features/stats/api/statsApi'
-import type { DayDetailsResponse, DayTraining } from '@/features/stats/api/types'
+import { useDayDetailsQuery } from '@/features/stats'
+import type { DayTraining } from '@/features/stats'
 
 const ACTIVE_BACKGROUND = '#3f3f3f'
 const ICON_ACTIVE = '#a6f16d'
@@ -97,49 +97,14 @@ const TaskCard = ({ task }: { task: DayTask }) => {
 export const DayDetailsScreen = () => {
 	const router = useRouter()
 	const params = useLocalSearchParams<{
-		id?: string | string[]
-		date?: string | string[]
+		id?: string
+		date?: string
 	}>()
-	const [isLoading, setIsLoading] = useState(true)
-	const [error, setError] = useState<string | null>(null)
-	const [details, setDetails] = useState<DayDetailsResponse | null>(null)
 
-	const scheduleId = Array.isArray(params.id) ? params.id[0] : params.id
-	const fallbackDate = Array.isArray(params.date) ? params.date[0] : params.date
+	const scheduleId = params.id
+	const fallbackDate = params.date
 
-	useEffect(() => {
-		let isMounted = true
-
-		const fetchDetails = async () => {
-			if (!scheduleId) {
-				setError('Не удалось определить день')
-				setIsLoading(false)
-				return
-			}
-
-			setIsLoading(true)
-			setError(null)
-
-			const result = await statsApi.getDayDetails({ id: scheduleId })
-
-			if (!isMounted) return
-
-			if (!result.success) {
-				setError(result.error ?? 'Не удалось загрузить детали дня')
-				setIsLoading(false)
-				return
-			}
-
-			setDetails(result.data)
-			setIsLoading(false)
-		}
-
-		fetchDetails()
-
-		return () => {
-			isMounted = false
-		}
-	}, [scheduleId])
+	const { data: details, isLoading, error } = useDayDetailsQuery(scheduleId)
 
 	const titleDate = formatDateTitle(details?.date ?? fallbackDate)
 
@@ -213,7 +178,7 @@ export const DayDetailsScreen = () => {
 				) : error ? (
 					<View className="mt-8 rounded-3xl bg-[#1f1f1f] p-5">
 						<Text className="text-body-medium text-center text-feedback-negative-900">
-							{error}
+							{error instanceof Error ? error.message : 'Не удалось загрузить данные'}
 						</Text>
 					</View>
 				) : tasks.length === 0 ? (

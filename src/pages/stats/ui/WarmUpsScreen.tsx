@@ -4,39 +4,12 @@ import { Text, View, FlatList } from 'react-native'
 import {
 	StatsDetailPageLayout
 } from '@/shared/ui/StatsDetailPageLayout/StatsDetailPageLayout'
-import { useQuery } from '@tanstack/react-query'
-import { getUserId } from '@/shared/lib'
-import { statsApi } from '@/features/stats'
+import { useTrainingsQuery } from '@/features/stats'
 import { ActivityCard } from '@/shared/ui'
+import { formatDateDots } from '@/shared/lib/formatters'
 
 export const WarmUpsScreen = () => {
-
-	const { data: userId } = useQuery({
-		queryKey: ['userId'],
-		queryFn: getUserId,
-	})
-
-	const { data: trainings, isLoading } = useQuery({
-		queryKey: ['warmups', userId],
-		queryFn: async () => {
-			if (!userId) return []
-			const result = await statsApi.getTrainings({ userId, kind: 'w', limit: 100 })
-			if (result.success) {
-				return result.data.trainings
-			}
-			return []
-		},
-		enabled: !!userId,
-	})
-
-
-	const formatDate = (dateString: string) => {
-		const date = new Date(dateString)
-		const day = String(date.getDate()).padStart(2, '0')
-		const month = String(date.getMonth() + 1).padStart(2, '0')
-		const year = date.getFullYear()
-		return `${day}.${month}.${year}`
-	}
+	const { data: trainings, isLoading } = useTrainingsQuery('w')
 
 	return (
 		<StatsDetailPageLayout isLoading={isLoading} title={'Зарядки'}>
@@ -46,7 +19,7 @@ export const WarmUpsScreen = () => {
 				renderItem={({ item }) => (
 					<ActivityCard
 						label={item.title}
-						date={formatDate(item.date)}
+						date={formatDateDots(item.date)}
 						minutes={`${item.duration} minutes`}
 						onPress={() => {}}
 					/>

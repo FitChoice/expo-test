@@ -1,8 +1,17 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import { router } from 'expo-router'
+import Feather from '@expo/vector-icons/Feather'
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import Fontisto from '@expo/vector-icons/Fontisto'
+import EvilIcons from '@expo/vector-icons/EvilIcons'
 
 import { Icon } from '@/shared/ui'
+import { useMainStatsQuery } from '@/features/stats'
+import type { MainStatsResponse } from '@/features/stats'
+
 import Emo1 from '@/assets/images/moods/emo1.svg'
 import Emo2 from '@/assets/images/moods/emo2.svg'
 import Emo3 from '@/assets/images/moods/emo3.svg'
@@ -10,18 +19,9 @@ import Emo4 from '@/assets/images/moods/emo4.svg'
 import Emo5 from '@/assets/images/moods/emo5.svg'
 import girlSample from '../../../../assets/images/girl_sample.png'
 import girlMeasure from '../../../../assets/images/girl-measure.png'
-import Feather from '@expo/vector-icons/Feather'
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import Barbell from '@/assets/images/barbell.svg'
 import Morning from '@/assets/images/morning_ex.svg'
 import Diary from '@/shared/ui/Icon/assets/diary.svg'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import Fontisto from '@expo/vector-icons/Fontisto'
-import EvilIcons from '@expo/vector-icons/EvilIcons'
-import { statsApi } from '@/features/stats/api/statsApi'
-import type { MainStatsResponse } from '@/features/stats/api/types'
-import { getUserId } from '@/shared/lib/auth'
-import { router } from 'expo-router'
 
 type OverallStatConfig = {
 	icon: React.ReactNode
@@ -89,48 +89,9 @@ const bodyWeightPoints = [
 	{ month: 'нб', value: 64 },
 	{ month: 'дк', value: 56 },
 ]
+
 export function DayStatistic() {
-	const [mainStats, setMainStats] = useState<MainStatsResponse | null>(null)
-	const [isStatsLoading, setIsStatsLoading] = useState(true)
-	const [statsError, setStatsError] = useState<string | null>(null)
-
-	useEffect(() => {
-		let isMounted = true
-
-		const loadMainStats = async () => {
-			setIsStatsLoading(true)
-			setStatsError(null)
-
-			const userId = await getUserId()
-			if (!userId) {
-				if (isMounted) {
-					setStatsError('Не удалось определить пользователя')
-					setIsStatsLoading(false)
-				}
-				return
-			}
-
-			const result = await statsApi.getMainStats({ userId })
-
-		
-			if (!isMounted) return
-
-			if (!result.success) {
-				setStatsError(result.error ?? 'Не удалось загрузить статистику')
-				setIsStatsLoading(false)
-				return
-			}
-
-			setMainStats(result.data)
-			setIsStatsLoading(false)
-		}
-
-		loadMainStats()
-
-		return () => {
-			isMounted = false
-		}
-	}, [])
+	const { data: mainStats, isLoading: isStatsLoading, error: statsError } = useMainStatsQuery()
 
 	const overallStats = useMemo(
 		() =>
@@ -140,14 +101,13 @@ export function DayStatistic() {
 					value === undefined || value === null
 						? '—'
 						: formatter
-							? formatter(value)
+							? formatter(value as number)
 							: String(value)
 
 				return { ...rest, value: formattedValue, key }
 			}),
 		[mainStats]
 	)
-
 
 	return (
 		<>
@@ -165,7 +125,9 @@ export function DayStatistic() {
 							<View className="mt-3 items-start gap-3">
 								<View className="flex-row items-center gap-5">
 									<FontAwesome6 name="bolt" size={14} color="#a172ff" />
-									<Text className="text-h2 text-white">100</Text>
+									<Text className="text-h2 text-white">
+										{mainStats?.streak ?? '—'}
+									</Text>
 								</View>
 								<Text className="text-caption-regular text-light-text-500">
 									Тренировок подряд
@@ -184,7 +146,9 @@ export function DayStatistic() {
 							<View className="mt-3 items-start gap-3">
 								<View className="flex-row items-center gap-5">
 									<Feather name="arrow-up" size={24} color="#aaec4d" />
-									<Text className="text-h2 text-brand-green-500">20%</Text>
+									<Text className="text-h2 text-brand-green-500">
+										{mainStats?.quality_growth ? `${mainStats.quality_growth}%` : '—'}
+									</Text>
 								</View>
 								<Text className="text-caption-regular text-light-text-500">
 									Чистота техники
@@ -210,7 +174,7 @@ export function DayStatistic() {
 					) : statsError ? (
 						<View className="w-full rounded-2xl bg-[#1e1e1e] p-4">
 							<Text className="text-body-medium text-feedback-negative-900">
-								{statsError}
+								{statsError.message}
 							</Text>
 						</View>
 					) : (
@@ -303,52 +267,46 @@ export function DayStatistic() {
 
 			{/* Body section */}
 			<View className="bg-[#1b1b1b] mb-6  rounded-[5%]">
-		<View className="p-4">
-
-			<View className="mb-4 flex-row items-center justify-between">
-				<Text className="text-t1.1 text-white">Тело</Text>
-				<Text className="text-t3 text-light-text-500">За этот год</Text>
-			</View>
-
-			<TouchableOpacity
-				className="mb-10 w-20 flex-row items-center justify-center rounded-2xl bg-fill-800 py-2"
-				activeOpacity={0.9}
-			>
-				<Text className="text-t3 text-light-text-200"> Вес</Text>
-				<EvilIcons name="chevron-right" size={24} color="white" />
-			</TouchableOpacity>
-
-			<View className="flex-row items-end justify-between gap-2">
-				{bodyWeightPoints.map(({ value, month }) => (
-					<View key={month} className="items-center gap-1">
-						<View
-							style={{
-								height: value,
-								width: 14,
-								backgroundColor: month === 'дк' ? '#9AE6B4' : '#3F3F46',
-							}}
-							className="rounded-2xl"
-						/>
-						<Text className="text-light-text-200">{month}</Text>
+				<View className="p-4">
+					<View className="mb-4 flex-row items-center justify-between">
+						<Text className="text-t1.1 text-white">Тело</Text>
+						<Text className="text-t3 text-light-text-500">За этот год</Text>
 					</View>
-				))}
-			</View>
 
+					<TouchableOpacity
+						className="mb-10 w-20 flex-row items-center justify-center rounded-2xl bg-fill-800 py-2"
+						activeOpacity={0.9}
+					>
+						<Text className="text-t3 text-light-text-200"> Вес</Text>
+						<EvilIcons name="chevron-right" size={24} color="white" />
+					</TouchableOpacity>
 
-
-		</View>
-
-
-			<View className="p-1" >
-				<View className=" mt-4 flex-row items-center justify-between gap-4 rounded-[20px] bg-black px-4 py-5">
-					<Text className="text-t1 text-light-text-100">52 кг</Text>
-					<Text className="text-body-regular text-light-text-200">В ноябре</Text>
+					<View className="flex-row items-end justify-between gap-2">
+						{bodyWeightPoints.map(({ value, month }) => (
+							<View key={month} className="items-center gap-1">
+								<View
+									style={{
+										height: value,
+										width: 14,
+										backgroundColor: month === 'дк' ? '#9AE6B4' : '#3F3F46',
+									}}
+									className="rounded-2xl"
+								/>
+								<Text className="text-light-text-200">{month}</Text>
+							</View>
+						))}
+					</View>
 				</View>
 
+				<View className="p-1" >
+					<View className=" mt-4 flex-row items-center justify-between gap-4 rounded-[20px] bg-black px-4 py-5">
+						<Text className="text-t1 text-light-text-100">
+							{mainStats ? '52 кг' : '—'}
+						</Text>
+						<Text className="text-body-regular text-light-text-200">В ноябре</Text>
+					</View>
+				</View>
 			</View>
-			</View>
-
-
 
 			{/* CTA */}
 			<View className="overflow-hidden rounded-3xl bg-[#1b1b1b]">

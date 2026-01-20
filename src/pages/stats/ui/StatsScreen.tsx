@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
 
-import { BackgroundLayoutNoSidePadding, Loader } from '@/shared/ui'
+import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { useNavbarLayout, useStatusBar } from '@/shared/lib'
 import { DayStatistic } from '@/pages/stats/ui/DayStatistic'
@@ -55,17 +55,7 @@ const Tabs = ({
 export const StatsScreen = () => {
 	const { contentPaddingBottom } = useNavbarLayout()
 	const [activeTab, setActiveTab] = useState<TabKey>('stats')
-	const [isLoading, setIsLoading] = useState(true)
 	useStatusBar({ style: 'light', backgroundColor: '#1E1E1E' })
-
-	useEffect(() => {
-		const timeout = setTimeout(() => setIsLoading(false), 800)
-		return () => clearTimeout(timeout)
-	}, [])
-
-	if (isLoading) {
-		return <Loader />
-	}
 
 	return (
 		<BackgroundLayoutNoSidePadding needBg={false}>

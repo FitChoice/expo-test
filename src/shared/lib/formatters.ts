@@ -46,3 +46,20 @@ export const formatTime = (time: string): string => {
 
 	return `${hours}:${minutes}`
 }
+
+/**
+ * Форматирует ISO-дату в формат "DD.MM.YYYY"
+ * @param dateString - дата в формате ISO 8601
+ * @returns строка в формате "DD.MM.YYYY"
+ */
+export const formatDateDots = (dateString: string): string => {
+	if (!dateString) return ''
+	const date = new Date(dateString)
+	if (Number.isNaN(date.getTime())) return ''
+
+	const day = String(date.getDate()).padStart(2, '0')
+	const month = String(date.getMonth() + 1).padStart(2, '0')
+	const year = date.getFullYear()
+
+	return `${day}.${month}.${year}`
+}
