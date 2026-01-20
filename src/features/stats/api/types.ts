@@ -120,3 +120,33 @@ export interface MainStatsParams {
 	userId: string | number
 	date?: string
 }
+
+export type StatKind =
+	| 'energy'
+	| 'mood'
+	| 'wellbeing'
+	| 'sleep_quality'
+	| 'weight'
+	| 'neck_circumference'
+	| 'chest_circumference'
+	| 'waist_circumference'
+	| 'hip_circumference'
+	| 'forearm_circumference'
+	| 'shin_circumference'
+
+export interface ChartParams {
+	userId: string | number
+	kind: StatKind
+	date?: string
+	period?: 'week' | 'month' | 'year'
+}
+
+export interface ChartStat {
+	date: string
+	value: number
+}
+
+export interface ChartResponse {
+	fields: string[]
+	stats: ChartStat[]
+}

@@ -13,6 +13,8 @@ import type {
 	MainStatsResponse,
 	TrainingsParams,
 	TrainingsResponse,
+	ChartParams,
+	ChartResponse,
 } from './types'
 
 const buildQueryString = (params: Record<string, string | number | undefined>) => {
@@ -112,5 +114,22 @@ export const statsApi = {
 		const query = buildQueryString({ date })
 		const endpoint = `/stats/main/${encodeURIComponent(String(userId))}${query}`
 		return apiClient.get<MainStatsResponse>(endpoint)
+	},
+
+	/**
+	 * Получить данные для графиков различных типов статистики
+	 * GET /api/v1/stats/chart/{userId}/{kind}
+	 */
+	async getChart({
+		userId,
+		kind,
+		date,
+		period,
+	}: ChartParams): Promise<ApiResult<ChartResponse>> {
+		const query = buildQueryString({ date, period })
+		const endpoint = `/stats/chart/${encodeURIComponent(String(userId))}/${encodeURIComponent(
+			kind
+		)}${query}`
+		return apiClient.get<ChartResponse>(endpoint)
 	},
 }

@@ -9,4 +9,6 @@ export const statsKeys = {
 	mainStats: (userId: string | number) =>
 		[...statsKeys.all, 'main', userId] as const,
 	bodyStats: (userId: string | number) => [...statsKeys.all, 'body', userId] as const,
+	chart: (userId: string | number, kind: string, period?: string, date?: string) =>
+		[...statsKeys.all, 'chart', userId, kind, period, date] as const,
 }
