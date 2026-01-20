@@ -8,6 +8,7 @@ export interface BodyStatsInput {
 	user_id: number
 	waist_circumference: number
 	weight: number
+	thigh_circumference: number
 }
 
 export interface BodyStatsResponse {

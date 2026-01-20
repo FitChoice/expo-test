@@ -8,4 +8,5 @@ export const statsKeys = {
 		[...statsKeys.all, 'day', scheduleId] as const,
 	mainStats: (userId: string | number) =>
 		[...statsKeys.all, 'main', userId] as const,
+	bodyStats: (userId: string | number) => [...statsKeys.all, 'body', userId] as const,
 }

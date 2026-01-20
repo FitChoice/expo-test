@@ -316,6 +316,7 @@ export function DayStatistic() {
 						<TouchableOpacity
 							className="h-20 w-20 items-center justify-center rounded-full bg-brand-purple-500"
 							activeOpacity={0.9}
+							onPress={() => router.push('/measure-statistic')}
 						>
 							<Icon name="chevrons-right" size={28} color="#FFFFFF" />
 						</TouchableOpacity>
