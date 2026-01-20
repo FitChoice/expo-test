@@ -15,10 +15,10 @@ import Diary from '@/assets/images/diary.svg'
 /**
  * Базовая ячейка календаря с фиксированной шириной (1/7 от ряда)
  */
-const CalendarCell = ({ children }: { children: React.ReactNode }) => (
-	<View 
-		style={{ width: CALENDAR_CELL_WIDTH }} 
-		className="mb-3 items-center"
+const CalendarCell = ({ children, isLast }: { children: React.ReactNode; isLast?: boolean }) => (
+	<View
+		style={{ width: CALENDAR_CELL_WIDTH }}
+		className={`mb-3 items-center ${!isLast ? 'pr-1' : ''}`}
 	>
 		{children}
 	</View>
@@ -27,8 +27,8 @@ const CalendarCell = ({ children }: { children: React.ReactNode }) => (
 /**
  * Пустая ячейка для заполнения отступов в начале месяца
  */
-const EmptyCell = () => (
-	<CalendarCell>
+const EmptyCell = ({ isLast }: { isLast?: boolean }) => (
+	<CalendarCell isLast={isLast}>
 		<View className="h-16" />
 	</CalendarCell>
 )
@@ -41,12 +41,13 @@ const DayCellComponent = ({
 	hasWorkout,
 	hasDiary,
 	onPress,
-}: DayCell & { onPress?: () => void }) => {
+	isLast,
+}: DayCell & { onPress?: () => void; isLast?: boolean }) => {
 	const workoutColor = hasWorkout ? CALENDAR_COLORS.active : CALENDAR_COLORS.inactive
 	const diaryColor = hasDiary ? CALENDAR_COLORS.active : CALENDAR_COLORS.inactive
 
 	return (
-		<CalendarCell>
+		<CalendarCell isLast={isLast}>
 			<TouchableOpacity
 				className="items-center"
 				activeOpacity={0.85}
@@ -92,11 +93,11 @@ export const CalendarStatistic = () => {
 			<View className="bg-brand-dark-400 mb-6 rounded-3xl p-4">
 				{/* 1. Заголовок дней недели — ОДИН на весь календарь */}
 				<View className="mb-4 flex-row">
-					{WEEK_DAYS_SHORT.map((day) => (
+					{WEEK_DAYS_SHORT.map((day, index) => (
 						<Text
 							key={day}
 							style={{ width: CALENDAR_CELL_WIDTH }}
-							className="text-center text-t3-regular uppercase text-light-text-500"
+							className={`text-center text-t3-regular uppercase text-light-text-500 ${index < 6 ? 'pr-1' : ''}`}
 						>
 							{day}
 						</Text>
@@ -119,11 +120,12 @@ export const CalendarStatistic = () => {
 							<View key={`${key}-week-${weekIdx}`} className="flex-row">
 								{week.map((day, dayIdx) => (
 									day.day === null ? (
-										<EmptyCell key={`${key}-empty-${weekIdx}-${dayIdx}`} />
+										<EmptyCell key={`${key}-empty-${weekIdx}-${dayIdx}`} isLast={dayIdx === 6} />
 									) : (
 										<DayCellComponent
 											key={`${key}-${day.day}`}
 											{...day}
+											isLast={dayIdx === 6}
 											onPress={() => handleDayPress(day)}
 										/>
 									)

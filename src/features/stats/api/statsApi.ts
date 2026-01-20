@@ -98,9 +98,7 @@ export const statsApi = {
 	 * GET /api/v1/stats/day
 	 */
 	async getDayDetails({ id }: DayDetailsParams): Promise<ApiResult<DayDetailsResponse>> {
-		const query = buildQueryString({ id })
-
-		return apiClient.get<DayDetailsResponse>(`/stats/day${query}`)
+		return apiClient.get<DayDetailsResponse>(`/stats/day/?id=${id}`)
 	},
 
 	/**

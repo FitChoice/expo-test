@@ -451,6 +451,8 @@ class ApiClient {
 	async get<TResponse>(endpoint: string): Promise<ApiResult<TResponse>> {
 		const authHeaders = await this.getAuthHeaders()
 
+		console.log('Making GET request to:', `${this.baseUrl}${endpoint}`)
+
 		try {
 			const response = await fetch(`${this.baseUrl}${endpoint}`, {
 				method: 'GET',
@@ -476,8 +478,9 @@ class ApiClient {
 				try {
 					responseData = await response.json()
 				} catch (jsonError) {
-					console.error('Failed to parse JSON response:', jsonError)
+					console.log('Failed to parse JSON response:', jsonError)
 					const text = await response.text()
+					console.log('Response text:', text)
 					return {
 						success: false,
 						error: `Ошибка сервера: ${response.status}`,
