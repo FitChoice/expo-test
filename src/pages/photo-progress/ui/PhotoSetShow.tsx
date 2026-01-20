@@ -84,11 +84,11 @@ export const PhotoSetShow = () => {
 				{currentSeries.photos.map((item, idx) => (
 					<View
 						key={`${item.side}-${item.id}`}
-						className="h-[260px] w-[48%]"
+						className="h-[260px] w-[48%]  "
 						style={{ marginBottom: idx === 0 || idx === 1 ? 40 : 0 }}
 					>
-						<View className="mb-2 rounded-3xl bg-[#454545]/70 px-4 py-2">
-							<Text className="text-t4 text-light-text-100">{sideTitle[item.side]}</Text>
+						<View className=" items-center justify-center">
+							<Text className="text-t4 mb-2 rounded-3xl bg-[#454545]/70 px-4 py-2 text-light-text-100">{sideTitle[item.side]}</Text>
 						</View>
 						<View className="overflow-hidden rounded-2xl border border-[#2a2a2a]">
 							<Image source={{ uri: item.uri }} className="h-full w-full" resizeMode="cover" />

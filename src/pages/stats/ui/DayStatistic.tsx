@@ -76,18 +76,18 @@ const moodPoints = [
 ]
 
 const bodyWeightPoints = [
-	{ month: 'ян', value: 56 },
-	{ month: 'фв', value: 64 },
-	{ month: 'мр', value: 60 },
-	{ month: 'ап', value: 74 },
+	{ month: 'ян', value: 26 },
+	{ month: 'фв', value: 34 },
+	{ month: 'мр', value: 40 },
+	{ month: 'ап', value: 54 },
 	{ month: 'мй', value: 68 },
-	{ month: 'ин', value: 62 },
-	{ month: 'ил', value: 75 },
-	{ month: 'ав', value: 64 },
-	{ month: 'сн', value: 72 },
-	{ month: 'ок', value: 70 },
-	{ month: 'нб', value: 64 },
-	{ month: 'дк', value: 56 },
+	{ month: 'ин', value: 72 },
+	{ month: 'ил', value: 65 },
+	{ month: 'ав', value: 54 },
+	{ month: 'сн', value: 42 },
+	{ month: 'ок', value: 30 },
+	{ month: 'нб', value: 24 },
+	{ month: 'дк', value: 16 },
 ]
 
 export function DayStatistic() {
@@ -287,8 +287,8 @@ export function DayStatistic() {
 								<View
 									style={{
 										height: value,
-										width: 14,
-										backgroundColor: month === 'дк' ? '#9AE6B4' : '#3F3F46',
+										width: 22,
+										backgroundColor: month === 'ян' ? '#C5F680' : '#3F3F46',
 									}}
 									className="rounded-2xl"
 								/>
