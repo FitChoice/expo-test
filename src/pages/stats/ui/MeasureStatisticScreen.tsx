@@ -45,9 +45,7 @@ export const MeasureStatisticScreen = () => {
 	const mutation = useCreateBodyStatsMutation()
 
 	const currentDate = new Date().toLocaleDateString('ru-RU', {
-		day: 'numeric',
 		month: 'long',
-		weekday: 'long',
 	})
 
 	const updateMeasurement = (key: string, value: string) => {
@@ -97,7 +95,7 @@ export const MeasureStatisticScreen = () => {
 				<View className="flex-1 bg-black">
 					{/* Header with gradient */}
 					<View
-						className="absolute left-0 right-0 top-0 z-0 rounded-b-[25%]"
+						className="absolute left-0 right-0 top-0 z-0 rounded-b-[25px]"
 						style={{ overflow: 'hidden' }}
 					>
 						<GradientHeader />

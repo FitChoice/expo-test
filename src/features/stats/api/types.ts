@@ -133,6 +133,7 @@ export type StatKind =
 	| 'hip_circumference'
 	| 'forearm_circumference'
 	| 'shin_circumference'
+	| 'thigh_circumference'
 
 export interface ChartParams {
 	userId: string | number

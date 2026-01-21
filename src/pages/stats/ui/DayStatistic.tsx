@@ -20,12 +20,20 @@ import Morning from '@/assets/images/morning_ex.svg'
 import Diary from '@/shared/ui/Icon/assets/diary.svg'
 import {
 	CHART_BAR_HEIGHT_STEP,
+	getBodyMetricLabel,
+	getBodyMetricUnit,
+	getCurrentMonthKey,
+	getMonthPrepositional,
 	calculateAverage,
 	getMetricLabel,
+	transformBodyChartData,
 	transformChartData,
+	type BodyChartDisplayPoint,
+	type BodyMetric,
 	type ChartDisplayPoint,
 	type WellbeingMetric,
 } from '../lib'
+import { BodyMetricSelectorModal } from './BodyMetricSelectorModal'
 import { MetricSelectorModal } from './MetricSelectorModal'
 
 type OverallStatConfig = {
@@ -70,23 +78,10 @@ const OVERALL_STATS_CONFIG: OverallStatConfig[] = [
 	},
 ]
 
-const bodyWeightPoints = [
-	{ month: 'ян', value: 26 },
-	{ month: 'фв', value: 34 },
-	{ month: 'мр', value: 40 },
-	{ month: 'ап', value: 54 },
-	{ month: 'мй', value: 68 },
-	{ month: 'ин', value: 72 },
-	{ month: 'ил', value: 65 },
-	{ month: 'ав', value: 54 },
-	{ month: 'сн', value: 42 },
-	{ month: 'ок', value: 30 },
-	{ month: 'нб', value: 24 },
-	{ month: 'дк', value: 16 },
-]
-
 const WEEK_BAR_WIDTH = 40
 const MONTH_BAR_WIDTH = 20
+const BODY_BAR_WIDTH = 22
+const BODY_BAR_MAX_HEIGHT = 72
 
 interface ChartBarProps {
 	point: ChartDisplayPoint
@@ -133,12 +128,54 @@ const ChartBar = ({ point, isSelected, onPress, barWidth }: ChartBarProps) => {
 	)
 }
 
+interface BodyChartBarProps {
+	point: BodyChartDisplayPoint
+	isSelected: boolean
+	onPress: () => void
+}
+
+const BodyChartBar = ({ point, isSelected, onPress }: BodyChartBarProps) => {
+	const { label, height, value } = point
+	const isEmpty = value === 0
+
+	if (isEmpty) {
+		return (
+			<View style={{ width: BODY_BAR_WIDTH }} className="items-center gap-1">
+				<View style={{ height: BODY_BAR_MAX_HEIGHT, width: BODY_BAR_WIDTH, opacity: 0 }} />
+				<Text className="text-light-text-200">{label}</Text>
+			</View>
+		)
+	}
+
+	return (
+		<TouchableOpacity
+			onPress={onPress}
+			activeOpacity={0.7}
+			style={{ width: BODY_BAR_WIDTH }}
+			className="items-center gap-1"
+		>
+			<View
+				style={{
+					height,
+					width: BODY_BAR_WIDTH,
+					backgroundColor: isSelected ? '#C5F680' : '#3F3F46',
+				}}
+				className="rounded-2xl"
+			/>
+			<Text className="text-light-text-200">{label}</Text>
+		</TouchableOpacity>
+	)
+}
+
 export function DayStatistic() {
 	const { data: mainStats, isLoading: isStatsLoading, error: statsError } = useMainStatsQuery()
 	const [selectedMetric, setSelectedMetric] = useState<WellbeingMetric>('mood')
 	const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('week')
 	const [isMetricModalVisible, setIsMetricModalVisible] = useState(false)
 	const [selectedBarKey, setSelectedBarKey] = useState<string | null>(null)
+	const [selectedBodyMetric, setSelectedBodyMetric] = useState<BodyMetric>('weight')
+	const [isBodyMetricModalVisible, setIsBodyMetricModalVisible] = useState(false)
+	const [selectedBodyBarKey, setSelectedBodyBarKey] = useState<string | null>(null)
 
 	const {
 		data: chartData,
@@ -147,6 +184,15 @@ export function DayStatistic() {
 	} = useChartQuery({
 		kind: selectedMetric,
 		period: selectedPeriod,
+	})
+
+	const {
+		data: bodyChartData,
+		isLoading: isBodyChartLoading,
+		error: bodyChartError,
+	} = useChartQuery({
+		kind: selectedBodyMetric,
+		period: 'year',
 	})
 
 	const overallStats = useMemo(
@@ -195,9 +241,41 @@ export function DayStatistic() {
 	const barWidth = selectedPeriod === 'week' ? WEEK_BAR_WIDTH : MONTH_BAR_WIDTH
 	const { Icon: BottomIcon, label: bottomLabel } = bottomDisplayData
 
+	const bodyDisplayPoints = useMemo(() => {
+		if (!bodyChartData?.stats) return []
+		return transformBodyChartData(bodyChartData.stats)
+	}, [bodyChartData?.stats])
+
+	const bodyBottomDisplayData = useMemo(() => {
+		const unit = getBodyMetricUnit(selectedBodyMetric)
+
+		if (selectedBodyBarKey) {
+			const selectedPoint = bodyDisplayPoints.find((point) => point.key === selectedBodyBarKey)
+			if (selectedPoint && selectedPoint.value > 0) {
+				const monthName = getMonthPrepositional(selectedPoint.key)
+				return {
+					value: `${selectedPoint.value} ${unit}`,
+					label: `В ${monthName}`,
+				}
+			}
+		}
+
+		return {
+			value: '—',
+			label: 'Нет данных',
+		}
+	}, [selectedBodyBarKey, bodyDisplayPoints, selectedBodyMetric])
+
 	useEffect(() => {
 		setSelectedBarKey(null)
 	}, [selectedMetric, selectedPeriod])
+
+	useEffect(() => {
+		if (bodyChartData?.stats) {
+			const currentKey = getCurrentMonthKey(bodyChartData.stats)
+			setSelectedBodyBarKey(currentKey)
+		}
+	}, [bodyChartData?.stats, selectedBodyMetric])
 
 	return (
 		<>
@@ -407,36 +485,48 @@ export function DayStatistic() {
 					</View>
 
 					<TouchableOpacity
-						className="mb-10 w-20 flex-row items-center justify-center rounded-2xl bg-fill-800 py-2"
+						className="mb-10 w-40 flex-row items-center justify-center rounded-2xl bg-fill-800 py-2"
 						activeOpacity={0.9}
+						onPress={() => setIsBodyMetricModalVisible(true)}
 					>
-						<Text className="text-t3 text-light-text-200"> Вес</Text>
+						<Text className="text-t3 text-light-text-200">
+							{getBodyMetricLabel(selectedBodyMetric)}
+						</Text>
 						<EvilIcons name="chevron-right" size={24} color="white" />
 					</TouchableOpacity>
 
-					<View className="flex-row items-end justify-between gap-2">
-						{bodyWeightPoints.map(({ value, month }) => (
-							<View key={month} className="items-center gap-1">
-								<View
-									style={{
-										height: value,
-										width: 22,
-										backgroundColor: month === 'ян' ? '#C5F680' : '#3F3F46',
-									}}
-									className="rounded-2xl"
+					{isBodyChartLoading ? (
+						<View className="items-center justify-center py-8">
+							<ActivityIndicator color="#aaec4d" />
+						</View>
+					) : bodyChartError ? (
+						<View className="rounded-2xl bg-[#1e1e1e] p-4">
+							<Text className="text-body-medium text-feedback-negative-900">
+								{bodyChartError.message}
+							</Text>
+						</View>
+					) : (
+						<View className="flex-row items-end justify-between gap-2">
+							{bodyDisplayPoints.map((point) => (
+								<BodyChartBar
+									key={point.key}
+									point={point}
+									isSelected={selectedBodyBarKey === point.key}
+									onPress={() => setSelectedBodyBarKey(point.key)}
 								/>
-								<Text className="text-light-text-200">{month}</Text>
-							</View>
-						))}
-					</View>
+							))}
+						</View>
+					)}
 				</View>
 
-				<View className="p-1" >
-					<View className=" mt-4 flex-row items-center justify-between gap-4 rounded-[20px] bg-black px-4 py-5">
+				<View className="p-1">
+					<View className="mt-4 flex-row items-center justify-between gap-4 rounded-[20px] bg-black px-4 py-5">
 						<Text className="text-t1 text-light-text-100">
-							{mainStats ? '52 кг' : '—'}
+							{bodyBottomDisplayData.value}
 						</Text>
-						<Text className="text-body-regular text-light-text-200">В ноябре</Text>
+						<Text className="text-body-regular text-light-text-200">
+							{bodyBottomDisplayData.label}
+						</Text>
 					</View>
 				</View>
 			</View>
@@ -464,6 +554,13 @@ export function DayStatistic() {
 				selectedMetric={selectedMetric}
 				onSelect={setSelectedMetric}
 				onClose={() => setIsMetricModalVisible(false)}
+			/>
+
+			<BodyMetricSelectorModal
+				visible={isBodyMetricModalVisible}
+				selectedMetric={selectedBodyMetric}
+				onSelect={setSelectedBodyMetric}
+				onClose={() => setIsBodyMetricModalVisible(false)}
 			/>
 		</>
 	)
