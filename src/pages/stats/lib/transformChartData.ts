@@ -14,7 +14,8 @@ export interface ChartDisplayPoint {
 	value: number
 }
 
-const HEIGHT_MULTIPLIER = 40
+export const CHART_BAR_HEIGHT_STEP = 40
+const HEIGHT_MULTIPLIER = CHART_BAR_HEIGHT_STEP
 
 export const transformChartData = (
 	stats: ChartStat[],
@@ -31,14 +32,15 @@ export const transformChartData = (
 			label,
 			Icon: rating.Icon,
 			color: rating.color,
-			height: Math.max(stat.value * HEIGHT_MULTIPLIER, HEIGHT_MULTIPLIER),
+			height: stat.value === 0 ? 0 : Math.max(stat.value * HEIGHT_MULTIPLIER, HEIGHT_MULTIPLIER),
 			value: stat.value,
 		}
 	})
 }
 
 export const calculateAverage = (stats: ChartStat[]): number => {
-	if (!stats.length) return 3
-	const sum = stats.reduce((acc, item) => acc + item.value, 0)
-	return Math.round(sum / stats.length)
+	const validStats = stats.filter((stat) => stat.value > 0)
+	if (!validStats.length) return 3
+	const sum = validStats.reduce((acc, item) => acc + item.value, 0)
+	return Math.round(sum / validStats.length)
 }

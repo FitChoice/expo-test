@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react'
-import { View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
+import React, { useEffect, useMemo, useState } from 'react'
+import { View, Text, Image, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import Feather from '@expo/vector-icons/Feather'
@@ -18,7 +18,14 @@ import girlMeasure from '../../../../assets/images/girl-measure.png'
 import Barbell from '@/assets/images/barbell.svg'
 import Morning from '@/assets/images/morning_ex.svg'
 import Diary from '@/shared/ui/Icon/assets/diary.svg'
-import { calculateAverage, getMetricLabel, transformChartData, type WellbeingMetric } from '../lib'
+import {
+	CHART_BAR_HEIGHT_STEP,
+	calculateAverage,
+	getMetricLabel,
+	transformChartData,
+	type ChartDisplayPoint,
+	type WellbeingMetric,
+} from '../lib'
 import { MetricSelectorModal } from './MetricSelectorModal'
 
 type OverallStatConfig = {
@@ -78,11 +85,60 @@ const bodyWeightPoints = [
 	{ month: 'дк', value: 16 },
 ]
 
+const WEEK_BAR_WIDTH = 40
+const MONTH_BAR_WIDTH = 20
+
+interface ChartBarProps {
+	point: ChartDisplayPoint
+	isSelected: boolean
+	onPress: () => void
+	barWidth: number
+}
+
+const ChartBar = ({ point, isSelected, onPress, barWidth }: ChartBarProps) => {
+	const { label, Icon: MoodIcon, color, height, value } = point
+	const isEmpty = value === 0
+
+	if (isEmpty) {
+		return (
+			<View style={{ width: barWidth }} className="items-center gap-2">
+				<View style={{ height: 24, width: 24, opacity: 0 }} />
+				<View style={{ height: CHART_BAR_HEIGHT_STEP, width: barWidth, opacity: 0 }} />
+				<Text className="uppercase text-light-text-200">{label}</Text>
+			</View>
+		)
+	}
+
+	return (
+		<TouchableOpacity
+			onPress={onPress}
+			activeOpacity={0.7}
+			style={{ width: barWidth }}
+			className="items-center gap-2"
+		>
+			<MoodIcon width={24} height={24} />
+			<View
+				style={{
+					height,
+					width: barWidth,
+					borderWidth: isSelected ? 2 : 0,
+					borderColor: isSelected ? '#C5F680' : 'transparent',
+				}}
+				className="overflow-hidden rounded-2xl bg-[#3f3f3f]"
+			>
+				<View style={{ height: 8, backgroundColor: color, width: '100%' }} />
+			</View>
+			<Text className="uppercase text-light-text-200">{label}</Text>
+		</TouchableOpacity>
+	)
+}
+
 export function DayStatistic() {
 	const { data: mainStats, isLoading: isStatsLoading, error: statsError } = useMainStatsQuery()
 	const [selectedMetric, setSelectedMetric] = useState<WellbeingMetric>('mood')
 	const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('week')
 	const [isMetricModalVisible, setIsMetricModalVisible] = useState(false)
+	const [selectedBarKey, setSelectedBarKey] = useState<string | null>(null)
 
 	const {
 		data: chartData,
@@ -119,7 +175,29 @@ export function DayStatistic() {
 		return calculateAverage(chartData.stats)
 	}, [chartData?.stats])
 
-	const AverageIcon = getRatingOption(averageRating).Icon
+	const bottomDisplayData = useMemo(() => {
+		if (selectedBarKey) {
+			const selectedPoint = displayPoints.find((point) => point.key === selectedBarKey)
+			if (selectedPoint && selectedPoint.value > 0) {
+				return {
+					Icon: selectedPoint.Icon,
+					label: `${selectedPoint.label}: ${selectedPoint.value}`,
+				}
+			}
+		}
+
+		return {
+			Icon: getRatingOption(averageRating).Icon,
+			label: `В среднем: ${averageRating}`,
+		}
+	}, [selectedBarKey, displayPoints, averageRating])
+
+	const barWidth = selectedPeriod === 'week' ? WEEK_BAR_WIDTH : MONTH_BAR_WIDTH
+	const { Icon: BottomIcon, label: bottomLabel } = bottomDisplayData
+
+	useEffect(() => {
+		setSelectedBarKey(null)
+	}, [selectedMetric, selectedPeriod])
 
 	return (
 		<>
@@ -278,26 +356,45 @@ export function DayStatistic() {
 							{chartError.message}
 						</Text>
 					</View>
+				) : selectedPeriod === 'month' ? (
+					<ScrollView
+						horizontal
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={{ gap: 8, paddingVertical: 8, alignItems: 'flex-end' }}
+					>
+						{displayPoints.map((point) => (
+							<ChartBar
+								key={point.key}
+								point={point}
+								isSelected={selectedBarKey === point.key}
+								onPress={() =>
+									setSelectedBarKey((prev) => (prev === point.key ? null : point.key))
+								}
+								barWidth={barWidth}
+							/>
+						))}
+					</ScrollView>
 				) : (
 					<View className="flex-row items-end justify-between gap-2">
-						{displayPoints.map(({ key, label, Icon: MoodIcon, color, height }) => (
-							<View key={key} className="items-center gap-2">
-								<MoodIcon width={24} height={24} />
-								<View
-									style={{ height, width: 40 }}
-									className="overflow-hidden rounded-2xl bg-[#3f3f3f]"
-								>
-									<View style={{ height: 8, backgroundColor: color, width: '100%' }} />
-								</View>
-								<Text className="uppercase text-light-text-200">{label}</Text>
-							</View>
+						{displayPoints.map((point) => (
+							<ChartBar
+								key={point.key}
+								point={point}
+								isSelected={selectedBarKey === point.key}
+								onPress={() =>
+									setSelectedBarKey((prev) => (prev === point.key ? null : point.key))
+								}
+								barWidth={barWidth}
+							/>
 						))}
 					</View>
 				)}
 
 				<View className="mt-4 h-20 flex-row items-center gap-4 rounded-full bg-[#3f3f3f] px-4">
-					<AverageIcon width={40} height={40} />
-					<Text className="text-body-regular text-light-text-200">В среднем</Text>
+					<BottomIcon width={40} height={40} />
+					<Text className="text-body-regular text-light-text-200">
+						{bottomLabel}
+					</Text>
 				</View>
 			</View>
 

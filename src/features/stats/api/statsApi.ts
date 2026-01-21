@@ -100,7 +100,7 @@ export const statsApi = {
 	 * GET /api/v1/stats/day
 	 */
 	async getDayDetails({ id }: DayDetailsParams): Promise<ApiResult<DayDetailsResponse>> {
-		return apiClient.get<DayDetailsResponse>(`/stats/day/?id=${id}`)
+		return apiClient.get<DayDetailsResponse>(`/stats/calendar/day/?id=${id}`)
 	},
 
 	/**
