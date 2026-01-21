@@ -1,19 +1,20 @@
 import React, { useMemo } from 'react'
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import { LinearGradient } from 'expo-linear-gradient'
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
 import Feather from '@expo/vector-icons/Feather'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 
 import MorningExercise from '@/assets/images/morning_ex.svg'
 import Stretching from '@/assets/images/stretching.svg'
 import Barbell from '@/assets/images/barbell.svg'
-import Diary from '@/assets/images/diary.svg'
+import Diary from '@/assets/images/diary_green.svg'
 import { useDayDetailsQuery } from '@/features/stats'
 import type { DayTraining } from '@/features/stats'
+import { StatsDetailPageLayout, TrainingTags } from '@/shared/ui'
+import MaterialIcons from '@expo/vector-icons/MaterialIcons'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 
-const ACTIVE_BACKGROUND = '#3f3f3f'
-const ICON_ACTIVE = '#a6f16d'
-const ICON_INACTIVE = '#3f3f3f'
+
+
 
 type DayTask = {
 	id: string
@@ -56,40 +57,47 @@ const getTaskIcon = (training?: Pick<DayTraining, 'type'>) => {
 
 const TaskCard = ({ task }: { task: DayTask }) => {
 	const Icon = task.icon
-	const iconColor = task.completed ? ICON_ACTIVE : ICON_INACTIVE
+
 
 	return (
-		<View className="mb-3 flex-row items-center rounded-3xl bg-[#1f1f1f] p-4">
-			<View className="mr-4 h-12 w-12 items-center justify-center rounded-2xl bg-[#262626]">
-				<Icon width={26} height={26} color={iconColor} fill={iconColor} />
-			</View>
+		<View className="mb-3 rounded-3xl bg-[#1E1E1E] p-4 gap-3">
 
-			<View className="flex-1">
-				<Text className="text-body-semibold text-white">{task.title}</Text>
+			<View className="flex-row  items-center justify-between " >
 
-				<View className="mt-2 flex-row items-center gap-4">
-					{task.duration ? (
-						<View className="flex-row items-center gap-1">
-							<Feather name="clock" size={14} color="#b0b0b0" />
-							<Text className="text-light-text-300 text-t3">{task.duration} минут</Text>
-						</View>
-					) : null}
+				<View className="flex-row  gap-5" >
+				<View >
+					<Icon width={26} height={26} color={'#a6f16d'} fill={'#a6f16d'} />
+				</View>
 
-					{task.xp ? (
-						<View className="flex-row items-center gap-1">
-							<Feather name="star" size={14} color="#b0b0b0" />
-							<Text className="text-light-text-300 text-t3">+{task.xp} опыта</Text>
-						</View>
-					) : null}
+				<View>
+					<Text className="text-t2-bold text-white">{task.title}</Text>
+				</View>
+				</View>
+
+				<View
+					className="h-12 w-12 bg-[#3f3f3f] items-center justify-center rounded-2xl"
+				>
+					<Feather name="arrow-right" size={18} color="#ffffff" />
 				</View>
 			</View>
 
-			<View
-				className="h-10 w-10 items-center justify-center rounded-2xl"
-				style={{ backgroundColor: ACTIVE_BACKGROUND }}
-			>
-				<Feather name="arrow-right" size={18} color="#ffffff" />
-			</View>
+			{
+				!task.title.includes('дневник') &&
+				<TrainingTags
+					icon1={<MaterialIcons name="timer" size={16} color="white" />}
+					title1={ `${task?.duration || ''} минут` }
+					icon2={
+						<MaterialCommunityIcons
+							name="bow-arrow"
+							size={16}
+							color="white"
+						/>
+					}
+					title2={`${task?.xp || ''} опыта`}
+				/>
+			}
+
+
 		</View>
 	)
 }
@@ -135,33 +143,7 @@ export const DayDetailsScreen = () => {
 	}, [details])
 
 	return (
-		<View className="flex-1 bg-black">
-			<LinearGradient
-				colors={['#6a55c8', '#2b233c', '#0f0f0f']}
-				start={{ x: 0, y: 0 }}
-				end={{ x: 1, y: 1 }}
-				style={{
-					paddingTop: 48,
-					paddingHorizontal: 20,
-					paddingBottom: 28,
-					borderBottomLeftRadius: 26,
-					borderBottomRightRadius: 26,
-				}}
-			>
-				<TouchableOpacity
-					onPress={() => router.back()}
-					activeOpacity={0.8}
-					className="mb-4 h-10 w-10 items-center justify-center rounded-full"
-					style={{ backgroundColor: ACTIVE_BACKGROUND }}
-				>
-					<Feather name="arrow-left" size={20} color="#ffffff" />
-				</TouchableOpacity>
-
-				<Text className="text-h2 text-white">{titleDate}</Text>
-				<Text className="text-body-medium text-light-text-300 mt-1">
-					Активности за день
-				</Text>
-			</LinearGradient>
+		<StatsDetailPageLayout isLoading={isLoading} title={titleDate} needSubtitle={false}>
 
 			<ScrollView
 				className="flex-1"
@@ -170,7 +152,7 @@ export const DayDetailsScreen = () => {
 			>
 				{isLoading ? (
 					<View className="mt-8 items-center">
-						<ActivityIndicator color={ICON_ACTIVE} />
+						<ActivityIndicator />
 						<Text className="text-body-medium text-light-text-300 mt-3">
 							Загружаем данные дня...
 						</Text>
@@ -191,6 +173,6 @@ export const DayDetailsScreen = () => {
 					tasks.map((task) => <TaskCard key={task.id} task={task} />)
 				)}
 			</ScrollView>
-		</View>
+		</StatsDetailPageLayout>
 	)
 }
