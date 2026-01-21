@@ -12,80 +12,13 @@ import {
 	type DayOfWeek,
 	type Goal,
 	type AgeGroup,
+	daysToMasks,
+	masksToDays,
+	goalsToMasks,
+	masksToGoals,
+	masksToNumber,
 } from '@/entities/survey'
 import { userApi } from '@/features/user'
-
-// Битовая маска дней недели: 1=Пн, 2=Вт, 4=Ср, 8=Чт, 16=Пт, 32=Сб, 64=Вс
-const DAY_MASKS: Record<DayOfWeek, number> = {
-	monday: 1,
-	tuesday: 2,
-	wednesday: 4,
-	thursday: 8,
-	friday: 16,
-	saturday: 32,
-	sunday: 64,
-}
-
-// Конвертация DayOfWeek[] в массив битовых масок
-function daysToMasks(days: DayOfWeek[]): number[] {
-	return days.map((day) => DAY_MASKS[day])
-}
-
-// Конвертация массива битовых масок обратно в DayOfWeek[]
-function masksToDays(masks: number[]): DayOfWeek[] {
-	const maskToDay: Record<number, DayOfWeek> = {
-		1: 'monday',
-		2: 'tuesday',
-		4: 'wednesday',
-		8: 'thursday',
-		16: 'friday',
-		32: 'saturday',
-		64: 'sunday',
-	}
-	return masks.map((mask) => maskToDay[mask]).filter(Boolean) as DayOfWeek[]
-}
-
-// Конвертация массива битовых масок дней в одно число (битовую маску)
-function masksToDaysNumber(masks: number[]): number {
-	return masks.reduce((mask, dayMask) => mask | dayMask, 0)
-}
-
-// Битовая маска целей: 1=Осанка, 2=Боль, 4=Гибкость, 8=Укрепление, 16=Сброс веса, 32=Стресс, 64=Энергия, 128=Самочувствие
-const GOAL_MASKS: Record<Goal, number> = {
-	posture: 1,
-	pain_relief: 2,
-	flexibility: 4,
-	strength: 8,
-	weight_loss: 16,
-	stress_relief: 32,
-	energy: 64,
-	wellness: 128,
-}
-
-// Конвертация Goal[] в массив битовых масок
-function goalsToMasks(goals: Goal[]): number[] {
-	return goals.map((goal) => GOAL_MASKS[goal])
-}
-
-// Конвертация массива битовых масок обратно в Goal[]
-function masksToGoals(masks: number[]): Goal[] {
-	const maskToGoal: Record<number, Goal> = {
-		1: 'posture',
-		2: 'pain_relief',
-		4: 'flexibility',
-		8: 'strength',
-		16: 'weight_loss',
-		32: 'stress_relief',
-		64: 'energy',
-		128: 'wellness',
-	}
-	return masks.map((mask) => maskToGoal[mask]).filter(Boolean) as Goal[]
-}
-
-// Конвертация массива битовых масок целей в одно число (битовую маску)
-function masksToGoalsNumber(masks: number[]): number {
-	return masks.reduce((mask, goalMask) => mask | goalMask, 0)
-}
 
 // Конвертация AgeGroup строки в число (среднее арифметическое)
 function ageGroupToNumber(ageGroup: AgeGroup): number {
@@ -206,7 +139,7 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 		set((state) => ({
 			surveyData: {
 				...state.surveyData,
-				train_days: daysToMasks(days) as any, // Конвертируем в массив чисел
+				train_days: daysToMasks(days), // Конвертируем в массив чисел
 			},
 		})),
 
@@ -219,7 +152,7 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 		set((state) => ({
 			surveyData: {
 				...state.surveyData,
-				train_goals: goalsToMasks(goals) as any, // Конвертируем в массив чисел
+				train_goals: goalsToMasks(goals), // Конвертируем в массив чисел
 			},
 		})),
 
@@ -237,7 +170,7 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 		set((state) => ({
 			surveyData: {
 				...state.surveyData,
-				age: ageGroupToNumber(ageGroup) as any, // Конвертируем в число (среднее арифметическое)
+				age: ageGroupToNumber(ageGroup), // Конвертируем в число (среднее арифметическое)
 			},
 		})),
 
@@ -247,7 +180,7 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 			return {
 				surveyData: {
 					...state.surveyData,
-					age: ageGroup ? (ageGroupToNumber(ageGroup) as any) : null,
+					age: ageGroup ? ageGroupToNumber(ageGroup) : null,
 				},
 			}
 		}),
@@ -347,8 +280,8 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 
 			const dataToSend = {
 				...surveyData,
-				train_days: masksToDaysNumber(trainDaysMasks) as any,
-				train_goals: masksToGoalsNumber(trainGoalsMasks) as any,
+				train_days: masksToNumber(trainDaysMasks) as any,
+				train_goals: masksToNumber(trainGoalsMasks) as any,
 			}
 
 			const result = await userApi.updateUser(userId, dataToSend as SurveyData)

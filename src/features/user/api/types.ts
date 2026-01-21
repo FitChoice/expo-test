@@ -19,6 +19,16 @@ export interface NotificationSettings {
 export interface UpdateProfileInput {
 	name?: string
 	avatar_url?: string
+	promocode?: string
+	gender?: 'male' | 'female'
+	age?: number
+	height?: number
+	weight?: number
+	train_days?: number
+	train_frequency?: number
+	train_goals?: number
+	main_direction?: number
+	secondary_direction?: number | null
 }
 
 export interface AvatarPresignUrlResponse {

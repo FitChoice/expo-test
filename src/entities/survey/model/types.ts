@@ -38,12 +38,12 @@ export type AgeGroup =
 export interface SurveyData {
 	name: string
 	gender: Gender | null
-	train_days: DayOfWeek[]
+	train_days: DayOfWeek[] | number[] | number
 	train_frequency: Frequency | null
-	train_goals: Goal[]
+	train_goals: Goal[] | number[] | number
 	main_direction: Direction | null
 	secondary_direction: Direction | null
-	age: AgeGroup | null
+	age: AgeGroup | number | null
 	height: number | null
 	weight: number | null
 	bmi: number | null

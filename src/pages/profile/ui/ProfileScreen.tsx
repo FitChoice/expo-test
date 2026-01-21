@@ -157,7 +157,7 @@ const ProfileContent = () => {
 
 				{/* CTA Banner */}
 				<TouchableOpacity
-					onPress={() => router.push('/survey')}
+					onPress={() => router.push('/change-training-program')}
 					className="mt-8 overflow-hidden rounded-[24px] bg-[#1E1E1E]"
 					activeOpacity={0.85}
 					style={{ minHeight: 150, padding: 20 }}

@@ -17,6 +17,15 @@ export type {
 export { calculateBMI, getBMICategory, type BMICategory } from './lib/calculator'
 
 export { validateSurveyData } from './lib/validator'
+export {
+	daysToMasks,
+	masksToDays,
+	goalsToMasks,
+	masksToGoals,
+	dayBitmaskToMasks,
+	goalBitmaskToMasks,
+	masksToNumber,
+} from './lib/converters'
 
 // Constants (UI options for forms)
 export {
