@@ -4,18 +4,23 @@
  */
 
 import { View, Text } from 'react-native'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Button } from '@/shared/ui'
 import { DotsProgress } from '@/shared/ui/DotsProgress'
 import SoundIcon from '@/assets/icons/large/sound.svg'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
+import { warmUpSpeech } from '@/shared/lib'
 
 interface SoundCheckScreenProps {
 	onNext: () => void
 }
 
 export function SoundCheckScreen({ onNext }: SoundCheckScreenProps) {
+	useEffect(() => {
+		warmUpSpeech()
+	}, [])
+
 	const handleStop = useCallback(() => {
 		router.back()
 	}, [])

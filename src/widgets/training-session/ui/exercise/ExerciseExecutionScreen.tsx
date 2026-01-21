@@ -5,7 +5,7 @@
  */
 
 import { View, Text, useWindowDimensions, Platform } from 'react-native'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { type ExerciseInfoResponse, useTrainingStore } from '@/entities/training'
 import { VIDEO_SCREEN_HEIGHT as verticalCameraViewHeight } from '@/shared/constants/sizes'
 import { PoseCamera } from '@/widgets/pose-camera'
@@ -18,56 +18,8 @@ import type {
 import { useVideoPlayer, VideoView } from 'expo-video'
 import { useVideoPlayerContext } from '@/shared/hooks/useVideoPlayerContext'
 import { TrainingExerciseProgress } from '@/shared/ui'
+import { useSpeechFeedback } from '@/shared/lib'
 
-
-// =========================================================================
-// DEBUG: Partial ROM Error Display
-// Этот компонент показывает ошибку "неполная амплитуда" при детекции
-// TODO: Удалить или заменить на полноценный UI после тестирования
-// =========================================================================
-const DEBUG_SHOW_PARTIAL_ROM = __DEV__ // Показывать только в dev-режиме
-
-interface PartialRomDebugProps {
-	partialRomCount: number
-	lastPartialRom: PartialROMEvent | null
-	isVisible: boolean
-}
-
-/**
- * Дебаг-компонент для отображения ошибки "неполная амплитуда"
- * Можно легко удалить после интеграции в основной UI
- */
-function PartialRomDebugBadge({ partialRomCount, lastPartialRom, isVisible }: PartialRomDebugProps) {
-	if (!isVisible || !DEBUG_SHOW_PARTIAL_ROM) return null
-
-	return (
-		<View
-			style={{
-				position: 'absolute',
-				top: 60,
-				left: 10,
-				backgroundColor: 'rgba(255, 100, 100, 0.9)',
-				paddingHorizontal: 12,
-				paddingVertical: 8,
-				borderRadius: 8,
-				zIndex: 100,
-			}}
-		>
-			<Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>
-				⚠️ Неполная амплитуда
-			</Text>
-			<Text style={{ color: 'white', fontSize: 12 }}>
-				Ошибок: {partialRomCount}
-			</Text>
-			{lastPartialRom && (
-				<Text style={{ color: 'white', fontSize: 10, opacity: 0.8 }}>
-					{lastPartialRom.phase_type === 'up' ? '↑ не до верха' : '↓ не до низа'}{' '}
-					({Math.round(lastPartialRom.depth_achieved * 100)}%)
-				</Text>
-			)}
-		</View>
-	)
-}
 
 // =========================================================================
 // STUB: Обработчик ошибки "неполная амплитуда"
@@ -75,11 +27,8 @@ function PartialRomDebugBadge({ partialRomCount, lastPartialRom, isVisible }: Pa
 // =========================================================================
 
 /**
- * Заглушка для обработки ошибки неполной амплитуды
- * TODO: Реализовать полноценную обработку:
- * - Показать уведомление пользователю
- * - Записать в аналитику
- * - Добавить в отчет тренировки
+ * Заглушка для обработки ошибки неполной амплитуды.
+ * Место для интеграции аналитики/отчетов, если потребуется.
  */
 function handlePartialRomError(event: PartialROMEvent, exerciseId: string | number): void {
 	// STUB: Логируем ошибку для отладки
@@ -91,6 +40,11 @@ function handlePartialRomError(event: PartialROMEvent, exerciseId: string | numb
 	})
 
 }
+
+const ERROR_WORDS = {
+	up: 'higher',
+	down: 'deeper',
+} as const
 
 
 interface TimerExerciseScreenProps {
@@ -125,15 +79,7 @@ export function ExerciseExecutionScreen({
 	)
 	const videoPlayerContext = useVideoPlayerContext()
 	const [telemetry, setTelemetry] = useState<EngineTelemetry | null>(null)
-
-
-	// =========================================================================
-	// Partial ROM Error Tracking (неполная амплитуда)
-	// =========================================================================
-	const [partialRomCount, setPartialRomCount] = useState(0)
-	const [lastPartialRom, setLastPartialRom] = useState<PartialROMEvent | null>(null)
-	const [showPartialRomBadge, setShowPartialRomBadge] = useState(false)
-	const partialRomTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+	const { speak, stop } = useSpeechFeedback()
 
 	/**
 	 * Обработка телеметрии с детекцией ошибок partial ROM
@@ -143,32 +89,19 @@ export function ExerciseExecutionScreen({
 
 		// Проверяем наличие ошибки неполной амплитуды
 		if (newTelemetry.partialRom) {
-			// Увеличиваем счетчик ошибок
-			setPartialRomCount((prev) => prev + 1)
-			setLastPartialRom(newTelemetry.partialRom)
-
-			// Показываем бейдж на 3 секунды
-			setShowPartialRomBadge(true)
-			if (partialRomTimeoutRef.current) {
-				clearTimeout(partialRomTimeoutRef.current)
-			}
-			partialRomTimeoutRef.current = setTimeout(() => {
-				setShowPartialRomBadge(false)
-			}, 3000)
+			const errorWord = ERROR_WORDS[newTelemetry.partialRom.phase_type]
+			speak(errorWord)
 
 			// Вызываем заглушку для обработки ошибки
 			handlePartialRomError(newTelemetry.partialRom, exercise.id)
 		}
-	}, [exercise.id])
+	}, [exercise.id, speak])
 
-	// Очистка таймера при размонтировании
 	useEffect(() => {
 		return () => {
-			if (partialRomTimeoutRef.current) {
-				clearTimeout(partialRomTimeoutRef.current)
-			}
+			stop()
 		}
-	}, [])
+	}, [stop])
 
 
 	useEffect(() => {
@@ -217,13 +150,6 @@ export function ExerciseExecutionScreen({
 						orientation={orientation}
 						onTelemetry={handleTelemetry}
 						exerciseId={exercise.id}
-					/>
-
-					{/* DEBUG: Отображение ошибки неполной амплитуды */}
-					<PartialRomDebugBadge
-						partialRomCount={partialRomCount}
-						lastPartialRom={lastPartialRom}
-						isVisible={showPartialRomBadge}
 					/>
 				</View>
 
