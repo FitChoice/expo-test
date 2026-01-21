@@ -16,6 +16,7 @@ import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { SafeAreaContainer, Input, Button } from '@/shared/ui'
 import { useCreateBodyStatsMutation } from '@/features/stats'
 import type { BodyStatsInput } from '@/features/stats/api/types'
+import { showToast } from '@/shared/lib'
 
 type MeasurementKey = keyof Omit<BodyStatsInput, 'user_id' | 'date'>
 
@@ -79,10 +80,14 @@ export const MeasureStatisticScreen = () => {
 			thigh_circumference: parseFloat(measurements.thigh_circumference) || 0,
 		}
 
-		console.log('Measurements to save:', payload)
+		//console.log('Measurements to save:', payload)
 
 		mutation.mutate(payload, {
-			onSuccess: () => router.push('/stats'),
+			onSuccess: () => {
+
+				router.push('/stats')
+				showToast.success(`Данные за ${currentDate} внесены`  )
+			},
 		})
 	}
 
