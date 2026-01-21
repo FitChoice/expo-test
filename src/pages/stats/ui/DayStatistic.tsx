@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
@@ -9,19 +9,17 @@ import Fontisto from '@expo/vector-icons/Fontisto'
 import EvilIcons from '@expo/vector-icons/EvilIcons'
 
 import { Icon } from '@/shared/ui'
-import { useMainStatsQuery } from '@/features/stats'
+import { useChartQuery, useMainStatsQuery } from '@/features/stats'
 import type { MainStatsResponse } from '@/features/stats'
+import { getRatingOption } from '@/shared/constants'
 
-import Emo1 from '@/assets/images/moods/emo1.svg'
-import Emo2 from '@/assets/images/moods/emo2.svg'
-import Emo3 from '@/assets/images/moods/emo3.svg'
-import Emo4 from '@/assets/images/moods/emo4.svg'
-import Emo5 from '@/assets/images/moods/emo5.svg'
 import girlSample from '../../../../assets/images/girl_sample.png'
 import girlMeasure from '../../../../assets/images/girl-measure.png'
 import Barbell from '@/assets/images/barbell.svg'
 import Morning from '@/assets/images/morning_ex.svg'
 import Diary from '@/shared/ui/Icon/assets/diary.svg'
+import { calculateAverage, getMetricLabel, transformChartData, type WellbeingMetric } from '../lib'
+import { MetricSelectorModal } from './MetricSelectorModal'
 
 type OverallStatConfig = {
 	icon: React.ReactNode
@@ -65,16 +63,6 @@ const OVERALL_STATS_CONFIG: OverallStatConfig[] = [
 	},
 ]
 
-const moodPoints = [
-	{ day: 'пн', Icon: Emo3, color: '#FFB800', height: 180 },
-	{ day: 'вт', Icon: Emo2, color: '#FF69B4', height: 110 },
-	{ day: 'ср', Icon: Emo5, color: '#10B981', height: 140 },
-	{ day: 'чт', Icon: Emo1, color: '#FF4B6E', height: 100 },
-	{ day: 'пт', Icon: Emo3, color: '#FFB800', height: 220 },
-	{ day: 'сб', Icon: Emo4, color: '#6B7280', height: 180 },
-	{ day: 'вс', Icon: Emo5, color: '#10B981', height: 150 },
-]
-
 const bodyWeightPoints = [
 	{ month: 'ян', value: 26 },
 	{ month: 'фв', value: 34 },
@@ -92,6 +80,18 @@ const bodyWeightPoints = [
 
 export function DayStatistic() {
 	const { data: mainStats, isLoading: isStatsLoading, error: statsError } = useMainStatsQuery()
+	const [selectedMetric, setSelectedMetric] = useState<WellbeingMetric>('mood')
+	const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('week')
+	const [isMetricModalVisible, setIsMetricModalVisible] = useState(false)
+
+	const {
+		data: chartData,
+		isLoading: isChartLoading,
+		error: chartError,
+	} = useChartQuery({
+		kind: selectedMetric,
+		period: selectedPeriod,
+	})
 
 	const overallStats = useMemo(
 		() =>
@@ -108,6 +108,18 @@ export function DayStatistic() {
 			}),
 		[mainStats]
 	)
+
+	const displayPoints = useMemo(() => {
+		if (!chartData?.stats) return []
+		return transformChartData(chartData.stats, selectedPeriod)
+	}, [chartData?.stats, selectedPeriod])
+
+	const averageRating = useMemo(() => {
+		if (!chartData?.stats) return 3
+		return calculateAverage(chartData.stats)
+	}, [chartData?.stats])
+
+	const AverageIcon = getRatingOption(averageRating).Icon
 
 	return (
 		<>
@@ -233,34 +245,58 @@ export function DayStatistic() {
 			<View className="bg-[#1b1b1b] mb-6 p-4 rounded-[5%]">
 				<View className="mb-4 flex-row items-center justify-between">
 					<Text className="text-t1.1 text-white">Общее состояние</Text>
-					<Text className="text-t3 text-light-text-500">За эту неделю</Text>
+					<TouchableOpacity
+						activeOpacity={0.8}
+						onPress={() =>
+							setSelectedPeriod((prev) => (prev === 'week' ? 'month' : 'week'))
+						}
+					>
+						<Text className="text-t3 text-light-text-500">
+							{selectedPeriod === 'week' ? 'За эту неделю' : 'За этот месяц'}
+						</Text>
+					</TouchableOpacity>
 				</View>
 
 				<TouchableOpacity
 					className="w-40 flex-row items-center justify-center rounded-2xl bg-fill-800 py-2"
 					activeOpacity={0.9}
+					onPress={() => setIsMetricModalVisible(true)}
 				>
-					<Text className="text-t3 text-light-text-200">Настроение</Text>
+					<Text className="text-t3 text-light-text-200">
+						{getMetricLabel(selectedMetric)}
+					</Text>
 					<EvilIcons name="chevron-right" size={24} color="white" />
 				</TouchableOpacity>
 
-				<View className="flex-row items-end justify-between gap-2">
-					{moodPoints.map(({ day, Icon: MoodIcon, color, height }) => (
-						<View key={day} className="items-center gap-2">
-							<MoodIcon width={24} height={24} />
-							<View
-								style={{ height, width: 40 }}
-								className="overflow-hidden rounded-2xl bg-[#3f3f3f]"
-							>
-								<View style={{ height: 8, backgroundColor: color, width: '100%' }} />
+				{isChartLoading ? (
+					<View className="mt-6 items-center justify-center">
+						<ActivityIndicator color="#aaec4d" />
+					</View>
+				) : chartError ? (
+					<View className="mt-6 rounded-2xl bg-[#1e1e1e] p-4">
+						<Text className="text-body-medium text-feedback-negative-900">
+							{chartError.message}
+						</Text>
+					</View>
+				) : (
+					<View className="flex-row items-end justify-between gap-2">
+						{displayPoints.map(({ key, label, Icon: MoodIcon, color, height }) => (
+							<View key={key} className="items-center gap-2">
+								<MoodIcon width={24} height={24} />
+								<View
+									style={{ height, width: 40 }}
+									className="overflow-hidden rounded-2xl bg-[#3f3f3f]"
+								>
+									<View style={{ height: 8, backgroundColor: color, width: '100%' }} />
+								</View>
+								<Text className="uppercase text-light-text-200">{label}</Text>
 							</View>
-							<Text className="uppercase text-light-text-200">{day}</Text>
-						</View>
-					))}
-				</View>
+						))}
+					</View>
+				)}
 
 				<View className="mt-4 h-20 flex-row items-center gap-4 rounded-full bg-[#3f3f3f] px-4">
-					<Emo3 />
+					<AverageIcon width={40} height={40} />
 					<Text className="text-body-regular text-light-text-200">В среднем</Text>
 				</View>
 			</View>
@@ -325,6 +361,13 @@ export function DayStatistic() {
 					<Image source={girlMeasure} className="h-48 w-44" resizeMode="contain" />
 				</View>
 			</View>
+
+			<MetricSelectorModal
+				visible={isMetricModalVisible}
+				selectedMetric={selectedMetric}
+				onSelect={setSelectedMetric}
+				onClose={() => setIsMetricModalVisible(false)}
+			/>
 		</>
 	)
 }

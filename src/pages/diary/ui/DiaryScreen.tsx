@@ -19,27 +19,9 @@ import { SafeAreaContainer } from '@/shared/ui/SafeAreaContainer'
 import { Button } from '@/shared/ui/Button'
 import { dairyApi } from '@/features/dairy/api'
 import type { DiaryInput } from '@/features/dairy/api'
-import Emo1 from '@/assets/images/moods/emo1.svg'
-import Emo2 from '@/assets/images/moods/emo2.svg'
-import Emo3 from '@/assets/images/moods/emo3.svg'
-import Emo4 from '@/assets/images/moods/emo4.svg'
-import Emo5 from '@/assets/images/moods/emo5.svg'
 import { showToast } from '@/shared/lib'
+import { RATING_OPTIONS } from '@/shared/constants'
 
-
-interface RatingOption {
-	id: number
-	Icon: React.ComponentType<any>
-	color: string
-}
-
-const ratingOptions: RatingOption[] = [
-	{ id: 1, Icon: Emo1, color: '#FF4B6E' },
-	{ id: 2, Icon: Emo2, color: '#FF69B4' },
-	{ id: 3, Icon: Emo3, color: '#FFB800' },
-	{ id: 4, Icon: Emo4, color: '#6B7280' },
-	{ id: 5, Icon: Emo5, color: '#10B981' },
-]
 
 const formatTimeInput = (value: string) => {
 	const digits = value.replace(/\D/g, '').slice(0, 4)
@@ -96,7 +78,7 @@ const QuestionSection = ({
 			<Text className="mb-1 text-t1.1 font-semibold text-white">{title}</Text>
 			<Text className="mb-4 text-t3 text-gray-400">{subtitle}</Text>
 			<View className="flex-row justify-between">
-				{ratingOptions.map((option) => {
+				{RATING_OPTIONS.map((option) => {
 					const Icon = option.Icon
 					const isSelected = selectedValue === option.id
 					return (
