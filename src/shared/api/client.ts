@@ -6,8 +6,21 @@ import * as SecureStore from 'expo-secure-store'
 import { router } from 'expo-router'
 import { type ApiResult } from './types'
 import { env } from '@/shared/config'
+import { clearAuthData, getRefreshToken } from '@/shared/lib/auth'
+import { refreshAccessToken, type RefreshResult } from './refreshToken'
 
 const API_BASE_URL = env.API_URL
+
+let refreshInFlight: Promise<RefreshResult> | null = null
+
+const singleFlightRefresh = async (): Promise<RefreshResult> => {
+	if (!refreshInFlight) {
+		refreshInFlight = refreshAccessToken().finally(() => {
+			refreshInFlight = null
+		})
+	}
+	return refreshInFlight
+}
 
 /**
  * API client configuration
@@ -31,9 +44,80 @@ class ApiClient {
 	 * Handle unauthorized response (401)
 	 */
 	private async handleUnauthorized(): Promise<void> {
-		await SecureStore.deleteItemAsync('auth_token')
+		await clearAuthData()
 		// Redirect to auth screen
 		router.replace('/auth')
+	}
+
+	private async request<TResponse>(
+		method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
+		endpoint: string,
+		data?: unknown,
+		options?: { skipAuthHandler?: boolean }
+	): Promise<ApiResult<TResponse>> {
+		const doFetch = async () => {
+			const authHeaders = await this.getAuthHeaders()
+			return fetch(`${this.baseUrl}${endpoint}`, {
+				method,
+				headers: {
+					'Content-Type': 'application/json',
+					...authHeaders,
+				},
+				body: data === undefined || method === 'GET' || method === 'DELETE' ? undefined : JSON.stringify(data),
+			})
+		}
+
+		try {
+			let response = await doFetch()
+
+			// Handle 401 with refresh+retry (unless explicitly skipped)
+			if (response.status === 401 && !options?.skipAuthHandler) {
+				const refreshResult = await singleFlightRefresh()
+
+				if (refreshResult === 'ok') {
+					// Retry original request once with refreshed token
+					response = await doFetch()
+				} else {
+					// If refresh flow already cleared tokens (no refresh / invalid refresh), force logout.
+					// Otherwise treat as transient (e.g., network) and don't destroy session.
+					const stillHasRefreshToken = await getRefreshToken()
+					if (!stillHasRefreshToken) {
+						await this.handleUnauthorized()
+					}
+					return { success: false, error: 'Unauthorized' }
+				}
+			}
+
+			// Read response body as text first (can only be read once)
+			const responseText = await response.text()
+			const contentType = response.headers.get('content-type')
+			const hasJsonContent = contentType?.includes('application/json')
+
+			let responseData: unknown = null
+			if (hasJsonContent && responseText) {
+				try {
+					responseData = JSON.parse(responseText)
+				} catch (jsonError) {
+					console.error('Failed to parse JSON response:', jsonError)
+					return { success: false, error: `Ошибка сервера: ${response.status}` }
+				}
+			}
+
+			if (!response.ok) {
+				const errorMessage =
+					responseData && typeof responseData === 'object' && 'error' in responseData
+						? String((responseData as { error?: unknown }).error)
+						: responseText || `Ошибка сервера: ${response.status}`
+
+				return { success: false, error: errorMessage }
+			}
+
+			return { success: true, data: responseData as TResponse }
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Ошибка сети'
+			console.error('API request failed:', err)
+			return { success: false, error: errorMessage }
+		}
 	}
 
 	/**
@@ -44,78 +128,7 @@ class ApiClient {
 		data: TRequest,
 		options?: { skipAuthHandler?: boolean }
 	): Promise<ApiResult<TResponse>> {
-		const authHeaders = await this.getAuthHeaders()
-
-		try {
-			const response = await fetch(`${this.baseUrl}${endpoint}`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					...authHeaders,
-				},
-				body: JSON.stringify(data),
-			})
-
-			console.log('API Response:', response)
-
-			// Handle 401 - unauthorized (skip for public endpoints like login)
-			if (response.status === 401 && !options?.skipAuthHandler) {
-				await this.handleUnauthorized()
-				return { success: false, error: 'Unauthorized' }
-			}
-
-			// Read response body as text first (can only be read once)
-			const responseText = await response.text()
-
-			// Try to parse as JSON if content-type indicates JSON
-			const contentType = response.headers.get('content-type')
-			const hasJsonContent = contentType?.includes('application/json')
-
-			let responseData: unknown = null
-
-			if (hasJsonContent && responseText) {
-				try {
-					responseData = JSON.parse(responseText)
-				} catch (jsonError) {
-					console.error('Failed to parse JSON response:', jsonError)
-					return {
-						success: false,
-						error: `Ошибка сервера: ${response.status}`,
-					}
-				}
-			}
-
-			if (!response.ok) {
-				// Log non-JSON error responses
-				if (!hasJsonContent && responseText) {
-					console.error('Non-JSON response for error status:', responseText)
-				}
-
-				const errorMessage =
-					responseData && typeof responseData === 'object' && 'error' in responseData
-						? String(responseData.error)
-						: responseText || `Ошибка сервера: ${response.status}`
-
-				return {
-					success: false,
-					error: errorMessage,
-				}
-			}
-
-			return {
-				success: true,
-				data: responseData as TResponse,
-			}
-		} catch (err) {
-			// Handle network errors
-			const errorMessage = err instanceof Error ? err.message : 'Ошибка сети'
-			console.error('API request failed:', err)
-
-			return {
-				success: false,
-				error: errorMessage,
-			}
-		}
+		return this.request<TResponse>('POST', endpoint, data, options)
 	}
 
 	/**
@@ -126,76 +139,7 @@ class ApiClient {
 		data: TRequest,
 		options?: { skipAuthHandler?: boolean }
 	): Promise<ApiResult<TResponse>> {
-		const authHeaders = await this.getAuthHeaders()
-
-		try {
-			const response = await fetch(`${this.baseUrl}${endpoint}`, {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json',
-					...authHeaders,
-				},
-				body: JSON.stringify(data),
-			})
-
-			// Handle 401 - unauthorized (skip for public endpoints like login)
-			if (response.status === 401 && !options?.skipAuthHandler) {
-				await this.handleUnauthorized()
-				return { success: false, error: 'Unauthorized' }
-			}
-
-			// Read response body as text first (can only be read once)
-			const responseText = await response.text()
-
-			// Try to parse as JSON if content-type indicates JSON
-			const contentType = response.headers.get('content-type')
-			const hasJsonContent = contentType?.includes('application/json')
-
-			let responseData: unknown = null
-
-			if (hasJsonContent && responseText) {
-				try {
-					responseData = JSON.parse(responseText)
-				} catch (jsonError) {
-					console.error('Failed to parse JSON response:', jsonError)
-					return {
-						success: false,
-						error: `Ошибка сервера: ${response.status}`,
-					}
-				}
-			}
-
-			if (!response.ok) {
-				// Log non-JSON error responses
-				if (!hasJsonContent && responseText) {
-					console.error('Non-JSON response for error status:', responseText)
-				}
-
-				const errorMessage =
-					responseData && typeof responseData === 'object' && 'error' in responseData
-						? String(responseData.error)
-						: responseText || `Ошибка сервера: ${response.status}`
-
-				return {
-					success: false,
-					error: errorMessage,
-				}
-			}
-
-			return {
-				success: true,
-				data: responseData as TResponse,
-			}
-		} catch (err) {
-			// Handle network errors
-			const errorMessage = err instanceof Error ? err.message : 'Ошибка сети'
-			console.error('API request failed:', err)
-
-			return {
-				success: false,
-				error: errorMessage,
-			}
-		}
+		return this.request<TResponse>('PATCH', endpoint, data, options)
 	}
 
 	/**
@@ -206,81 +150,7 @@ class ApiClient {
 		data?: TRequest,
 		options?: { skipAuthHandler?: boolean }
 	): Promise<ApiResult<TResponse>> {
-		const authHeaders = await this.getAuthHeaders()
-
-		try {
-			const response = await fetch(`${this.baseUrl}${endpoint}`, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-					...authHeaders,
-				},
-				body: JSON.stringify(data),
-			})
-
-			// console.log('url')
-			// console.log(`${this.baseUrl}${endpoint}`)
-			console.log('put response')
-			console.log(response)
-
-			// Handle 401 - unauthorized (skip for public endpoints)
-			if (response.status === 401 && !options?.skipAuthHandler) {
-				await this.handleUnauthorized()
-				return { success: false, error: 'Unauthorized' }
-			}
-
-			// Read response body as text first (can only be read once)
-			const responseText = await response.text()
-
-			// Try to parse as JSON if content-type indicates JSON
-			const contentType = response.headers.get('content-type')
-			const hasJsonContent = contentType?.includes('application/json')
-
-			let responseData: unknown = null
-
-			if (hasJsonContent && responseText) {
-				try {
-					responseData = JSON.parse(responseText)
-				} catch (jsonError) {
-					console.error('Failed to parse JSON response:', jsonError)
-					return {
-						success: false,
-						error: `Ошибка сервера: ${response.status}`,
-					}
-				}
-			}
-
-			if (!response.ok) {
-				// Log non-JSON error responses
-				if (!hasJsonContent && responseText) {
-					console.error('Non-JSON response for error status:', responseText)
-				}
-
-				const errorMessage =
-					responseData && typeof responseData === 'object' && 'error' in responseData
-						? String(responseData.error)
-						: responseText || `Ошибка сервера: ${response.status}`
-
-				return {
-					success: false,
-					error: errorMessage,
-				}
-			}
-
-			return {
-				success: true,
-				data: responseData as TResponse,
-			}
-		} catch (err) {
-			// Handle network errors
-			const errorMessage = err instanceof Error ? err.message : 'Ошибка сети'
-			console.error('API request failed:', err)
-
-			return {
-				success: false,
-				error: errorMessage,
-			}
-		}
+		return this.request<TResponse>('PUT', endpoint, data, options)
 	}
 
 	/**
@@ -290,69 +160,7 @@ class ApiClient {
 		endpoint: string,
 		options?: { skipAuthHandler?: boolean }
 	): Promise<ApiResult<TResponse>> {
-		const authHeaders = await this.getAuthHeaders()
-
-		try {
-			const response = await fetch(`${this.baseUrl}${endpoint}`, {
-				method: 'DELETE',
-				headers: {
-					'Content-Type': 'application/json',
-					...authHeaders,
-				},
-			})
-
-			// Handle 401 - unauthorized
-			if (response.status === 401 && !options?.skipAuthHandler) {
-				await this.handleUnauthorized()
-				return { success: false, error: 'Unauthorized' }
-			}
-
-			// Read response body as text first (can only be read once)
-			const responseText = await response.text()
-
-			// Try to parse as JSON if content-type indicates JSON
-			const contentType = response.headers.get('content-type')
-			const hasJsonContent = contentType?.includes('application/json')
-
-			let responseData: unknown = null
-
-			if (hasJsonContent && responseText) {
-				try {
-					responseData = JSON.parse(responseText)
-				} catch (jsonError) {
-					console.error('Failed to parse JSON response:', jsonError)
-					return {
-						success: false,
-						error: `Ошибка сервера: ${response.status}`,
-					}
-				}
-			}
-
-			if (!response.ok) {
-				const errorMessage =
-					responseData && typeof responseData === 'object' && 'error' in responseData
-						? String(responseData.error)
-						: responseText || `Ошибка сервера: ${response.status}`
-
-				return {
-					success: false,
-					error: errorMessage,
-				}
-			}
-
-			return {
-				success: true,
-				data: responseData as TResponse,
-			}
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Ошибка сети'
-			console.error('API request failed:', err)
-
-			return {
-				success: false,
-				error: errorMessage,
-			}
-		}
+		return this.request<TResponse>('DELETE', endpoint, undefined, options)
 	}
 
 	/**
@@ -448,78 +256,12 @@ class ApiClient {
 	/**
 	 * Perform GET request
 	 */
-	async get<TResponse>(endpoint: string): Promise<ApiResult<TResponse>> {
-		const authHeaders = await this.getAuthHeaders()
-
+	async get<TResponse>(
+		endpoint: string,
+		options?: { skipAuthHandler?: boolean }
+	): Promise<ApiResult<TResponse>> {
 		console.log('Making GET request to:', `${this.baseUrl}${endpoint}`)
-
-		try {
-			const response = await fetch(`${this.baseUrl}${endpoint}`, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					...authHeaders,
-				},
-			})
-
-			// Handle 401 - unauthorized
-			if (response.status === 401) {
-				await this.handleUnauthorized()
-				return { success: false, error: 'Unauthorized' }
-			}
-
-			// Check if response has content
-			const contentType = response.headers.get('content-type')
-			const hasJsonContent = contentType?.includes('application/json')
-
-			let responseData: unknown = null
-
-			if (hasJsonContent) {
-				try {
-					responseData = await response.json()
-				} catch (jsonError) {
-					console.log('Failed to parse JSON response:', jsonError)
-					const text = await response.text()
-					console.log('Response text:', text)
-					return {
-						success: false,
-						error: `Ошибка сервера: ${response.status}`,
-					}
-				}
-			} else {
-				// For successful responses, non-JSON content is acceptable (e.g., 204 No Content, plain text success)
-				// Only log as error for non-successful responses (except 404 which is expected for missing resources)
-				if (!response.ok && response.status !== 404) {
-					const text = await response.text()
-					console.error('Non-JSON response for error status:', text)
-				}
-			}
-
-			if (!response.ok) {
-				const errorMessage =
-					responseData && typeof responseData === 'object' && 'error' in responseData
-						? String(responseData.error)
-						: `Ошибка сервера: ${response.status}`
-
-				return {
-					success: false,
-					error: errorMessage,
-				}
-			}
-
-			return {
-				success: true,
-				data: responseData as TResponse,
-			}
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Ошибка сети'
-			console.error('API request failed:', err)
-
-			return {
-				success: false,
-				error: errorMessage,
-			}
-		}
+		return this.request<TResponse>('GET', endpoint, undefined, options)
 	}
 }
 

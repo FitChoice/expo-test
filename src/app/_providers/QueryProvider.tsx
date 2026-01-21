@@ -18,7 +18,13 @@ const queryClient = new QueryClient({
 			// Cache time: 10 minutes
 			gcTime: 1000 * 60 * 10,
 			// Retry failed requests 3 times
-			retry: 3,
+			retry: (failureCount, error) => {
+				const message =
+					error instanceof Error ? error.message : typeof error === 'string' ? error : ''
+				// Never retry auth errors (prevents cascaded logout / repeated 401s)
+				if (/unauthorized/i.test(message)) return false
+				return failureCount < 3
+			},
 			// Don't refetch on window focus by default
 			refetchOnWindowFocus: false,
 		},
