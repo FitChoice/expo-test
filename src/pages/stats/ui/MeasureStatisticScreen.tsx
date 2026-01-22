@@ -84,9 +84,10 @@ export const MeasureStatisticScreen = () => {
 
 		mutation.mutate(payload, {
 			onSuccess: () => {
-
+				showToast.success(`Данные за ${currentDate} внесены`)
+			},
+			onSettled: () => {
 				router.push('/stats')
-				showToast.success(`Данные за ${currentDate} внесены`  )
 			},
 		})
 	}

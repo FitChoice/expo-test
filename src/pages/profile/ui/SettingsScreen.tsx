@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react'
 import { View, ScrollView, Text, Linking, StyleSheet, Alert } from 'react-native'
 import { useRouter } from 'expo-router'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { BackButton, Switch, SettingsItem, ConfirmModal, Avatar } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { SettingsSection, FAQAccordion } from '@/widgets/profile'
@@ -28,7 +28,6 @@ import {
 
 export const SettingsScreen = () => {
 	const router = useRouter()
-	const queryClient = useQueryClient()
 	const { contentPaddingBottom } = useNavbarLayout()
 
 	const [userId, setUserId] = useState<number | null>(null)
@@ -60,9 +59,6 @@ export const SettingsScreen = () => {
 		onSuccess: async () => {
 			await clearAuthData()
 			router.replace('/auth')
-		},
-		onError: () => {
-			showToast.error('Ошибка удаления аккаунта')
 		},
 	})
 

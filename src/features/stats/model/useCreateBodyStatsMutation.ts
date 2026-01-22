@@ -4,7 +4,6 @@ import { statsApi } from '../api/statsApi'
 import { statsKeys } from '../api/queryKeys'
 import type { BodyStatsInput } from '../api/types'
 import { getUserId } from '@/shared/lib/auth'
-import { showToast } from '@/shared/lib'
 
 export type CreateBodyStatsInput = Omit<BodyStatsInput, 'user_id' | 'date'>
 
@@ -32,15 +31,11 @@ export function useCreateBodyStatsMutation() {
 			return result.data
 		},
 		onSuccess: async () => {
-			showToast.success('Данные сохранены')
 			const userId = await getUserId()
 			if (userId) {
 				// Инвалидируем основные показатели, так как они могут зависеть от новых данных
 				await queryClient.invalidateQueries({ queryKey: statsKeys.mainStats(userId) })
 			}
-		},
-		onError: (error: Error) => {
-			showToast.error(error.message)
 		},
 	})
 }

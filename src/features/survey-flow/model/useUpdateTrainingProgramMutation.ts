@@ -28,15 +28,10 @@ export const useUpdateTrainingProgramMutation = () => {
 
 			return { userId }
 		},
-		onSuccess: async ({ userId }) => {
-			await Promise.all([
-				queryClient.invalidateQueries({ queryKey: ['profile', userId] }),
-				queryClient.invalidateQueries({ queryKey: trainingKeys.plan(userId) }),
-			])
+		onSuccess: ({ userId }) => {
 			showToast.success('Программа тренировок обновлена')
-		},
-		onError: (error: Error) => {
-			showToast.error(error.message)
+			queryClient.invalidateQueries({ queryKey: ['profile', userId] })
+			queryClient.invalidateQueries({ queryKey: trainingKeys.plan(userId) })
 		},
 	})
 }

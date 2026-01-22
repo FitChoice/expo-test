@@ -1,5 +1,5 @@
 import { View, type DimensionValue } from 'react-native'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { router } from 'expo-router'
 import { BackButton, BackgroundLayout, Button } from '@/shared/ui'
 import {
@@ -8,20 +8,16 @@ import {
 	SurveyStep12,
 	SurveyStep7,
 	SurveyStep9,
-	SurveyStepLoading,
 } from '@/pages/survey/ui/components'
 import type { DayOfWeek, Direction, Frequency, Goal, SurveyData } from '@/entities/survey'
 import {
 	daysToMasks,
-	dayBitmaskToMasks,
 	goalsToMasks,
-	goalBitmaskToMasks,
 	masksToDays,
 	masksToGoals,
 	masksToNumber,
 } from '@/entities/survey'
-import { useUpdateTrainingProgramMutation, surveyApi } from '@/features/survey-flow'
-import { getUserId, showToast } from '@/shared/lib'
+import { useUpdateTrainingProgramMutation } from '@/features/survey-flow'
 
 const initialFormData: SurveyData = {
 	name: '',
@@ -42,14 +38,8 @@ export const ChangeTrainingProgramScreen = () => {
 	const [currentStep, setCurrentStep] = useState(1)
 	const [formData, setFormData] = useState<SurveyData>(initialFormData)
 
-	const { mutate : updateTrainingProgramMutation, isPending, isSuccess, isError } = useUpdateTrainingProgramMutation()
+	const { mutate : updateTrainingProgramMutation, isPending } = useUpdateTrainingProgramMutation()
 
-
-	useEffect(() => {
-		if (isSuccess || isError) {
-			router.replace('/profile')
-		}
-	}, [isSuccess, isError])
 
 	const updateTrainingDays = useCallback((days: DayOfWeek[]) => {
 		setFormData((prev) => ({ ...prev, train_days: daysToMasks(days) }))
@@ -114,6 +104,12 @@ export const ChangeTrainingProgramScreen = () => {
 					...formData,
 					train_days: masksToNumber((formData.train_days as number[]) || []),
 					train_goals: masksToNumber((formData.train_goals as number[]) || []),
+				},
+
+				{
+					onSettled: () => {
+						router.replace('/profile')
+					},
 				}
 			)
 			return

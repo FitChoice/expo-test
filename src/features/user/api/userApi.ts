@@ -38,11 +38,6 @@ export const userApi = {
 	 * Get presigned URL for avatar upload
 	 */
 	async getImagePresignUrl(filename: string): Promise<ApiResult<AvatarPresignUrlResponse>> {
-		const safeName = filename.trim() || 'avatar.jpg'
-
-		console.log('filename')
-		console.log(filename)
-
 		// Backend presign endpoint expects POST with JSON body { filename }
 		return apiClient.put<{ filename: string }, AvatarPresignUrlResponse>(`/user/presign-url?filename=${filename}`)
 	},

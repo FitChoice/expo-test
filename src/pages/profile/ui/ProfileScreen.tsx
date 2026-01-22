@@ -72,9 +72,6 @@ const ProfileContent = () => {
 			setIsEditMode(false)
 			showToast.success('Профиль обновлен')
 		},
-		onError: () => {
-			showToast.error('Ошибка обновления')
-		},
 	})
 
 	const uploadAvatarMutation = useUploadAvatar()
