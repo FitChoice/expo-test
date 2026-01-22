@@ -41,71 +41,15 @@ const initialFormData: SurveyData = {
 export const ChangeTrainingProgramScreen = () => {
 	const [currentStep, setCurrentStep] = useState(1)
 	const [formData, setFormData] = useState<SurveyData>(initialFormData)
-	const [isInitializing, setIsInitializing] = useState(true)
-	const updateTrainingProgramMutation = useUpdateTrainingProgramMutation()
-	const isSubmitting =
-		updateTrainingProgramMutation.isPending ||
-		updateTrainingProgramMutation.isSuccess ||
-		updateTrainingProgramMutation.isError
+
+	const { mutate : updateTrainingProgramMutation, isPending, isSuccess, isError } = useUpdateTrainingProgramMutation()
+
 
 	useEffect(() => {
-		if (updateTrainingProgramMutation.isSuccess || updateTrainingProgramMutation.isError) {
+		if (isSuccess || isError) {
 			router.replace('/profile')
 		}
-	}, [updateTrainingProgramMutation.isSuccess, updateTrainingProgramMutation.isError])
-
-	useEffect(() => {
-		let isMounted = true
-
-		const loadUserMetadata = async () => {
-			try {
-				const userId = await getUserId()
-				if (!userId) {
-					showToast.error('Не удалось определить пользователя')
-					router.replace('/profile')
-					return
-				}
-
-				const metadata = await surveyApi.getUserMetadata(userId)
-				if (!metadata.success) {
-					showToast.error(metadata.error || 'Не удалось загрузить данные')
-					router.replace('/profile')
-					return
-				}
-
-				const trainDaysMask =
-					typeof metadata.data.train_days === 'number' ? metadata.data.train_days : 0
-				const trainGoalsMask =
-					typeof metadata.data.train_goals === 'number' ? metadata.data.train_goals : 0
-
-				if (isMounted) {
-					setFormData((prev) => ({
-						...prev,
-						name: metadata.data.name || '',
-						gender: metadata.data.gender || null,
-						age: metadata.data.age ?? null,
-						height: metadata.data.height ?? null,
-						weight: metadata.data.weight ?? null,
-						train_days: dayBitmaskToMasks(trainDaysMask),
-						train_frequency: metadata.data.train_frequency ?? null,
-						train_goals: goalBitmaskToMasks(trainGoalsMask),
-						main_direction: metadata.data.main_direction ?? null,
-						secondary_direction: metadata.data.secondary_direction ?? null,
-					}))
-				}
-			} finally {
-				if (isMounted) {
-					setIsInitializing(false)
-				}
-			}
-		}
-
-		loadUserMetadata()
-
-		return () => {
-			isMounted = false
-		}
-	}, [])
+	}, [isSuccess, isError])
 
 	const updateTrainingDays = useCallback((days: DayOfWeek[]) => {
 		setFormData((prev) => ({ ...prev, train_days: daysToMasks(days) }))
@@ -155,7 +99,7 @@ export const ChangeTrainingProgramScreen = () => {
 	}, [currentStep, formData, getTrainingDaysAsStrings, getGoalsAsStrings])
 
 	const handleBack = () => {
-		if (isSubmitting || isInitializing) return
+
 		if (currentStep === 1) {
 			router.back()
 			return
@@ -165,7 +109,7 @@ export const ChangeTrainingProgramScreen = () => {
 
 	const handleNext = () => {
 		if (currentStep === 5) {
-			updateTrainingProgramMutation.mutate(
+			updateTrainingProgramMutation(
 				{
 					...formData,
 					train_days: masksToNumber((formData.train_days as number[]) || []),
@@ -186,9 +130,9 @@ export const ChangeTrainingProgramScreen = () => {
 	}
 
 	const renderCurrentStep = () => {
-		if (isSubmitting || isInitializing) {
-			return <SurveyStepLoading />
-		}
+		// if (isSubmitting || isInitializing) {
+		// 	return <SurveyStepLoading />
+		// }
 
 		switch (currentStep) {
 			case 1:
@@ -230,7 +174,7 @@ export const ChangeTrainingProgramScreen = () => {
 	}
 
 	const layoutConfig = useMemo(() => {
-		const isGradient = currentStep === 5 || isSubmitting || isInitializing
+		const isGradient = currentStep === 5 || isPending
 		return {
 			WrapperComponent: isGradient ? BackgroundLayout : View,
 			wrapperProps: isGradient
@@ -238,10 +182,10 @@ export const ChangeTrainingProgramScreen = () => {
 				: { className: 'flex-1 bg-[#151515] px-4' },
 			contentPadding: isGradient ? 'px-4' : '',
 		}
-	}, [currentStep, isSubmitting, isInitializing])
+	}, [currentStep, isPending])
 
 	const { WrapperComponent, wrapperProps, contentPadding } = layoutConfig
-	const showButtons = !isSubmitting && !isInitializing
+	const showButtons = !isPending
 
 	return (
 		<WrapperComponent {...(wrapperProps as any)}>

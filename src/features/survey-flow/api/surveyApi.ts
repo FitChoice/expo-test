@@ -7,18 +7,26 @@ import type { ApiResult } from '@/shared/api/types'
 import type { SurveyData } from '@/entities/survey'
 
 interface UpdateUserMetadataInput {
-	name?: string
-	gender?: 'male' | 'female'
-	age?: number
-	height?: number
-	weight?: number
-	train_days?: number // битовая маска дней недели
-	train_frequency?: number
-	train_goals?: number // битовая маска целей
-	main_direction?: number
-	secondary_direction?: number
-	promocode?: string
+	age?: number,
+	avatar_url?: string,
+	gender?: string,
+	height?: number,
+	main_direction?: number,
+	name?: string,
+	notif_main?: boolean,
+	notif_progress?: boolean,
+	notif_report?: boolean,
+	notif_system?: boolean,
+	promocode?: string,
+	secondary_direction?: number,
+	train_days?: number,
+	train_frequency?: number,
+	train_goals?: number,
+	weight?: number,
 }
+
+
+
 
 interface UpdateUserResponse {
 	status: string
@@ -28,48 +36,55 @@ interface UpdateUserResponse {
  * Преобразует SurveyData в формат API
  */
 function surveyDataToApiFormat(data: SurveyData): UpdateUserMetadataInput {
-	// Конвертируем массив битовых масок дней в одно число (битовую маску)
-	// train_days может быть уже числом (если пришло из useSurveyFlow) или массивом
-	const trainingDaysMasks = data.train_days as unknown as number[] | number
-	let trainDaysMask: number | undefined
+	const out: UpdateUserMetadataInput = {}
 
-	if (Array.isArray(trainingDaysMasks)) {
-		trainDaysMask =
-			trainingDaysMasks.reduce((mask, dayMask) => {
-				return mask | dayMask
-			}, 0) || undefined
-	} else if (typeof trainingDaysMasks === 'number') {
-		trainDaysMask = trainingDaysMasks || undefined
+	const setString = (key: keyof UpdateUserMetadataInput, value: unknown) => {
+		if (typeof value !== 'string') return
+		const v = value.trim()
+		if (!v) return
+		out[key] = v as never
 	}
 
-	// Конвертируем массив битовых масок целей в одно число (битовую маску)
-	// train_goals может быть уже числом (если пришло из useSurveyFlow) или массивом
-	const goalsMasks = data.train_goals as unknown as number[] | number
-	let goalsMask: number | undefined
-
-	if (Array.isArray(goalsMasks)) {
-		goalsMask =
-			goalsMasks.reduce((mask, goalMask) => {
-				return mask | goalMask
-			}, 0) || undefined
-	} else if (typeof goalsMasks === 'number') {
-		goalsMask = goalsMasks || undefined
+	const setNumber = (key: keyof UpdateUserMetadataInput, value: unknown) => {
+		const n = typeof value === 'number' ? value : Number(value)
+		if (!Number.isFinite(n)) return
+		if (n === 0) return
+		out[key] = n as never
 	}
 
-	// age уже хранится как число (среднее арифметическое) в стейте
+	const toBitMask = (value: unknown): number | undefined => {
+		if (Array.isArray(value)) {
+			const mask = (value as Array<number | string>).reduce((acc: number, v) => {
+				const n = typeof v === 'number' ? v : Number(v)
+				return Number.isFinite(n) ? (acc | n) : acc
+			}, 0)
+			return mask === 0 ? undefined : mask
+		}
 
-	return {
-		name: data.name || undefined,
-		gender: data.gender || undefined,
-		age: (data.age as unknown as number) || undefined,
-		height: data.height || undefined,
-		weight: data.weight || undefined,
-		train_days: trainDaysMask,
-		train_frequency: data.train_frequency || undefined,
-		train_goals: goalsMask,
-		main_direction: data.main_direction || undefined,
-		secondary_direction: data.secondary_direction || undefined,
+		if (typeof value === 'number') return value === 0 ? undefined : value
+		const n = Number(value)
+		return Number.isFinite(n) && n !== 0 ? n : undefined
 	}
+
+	// Если значение undefined/пустое/0 — ключ вообще не включаем в payload
+	setString('name', data.name)
+	setString('gender', data.gender)
+
+	// age уже хранится как число (среднее арифметическое) в стейте, но страхуемся
+	setNumber('age', data.age)
+	setNumber('height', data.height)
+	setNumber('weight', data.weight)
+	setNumber('train_frequency', data.train_frequency)
+	setNumber('main_direction', data.main_direction)
+	setNumber('secondary_direction', data.secondary_direction)
+
+	const trainDaysMask = toBitMask(data.train_days)
+	if (trainDaysMask !== undefined) out.train_days = trainDaysMask
+
+	const goalsMask = toBitMask(data.train_goals)
+	if (goalsMask !== undefined) out.train_goals = goalsMask
+
+	return out
 }
 
 export const surveyApi = {
@@ -80,36 +95,9 @@ export const surveyApi = {
 		userId: number,
 		data: SurveyData
 	): Promise<ApiResult<UpdateUserResponse>> {
-		// Валидация
-		if (!data.name || !data.gender) {
-			return {
-				success: false,
-				error: 'Имя и пол обязательны для заполнения',
-			}
-		}
-
-		// Проверяем goals - может быть массивом или числом
-		const goalsMasks = data.train_goals as unknown as number[] | number
-		const hasGoals = Array.isArray(goalsMasks)
-			? goalsMasks.length > 0
-			: typeof goalsMasks === 'number' && goalsMasks > 0
-
-		if (!hasGoals) {
-			return {
-				success: false,
-				error: 'Выберите хотя бы одну цель',
-			}
-		}
-
-		if (!data.main_direction) {
-			return {
-				success: false,
-				error: 'Выберите основное направление',
-			}
-		}
-
+	
 		const apiData = surveyDataToApiFormat(data)
-		console.log('API data:', apiData)
+	
 
 		return apiClient.patch(`/user/update/${userId}`, apiData)
 	},

@@ -1,6 +1,5 @@
 import { GreenGradient } from '@/shared/ui/GradientBG'
 import { ControlButton } from '@/shared/ui'
-import AntDesign from '@expo/vector-icons/AntDesign'
 import Entypo from '@expo/vector-icons/Entypo'
 import React, { type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 import { Platform, View } from 'react-native'

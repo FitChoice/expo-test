@@ -2,9 +2,6 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native'
 import { useRouter, usePathname } from 'expo-router'
 import { useNavbarLayout } from '@/shared/lib'
 import { Icon } from '@/shared/ui'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import Fontisto from '@expo/vector-icons/Fontisto'
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 
 type NavItem = {
 	route: string

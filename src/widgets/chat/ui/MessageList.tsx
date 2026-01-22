@@ -3,7 +3,7 @@
  * Стандартный порядок: старые сверху, новые снизу
  */
 
-import React, { useCallback, useRef, useEffect, useMemo } from 'react'
+import React, { useCallback, useRef, useEffect } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { FlashList, type FlashListRef } from '@shopify/flash-list'
 import type { Message } from '@/entities/chat'

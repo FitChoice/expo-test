@@ -24,17 +24,17 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 			</View>
 
 			{/* Content */}
-			<View className="flex-1 items-center justify-center px-6 py-8">
+			<View className="flex-1 items-center justify-center px-6 py-6">
 				{/* Number and Title */}
 				<View className="items-center justify-center">
 					<Text className="font-rimma text-[50px] leading-[72px] text-light-text-100">
 						{displayNumber}
 					</Text>
-					<Text className="mt-1 text-t2 text-light-text-100">{title}</Text>
+					<Text className="mt-1 text-t3 text-light-text-100">{title}</Text>
 				</View>
 
 				{/* Description */}
-				<Text className="mt-4 text-center text-t4 text-light-text-200">
+				<Text className="mt-4 text-center text-t4 text-light-text-500">
 					{description}
 				</Text>
 			</View>
