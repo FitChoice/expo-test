@@ -1,4 +1,4 @@
-import { View } from 'react-native'
+import { View, type DimensionValue } from 'react-native'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { router } from 'expo-router'
 import { BackButton, BackgroundLayout, Button } from '@/shared/ui'
@@ -43,6 +43,16 @@ export const ChangeTrainingProgramScreen = () => {
 	const [formData, setFormData] = useState<SurveyData>(initialFormData)
 	const [isInitializing, setIsInitializing] = useState(true)
 	const updateTrainingProgramMutation = useUpdateTrainingProgramMutation()
+	const isSubmitting =
+		updateTrainingProgramMutation.isPending ||
+		updateTrainingProgramMutation.isSuccess ||
+		updateTrainingProgramMutation.isError
+
+	useEffect(() => {
+		if (updateTrainingProgramMutation.isSuccess || updateTrainingProgramMutation.isError) {
+			router.replace('/profile')
+		}
+	}, [updateTrainingProgramMutation.isSuccess, updateTrainingProgramMutation.isError])
 
 	useEffect(() => {
 		let isMounted = true
@@ -145,7 +155,7 @@ export const ChangeTrainingProgramScreen = () => {
 	}, [currentStep, formData, getTrainingDaysAsStrings, getGoalsAsStrings])
 
 	const handleBack = () => {
-		if (updateTrainingProgramMutation.isPending || isInitializing) return
+		if (isSubmitting || isInitializing) return
 		if (currentStep === 1) {
 			router.back()
 			return
@@ -160,11 +170,6 @@ export const ChangeTrainingProgramScreen = () => {
 					...formData,
 					train_days: masksToNumber((formData.train_days as number[]) || []),
 					train_goals: masksToNumber((formData.train_goals as number[]) || []),
-				},
-				{
-					onSuccess: () => {
-						router.replace('/profile')
-					},
 				}
 			)
 			return
@@ -174,13 +179,14 @@ export const ChangeTrainingProgramScreen = () => {
 
 	}
 
-	const getProgressWidth = () => {
-		const progressSteps = [33, 67, 100, 134, 168]
-		return progressSteps[currentStep - 1] || 33
+	const getProgressWidth = (): DimensionValue => {
+		const totalSteps = 5
+		const progress = (currentStep / totalSteps) * 100
+		return `${Math.min(progress, 100)}%` as DimensionValue
 	}
 
 	const renderCurrentStep = () => {
-		if (updateTrainingProgramMutation.isPending || isInitializing) {
+		if (isSubmitting || isInitializing) {
 			return <SurveyStepLoading />
 		}
 
@@ -224,8 +230,7 @@ export const ChangeTrainingProgramScreen = () => {
 	}
 
 	const layoutConfig = useMemo(() => {
-		const isGradient =
-			currentStep === 5 || updateTrainingProgramMutation.isPending || isInitializing
+		const isGradient = currentStep === 5 || isSubmitting || isInitializing
 		return {
 			WrapperComponent: isGradient ? BackgroundLayout : View,
 			wrapperProps: isGradient
@@ -233,10 +238,10 @@ export const ChangeTrainingProgramScreen = () => {
 				: { className: 'flex-1 bg-[#151515] px-4' },
 			contentPadding: isGradient ? 'px-4' : '',
 		}
-	}, [currentStep, updateTrainingProgramMutation.isPending, isInitializing])
+	}, [currentStep, isSubmitting, isInitializing])
 
 	const { WrapperComponent, wrapperProps, contentPadding } = layoutConfig
-	const showButtons = !updateTrainingProgramMutation.isPending && !isInitializing
+	const showButtons = !isSubmitting && !isInitializing
 
 	return (
 		<WrapperComponent {...(wrapperProps as any)}>
