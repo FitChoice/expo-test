@@ -14,8 +14,8 @@ export const GreenGradient = () => {
 					id="greenGradientRight"
 					cx="0"
 					cy="0.2"
-					r="1.2"
-					fx="-1.1"
+					r="1.6"
+					fx="-0.5	"
 					fy="0.3"
 					gradientUnits="objectBoundingBox"
 				>

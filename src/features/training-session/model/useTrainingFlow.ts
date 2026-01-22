@@ -127,7 +127,7 @@ export function useTrainingFlow({
 			id: exercise.id,
 			training_id: training?.id ?? 0,
 			reps: accumulatedExerciseReps.current,
-			quality: 100, // TODO: Получать реальное качество из Engine
+			quality: 100, // В текущей версии Engine качество всегда 100
 			recorded_errors: [],
 		}
 
@@ -150,15 +150,21 @@ export function useTrainingFlow({
 		setCurrentExerciseId(exercises[nextIndex].id)
 	}, [currentExerciseIndex, exercises, resetExerciseProgress, setCurrentExerciseId])
 
+	const resetSetAndReps = useCallback(() => {
+		setCurrentReps(0)
+		setSetNumber(0)
+		setCurrentSetStore(0)
+	}, [setCurrentReps, setCurrentSetStore])
+
 	const handleExecutionComplete = useCallback(() => {
 		if (!currentExercise) return
 
 		const newSetNumber = setNumber + 1
-		
+
 		// Логируем завершение сета
 		const repsDone = currentReps
 		accumulatedExerciseReps.current += repsDone
-		
+
 		completeSet({
 			exerciseIndex: currentExerciseIndex,
 			setNumber: setNumber,
@@ -168,52 +174,47 @@ export function useTrainingFlow({
 			errors: [],
 		})
 
+		const isFinalSetForSide = newSetNumber >= setsPerExercise
+		const isFinalSide = !requiresSideSwitch || currentSideState === 'left'
+		const isFinalStep = isLastExercise && isFinalSetForSide && isFinalSide
+
+		if (isFinalStep) {
+			void sendExerciseCompletion(currentExercise, true)
+			return
+		}
+
 		if (requiresSideSwitch) {
-			// Логика для упражнений с зеркалированием сторон
-			if (newSetNumber < setsPerExercise) {
-				// Ещё остались сеты для текущей стороны
+			if (!isFinalSetForSide) {
 				setSetNumber(newSetNumber)
 				nextSet()
 				setRestType('set')
 				setCurrentStep('rest')
+			} else if (currentSideState === 'right') {
+				setCurrentSideState('left')
+				setCurrentSide('left')
+				resetSetAndReps()
+				setCurrentStep('side_switch')
 			} else {
-				// Все сеты для текущей стороны выполнены
-				if (currentSideState === 'right') {
-					// Закончили правую сторону, переходим к смене на левую
-					setCurrentSideState('left')
-					setCurrentSide('left')
-					setCurrentReps(0)
-					setSetNumber(0)
-					setCurrentSetStore(0)
-					setCurrentStep('side_switch')
-				} else {
-					// Закончили левую сторону (т.е. всё упражнение)
-					void sendExerciseCompletion(currentExercise, isLastExercise)
-					if (!isLastExercise) {
-						setRestType('exercise')
-						setCurrentStep('rest')
-					}
-				}
+				// Закончили левую сторону, но есть ещё упражнения
+				void sendExerciseCompletion(currentExercise, false)
+				setRestType('exercise')
+				setCurrentStep('rest')
 			}
 			return
 		}
 
-		// Логика для обычных упражнений (без сторон)
-		if (newSetNumber < setsPerExercise) {
+		if (!isFinalSetForSide) {
 			setSetNumber(newSetNumber)
 			nextSet()
-			setCurrentSideState('right')
-			setCurrentSide('right')
 			setRestType('set')
 			setCurrentStep('rest')
 		} else {
-			void sendExerciseCompletion(currentExercise, isLastExercise)
-			if (!isLastExercise) {
-				setRestType('exercise')
-				setCurrentStep('rest')
-			}
+			// Закончили упражнение, но есть ещё упражнения
+			void sendExerciseCompletion(currentExercise, false)
+			setRestType('exercise')
+			setCurrentStep('rest')
 		}
-	}, [currentExercise, currentReps, completeSet, currentExerciseIndex, setNumber, requiresSideSwitch, currentSideState, setsPerExercise, nextSet, setCurrentSide, setCurrentReps, setCurrentSetStore, sendExerciseCompletion, isLastExercise])
+	}, [currentExercise, currentReps, completeSet, currentExerciseIndex, setNumber, requiresSideSwitch, currentSideState, setsPerExercise, isLastExercise, sendExerciseCompletion, nextSet, setCurrentSide, resetSetAndReps])
 
 	const handleRestComplete = useCallback(() => {
 		if (restType === 'set') {
@@ -248,13 +249,11 @@ export function useTrainingFlow({
 
 	const executionKey = `${currentExercise?.id}-${setNumber}-${currentSideState}`
 
-	// Handler для завершения side_switch — сбрасывает счётчик и переходит к position
+	// Handler для завершения side_switch — сбрасывает счётчик и переходит к execution
 	const handleSideSwitchComplete = useCallback(() => {
-		setCurrentReps(0)
-		setSetNumber(0)
-		setCurrentSetStore(0)
-		setCurrentStep('position')
-	}, [setCurrentReps, setCurrentSetStore])
+		resetSetAndReps()
+		setCurrentStep('execution')
+	}, [resetSetAndReps])
 
 	const exerciseProgressRatio = useMemo(() => {
 		if (!currentExercise) return 0

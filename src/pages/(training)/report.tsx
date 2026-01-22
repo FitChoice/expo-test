@@ -104,7 +104,7 @@ export default function TrainingReportScreen() {
 				<View className="flex-1">
 					<MetricCard
 						icon={<MaterialCommunityIcons name="run-fast" size={24} color="#689F38" />}
-						displayNumber={trainingReport?.data?.cals}
+						displayNumber={trainingReport?.data.report_cals}
 						title={'ккал'}
 						description={'Каллорий сожжено'}
 					/>
