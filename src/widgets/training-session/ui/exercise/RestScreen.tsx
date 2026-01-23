@@ -5,15 +5,17 @@
  */
 
 import { View, Text, useWindowDimensions, Platform } from 'react-native'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useCallback } from 'react'
 import { LargeNumberDisplay, TrainingExerciseProgress } from '@/shared/ui'
 import type { ExerciseInfoResponse } from '@/entities/training'
 import { useCountdown } from '@/shared/hooks/useCountdown'
 
 import { ExerciseSetInfo } from './components/ExerciseSetInfo'
 
-interface RestScreenProps {
+export interface RestScreenProps {
 	onComplete: () => void
+	onRestTheoryTrigger?: () => void
+	restTheoryTriggerAt?: number | null
 	duration: number // seconds
 	exercise: ExerciseInfoResponse
 	currentSet: number
@@ -26,20 +28,43 @@ const IS_ANDROID = Platform.OS === 'android'
 
 export function RestScreen({
 	onComplete,
+	onRestTheoryTrigger,
+	restTheoryTriggerAt,
 	duration,
 	exercise,
 	currentSet,
-														 currentExerciseIndex,
-														 totalExercises,
+	currentExerciseIndex,
+	totalExercises,
 	exerciseProgressRatio,
 }: RestScreenProps) {
 	const { width, height } = useWindowDimensions()
 	const isVertical = height > width
 
+	const hasTriggeredRestTheoryRef = useRef(false)
+	const handleComplete = useCallback(() => {
+		if (hasTriggeredRestTheoryRef.current) return
+		onComplete()
+	}, [onComplete])
+
 	const { remainingTime } = useCountdown(duration, {
-		onComplete,
+		onComplete: handleComplete,
 		autoStart: true,
 	})
+
+	useEffect(() => {
+		if (
+			restTheoryTriggerAt == null ||
+			!onRestTheoryTrigger ||
+			hasTriggeredRestTheoryRef.current
+		) {
+			return
+		}
+
+		if (remainingTime <= restTheoryTriggerAt) {
+			hasTriggeredRestTheoryRef.current = true
+			onRestTheoryTrigger()
+		}
+	}, [remainingTime, restTheoryTriggerAt, onRestTheoryTrigger])
 
 	const displayTime = useMemo(() => {
 		const mins = Math.floor(remainingTime / 60)

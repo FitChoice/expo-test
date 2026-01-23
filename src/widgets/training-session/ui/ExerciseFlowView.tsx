@@ -7,6 +7,7 @@ import { RestScreen } from './exercise/RestScreen'
 import { RotateScreen } from './exercise/RotateScreen'
 import { ExerciseExecutionScreen } from './exercise/ExerciseExecutionScreen'
 import { ExerciseTheoryScreen } from './exercise/ExerciseTheoryScreen'
+import { REST_THEORY_DURATION } from '@/shared/constants'
 import type { ExerciseInfoResponse } from '@/entities/training'
 import type { ExerciseStep } from '@/features/training-session'
 import { ExerciseWithCounterWrapper } from './ExerciseWithCounterWrapper/ExerciseWithCounterWrapper'
@@ -21,6 +22,7 @@ type ExerciseFlowViewProps = {
 	currentSide: 'left' | 'right'
 	executionKey: string
 	restDuration: number
+	restTheoryTriggerAt: number | null
 	practiceVideoUrl: string | null
 
 	currentExerciseIndex: number
@@ -33,6 +35,8 @@ type ExerciseFlowViewProps = {
 	onExecutionComplete: () => void
 	onSideSwitchComplete: () => void
 	onRestComplete: () => void
+	onRestTheoryTrigger: () => void
+	onRestTheoryComplete: () => void
 }
 
 export function ExerciseFlowView({
@@ -44,6 +48,7 @@ export function ExerciseFlowView({
 	currentSide,
 	executionKey,
 	restDuration,
+	restTheoryTriggerAt,
 	practiceVideoUrl,
 	currentExerciseIndex,
 	totalExercises,
@@ -54,6 +59,8 @@ export function ExerciseFlowView({
 	onExecutionComplete,
 	onSideSwitchComplete,
 	onRestComplete,
+	onRestTheoryTrigger,
+	onRestTheoryComplete,
 }: ExerciseFlowViewProps) {
 
 	return (
@@ -89,7 +96,8 @@ export function ExerciseFlowView({
 						type={'rest'}
 						exercise={exercise}
 						currentSet={currentSet}
-						onComplete={onCountdownComplete}
+						onComplete={onRestTheoryComplete}
+						maxDuration={REST_THEORY_DURATION}
 						isVertical={!exercise.is_horizontal}
 						currentExerciseIndex={currentExerciseIndex}
 						totalExercises={totalExercises}
@@ -131,6 +139,8 @@ export function ExerciseFlowView({
 						totalExercises={totalExercises}
 						exerciseProgressRatio={exerciseProgressRatio}
 						onComplete={onRestComplete}
+						onRestTheoryTrigger={onRestTheoryTrigger}
+						restTheoryTriggerAt={restTheoryTriggerAt}
 						duration={restDuration}
 						exercise={exercise}
 						currentSet={currentSet}

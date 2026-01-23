@@ -27,6 +27,7 @@ interface ExerciseTheoryScreenProps {
 	totalExercises: number
 	exerciseProgressRatio: number
 	type?: string
+	maxDuration?: number
 }
 
 export function ExerciseTheoryScreen({
@@ -36,11 +37,12 @@ export function ExerciseTheoryScreen({
 	isVertical,
 	currentExerciseIndex,
 	totalExercises,
-	exerciseProgressRatio, type
+	exerciseProgressRatio, type,
+	maxDuration
 }: ExerciseTheoryScreenProps) {
 	const videoUrl = type ? exercise.video_practice : exercise.video_theory
 	const player = useVideoPlayer(videoUrl, (p) => {
-		p.loop = false
+		p.loop = !!maxDuration
 		p.play()
 	})
 
@@ -52,21 +54,23 @@ export function ExerciseTheoryScreen({
 	const hasInitializedDurationRef = useRef(false)
 	const lastBeepSecondRef = useRef<number | null>(null)
 
+	const triggerComplete = useCallback(() => {
+		if (hasCompletedRef.current) return
+		hasCompletedRef.current = true
+		onComplete()
+	}, [onComplete])
+
 	// Countdown only for UI display (no onComplete - transition handled by playToEnd)
+	// For restTheory (maxDuration) we use countdown to trigger completion
 	const { remainingTime, reset, pause, start } = useCountdown(0, {
 		autoStart: false,
+		onComplete: maxDuration ? triggerComplete : undefined,
 	})
 
 	const safeStart = useCallback(() => {
 		if (!hasInitializedDurationRef.current) return
 		start()
 	}, [start])
-
-	const triggerComplete = useCallback(() => {
-		if (hasCompletedRef.current) return
-		hasCompletedRef.current = true
-		onComplete()
-	}, [onComplete])
 
 	// Register player in context for global pause/resume
 	useEffect(() => {
@@ -100,7 +104,9 @@ export function ExerciseTheoryScreen({
 	useEventListener(player, 'statusChange', ({ status }) => {
 		if (status === 'readyToPlay' && !hasInitializedDurationRef.current && player.duration > 0) {
 			hasInitializedDurationRef.current = true
-			reset(Math.ceil(player.duration))
+			const videoDuration = Math.ceil(player.duration)
+			const duration = maxDuration ? Math.min(videoDuration, maxDuration) : videoDuration
+			reset(duration)
 			safeStart()
 		}
 	})

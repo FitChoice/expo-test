@@ -41,7 +41,8 @@ export function ExerciseFlow({
 		currentSideState,
 		displayCurrentSet,
 		practiceVideoUrl,
-		baseRestDuration,
+		restDuration,
+		restTheoryTriggerAt,
 		executionKey,
 		currentExerciseIndex,
 		totalExercises,
@@ -51,6 +52,8 @@ export function ExerciseFlow({
 		handlePositionComplete,
 		handleExecutionComplete,
 		handleRestComplete,
+		handleRestTheoryTrigger,
+		handleRestTheoryComplete,
 		handleSideSwitchComplete,
 	} = useTrainingFlow({
 		exercises,
@@ -69,7 +72,8 @@ export function ExerciseFlow({
 			currentSet={displayCurrentSet}
 			currentSide={currentSideState}
 			executionKey={executionKey}
-			restDuration={baseRestDuration}
+			restDuration={restDuration}
+			restTheoryTriggerAt={restTheoryTriggerAt}
 			practiceVideoUrl={practiceVideoUrl}
 			currentExerciseIndex={currentExerciseIndex}
 			totalExercises={totalExercises}
@@ -80,6 +84,8 @@ export function ExerciseFlow({
 			onExecutionComplete={handleExecutionComplete}
 			onSideSwitchComplete={handleSideSwitchComplete}
 			onRestComplete={handleRestComplete}
+			onRestTheoryTrigger={handleRestTheoryTrigger}
+			onRestTheoryComplete={handleRestTheoryComplete}
 		/>
 	)
 }

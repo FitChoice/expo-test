@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as ScreenOrientation from 'expo-screen-orientation'
+import { REST_THEORY_DURATION, REST_THEORY_THRESHOLD } from '@/shared/constants'
 import type { ExerciseInfoResponse, ExecuteExerciseInput, CompleteTrainingInput } from '@/entities/training'
 import { useTrainingStore } from '@/entities/training'
 
@@ -49,6 +50,18 @@ export function useTrainingFlow({
 		typeof currentExercise?.is_mirror === 'number'
 			? Number(currentExercise.is_mirror)
 			: currentExercise?.is_mirror
+	)
+
+	const baseRestDuration = useMemo(() => {
+		if (!currentExercise) return 15
+		return restType === 'set'
+			? (currentExercise.rest_between_sets ?? 15)
+			: (currentExercise.rest_after_exercise ?? 30)
+	}, [restType, currentExercise])
+
+	const needsRestTheory = useMemo(
+		() => restType === 'set' && baseRestDuration >= REST_THEORY_THRESHOLD,
+		[restType, baseRestDuration]
 	)
 
 	const resetExerciseProgress = useCallback(() => {
@@ -150,6 +163,17 @@ export function useTrainingFlow({
 		setCurrentExerciseId(exercises[nextIndex].id)
 	}, [currentExerciseIndex, exercises, resetExerciseProgress, setCurrentExerciseId])
 
+	const proceedAfterRest = useCallback(() => {
+		if (restType === 'set') {
+			setCurrentStep('position')
+			return
+		}
+
+		if (restType === 'exercise') {
+			void proceedToNextExercise()
+		}
+	}, [restType, proceedToNextExercise])
+
 	const resetSetAndReps = useCallback(() => {
 		setCurrentReps(0)
 		setSetNumber(0)
@@ -216,16 +240,17 @@ export function useTrainingFlow({
 		}
 	}, [currentExercise, currentReps, completeSet, currentExerciseIndex, setNumber, requiresSideSwitch, currentSideState, setsPerExercise, isLastExercise, sendExerciseCompletion, nextSet, setCurrentSide, resetSetAndReps])
 
-	const handleRestComplete = useCallback(() => {
-		if (restType === 'set') {
-			setCurrentStep('position')
-			return
-		}
+	const handleRestTheoryTrigger = useCallback(() => {
+		setCurrentStep('restTheory')
+	}, [])
 
-		if (restType === 'exercise') {
-			void proceedToNextExercise()
-		}
-	}, [restType, proceedToNextExercise])
+	const handleRestComplete = useCallback(() => {
+		proceedAfterRest()
+	}, [proceedAfterRest])
+
+	const handleRestTheoryComplete = useCallback(() => {
+		proceedAfterRest()
+	}, [proceedAfterRest])
 
 	const displayCurrentSet = Math.max(
 		1,
@@ -239,13 +264,6 @@ export function useTrainingFlow({
 			? currentExercise.video_practice_second || currentExercise.video_practice
 			: currentExercise.video_practice
 	}, [currentExercise, currentSideState])
-
-	const baseRestDuration = useMemo(() => {
-		if (!currentExercise) return 15
-		return restType === 'set'
-			? (currentExercise.rest_between_sets ?? 15)
-			: (currentExercise.rest_after_exercise ?? 30)
-	}, [restType, currentExercise])
 
 	const executionKey = `${currentExercise?.id}-${setNumber}-${currentSideState}`
 
@@ -278,7 +296,8 @@ export function useTrainingFlow({
 		currentSideState,
 		displayCurrentSet,
 		practiceVideoUrl,
-		baseRestDuration,
+		restDuration: baseRestDuration,
+		restTheoryTriggerAt: needsRestTheory ? REST_THEORY_DURATION : null,
 		executionKey,
 		currentExerciseIndex,
 		totalExercises: exercises.length,
@@ -288,6 +307,8 @@ export function useTrainingFlow({
 		handlePositionComplete,
 		handleExecutionComplete,
 		handleRestComplete,
+		handleRestTheoryTrigger,
+		handleRestTheoryComplete,
 		handleSideSwitchComplete,
 	}
 }
