@@ -3,7 +3,7 @@ import * as ScreenOrientation from 'expo-screen-orientation'
 import type { ExerciseInfoResponse, ExecuteExerciseInput, CompleteTrainingInput } from '@/entities/training'
 import { useTrainingStore } from '@/entities/training'
 
-export type ExerciseStep = 'theory' | 'position' | 'execution' | 'side_switch' | 'rest' | 'rotate'
+export type ExerciseStep = 'theory' | 'position' | 'execution' | 'side_switch' | 'rest' | 'rotate' | 'restTheory'
 
 interface UseTrainingFlowProps {
 	exercises: ExerciseInfoResponse[]

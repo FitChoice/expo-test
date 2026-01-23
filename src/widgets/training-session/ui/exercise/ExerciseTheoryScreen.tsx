@@ -14,6 +14,7 @@ import type { ExerciseInfoResponse } from '@/entities/training'
 import { useVideoPlayerContext } from '@/shared/hooks/useVideoPlayerContext'
 import { useCountdown } from '@/shared/hooks/useCountdown'
 import { VIDEO_SCREEN_HEIGHT as height } from '@/shared/constants/sizes'
+import { useBeepSound } from '@/shared/lib'
 
 import { ExerciseSetInfo } from './components/ExerciseSetInfo'
 
@@ -25,6 +26,7 @@ interface ExerciseTheoryScreenProps {
 	currentExerciseIndex: number
 	totalExercises: number
 	exerciseProgressRatio: number
+	type?: string
 }
 
 export function ExerciseTheoryScreen({
@@ -34,19 +36,21 @@ export function ExerciseTheoryScreen({
 	isVertical,
 	currentExerciseIndex,
 	totalExercises,
-	exerciseProgressRatio,
+	exerciseProgressRatio, type
 }: ExerciseTheoryScreenProps) {
-	const videoUrl = exercise.video_theory ?? ''
+	const videoUrl = type ? exercise.video_practice : exercise.video_theory
 	const player = useVideoPlayer(videoUrl, (p) => {
 		p.loop = false
 		p.play()
 	})
 
 	const videoPlayerContext = useVideoPlayerContext()
+	const { playBeep } = useBeepSound()
 	
 	// Guard against double completion calls
 	const hasCompletedRef = useRef(false)
 	const hasInitializedDurationRef = useRef(false)
+	const lastBeepSecondRef = useRef<number | null>(null)
 
 	// Countdown only for UI display (no onComplete - transition handled by playToEnd)
 	const { remainingTime, reset, pause, start } = useCountdown(0, {
@@ -114,6 +118,21 @@ export function ExerciseTheoryScreen({
 		}, 500)
 		return () => clearInterval(interval)
 	}, [player, triggerComplete])
+
+	useEffect(() => {
+		if (!type) {
+			lastBeepSecondRef.current = null
+			return
+		}
+		if (remainingTime > 3) {
+			lastBeepSecondRef.current = null
+			return
+		}
+		if (remainingTime > 0 && lastBeepSecondRef.current !== remainingTime) {
+			lastBeepSecondRef.current = remainingTime
+			playBeep()
+		}
+	}, [playBeep, remainingTime, type])
 
 	if (!videoUrl) {
 		throw new Error('Exercise theory video is required but missing.')

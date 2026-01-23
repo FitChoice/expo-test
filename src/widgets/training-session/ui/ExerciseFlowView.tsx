@@ -84,6 +84,19 @@ export function ExerciseFlowView({
 					/>
 				)}
 
+				{currentStep === 'restTheory' && (
+					<ExerciseTheoryScreen
+						type={'rest'}
+						exercise={exercise}
+						currentSet={currentSet}
+						onComplete={onCountdownComplete}
+						isVertical={!exercise.is_horizontal}
+						currentExerciseIndex={currentExerciseIndex}
+						totalExercises={totalExercises}
+						exerciseProgressRatio={exerciseProgressRatio}
+					/>
+				)}
+
 				{currentStep === 'execution' && (
 					<ExerciseExecutionScreen
 						key={executionKey}
