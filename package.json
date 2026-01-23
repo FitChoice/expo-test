@@ -90,6 +90,11 @@
 		"typescript": "~5.9.3",
 		"typescript-eslint": "^8.46.2"
 	},
+	"pnpm": {
+		"overrides": {
+			"strip-ansi@6.0.1>ansi-regex": "5.0.1"
+		}
+	},
 	"private": true,
 	"packageManager": "pnpm@10.19.0"
 }

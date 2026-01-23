@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { surveyApi } from '../api'
 import { trainingApi, trainingKeys } from '@/features/training/api'
-import { showToast, getUserId } from '@/shared/lib'
+import { getUserId, showToast } from '@/shared/lib'
 import type { SurveyData } from '@/entities/survey'
 
 export const useUpdateTrainingProgramMutation = () => {
@@ -30,6 +30,7 @@ export const useUpdateTrainingProgramMutation = () => {
 		},
 		onSuccess: ({ userId }) => {
 			showToast.success('Программа тренировок обновлена')
+			console.log('Тост показан')
 			queryClient.invalidateQueries({ queryKey: ['profile', userId] })
 			queryClient.invalidateQueries({ queryKey: trainingKeys.plan(userId) })
 		},

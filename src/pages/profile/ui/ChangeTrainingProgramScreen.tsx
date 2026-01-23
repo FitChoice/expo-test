@@ -107,8 +107,11 @@ export const ChangeTrainingProgramScreen = () => {
 				},
 
 				{
-					onSettled: () => {
-						router.replace('/profile')
+					onSettled:  () => {
+						// router.replace('/profile')
+						router.navigate({
+							pathname: '/profile',
+						})
 					},
 				}
 			)
@@ -133,10 +136,11 @@ export const ChangeTrainingProgramScreen = () => {
 		switch (currentStep) {
 			case 1:
 				return (
-					<SurveyStep7
-						selectedDays={getTrainingDaysAsStrings()}
-						onDaysChange={updateTrainingDays}
-					/>
+				<SurveyStep7
+					selectedDays={getTrainingDaysAsStrings()}
+					onDaysChange={updateTrainingDays}
+				/>
+
 				)
 			case 2:
 				return (
