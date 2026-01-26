@@ -14,11 +14,22 @@ import { useQuery } from '@tanstack/react-query'
 import type { ApiResult } from '@/shared/api'
 import { trainingApi } from '@/features/training/api'
 import { type TrainingReport } from '@/features/training/api/trainingApi'
+import { useEffect, useMemo } from 'react'
+import { showToast } from '@/shared/lib'
 
 export default function TrainingReportScreen() {
 	const training = useTrainingStore((state) => state.training)
 	const goToAnalytics = useTrainingStore((state) => state.setAnalytics)
 	const reset = useTrainingStore((state) => state.reset)
+
+
+	const isTrainingAi = useMemo(() => {
+		return training?.exercises?.some((exercise) => exercise.is_ai)
+	}, [training])
+
+	useEffect(() => {
+		showToast.success('Все ли вам понравилось?', 'Пожалуйста, оцените качество тренировки, это поможет нам развиваться', 'headset')
+	}, [])
 
 
 	const { data: trainingReport, isLoading } = useQuery<ApiResult<TrainingReport>, Error>({
@@ -58,7 +69,6 @@ export default function TrainingReportScreen() {
 
 	return (
 		<View className="flex-1">
-
 				{/* Training Header Block */}
 				<View className="w-full flex-row items-center bg-transparent px-4 py-10">
 					{/* Icon Circle */}
@@ -120,6 +130,8 @@ export default function TrainingReportScreen() {
 						/>
 					</View>
 				</View>
+			{
+				isTrainingAi ?
 				<View className="h-[170px] w-full p-2">
 					<MetricCard
 						icon={<Fontisto name="fire" size={24} color="#AAEC4D" />}
@@ -127,8 +139,8 @@ export default function TrainingReportScreen() {
 						title={'%'}
 						description={'Читстота техники'}
 					/>
-				</View>
-
+				</View> : <></>
+			}
 
 			{/* Button at bottom */}
 			<View className="flex-row gap-2 py-2 pb-20">
