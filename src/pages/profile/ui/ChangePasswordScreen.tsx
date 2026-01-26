@@ -10,6 +10,9 @@ import { BackgroundLayout, BackButton, Input, Button } from '@/shared/ui'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import { userApi } from '@/features/user/api'
 import { getUserId, useNavbarLayout, showToast } from '@/shared/lib'
+import Toast from 'react-native-toast-message'
+import { toastConfig } from '@/shared/ui/Toast/config'
+
 
 interface FormErrors {
 	oldPassword?: string
@@ -79,8 +82,7 @@ export const ChangePasswordScreen = () => {
 				setOldPassword('')
 				setNewPassword('')
 				setConfirmPassword('')
-				// Navigate back after showing success toast
-				setTimeout(() => router.back(), 2000)
+
 			} else {
 				// Handle specific error cases
 				const errorLower = result.error?.toLowerCase() || ''
@@ -109,7 +111,7 @@ export const ChangePasswordScreen = () => {
 				</View>
 
 				<ScrollView
-					className="flex-1"
+					className="flex-1 pt-40"
 					contentContainerStyle={{ paddingTop: 20, paddingBottom: contentPaddingBottom }}
 					showsVerticalScrollIndicator={false}
 					keyboardShouldPersistTaps="handled"
@@ -181,6 +183,7 @@ export const ChangePasswordScreen = () => {
 
 				<NavigationBar />
 			</View>
+	    <Toast config={toastConfig} />
 		</BackgroundLayout>
 	)
 }

@@ -61,6 +61,8 @@ const ProfileContent = () => {
 	// Fetch profile data
 	const { data: userProfile, isLoading } = useProfileQuery(userId)
 
+
+
 	// Update profile mutation
 	const updateProfileMutation = useMutation({
 		mutationFn: async (name: string) => {

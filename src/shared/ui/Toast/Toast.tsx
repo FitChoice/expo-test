@@ -4,24 +4,26 @@
  */
 
 import React from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
-import { Icon } from '../Icon'
+import { View, Text } from 'react-native'
+import Octicons from '@expo/vector-icons/Octicons';
 import type { ToastProps } from './types'
 
-export const Toast: React.FC<ToastProps> = ({ message, variant = 'success', onHide }) => {
-	const iconName = variant === 'success' ? 'check' : 'warning'
-	const iconColor = variant === 'success' ? '#00CF1B' : '#FF2854'
+export const Toast: React.FC<ToastProps> = ({ message, description, variant = 'success' }) => {
+
+	const iconColor = variant === 'success' ? '#81BD12' : variant === 'error' ? '#CA3114' : '#1A3FBA'
 
 	return (
-		<View className="mx-4 flex-row items-center gap-3 rounded-2xl bg-fill-800 p-4 shadow-lg">
-			<Icon name={iconName} size={24} color={iconColor} />
-			<Text className="flex-1 text-t2 text-white">{message}</Text>
-			<TouchableOpacity
-				onPress={onHide}
-				hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-			>
-				<Icon name="close" size={20} color="#FFFFFF" />
-			</TouchableOpacity>
+		<View className="flex-row items-center gap-5 rounded-2xl bg-fill-800 p-4 shadow-lg w-full">
+
+			<View className="p-4  rounded-2xl bg-fill-700" >
+				<Octicons name="dot-fill" size={14} color={iconColor} />
+			</View>
+
+			<View className="flex-column gap-5" >
+				<Text className="flex-1 text-t2-bold text-light-text-100">{message}</Text>
+				{description && <Text className=" text-t3 	text-light-text-500">{description}</Text>}
+			</View>
+
 		</View>
 	)
 }

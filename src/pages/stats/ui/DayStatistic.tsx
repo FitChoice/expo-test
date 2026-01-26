@@ -7,6 +7,7 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Fontisto from '@expo/vector-icons/Fontisto'
 import EvilIcons from '@expo/vector-icons/EvilIcons'
+import { differenceInDays, addMonths, startOfMonth } from 'date-fns';
 
 import { Icon } from '@/shared/ui'
 import { useChartQuery, useMainStatsQuery } from '@/features/stats'
@@ -246,6 +247,7 @@ export function DayStatistic() {
 		return transformBodyChartData(bodyChartData.stats)
 	}, [bodyChartData?.stats])
 
+
 	const bodyBottomDisplayData = useMemo(() => {
 		const unit = getBodyMetricUnit(selectedBodyMetric)
 
@@ -276,6 +278,21 @@ export function DayStatistic() {
 			setSelectedBodyBarKey(currentKey)
 		}
 	}, [bodyChartData?.stats, selectedBodyMetric])
+
+
+	const daysUntilNewMeasure = useMemo(() => {
+		if (!bodyChartData?.stats || !bodyChartData?.stats.length) return 0
+
+			const lastMeasureDate = bodyChartData?.stats[0]['date'].split('-')
+			const nextMonth = addMonths(new Date(lastMeasureDate[0], lastMeasureDate[1], lastMeasureDate[2]), 1)
+			const result = differenceInDays(
+				startOfMonth(nextMonth),
+				new Date(lastMeasureDate[0], lastMeasureDate[1], lastMeasureDate[2], 23, 0),
+			)
+			return result as number
+
+	}, [bodyChartData?.stats])
+
 
 	return (
 		<>
@@ -507,9 +524,9 @@ export function DayStatistic() {
 						</View>
 					) : (
 						<View className="flex-row items-end justify-between gap-2">
-							{bodyDisplayPoints.map((point) => (
+							{bodyDisplayPoints.map((point, idx) => (
 								<BodyChartBar
-									key={point.key}
+									key={point.key + idx}
 									point={point}
 									isSelected={selectedBodyBarKey === point.key}
 									onPress={() => setSelectedBodyBarKey(point.key)}
@@ -535,14 +552,26 @@ export function DayStatistic() {
 			<View className="overflow-hidden rounded-3xl bg-[#1b1b1b]">
 				<View className="flex-row items-center gap-2 px-5">
 					<View className="h-48 flex-1 justify-between py-2">
-						<Text className="text-t1.1 text-white">Внести изменения за этот месяц</Text>
-						<TouchableOpacity
+						{
+							daysUntilNewMeasure == 0 ?
+								<>
+							<Text className="text-t1.1 text-white">Внести изменения за этот месяц</Text>
+							<TouchableOpacity
 							className="h-20 w-20 items-center justify-center rounded-full bg-brand-purple-500"
 							activeOpacity={0.9}
-							onPress={() => router.push('/measure-statistic')}
-						>
-							<Icon name="chevrons-right" size={28} color="#FFFFFF" />
-						</TouchableOpacity>
+						onPress={() => router.push('/measure-statistic')}
+					>
+						<Icon name="chevrons-right" size={28} color="#FFFFFF" />
+					</TouchableOpacity>
+								</> : <>
+									<Text className="text-t1.1 text-white">До внесения следующих данных</Text>
+									<View className="flex-row gap-2 align-center" >
+										<Text className="text-center font-rimma text-3xl text-white">{daysUntilNewMeasure}</Text>
+										<Text className="text-t1.1 text-white">дней</Text>
+									</View>
+
+								</>
+						}
 					</View>
 
 					<Image source={girlMeasure} className="h-48 w-44" resizeMode="contain" />
