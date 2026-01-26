@@ -18,6 +18,8 @@ import {
 	masksToNumber,
 } from '@/entities/survey'
 import { useUpdateTrainingProgramMutation } from '@/features/survey-flow'
+import Toast from 'react-native-toast-message'
+import { toastConfig } from '@/shared/ui/Toast/config'
 
 const initialFormData: SurveyData = {
 	name: '',
@@ -109,9 +111,13 @@ export const ChangeTrainingProgramScreen = () => {
 				{
 					onSettled:  () => {
 						// router.replace('/profile')
-						router.navigate({
-							pathname: '/profile',
-						})
+
+						setTimeout(() => {
+							router.navigate({
+								pathname: '/profile',
+							})
+						}, 2000)
+
 					},
 				}
 			)
@@ -237,6 +243,7 @@ export const ChangeTrainingProgramScreen = () => {
 					</View>
 				)}
 			</View>
+			<Toast config={toastConfig} />
 		</WrapperComponent>
 	)
 }

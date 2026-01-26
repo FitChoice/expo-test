@@ -91,6 +91,7 @@ export type IconName =
 	| 'back'
 	| 'message'
 	| 'pie-chart'
+	| 'headset'
 	// Чат
 	| 'microphone'
 	| 'send'

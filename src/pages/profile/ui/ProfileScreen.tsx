@@ -29,6 +29,8 @@ import { useUploadAvatar } from '@/features/user/hooks/useUploadAvatar'
 import { Feather } from '@expo/vector-icons'
 import { NavigationBar } from '@/widgets/navigation-bar'
 import boySample from '../../../../assets/images/profile_girl_sample.png'
+import Toast from 'react-native-toast-message'
+import { toastConfig } from '@/shared/ui/Toast/config'
 
 export const ProfileScreen = () => {
 	return (

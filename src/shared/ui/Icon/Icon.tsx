@@ -40,6 +40,7 @@ import Lightning from './assets/lightning.svg'
 import CalendarDots from './assets/calendar-dots.svg'
 import Ruler from './assets/ruler.svg'
 import Barbell from './assets/barbell.svg'
+import Headset from './assets/headset.svg'
 import HealthKnees from './assets/health-knees.svg'
 import HealthNeckShoulders from './assets/health-neck-shoulders.svg'
 import HealthBackPain from './assets/health-back-pain.svg'
@@ -155,6 +156,7 @@ const iconMap: Record<IconName, React.FC<SvgProps>> = {
 	'dots-three-vertical': DotsThreeVertical,
 	'gender-female': GenderFemale,
 	'gender-male': GenderMale,
+	'headset': Headset,
 	house: House,
 	camera: Camera,
 	file: File,
