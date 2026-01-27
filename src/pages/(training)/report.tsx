@@ -23,10 +23,6 @@ export default function TrainingReportScreen() {
 	const reset = useTrainingStore((state) => state.reset)
 
 
-	const isTrainingAi = useMemo(() => {
-		return training?.exercises?.some((exercise) => exercise.is_ai)
-	}, [training])
-
 	useEffect(() => {
 		showToast.success('Все ли вам понравилось?', 'Пожалуйста, оцените качество тренировки, это поможет нам развиваться', 'headset')
 	}, [])
@@ -60,6 +56,7 @@ export default function TrainingReportScreen() {
 		// Navigate to home
 		router.replace('/home')
 	}
+
 
 	if (!training || isLoading) {
 		return (
@@ -131,7 +128,7 @@ export default function TrainingReportScreen() {
 					</View>
 				</View>
 			{
-				isTrainingAi ?
+				trainingReport?.data.report_technique_quality  ?
 				<View className="h-[170px] w-full p-2">
 					<MetricCard
 						icon={<Fontisto name="fire" size={24} color="#AAEC4D" />}

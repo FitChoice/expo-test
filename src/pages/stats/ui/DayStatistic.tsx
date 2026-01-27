@@ -320,7 +320,11 @@ export function DayStatistic() {
 
 
 	if (userProfileLoading || !userProfile) {
-		return <Loader />
+		return <View className='flex-1 h-full' >
+	         <Loader />
+		</View>
+	
+
 	}
 
 

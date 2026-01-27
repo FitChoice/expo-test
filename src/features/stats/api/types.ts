@@ -74,6 +74,7 @@ export interface DayTraining {
 	id: number
 	title: string
 	type: string
+	is_complete: boolean
 }
 
 export interface DayDetailsResponse {

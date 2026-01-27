@@ -8,7 +8,7 @@ import { Button } from '@/shared/ui/Button'
 import { Icon } from '@/shared/ui'
 import { dairyApi } from '@/features/dairy/api'
 import { Loader } from '@/shared/ui/Loader/Loader'
-import { formatTime } from '@/shared/lib/formatters'
+import { formatDateDots, formatTime } from '@/shared/lib/formatters'
 
 import { getRatingOption } from '@/shared/constants'
 
@@ -24,6 +24,7 @@ export const DiaryCompletedScreen = () => {
 		},
 		enabled: !!scheduleId,
 	})
+
 
 	const diary = diaryResult?.success ? diaryResult.data : undefined
 
@@ -86,7 +87,7 @@ export const DiaryCompletedScreen = () => {
 							<Text className="text-lg font-bold text-white">Запись в дневнике</Text>
 							{date ? (
 								<View className="mt-1 self-start rounded-full bg-[#2E2E2E] px-3 py-1">
-									<Text className="text-xs text-[#949494]">{String(date)}</Text>
+									<Text className="text-xs text-[#949494]">{formatDateDots(date)}</Text>
 								</View>
 							) : null}
 						</View>

@@ -181,7 +181,7 @@ const MobileContent = () => {
 			: undefined
 
 		if (day?.is_diary_complete) {
-			router.push({ pathname: '/diary/completed', params: { id } })
+			router.push({ pathname: '/diary/completed', params: { id, date: day.date } })
 		} else {
 			router.push({ pathname: '/diary', params: { id } })
 		}
@@ -211,6 +211,8 @@ const MobileContent = () => {
 			<Stretching />
 		)
 	}
+
+	const amountCompletedTrainings = selectedDayTraining?.filter((activity) => activity.Progress.every((p) => p !== 0)).length ?? 0
 
 	if (isLoading) {
 		return <Loader text="Загрузка тренировочного плана" />
@@ -304,7 +306,7 @@ const MobileContent = () => {
 						{/* Progress Tag - moved to top */}
 						<View style={styles.progressTag}>
 							<FontAwesome5 name="font-awesome-flag" size={16} color="white" />
-							<Text style={styles.progressTagText}>0/2</Text>
+							<Text style={styles.progressTagText}>{`${amountCompletedTrainings}/${selectedDayTraining.length + 1}`}</Text>
 						</View>
 
 						<View style={styles.cardHeader}>

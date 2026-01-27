@@ -1,7 +1,13 @@
 import React, { useMemo } from 'react'
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
+import {
+	ActivityIndicator,
+	ScrollView,
+	Text,
+	TouchableOpacity,
+	View,
+} from 'react-native'
 import Feather from '@expo/vector-icons/Feather'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { router, useLocalSearchParams, useRouter } from 'expo-router'
 
 import MorningExercise from '@/assets/images/morning_ex.svg'
 import Stretching from '@/assets/images/stretching.svg'
@@ -12,6 +18,7 @@ import type { DayTraining } from '@/features/stats'
 import { StatsDetailPageLayout, TrainingTags } from '@/shared/ui'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { formatDateDots } from '@/shared/lib'
 
 
 
@@ -21,6 +28,7 @@ type DayTask = {
 	title: string
 	duration?: number
 	xp?: number
+	date: string
 	icon: React.ComponentType<{
 		width?: number
 		height?: number
@@ -74,11 +82,39 @@ const TaskCard = ({ task }: { task: DayTask }) => {
 				</View>
 				</View>
 
-				<View
-					className="h-12 w-12 bg-[#3f3f3f] items-center justify-center rounded-2xl"
-				>
-					<Feather name="arrow-right" size={18} color="#ffffff" />
-				</View>
+
+				{
+					task.completed ? 	<TouchableOpacity
+						onPress={() => {
+							if (task.title.includes('дневник')) {
+								router.push({
+									pathname: '/diary/completed',
+									params: {
+										id: String(task.id),
+										date: task.date,
+
+									},
+								})
+								return
+							}
+							router.push({
+									pathname: '/stats-day/report',
+									params: {
+										trainingId: task.id,
+										name: task.title,
+										date: formatDateDots(task.date),
+										xr: task.xp,
+
+									}
+								}
+							)
+						}}
+						className="h-12 w-12 bg-[#3f3f3f] items-center justify-center rounded-2xl"
+					>
+						<Feather name="arrow-right" size={18} color="#ffffff" />
+					</TouchableOpacity> : null
+				}
+
 			</View>
 
 			{
@@ -114,28 +150,31 @@ export const DayDetailsScreen = () => {
 
 	const { data: details, isLoading, error } = useDayDetailsQuery(scheduleId)
 
+
 	const titleDate = formatDateTitle(details?.date ?? fallbackDate)
 
 	const tasks = useMemo<DayTask[]>(() => {
 		if (!details) return []
 
 		const trainingTasks: DayTask[] = details.trainings.map((training) => ({
-			id: `training-${training.id}`,
+			id: `${training.id}`,
 			title: training.title || 'Тренировка',
 			duration: training.duration,
 			xp: 20,
 			icon: getTaskIcon(training),
-			completed: true,
+			completed: training.is_complete,
+			date: details.date,
 		}))
 
 		const diaryTask: DayTask | null = details.diary
 			? {
-					id: `diary-${details.diary.id}`,
+					id: `${details.diary.id}`,
 					title: 'Запись в дневнике',
 					duration: 10,
 					xp: 10,
 					icon: Diary,
 					completed: details.diary.filled,
+				date: details.date,
 				}
 			: null
 
