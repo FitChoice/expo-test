@@ -33,8 +33,12 @@ export function useCreateBodyStatsMutation() {
 		onSuccess: async () => {
 			const userId = await getUserId()
 			if (userId) {
-				// Инвалидируем основные показатели, так как они могут зависеть от новых данных
-				await queryClient.invalidateQueries({ queryKey: statsKeys.mainStats(userId) })
+				// Инвалидируем основные показатели, графики и замеры тела, так как они зависят от новых данных
+				await Promise.all([
+					queryClient.invalidateQueries({ queryKey: statsKeys.mainStats(userId) }),
+					queryClient.invalidateQueries({ queryKey: statsKeys.bodyStats(userId) }),
+					queryClient.invalidateQueries({ queryKey: [...statsKeys.all, 'chart', userId] }),
+				])
 			}
 		},
 	})

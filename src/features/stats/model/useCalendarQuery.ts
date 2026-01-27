@@ -17,6 +17,8 @@ export const useCalendarQuery = (monthsCount = 3) => {
 		queryFn: getUserId,
 	})
 
+
+
 	// Основной запрос данных статистики
 	const { 
 		data: calendarItems, 
@@ -35,6 +37,7 @@ export const useCalendarQuery = (monthsCount = 3) => {
 		enabled: !!userId,
 	})
 
+
 	// Группировка данных по дате для быстрого поиска при построении сетки
 	const calendarByDate = useMemo(() => {
 		const map = new Map<string, CalendarItem>()
@@ -45,11 +48,14 @@ export const useCalendarQuery = (monthsCount = 3) => {
 		return map
 	}, [calendarItems])
 
+	//console.log('calendarByDate', calendarByDate)
+
 	// Формирование структуры месяцев
 	const months: MonthData[] = useMemo(
 		() => buildMonths(calendarByDate, monthsCount),
 		[calendarByDate, monthsCount]
 	)
+
 
 	return {
 		months,

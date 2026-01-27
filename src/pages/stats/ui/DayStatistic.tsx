@@ -208,8 +208,6 @@ export function DayStatistic() {
 		period: selectedPeriod,
 	})
 
-	console.log('chartData')
-	console.log(chartData)
 
 	const {
 		data: bodyChartData,
@@ -220,8 +218,6 @@ export function DayStatistic() {
 		period: 'year',
 	})
 
-	console.log('bodyChartData')
-	console.log(bodyChartData)
 
 	const overallStats = useMemo(
 		() =>
@@ -240,14 +236,15 @@ export function DayStatistic() {
 	)
 
 	const displayPoints = useMemo(() => {
-		if (!chartData?.stats) return []
-		return transformChartData(chartData.stats, selectedPeriod)
-	}, [chartData?.stats, selectedPeriod])
+		if (!chartData) return []
+		return transformChartData(chartData, selectedPeriod)
+	}, [chartData, selectedPeriod])
+
 
 	const averageRating = useMemo(() => {
-		if (!chartData?.stats) return 3
-		return calculateAverage(chartData.stats)
-	}, [chartData?.stats])
+		if (!chartData) return 3
+		return calculateAverage(chartData)
+	}, [chartData])
 
 	const bottomDisplayData = useMemo(() => {
 		if (selectedBarKey) {

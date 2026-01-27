@@ -46,6 +46,7 @@ const DayCellComponent = ({
 	const workoutColor = hasWorkout ? CALENDAR_COLORS.active : CALENDAR_COLORS.inactive
 	const diaryColor = hasDiary ? CALENDAR_COLORS.active : CALENDAR_COLORS.inactive
 
+
 	return (
 		<CalendarCell isLast={isLast}>
 			<TouchableOpacity
