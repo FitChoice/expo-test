@@ -2,7 +2,6 @@ import {
 	View,
 	Text,
 	TouchableOpacity,
-	TextInput,
 	ScrollView,
 	StyleSheet,
 	KeyboardAvoidingView,
@@ -11,12 +10,11 @@ import {
 	Platform,
 } from 'react-native'
 import { GradientHeader } from '@/shared/ui/GradientBG'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
-import { SafeAreaContainer } from '@/shared/ui/SafeAreaContainer'
-import { Button } from '@/shared/ui/Button'
+import { SafeAreaContainer, Button, Input } from '@/shared/ui'
 import { dairyApi } from '@/features/dairy/api'
 import type { DiaryInput } from '@/features/dairy/api'
 import { showToast } from '@/shared/lib'
@@ -124,6 +122,8 @@ export const DiaryScreen = () => {
 	const [sleepTime, setSleepTime] = useState('00:00')
 	const [wakeTime, setWakeTime] = useState('07:00')
 	const [notes, setNotes] = useState('')
+	const scrollViewRef = useRef<ScrollView>(null)
+	const inputPositions = useRef<Record<string, number>>({})
 
 	const isFormValid =
 		mood !== null && wellBeing !== null && energyLevel !== null && sleepQuality !== null
@@ -142,13 +142,11 @@ export const DiaryScreen = () => {
 
 		try {
 			await dairyApi.upsertDiary(payload).then(async (res) => {
-				// console.log('invalidated trainingPlan')
-				// console.log(res)
+		
 				if (res.success) {
 					showToast.success('Данные сохранены')
 					await queryClient.invalidateQueries({ queryKey: ['trainingPlan'] })
-					// console.log('invalidated trainingPlan')
-					// console.log(res)
+				
 					router.navigate('/home')
 				} else {
 					showToast.error(res.error || 'Ошибка сохранения')
@@ -165,6 +163,15 @@ export const DiaryScreen = () => {
 		month: 'long',
 		weekday: 'long',
 	})
+
+	const scrollToInput = (key: string) => {
+		setTimeout(() => {
+			const yOffset = inputPositions.current[key]
+			if (yOffset !== undefined && scrollViewRef.current) {
+				scrollViewRef.current.scrollTo({ y: Math.max(0, yOffset - 10), animated: true })
+			}
+		}, 100)
+	}
 
 	return (
 		<KeyboardAvoidingView
@@ -193,99 +200,108 @@ export const DiaryScreen = () => {
 
 						{/* Scrollable Content */}
 						<ScrollView
+							ref={scrollViewRef}
 							className="flex-1 bg-black pt-10"
 							showsVerticalScrollIndicator={false}
 							keyboardShouldPersistTaps="handled"
 							keyboardDismissMode="on-drag"
 						>
-							<QuestionSection
-								title="Настроение"
-								subtitle="Какое у вас общее настроение?"
-								selectedValue={mood}
-								onSelect={setMood}
-							/>
+							<View className="pb-24">
+								<QuestionSection
+									title="Настроение"
+									subtitle="Какое у вас общее настроение?"
+									selectedValue={mood}
+									onSelect={setMood}
+								/>
 
-							<QuestionSection
-								title="Самочувствие"
-								subtitle="Когда вы чувствуете себя физически?"
-								selectedValue={wellBeing}
-								onSelect={setWellBeing}
-							/>
+								<QuestionSection
+									title="Самочувствие"
+									subtitle="Когда вы чувствуете себя физически?"
+									selectedValue={wellBeing}
+									onSelect={setWellBeing}
+								/>
 
-							<QuestionSection
-								title="Уровень энергии"
-								subtitle="Сколько у вас сил сегодня?"
-								selectedValue={energyLevel}
-								onSelect={setEnergyLevel}
-							/>
+								<QuestionSection
+									title="Уровень энергии"
+									subtitle="Сколько у вас сил сегодня?"
+									selectedValue={energyLevel}
+									onSelect={setEnergyLevel}
+								/>
 
-							<QuestionSection
-								title="Качество сна"
-								subtitle="Как вы спали прошлой ночью?"
-								selectedValue={sleepQuality}
-								onSelect={setSleepQuality}
-							/>
+								<QuestionSection
+									title="Качество сна"
+									subtitle="Как вы спали прошлой ночью?"
+									selectedValue={sleepQuality}
+									onSelect={setSleepQuality}
+								/>
 
-							{/* Sleep Time Section */}
-							<View
-								className="mb-6 bg-bg-dark-500 p-4"
-								style={{ overflow: 'hidden', borderRadius: 14 }}
-							>
-								<Text className="mb-1 text-lg font-semibold text-white">Время сна</Text>
-								<Text className="mb-4 text-sm text-gray-400">
-									Во сколько легли и во сколько проснулись?
-									Можете не отвечать на этот вопрос
-								</Text>
-								<View className="flex-row justify-between">
-									<View className="mr-2 flex-1">
-										<Text className="mb-2 text-sm text-gray-400">Засыпание</Text>
-										<TextInput
-											value={sleepTime}
-											onChangeText={(value) => setSleepTime(formatTimeInput(value))}
-											className="rounded-xl bg-[#2E322D] px-4 py-3 text-white"
-											keyboardType="number-pad"
-											maxLength={5}
-											placeholder="00:00"
-											placeholderTextColor="#666"
-										/>
-									</View>
-									<View className="ml-2 flex-1">
-										<Text className="mb-2 text-sm text-gray-400">Пробуждение</Text>
-										<TextInput
-											value={wakeTime}
-											onChangeText={(value) => setWakeTime(formatTimeInput(value))}
-											className="rounded-xl bg-[#2E322D] px-4 py-3 text-white"
-											keyboardType="number-pad"
-											maxLength={5}
-											placeholder="07:00"
-											placeholderTextColor="#666"
-										/>
+								{/* Sleep Time Section */}
+								<View
+									className="mb-6 bg-bg-dark-500 p-4"
+									style={{ overflow: 'hidden', borderRadius: 14 }}
+								>
+									<Text className="mb-1 text-lg font-semibold text-white">Время сна</Text>
+									<Text className="mb-4 text-sm text-gray-400">
+										Во сколько легли и во сколько проснулись?
+										Можете не отвечать на этот вопрос
+									</Text>
+									<View className="flex-row justify-between">
+										<View
+											className="mr-2 flex-1"
+											onLayout={(event) => {
+												inputPositions.current.sleepTime = event.nativeEvent.layout.y
+											}}
+										>
+											<Text className="mb-2 text-sm text-gray-400">Засыпание</Text>
+											<Input
+												value={sleepTime}
+												onChangeText={(value) => setSleepTime(formatTimeInput(value))}
+												onFocus={() => scrollToInput('sleepTime')}
+												keyboardType="number-pad"
+												maxLength={5}
+												placeholder="00:00"
+											/>
+										</View>
+										<View
+											className="ml-2 flex-1"
+											onLayout={(event) => {
+												inputPositions.current.wakeTime = event.nativeEvent.layout.y
+											}}
+										>
+											<Text className="mb-2 text-sm text-gray-400">Пробуждение</Text>
+											<Input
+												value={wakeTime}
+												onChangeText={(value) => setWakeTime(formatTimeInput(value))}
+												onFocus={() => scrollToInput('wakeTime')}
+												keyboardType="number-pad"
+												maxLength={5}
+												placeholder="07:00"
+											/>
+										</View>
 									</View>
 								</View>
-							</View>
 
-							{/* Notes Section */}
-							<View
-								className="mb-6 bg-bg-dark-500 p-4"
-								style={{ overflow: 'hidden', borderRadius: 14 }}
-							>
-								<Text className="mb-1 text-lg font-semibold text-white">Заметки</Text>
-								<Text className="mb-4 text-sm text-gray-400">
-									Может, хотите что-то добавить?
-								</Text>
-								<TextInput
-									value={notes}
-									onChangeText={setNotes}
-									className="min-h-[100px] rounded-xl bg-[#2E322D] px-4 py-3 text-white"
-									placeholder="Сегодня я..."
-									placeholderTextColor="#666"
-									multiline
-									textAlignVertical="top"
-									maxLength={500}
-								/>
-								<Text className="mt-2 text-right text-xs text-gray-500">
-									{notes.length} / 500 символов
-								</Text>
+								{/* Notes Section */}
+								<View
+									className="mb-6 bg-bg-dark-500 p-4"
+									style={{ overflow: 'hidden', borderRadius: 14 }}
+									onLayout={(event) => {
+										inputPositions.current.notes = event.nativeEvent.layout.y
+									}}
+								>
+									<Text className="mb-1 text-lg font-semibold text-white">Заметки</Text>
+									<Text className="mb-4 text-sm text-gray-400">
+										Может, хотите что-то добавить?
+									</Text>
+									<Input
+										variant="textarea"
+										value={notes}
+										onChangeText={setNotes}
+										onFocus={() => scrollToInput('notes')}
+										placeholder="Сегодня я..."
+										maxLength={500}
+									/>
+								</View>
 							</View>
 						</ScrollView>
 
