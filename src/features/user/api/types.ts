@@ -7,6 +7,7 @@ export interface UserProfile {
 	email: string
 	experience: number
 	name: string
+	gender: 'male' | 'female'
 }
 
 export interface NotificationSettings {

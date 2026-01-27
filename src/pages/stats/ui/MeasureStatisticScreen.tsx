@@ -87,7 +87,9 @@ export const MeasureStatisticScreen = () => {
 				showToast.success(`Данные за ${currentDate} внесены`)
 			},
 			onSettled: () => {
+			setTimeout(() => {
 				router.push('/stats')
+			}, 2000)
 			},
 		})
 	}

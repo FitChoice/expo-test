@@ -7,15 +7,17 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Fontisto from '@expo/vector-icons/Fontisto'
 import EvilIcons from '@expo/vector-icons/EvilIcons'
-import { differenceInDays, addMonths, startOfMonth } from 'date-fns';
+import { addMonths, differenceInCalendarDays, parseISO, startOfMonth } from 'date-fns';
 
-import { Icon } from '@/shared/ui'
+import { Icon, Loader } from '@/shared/ui'
 import { useChartQuery, useMainStatsQuery } from '@/features/stats'
 import type { MainStatsResponse } from '@/features/stats'
 import { getRatingOption } from '@/shared/constants'
 
 import girlSample from '../../../../assets/images/girl_sample.png'
 import girlMeasure from '../../../../assets/images/girl-measure.png'
+import boyMeasure from '../../../../assets/images/boy-measure.png'
+import boySample from '../../../../assets/images/boy_sample.png'
 import Barbell from '@/assets/images/barbell.svg'
 import Morning from '@/assets/images/morning_ex.svg'
 import Diary from '@/shared/ui/Icon/assets/diary.svg'
@@ -36,6 +38,8 @@ import {
 } from '../lib'
 import { BodyMetricSelectorModal } from './BodyMetricSelectorModal'
 import { MetricSelectorModal } from './MetricSelectorModal'
+import { getUserId } from '@/shared/lib'
+import { useProfileQuery } from '@/features/user'
 
 type OverallStatConfig = {
 	icon: React.ReactNode
@@ -178,6 +182,23 @@ export function DayStatistic() {
 	const [isBodyMetricModalVisible, setIsBodyMetricModalVisible] = useState(false)
 	const [selectedBodyBarKey, setSelectedBodyBarKey] = useState<string | null>(null)
 
+
+	// Local UI state
+	const [userId, setUserId] = useState<number | null>(null)
+
+	// Get userId on mount
+	useEffect(() => {
+		const fetchUserId = async () => {
+			const id = await getUserId()
+			setUserId(id)
+		}
+		fetchUserId()
+	}, [])
+
+	// Fetch profile data
+	const { data: userProfile, isLoading: userProfileLoading } = useProfileQuery(userId)
+
+
 	const {
 		data: chartData,
 		isLoading: isChartLoading,
@@ -187,6 +208,9 @@ export function DayStatistic() {
 		period: selectedPeriod,
 	})
 
+	console.log('chartData')
+	console.log(chartData)
+
 	const {
 		data: bodyChartData,
 		isLoading: isBodyChartLoading,
@@ -195,6 +219,9 @@ export function DayStatistic() {
 		kind: selectedBodyMetric,
 		period: 'year',
 	})
+
+	console.log('bodyChartData')
+	console.log(bodyChartData)
 
 	const overallStats = useMemo(
 		() =>
@@ -283,15 +310,21 @@ export function DayStatistic() {
 	const daysUntilNewMeasure = useMemo(() => {
 		if (!bodyChartData?.stats || !bodyChartData?.stats.length) return 0
 
-			const lastMeasureDate = bodyChartData?.stats[0]['date'].split('-')
-			const nextMonth = addMonths(new Date(lastMeasureDate[0], lastMeasureDate[1], lastMeasureDate[2]), 1)
-			const result = differenceInDays(
-				startOfMonth(nextMonth),
-				new Date(lastMeasureDate[0], lastMeasureDate[1], lastMeasureDate[2], 23, 0),
-			)
-			return result as number
+		const lastMeasureDateValue = bodyChartData.stats[0]?.date
+		if (!lastMeasureDateValue) return 0
+		const lastMeasureDate = parseISO(lastMeasureDateValue)
+		const nextMonthStart = startOfMonth(addMonths(lastMeasureDate, 1))
+
+		const result = differenceInCalendarDays(nextMonthStart, lastMeasureDate)
+		return result as number
 
 	}, [bodyChartData?.stats])
+
+
+
+	if (userProfileLoading || !userProfile) {
+		return <Loader />
+	}
 
 
 	return (
@@ -410,7 +443,7 @@ export function DayStatistic() {
 						</TouchableOpacity>
 					</View>
 
-					<Image source={girlSample} className="h-50 w-50" resizeMode="contain" />
+					<Image source={userProfile.gender === 'male' ?	boySample :  girlSample} className="h-50 w-50" resizeMode="contain" />
 				</View>
 			</View>
 
@@ -574,7 +607,7 @@ export function DayStatistic() {
 						}
 					</View>
 
-					<Image source={girlMeasure} className="h-48 w-44" resizeMode="contain" />
+					<Image source={userProfile.gender === 'male' ?	boyMeasure :  girlMeasure } className="h-48 w-44" resizeMode="contain" />
 				</View>
 			</View>
 

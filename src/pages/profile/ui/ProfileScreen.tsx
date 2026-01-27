@@ -28,9 +28,8 @@ import { useProfileQuery } from '@/features/user/hooks/useProfileQuery'
 import { useUploadAvatar } from '@/features/user/hooks/useUploadAvatar'
 import { Feather } from '@expo/vector-icons'
 import { NavigationBar } from '@/widgets/navigation-bar'
-import boySample from '../../../../assets/images/profile_girl_sample.png'
-import Toast from 'react-native-toast-message'
-import { toastConfig } from '@/shared/ui/Toast/config'
+import girlSample from '../../../../assets/images/profile_girl_sample.png'
+import boySample from '../../../../assets/images/profile_boy_sample.png'
 
 export const ProfileScreen = () => {
 	return (
@@ -176,7 +175,7 @@ const ProfileContent = () => {
 					</View>
 
 					<Image
-						source={boySample}
+						source={userProfile.gender === 'male' ? boySample : girlSample}
 						style={{
 							position: 'absolute',
 							right: 0,
