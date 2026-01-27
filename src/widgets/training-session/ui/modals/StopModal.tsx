@@ -63,7 +63,8 @@ export function StopModal({ visible, onResume, onStop }: PauseModalProps) {
 
 				{/* Button at bottom */}
 				<View
-					className={`${isLandscape ? 'absolute bottom-20 left-0 right-0 flex-row justify-center gap-2 px-6 pb-safe-bottom' : 'absolute bottom-0 left-0 right-0 flex-row gap-2 px-6 pb-safe-bottom'}`}
+					className={`${isLandscape ? 'absolute bottom-20 left-0 right-0 flex-row justify-center gap-2 px-6 pb-safe-bottom' :
+						'absolute bottom-20 left-0 right-0 flex-row gap-2 px-6 pb-safe-bottom'}`}
 				>
 					<Button
 						onPress={onResume}

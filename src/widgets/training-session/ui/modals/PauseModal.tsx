@@ -21,6 +21,7 @@ interface PauseModalProps {
 	visible: boolean
 	onResume: () => void
 }
+const IS_ANDROID = Platform.OS === 'android'
 
 export function PauseModal({ visible, onResume }: PauseModalProps) {
 	const { width, height } = useWindowDimensions()
@@ -61,7 +62,7 @@ export function PauseModal({ visible, onResume }: PauseModalProps) {
 
 				{/* Button at bottom */}
 				<View
-					className={'absolute bottom-12 left-0 right-0 px-6'}
+					className={`absolute bottom-${IS_ANDROID ? 20 : 15} left-0 right-0 px-6`}
 				>
 					<Button
 						onPress={onResume}

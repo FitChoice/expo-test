@@ -156,9 +156,9 @@ export function ExerciseTheoryScreen({
 		if (isVertical) {
 			return (
 			<View className="p-5">
-				<Text className="mb-2 text-center text-t1 text-light-text-200">{exercise.name}</Text>
+				<Text className="text-center text-t1 text-light-text-200">{exercise.name}</Text>
 
-				<View className="items-center justify-center py-4">
+				<View className="items-center justify-center py-2">
 						<TrainingExerciseProgress
 							totalExercises={totalExercises}
 							currentExerciseIndex={currentExerciseIndex}
@@ -225,7 +225,7 @@ export function ExerciseTheoryScreen({
 	return (
 		<View className="flex-1">
 			<View style={{ height: isVertical ? height : '100%' }}>
-				<VideoView player={player} style={{ flex: 1 }} contentFit="cover" nativeControls={false} />
+				<VideoView player={player} style={{ flex: 1, borderRadius: 20 }} contentFit="cover" nativeControls={false} />
 			</View>
 			{renderOverlay()}
 		</View>
