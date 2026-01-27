@@ -139,9 +139,9 @@ export function ExerciseExecutionScreen({
 				style={{
 					height: isVertical ? height : '100%',
 					width: '100%',
-
 					overflow: 'hidden',
 					borderRadius: 8,
+
 				}}
 			>
 				<View className="rounded-3xl">
@@ -155,7 +155,16 @@ export function ExerciseExecutionScreen({
 
 				{!isVertical && (
 					<>
+
 						<View className="absolute left-0 right-0 top-10 items-center justify-center px-4">
+							<View className="mb-2" >
+								<TrainingExerciseProgress
+									totalExercises={totalExercises}
+									currentExerciseIndex={currentExerciseIndex}
+									progressRatio={exerciseProgressRatio}
+									isVertical={isVertical}
+								/>
+							</View>
 							<Text className="text-center text-t1 text-light-text-200">{exercise.name}</Text>
 						</View>
 
@@ -260,12 +269,7 @@ export function ExerciseExecutionScreen({
 			    </View>
 			) : (
 			    <View className="w-full px-4 py-4 items-center">
-						<TrainingExerciseProgress
-							totalExercises={totalExercises}
-							currentExerciseIndex={currentExerciseIndex}
-							progressRatio={exerciseProgressRatio}
-							isVertical={isVertical}
-						/>
+
 			    </View>
 			)}
 

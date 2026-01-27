@@ -44,7 +44,7 @@ export function TrainingExerciseProgress({
 	return (
 		<View
 			{...props}
-			className={`flex-row items-center gap-1 w-full ${className}`}
+			className={`flex-row items-center gap-1 w-${isVertical ? 'full' : '1/2'} ${className}`}
 		>
 			{Array.from({ length: totalExercises }).map((_, index) => {
 				const isCompleted = index < currentExerciseIndex

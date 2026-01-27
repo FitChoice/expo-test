@@ -445,7 +445,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({
 			style={[
 				isPortrait() ? styles.containerPortrait : styles.containerLandscape,
 				!isPortrait() && {
-					width: Dimensions.get('window').width,
+					width: '100%',
 					height: Dimensions.get('window').height,
 				},
 				{
