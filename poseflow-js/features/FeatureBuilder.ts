@@ -6,6 +6,22 @@ import { computeSymmetry, computeYaw } from './symmetryYaw'
 
 const cloneFeatures = (feats: FeatureMap): FeatureMap => ({ ...feats })
 
+// Patterns for axis features that should be smoothed
+// These are the main movement indicators fed to the FSM
+const AXIS_SMOOTHING_PATTERNS = [
+    'depth',      // squat_depth, pushup_depth, etc.
+    'angle',      // squat_knee_angle, hip_extension_angle, etc.
+    'extension',  // quadruped_hip_extension_*, etc.
+    'distance',   // leg_abduction_distance_*, arm_spread_distance, etc.
+    'lean',       // torso_lean_angle
+    'height',     // wrist_height, elbow_height, etc.
+    'progress',   // calf_raise_progress, etc.
+    'spread',     // arm_spread_*, etc.
+    'width',      // stance_width_*, etc.
+    'ratio',      // stance_width_ratio, arm_spread_ratio, etc.
+    'lift',       // thigh_lift_ratio, side_lying_leg_lift
+]
+
 export class FeatureBuilder {
     private readonly minConfidence: number
     private readonly jointMinConfidence: Record<string, number>
@@ -13,6 +29,11 @@ export class FeatureBuilder {
     private readonly smoothingAlpha: number
     private featureHistory: FeatureMap[] = []
     private velocityHistory: FeatureMap[] = []
+
+    // Axis smoothing state (EMA for key movement axes)
+    // This reduces jitter in the FSM input signal
+    private axisSmoothingState: FeatureMap = {}
+    private readonly axisSmoothingAlpha = 0.4  // Lower = more smoothing
 
     constructor({
         minConfidence,
@@ -51,6 +72,10 @@ export class FeatureBuilder {
         const yaw = computeYaw(nkpts, this.minConfidence)
         Object.assign(feats, yaw)
 
+        // Apply EMA smoothing to axis features before FSM.
+        // This reduces jitter in the main movement indicators.
+        this.smoothAxisFeatures(feats)
+
         // Temporal derivatives help with tempo/speed checks and hysteresis tuning.
         const velocities = this.computeVelocities(feats, dt)
         Object.assign(feats, velocities)
@@ -69,6 +94,36 @@ export class FeatureBuilder {
     reset(): void {
         this.featureHistory = []
         this.velocityHistory = []
+        this.axisSmoothingState = {}
+    }
+
+    /**
+     * Apply EMA smoothing to axis-related features.
+     * This reduces jitter in the values fed to the FSM.
+     * Only smooths features matching AXIS_SMOOTHING_PATTERNS.
+     */
+    private smoothAxisFeatures(feats: FeatureMap): void {
+        for (const key of Object.keys(feats)) {
+            // Check if this feature should be smoothed
+            const shouldSmooth = AXIS_SMOOTHING_PATTERNS.some(pattern => key.includes(pattern))
+            if (!shouldSmooth) continue
+
+            const rawValue = feats[key]
+
+            // Initialize state if first occurrence
+            if (!(key in this.axisSmoothingState)) {
+                this.axisSmoothingState[key] = rawValue
+                continue
+            }
+
+            // Apply EMA: smoothed = alpha * raw + (1 - alpha) * prev
+            const smoothed =
+                this.axisSmoothingAlpha * rawValue +
+                (1 - this.axisSmoothingAlpha) * this.axisSmoothingState[key]
+
+            this.axisSmoothingState[key] = smoothed
+            feats[key] = smoothed
+        }
     }
 
     private computeVelocities(current: FeatureMap, dt: number): FeatureMap {
