@@ -1,22 +1,21 @@
 {
-  "exercise": "squat",
-  "axis": "squat_knee_angle_inv",
-  "states": ["Top", "Down", "Bottom", "Up"],
+  "exercise": "squat_0001",
+  "axis": "right_knee_angle",
   "thresholds": {
-    "down_enter": 30,
-    "bottom_enter": 17,
-    "up_enter": 70,
-    "top_enter": 100,
-    "min_dwell_ms": 0
+    "down_enter": 101.62,
+    "bottom_enter": 79.62,
+    "up_enter": 124.62,
+    "top_enter": 147.62,
+    "min_dwell_ms": 100
   },
-  "rep_on_transition": "Up->Top",
-  "hysteresis": 1,
-  "anti_yaw_max": 1.0,
-  "partial_rom_threshold_up": 0.2,
-  "quality": {
-    "rom_angle_min": 80,
-    "knee_valgus_max": 0.12,
-    "torso_lean_max": 18
-  }
+  "hysteresis": 2.17,
+  "anti_yaw_max": 1,
+  "range_error_lines": [
+    {
+      "type": "max_valley",
+      "value": 62.62,
+      "label": "Глубоко сел",
+      "color": "#ef4444"
+    }
+  ]
 }
-
