@@ -1,4 +1,6 @@
 export * from './types'
 export * from './ExerciseEngine'
+export * from './KeypointImputer'
+export { PoseNormalizer } from './normalizer'
+export { FeatureBuilder } from './features/FeatureBuilder'
 export type { FSMParams } from './fsm/RepCounterFSM'
-
