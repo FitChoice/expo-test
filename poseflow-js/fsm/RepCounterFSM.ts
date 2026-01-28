@@ -1,4 +1,4 @@
-import type { FeatureMap, PartialROMEvent } from '../types'
+import type { AxisExtremumEvent, FeatureMap, PartialROMEvent } from '../types'
 
 export interface FSMParams {
     down_enter: number
@@ -10,10 +10,17 @@ export interface FSMParams {
     anti_yaw_max?: number
     // Number of complete phases (Top->Top) required to count one rep
     phases_per_rep?: number
-    // Threshold (0-1) for detecting partial ROM on down phase
-    partial_rom_threshold_down?: number
-    // Threshold (0-1) for detecting partial ROM on up phase
-    partial_rom_threshold_up?: number
+
+    // === Partial ROM thresholds (0-1) ===
+    // Set to null/undefined to disable detection for that transition.
+    // Down->Up: returned up without reaching Bottom
+    partial_rom_threshold_down_up?: number | null
+    // Up->Down: returned down without reaching Top
+    partial_rom_threshold_up_down?: number | null
+    // Down->Bottom: reached Bottom, check depth quality
+    partial_rom_threshold_down_bottom?: number | null
+    // Up->Top: reached Top, check extension quality
+    partial_rom_threshold_up_top?: number | null
 }
 
 // Port of the Python rep-counting FSM with interpolation helpers for dropped frames.
@@ -36,8 +43,25 @@ export class RepCounterFSM {
     // Partial ROM detection: track min/max axis values in Down/Up states
     private downMinAxis: number | null = null
     private upMaxAxis: number | null = null
+    // Track minimum axis while in Bottom (true valley for depth checks).
+    // This is important because the axis can continue decreasing AFTER entering Bottom.
+    private bottomMinAxis: number | null = null
     // Last detected partial ROM event (reset after reading)
     private pendingPartialRom: PartialROMEvent | null = null
+    // Axis extremum events (peak/valley) used by range_error_lines checks in UI.
+    // This is intentionally edge-triggered, same idea as pendingPartialRom.
+    private pendingExtremum: AxisExtremumEvent | null = null
+
+    // --- Anti-spam extremum emission helpers ---
+    // We emit peak/valley not only on explicit FSM transitions, but also on a
+    // "direction reversal" inside Down/Up phases. This fixes cases where the
+    // thresholds are a bit off and the FSM doesn't reach the expected transition,
+    // so range_error_lines would never be evaluated.
+    //
+    // The event remains edge-triggered (once per descent/ascent attempt).
+    private downValleyEmitted = false
+    private upPeakEmitted = false
+    private lastAxisForReversal: number | null = null
 
     constructor(axisName: string, params: FSMParams, fps: number) {
         this.axisName = axisName
@@ -59,7 +83,26 @@ export class RepCounterFSM {
         // Reset partial ROM tracking
         this.downMinAxis = null
         this.upMaxAxis = null
+        this.bottomMinAxis = null
         this.pendingPartialRom = null
+        this.pendingExtremum = null
+        this.downValleyEmitted = false
+        this.upPeakEmitted = false
+        this.lastAxisForReversal = null
+    }
+
+    /**
+     * Epsilon for detecting "direction reversal" (start going up after a valley, etc).
+     *
+     * Needs to work for:
+     * - Angle axes (0..180) where 0.5..1.0 degrees is meaningful
+     * - Normalized axes (0..1) where epsilon must be ~0.01
+     *
+     * We scale epsilon with the threshold span as a robust default.
+     */
+    private reversalEpsilon(): number {
+        const span = Math.abs(this.params.top_enter - this.params.bottom_enter)
+        return Math.max(this.params.hysteresis * 2, span * 0.01, 1e-6)
     }
 
     /**
@@ -92,6 +135,7 @@ export class RepCounterFSM {
                 frame_dropped: frameDropped,
                 transition_recovered: false,
                 partial_rom: null,
+                extremum: null,
             }
         }
 
@@ -117,15 +161,30 @@ export class RepCounterFSM {
                 frame_dropped: true,
                 transition_recovered: true,
                 partial_rom: null,
+                extremum: null,
             }
         }
 
+        const prevState = this.state
         const [phase, incr] = this.transition(axis)
         this.reps += incr
 
         // Get pending partial ROM event and reset it
         const partialRom = this.pendingPartialRom
         this.pendingPartialRom = null
+
+        // Get pending extremum event and reset it.
+        // This is the key piece that prevents error "spam":
+        // the UI only reacts to a single transition event, not to continuous axis comparisons.
+        const extremum = this.pendingExtremum
+        this.pendingExtremum = null
+
+        // Debug logging for partial ROM detection
+        if (partialRom) {
+            console.log('[PartialROM] DETECTED:', partialRom.phase_type, 
+                'depth:', (partialRom.depth_achieved * 100).toFixed(1) + '%',
+                'transition:', prevState, '->', phase)
+        }
 
         return {
             phase,
@@ -136,6 +195,7 @@ export class RepCounterFSM {
             frame_dropped: frameDropped,
             transition_recovered: false,
             partial_rom: partialRom,
+            extremum,
         }
     }
 
@@ -145,70 +205,181 @@ export class RepCounterFSM {
         let increment = 0
         const h = this.params.hysteresis
 
-        // Track minimum axis value while in Down state (for partial ROM down detection)
+        // Track axis direction (increase/decrease) for reversal-based extrema.
+        const prevAxis = this.lastAxisForReversal
+        const delta = prevAxis == null ? 0 : axis - prevAxis
+        this.lastAxisForReversal = axis
+
+        // Track minimum axis value while in Down state (for partial ROM detection)
         if (prev === 'Down') {
             if (this.downMinAxis === null || axis < this.downMinAxis) {
                 this.downMinAxis = axis
             }
         }
 
-        // Track maximum axis value while in Up state (for partial ROM up detection)
+        // Track minimum axis value while in Bottom state (true valley).
+        if (prev === 'Bottom') {
+            if (this.bottomMinAxis === null || axis < this.bottomMinAxis) {
+                this.bottomMinAxis = axis
+            }
+        }
+
+        // Track maximum axis value while in Up state (for partial ROM detection)
         if (prev === 'Up') {
             if (this.upMaxAxis === null || axis > this.upMaxAxis) {
                 this.upMaxAxis = axis
             }
         }
 
+        // Reversal-based extremum emission (no spam, once per attempt).
+        // - In Down: when we start moving UP after reaching a minimum, emit a valley.
+        // - In Up: when we start moving DOWN after reaching a maximum, emit a peak.
+        //
+        // This helps even if we don't cross up_enter/bottom_enter due to threshold mismatch.
+        const eps = this.reversalEpsilon()
+        if (prev === 'Down' && !this.downValleyEmitted && this.downMinAxis != null) {
+            if (delta > 0 && axis > this.downMinAxis + eps) {
+                this.pendingExtremum = { pointType: 'valley', axisValue: this.downMinAxis }
+                this.downValleyEmitted = true
+            }
+        }
+        // In Bottom: emit the true valley on the first upward move after the minimum.
+        if (prev === 'Bottom' && !this.downValleyEmitted && this.bottomMinAxis != null) {
+            if (delta > 0 && axis > this.bottomMinAxis + eps) {
+                this.pendingExtremum = { pointType: 'valley', axisValue: this.bottomMinAxis }
+                this.downValleyEmitted = true
+            }
+        }
+        if (prev === 'Up' && !this.upPeakEmitted && this.upMaxAxis != null) {
+            if (delta < 0 && axis < this.upMaxAxis - eps) {
+                this.pendingExtremum = { pointType: 'peak', axisValue: this.upMaxAxis }
+                this.upPeakEmitted = true
+            }
+        }
+
         if (prev === 'Top') {
             if (axis < this.params.bottom_enter) {
                 // Direct transition to Bottom if axis is very low
+                // Do NOT emit the valley here: the axis may keep decreasing in Bottom.
+                // Instead, track bottomMinAxis and emit on reversal / exit from Bottom.
+                this.bottomMinAxis = axis
+                this.downValleyEmitted = false
                 next = 'Bottom'
             } else if (axis < this.params.down_enter - h) {
                 next = 'Down'
                 // Reset tracking when entering Down state
                 this.downMinAxis = axis
+                this.downValleyEmitted = false
             }
         } else if (prev === 'Down') {
             if (axis > this.params.up_enter + h) {
-                // Direct transition to Up if axis jumps high (missed Bottom)
-                // Check for partial ROM (down) before leaving Down state
+                // Down->Up: returned up without reaching Bottom
+                // Check partial ROM for incomplete descent
+                console.log('[FSM] Transition Down->Up (incomplete descent)', {
+                    axis: axis.toFixed(3),
+                    up_enter: this.params.up_enter,
+                    hysteresis: h,
+                    downMinAxis: this.downMinAxis?.toFixed(3) ?? 'null',
+                })
                 if (this.downMinAxis !== null) {
-                    this.pendingPartialRom = this.checkPartialRomDown(this.downMinAxis)
+                    // Emit a valley based on the observed minimum during the descent attempt.
+                    // Only if we haven't emitted it already via reversal logic.
+                    if (!this.downValleyEmitted) {
+                        this.pendingExtremum = { pointType: 'valley', axisValue: this.downMinAxis }
+                        this.downValleyEmitted = true
+                    }
+                    this.pendingPartialRom = this.checkPartialRomDownUp(this.downMinAxis)
                 }
                 next = 'Up'
-                this.downMinAxis = null // Reset after leaving Down
-                this.upMaxAxis = axis // Start tracking for Up state
+                this.downMinAxis = null
+                this.bottomMinAxis = null
+                this.upMaxAxis = axis
+                this.upPeakEmitted = false
             } else if (axis < this.params.bottom_enter - h) {
+                // Down->Bottom: reached Bottom
+                // Check partial ROM for depth quality (how deep did we go?)
+                console.log('[FSM] Transition Down->Bottom (full descent)', {
+                    axis: axis.toFixed(3),
+                    bottom_enter: this.params.bottom_enter,
+                    hysteresis: h,
+                })
+                if (this.downMinAxis !== null) {
+                    // IMPORTANT:
+                    // Do NOT emit a valley here. The axis can keep decreasing while in Bottom,
+                    // and we want to evaluate range_error_lines using the TRUE minimum.
+                    // We will emit the valley on reversal / exit from Bottom.
+                    const partial = this.checkPartialRomDownBottom(this.downMinAxis)
+                    if (partial) this.pendingPartialRom = partial
+                }
                 next = 'Bottom'
-                this.downMinAxis = null // Reset - we reached Bottom, no partial ROM
+                // Carry the minimum into Bottom tracking.
+                this.bottomMinAxis = this.downMinAxis
+                this.downMinAxis = null
             }
         } else if (prev === 'Bottom') {
             if (axis > this.params.up_enter + h) {
+                // Bottom->Up: leaving the bottom. Emit the true valley if we haven't already.
+                if (!this.downValleyEmitted && this.bottomMinAxis != null) {
+                    this.pendingExtremum = { pointType: 'valley', axisValue: this.bottomMinAxis }
+                    this.downValleyEmitted = true
+                }
                 next = 'Up'
-                this.upMaxAxis = axis // Start tracking for Up state
+                this.bottomMinAxis = null
+                this.upMaxAxis = axis
+                this.upPeakEmitted = false
             }
         } else if (prev === 'Up') {
             if (axis > this.params.top_enter + h) {
+                // Up->Top: reached Top
+                // Check partial ROM for extension quality (how high did we go?)
+                console.log('[FSM] Transition Up->Top (full extension)', {
+                    axis: axis.toFixed(3),
+                    top_enter: this.params.top_enter,
+                    hysteresis: h,
+                    upMaxAxis: this.upMaxAxis?.toFixed(3) ?? 'null',
+                })
+                if (this.upMaxAxis !== null) {
+                    // Emit a peak based on the observed maximum during the ascent.
+                    // Only if we haven't emitted it already via reversal logic.
+                    if (!this.upPeakEmitted) {
+                        this.pendingExtremum = { pointType: 'peak', axisValue: this.upMaxAxis }
+                        this.upPeakEmitted = true
+                    }
+                    const partial = this.checkPartialRomUpTop(this.upMaxAxis)
+                    if (partial) this.pendingPartialRom = partial
+                }
                 next = 'Top'
-                this.upMaxAxis = null // Reset - we reached Top, no partial ROM
+                this.upMaxAxis = null
                 // Increment phase count for compound exercises
                 this.phaseCount += 1
-                // Only increment rep counter after completing required phases
                 if (this.phaseCount >= this.phasesPerRep) {
                     increment = 1
                     this.phaseCount = 0
                 }
             } else if (axis < this.params.down_enter - h) {
-                // Going back down without reaching Top - check for partial ROM (up)
+                // Up->Down: returned down without reaching Top
+                // Check partial ROM for incomplete ascent
+                console.log('[FSM] Transition Up->Down (incomplete extension)', {
+                    axis: axis.toFixed(3),
+                    down_enter: this.params.down_enter,
+                    hysteresis: h,
+                    upMaxAxis: this.upMaxAxis?.toFixed(3) ?? 'null',
+                })
                 if (this.upMaxAxis !== null) {
-                    const partial = this.checkPartialRomUp(this.upMaxAxis)
-                    if (partial !== null) {
-                        this.pendingPartialRom = partial
+                    // Emit a peak based on the observed maximum during the ascent attempt.
+                    // Again: edge-triggered on transition (and guarded from duplicates).
+                    if (!this.upPeakEmitted) {
+                        this.pendingExtremum = { pointType: 'peak', axisValue: this.upMaxAxis }
+                        this.upPeakEmitted = true
                     }
+                    const partial = this.checkPartialRomUpDown(this.upMaxAxis)
+                    if (partial) this.pendingPartialRom = partial
                 }
                 next = 'Down'
-                this.upMaxAxis = null // Reset after leaving Up
-                this.downMinAxis = axis // Start tracking for Down state
+                this.upMaxAxis = null
+                this.downMinAxis = axis
+                this.downValleyEmitted = false
+                this.bottomMinAxis = null
             }
         }
 
@@ -279,89 +450,185 @@ export class RepCounterFSM {
         }
     }
 
+    // ========== Partial ROM Detection Methods ==========
+    // Each method checks one specific transition for incomplete range of motion.
+    // Threshold meaning: minimum % of range that must be achieved to trigger a partial ROM warning.
+    // Logic: if achieved >= threshold AND achieved < 100%, it's partial ROM (user started but didn't complete).
+    // This matches Python implementation semantics.
+
     /**
-     * Check if we had partial ROM (incomplete depth) in Down state.
-     * Called when leaving Down state without reaching Bottom.
+     * Down->Up: returned up without reaching Bottom (incomplete descent)
+     * Uses partial_rom_threshold_down_up
+     * 
+     * Triggers when:
+     * - User achieved >= threshold% of depth (started the movement)
+     * - But didn't reach 100% (didn't complete to Bottom)
+     * 
+     * Example: threshold=0.2 means partial ROM is flagged if user went 20-99% deep
      */
-    private checkPartialRomDown(minAxis: number): PartialROMEvent | null {
-        // Skip if threshold not configured
-        if (this.params.partial_rom_threshold_down == null) {
+    private checkPartialRomDownUp(minAxis: number): PartialROMEvent | null {
+        const threshold = this.params.partial_rom_threshold_down_up
+        if (threshold == null) {
+            console.log('[PartialROM] down_up: threshold is null/undefined, skipping')
             return null
         }
 
-        // Calculate the range between down_enter and bottom_enter
-        // Note: axis values decrease when going deeper (down_enter > bottom_enter)
+        // Range from down_enter to bottom_enter (axis decreases when going deeper)
         const rangeTotal = this.params.down_enter - this.params.bottom_enter
-
-        // Handle edge case: if range is zero or negative, skip detection
         if (rangeTotal <= 0) {
+            console.log('[PartialROM] down_up: invalid range (down_enter <= bottom_enter)')
             return null
         }
 
-        // How much depth was achieved (from down_enter toward bottom_enter)
-        const depthAchievedAbs = this.params.down_enter - minAxis
+        // How far we went from down_enter toward bottom_enter
+        const depthAchieved = this.params.down_enter - minAxis
+        let depthPct = Math.max(0, Math.min(1, depthAchieved / rangeTotal))
 
-        // Percentage of required depth (0.0 = at down_enter, 1.0 = at bottom_enter)
-        let depthPct = depthAchievedAbs / rangeTotal
+        console.log('[PartialROM] down_up CHECK:', {
+            threshold,
+            minAxis: minAxis.toFixed(3),
+            down_enter: this.params.down_enter,
+            bottom_enter: this.params.bottom_enter,
+            rangeTotal: rangeTotal.toFixed(3),
+            depthAchieved: depthAchieved.toFixed(3),
+            depthPct: (depthPct * 100).toFixed(1) + '%',
+            willTrigger: depthPct >= threshold && depthPct < 1.0,
+        })
 
-        // Clamp to valid range
-        depthPct = Math.max(0.0, Math.min(1.0, depthPct))
-
-        // Check if we're above threshold but didn't reach Bottom
-        if (depthPct >= this.params.partial_rom_threshold_down && depthPct < 1.0) {
-            const deficit = minAxis - this.params.bottom_enter
+        // Error if achieved >= threshold but < 100% (started movement but didn't complete)
+        // This matches Python: depth_pct >= threshold AND depth_pct < 1.0
+        if (depthPct >= threshold && depthPct < 1.0) {
             return {
-                phase_type: 'down',
+                phase_type: 'down_up',
                 depth_achieved: depthPct,
                 axis_value: minAxis,
                 required_threshold: this.params.bottom_enter,
-                deficit,
+                deficit: minAxis - this.params.bottom_enter,
             }
         }
-
         return null
     }
 
     /**
-     * Check if we had partial ROM (incomplete height) in Up state.
-     * Called when leaving Up state without reaching Top.
+     * Up->Down: returned down without reaching Top (incomplete ascent)
+     * Uses partial_rom_threshold_up_down
+     * 
+     * Triggers when:
+     * - User achieved >= threshold% of height (started the movement)
+     * - But didn't reach 100% (didn't complete to Top)
      */
-    private checkPartialRomUp(maxAxis: number): PartialROMEvent | null {
-        // Skip if threshold not configured
-        if (this.params.partial_rom_threshold_up == null) {
-            return null
-        }
+    private checkPartialRomUpDown(maxAxis: number): PartialROMEvent | null {
+        const threshold = this.params.partial_rom_threshold_up_down
+        if (threshold == null) return null
 
-        // Calculate the range between up_enter and top_enter
-        // Note: axis values increase when going up (up_enter < top_enter)
+        // Range from up_enter to top_enter (axis increases when going up)
         const rangeTotal = this.params.top_enter - this.params.up_enter
+        if (rangeTotal <= 0) return null
 
-        // Handle edge case: if range is zero or negative, skip detection
-        if (rangeTotal <= 0) {
-            return null
-        }
+        // How far we went from up_enter toward top_enter
+        const heightAchieved = maxAxis - this.params.up_enter
+        let heightPct = Math.max(0, Math.min(1, heightAchieved / rangeTotal))
 
-        // How much height was achieved (from up_enter toward top_enter)
-        const heightAchievedAbs = maxAxis - this.params.up_enter
-
-        // Percentage of required height (0.0 = at up_enter, 1.0 = at top_enter)
-        let heightPct = heightAchievedAbs / rangeTotal
-
-        // Clamp to valid range
-        heightPct = Math.max(0.0, Math.min(1.0, heightPct))
-
-        // Check if we're above threshold but didn't reach Top
-        if (heightPct >= this.params.partial_rom_threshold_up && heightPct < 1.0) {
-            const deficit = this.params.top_enter - maxAxis
+        // Error if achieved >= threshold but < 100% (started movement but didn't complete)
+        if (heightPct >= threshold && heightPct < 1.0) {
             return {
-                phase_type: 'up',
+                phase_type: 'up_down',
                 depth_achieved: heightPct,
                 axis_value: maxAxis,
                 required_threshold: this.params.top_enter,
-                deficit,
+                deficit: this.params.top_enter - maxAxis,
             }
         }
+        return null
+    }
 
+    /**
+     * Down->Bottom: reached Bottom, check depth quality
+     * Uses partial_rom_threshold_down_bottom
+     * 
+     * This checks quality even when Bottom is reached.
+     * Triggers when depth achieved >= threshold but we want to flag it as partial.
+     */
+    private checkPartialRomDownBottom(minAxis: number): PartialROMEvent | null {
+        const threshold = this.params.partial_rom_threshold_down_bottom
+        if (threshold == null) return null
+
+        // Range from down_enter to bottom_enter
+        const rangeTotal = this.params.down_enter - this.params.bottom_enter
+        if (rangeTotal <= 0) return null
+
+        // How far we went from down_enter toward bottom_enter
+        const depthAchieved = this.params.down_enter - minAxis
+        let depthPct = Math.max(0, Math.min(1, depthAchieved / rangeTotal))
+
+        // Error if achieved >= threshold but < 100% (quality check)
+        if (depthPct >= threshold && depthPct < 1.0) {
+            return {
+                phase_type: 'down_bottom',
+                depth_achieved: depthPct,
+                axis_value: minAxis,
+                required_threshold: this.params.bottom_enter,
+                deficit: minAxis - this.params.bottom_enter,
+            }
+        }
+        return null
+    }
+
+    /**
+     * Up->Top: reached Top, check extension quality
+     * Uses partial_rom_threshold_up_top
+     * 
+     * NOTE: This check triggers when transitioning Up->Top.
+     * At that moment, axis > top_enter + hysteresis, so upMaxAxis >= top_enter.
+     * This means heightPct will always be ~100% (clamped to 1.0).
+     * The condition "heightPct < 1.0" will NEVER be true for normal transitions!
+     * 
+     * TODO: This logic needs to be rethought. Currently it cannot detect
+     * "quality" issues because by definition, reaching Top means 100% extension.
+     */
+    private checkPartialRomUpTop(maxAxis: number): PartialROMEvent | null {
+        const threshold = this.params.partial_rom_threshold_up_top
+        if (threshold == null) {
+            console.log('[PartialROM] up_top: threshold is null/undefined, skipping')
+            return null
+        }
+
+        // Range from up_enter to top_enter
+        const rangeTotal = this.params.top_enter - this.params.up_enter
+        if (rangeTotal <= 0) {
+            console.log('[PartialROM] up_top: invalid range (top_enter <= up_enter)')
+            return null
+        }
+
+        // How far we went from up_enter toward top_enter
+        const heightAchieved = maxAxis - this.params.up_enter
+        let heightPct = Math.max(0, Math.min(1, heightAchieved / rangeTotal))
+
+        console.log('[PartialROM] up_top CHECK:', {
+            threshold,
+            maxAxis: maxAxis.toFixed(3),
+            top_enter: this.params.top_enter,
+            up_enter: this.params.up_enter,
+            hysteresis: this.params.hysteresis,
+            rangeTotal: rangeTotal.toFixed(3),
+            heightAchieved: heightAchieved.toFixed(3),
+            heightPct: (heightPct * 100).toFixed(1) + '%',
+            willTrigger: heightPct >= threshold && heightPct < 1.0,
+            NOTE: 'heightPct is always ~100% when reaching Top, so this will never trigger!'
+        })
+
+        // Error if achieved >= threshold but < 100% (quality check)
+        // BUG: This condition can NEVER be true because when transitioning to Top,
+        // maxAxis >= top_enter + hysteresis, so heightPct is always >= 1.0 (clamped to 1.0)
+        if (heightPct >= threshold && heightPct < 1.0) {
+            return {
+                phase_type: 'up_top',
+                depth_achieved: heightPct,
+                axis_value: maxAxis,
+                required_threshold: this.params.top_enter,
+                deficit: this.params.top_enter - maxAxis,
+            }
+        }
         return null
     }
 }

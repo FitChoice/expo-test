@@ -42,8 +42,10 @@ function handlePartialRomError(event: PartialROMEvent, exerciseId: string | numb
 }
 
 const ERROR_WORDS = {
-	up: 'higher',
-	down: 'deeper',
+	down_up: 'deeper',      // Не доприсел (Down->Up without reaching Bottom)
+	up_down: 'higher',      // Не довстал (Up->Down without reaching Top)
+	down_bottom: 'deeper',  // Неглубокий присед (Down->Bottom quality check)
+	up_top: 'higher',       // Неполное выпрямление (Up->Top quality check)
 } as const
 
 
