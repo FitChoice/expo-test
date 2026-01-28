@@ -3,7 +3,12 @@ import { EMASmoother, OneEuroFilter, type Smoother } from './smoothers'
 import { FeatureBuilder } from './features/FeatureBuilder'
 import { RepCounterFSM, type FSMParams } from './fsm/RepCounterFSM'
 import { toCocoKeypoints } from './utils/keypoints'
+import { KeypointImputer } from './KeypointImputer'
 import type { EngineConfig, EngineTelemetry, ExerciseRule, RawKeypoint } from './types'
+
+// Minimum visible keypoints required for reliable processing.
+// Below this threshold, frames are dropped to avoid false positives.
+const MIN_VISIBLE_KEYPOINTS = 10
 
 // Default runtime knobs are intentionally conservative so the app behaves like the Python prototype.
 const DEFAULT_CONFIG: EngineConfig = {
@@ -31,6 +36,7 @@ export class ExerciseEngine {
     private readonly config: EngineConfig
     private readonly normalizer: PoseNormalizer
     private smoother: Smoother | null
+    private readonly imputer: KeypointImputer
     private readonly features: FeatureBuilder
     private fsm: RepCounterFSM
 
@@ -40,6 +46,11 @@ export class ExerciseEngine {
         this.normalizer = new PoseNormalizer(this.config.minConfidence)
         // Smoother stays optional because seated exercises may prefer raw data.
         this.smoother = this.buildSmoother()
+        // Imputer restores missing keypoints from recent history
+        this.imputer = new KeypointImputer({
+            threshold: this.config.minConfidence,
+            historySize: Math.max(30, this.config.historySize * 3),
+        })
         this.features = new FeatureBuilder({
             minConfidence: this.config.minConfidence,
             historySize: this.config.historySize,
@@ -81,16 +92,36 @@ export class ExerciseEngine {
 
     /**
      * Update partial ROM detection thresholds.
+     * Four thresholds for different transitions:
+     * - down_up: Down->Up (incomplete descent)
+     * - up_down: Up->Down (incomplete ascent)
+     * - down_bottom: Down->Bottom (depth quality)
+     * - up_top: Up->Top (extension quality)
+     * Set to null/undefined to disable detection for that transition.
      */
-    updatePartialRomThresholds(up?: number, down?: number): void {
+    updatePartialRomThresholds(thresholds: {
+        down_up?: number | null
+        up_down?: number | null
+        down_bottom?: number | null
+        up_top?: number | null
+    }): void {
+        console.log('[ExerciseEngine] Updating partial ROM thresholds:', {
+            down_up: thresholds.down_up,
+            up_down: thresholds.up_down,
+            down_bottom: thresholds.down_bottom,
+            up_top: thresholds.up_top,
+        })
         this.rule = {
             ...this.rule,
-            partial_rom_threshold_up: up,
-            partial_rom_threshold_down: down,
+            partial_rom_threshold_down_up: thresholds.down_up,
+            partial_rom_threshold_up_down: thresholds.up_down,
+            partial_rom_threshold_down_bottom: thresholds.down_bottom,
+            partial_rom_threshold_up_top: thresholds.up_top,
         }
         const currentReps = this.fsm.getReps()
         this.fsm = this.buildFsm()
         this.fsm.setReps(currentReps)
+        console.log('[ExerciseEngine] FSM rebuilt with new thresholds')
     }
 
     /**
@@ -103,6 +134,7 @@ export class ExerciseEngine {
     reset(): void {
         this.features.reset()
         this.smoother?.reset()
+        this.imputer.reset()
         this.fsm.reset()
     }
 
@@ -111,10 +143,28 @@ export class ExerciseEngine {
             return this.emptyTelemetry()
         }
 
-        // Pipeline: raw keypoints -> normalized -> smoothed -> high level features -> FSM step.
+        // Count visible keypoints BEFORE processing
+        const visibleCount = keypoints.filter(
+            kp => (kp.score ?? 0) >= this.config.minConfidence
+        ).length
+
+        // If too few keypoints visible, skip processing to avoid false positives.
+        // This prevents FSM from making bad transitions when skeleton is mostly occluded.
+        if (visibleCount < MIN_VISIBLE_KEYPOINTS) {
+            return {
+                ...this.emptyTelemetry(),
+                frameDropped: true,
+                // Preserve current rep count so UI doesn't reset
+                reps: this.fsm.getReps(),
+            }
+        }
+
+        // Pipeline: raw -> COCO format -> normalized -> imputed -> smoothed -> features -> FSM
         const coco = toCocoKeypoints(keypoints)
         const normalized = this.normalizer.normalize(coco)
-        const smoothed = this.smoother ? this.smoother.smooth(normalized, timestamp) : normalized
+        // Impute missing keypoints from recent history before smoothing
+        const imputed = this.imputer.impute(normalized)
+        const smoothed = this.smoother ? this.smoother.smooth(imputed, timestamp) : imputed
         const feats = this.features.compute(smoothed, 1 / this.config.fps)
         const step = this.fsm.step(feats)
 
@@ -128,6 +178,8 @@ export class ExerciseEngine {
             transitionRecovered: step.transition_recovered,
             // Partial ROM detection: incomplete amplitude warning
             partialRom: step.partial_rom,
+            // Peak/valley event from FSM transitions (for range_error_lines checks)
+            extremum: step.extremum ?? null,
             traceback: DEFAULT_TRACEBACK,
         }
     }
@@ -140,10 +192,18 @@ export class ExerciseEngine {
             anti_yaw_max: this.rule.anti_yaw_max,
             // Phases per rep: for compound exercises (e.g., left+right lunge)
             phases_per_rep: this.rule.phases_per_rep,
-            // Partial ROM detection thresholds
-            partial_rom_threshold_down: this.rule.partial_rom_threshold_down,
-            partial_rom_threshold_up: this.rule.partial_rom_threshold_up,
+            // Partial ROM detection thresholds (4 transitions)
+            partial_rom_threshold_down_up: this.rule.partial_rom_threshold_down_up,
+            partial_rom_threshold_up_down: this.rule.partial_rom_threshold_up_down,
+            partial_rom_threshold_down_bottom: this.rule.partial_rom_threshold_down_bottom,
+            partial_rom_threshold_up_top: this.rule.partial_rom_threshold_up_top,
         }
+        console.log('[ExerciseEngine] Building FSM with partial ROM thresholds:', {
+            down_up: params.partial_rom_threshold_down_up,
+            up_down: params.partial_rom_threshold_up_down,
+            down_bottom: params.partial_rom_threshold_down_bottom,
+            up_top: params.partial_rom_threshold_up_top,
+        })
         return new RepCounterFSM(this.rule.axis, params, this.config.fps)
     }
 
@@ -169,6 +229,7 @@ export class ExerciseEngine {
             frameDropped: true,
             transitionRecovered: false,
             partialRom: null,
+            extremum: null,
             traceback: DEFAULT_TRACEBACK,
         }
     }
