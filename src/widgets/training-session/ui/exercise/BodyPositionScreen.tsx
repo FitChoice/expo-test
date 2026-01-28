@@ -138,7 +138,7 @@ export const BodyPositionScreen = ({
 
 	return (
 		<View className="flex-1 bg-transparent">
-			<BackgroundLayoutNoSidePadding edges={IS_ANDROID ? ['right'] : []} hasSidePadding={false}>
+			<BackgroundLayoutNoSidePadding edges={[]} hasSidePadding={false}>
 				<View
 					style={{
 						height: isVertical ? CAM_PREVIEW_HEIGHT : '100%',

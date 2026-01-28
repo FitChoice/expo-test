@@ -62,7 +62,7 @@ export function PauseModal({ visible, onResume }: PauseModalProps) {
 
 				{/* Button at bottom */}
 				<View
-					className={`absolute bottom-${IS_ANDROID ? 20 : 15} left-0 right-0 px-6`}
+					className={`absolute bottom-${IS_ANDROID ? isLandscape ? 10 : 20 : 15} left-0 right-0 px-6`}
 				>
 					<Button
 						onPress={onResume}
