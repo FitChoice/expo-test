@@ -77,6 +77,8 @@ const MIN_KEYPOINT_SCORE = 0.3
 // preprocess the input (crop, resize, etc). For best result, use the size that
 // doesn't distort the image.
 const OUTPUT_TENSOR_WIDTH = 180 //CAM_PREVIEW_WIDTH
+const OUTPUT_TENSOR_HEIGHT = OUTPUT_TENSOR_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4)
+
 
 const getOutputTensorHeight = (isPortrait: boolean) => {
 	return OUTPUT_TENSOR_WIDTH / getAspectRatio(isPortrait)

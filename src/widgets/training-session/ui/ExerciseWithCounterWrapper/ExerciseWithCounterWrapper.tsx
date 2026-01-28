@@ -146,7 +146,10 @@ export const ExerciseWithCounterWrapper = ({
 
 				{/* Control Buttons */}
 				{isShowActionButtons && (
-					<View className={`absolute top-12 z-10 flex-row justify-end gap-2 right-${IS_ANDROID && !isPortrait ? 6 : 4 }`}>
+					<View
+						className={`absolute top-12 z-10 flex-row justify-end gap-2 right-${IS_ANDROID && !isPortrait ? 6 : 4 }`}
+						style={IS_ANDROID && !isPortrait ? { transform: [{ translateX: -30 }] } : undefined}
+					>
 						<ControlButton
 							icon={<FontAwesome5 name="pause" size={24} color="#FFFFFF" />}
 							onPress={pauseTimer}
