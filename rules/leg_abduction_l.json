@@ -1,21 +1,21 @@
 {
-  "exercise": "leg_abduction_l",
-  "axis": "leg_abduction_distance_l",
-  "states": ["Top", "Down", "Bottom", "Up"],
+  "exercise": "leg_abduction_l_0006",
+  "axis": "full_leg_spread_norm",
   "thresholds": {
-    "down_enter": 0.58,
-    "bottom_enter": 0.55,
-    "up_enter": 0.75,
-    "top_enter": 0.82,
-    "min_dwell_ms": 0
+    "down_enter": 2.42,
+    "bottom_enter": 1.85,
+    "up_enter": 3.49,
+    "top_enter": 4.73,
+    "min_dwell_ms": 100
   },
-  "rep_on_transition": "Up->Top",
-  "hysteresis": 0.02,
-  "anti_yaw_max": 1.0,
-  "partial_rom_threshold_up": 0.2,
-  "quality": {
-    "rom_angle_min": 0.20,
-    "torso_lean_max": 20
-  }
+  "hysteresis": 0.03,
+  "anti_yaw_max": 1,
+  "range_error_lines": [
+    {
+      "type": "min_peak",
+      "value": 4.24,
+      "label": "Нужно поднимать выше",
+      "color": "#22c55e"
+    }
+  ]
 }
-

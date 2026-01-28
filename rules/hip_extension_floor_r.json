@@ -1,25 +1,21 @@
 {
-  "exercise": "hip_extension_floor_r",
-  "axis": "right_knee_depth",
-  "states": [
-    "Top",
-    "Down",
-    "Bottom",
-    "Up"
-  ],
+  "exercise": "hip_extension_floor_r_0009",
+  "axis": "ankle_to_hip_vertical_r",
   "thresholds": {
-    "down_enter": -0.22,
-    "bottom_enter": -0.4,
-    "up_enter": 0.08,
-    "top_enter": 0.14,
-    "min_dwell_ms": 280
+    "down_enter": -1.24,
+    "bottom_enter": -1.52,
+    "up_enter": -0.84,
+    "top_enter": -0.57,
+    "min_dwell_ms": 100
   },
-  "rep_on_transition": "Up->Top",
-  "hysteresis": 0.04,
-  "anti_yaw_max": 1.0,
-  "partial_rom_threshold_up": 0.2,
-  "quality": {
-    "rom_angle_min": 0.2,
-    "torso_lean_max": 20
-  }
+  "hysteresis": 0,
+  "anti_yaw_max": 1,
+  "range_error_lines": [
+    {
+      "type": "min_valley",
+      "value": -1.06,
+      "label": "Ногу выше",
+      "color": "#3b82f6"
+    }
+  ]
 }

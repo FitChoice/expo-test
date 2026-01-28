@@ -1,24 +1,21 @@
 {
-  "exercise": "arms_rotate_on_stomach",
-  "axis": "left_shoulder_angle",
-  "сс": [
-    "Top",
-    "Down",
-    "Bottom",
-    "Up"
-  ],
+  "exercise": "arms_rotate_on_stomach_0012",
+  "axis": "right_shoulder_angle",
   "thresholds": {
-    "down_enter": 110,
-    "bottom_enter": 90,
-    "up_enter": 150,
-    "top_enter": 175,
-    "min_dwell_ms": 150
+    "down_enter": 38.62,
+    "bottom_enter": 18.62,
+    "up_enter": 87.62,
+    "top_enter": 133.62,
+    "min_dwell_ms": 100
   },
-  "rep_on_transition": "Up->Top",
-  "hysteresis": 2.0,
-  "anti_yaw_max": 1.0,
-  "quality": {
-    "rom_angle_min": 25,
-    "torso_lean_max": 25
-  }
+  "hysteresis": 3.94,
+  "anti_yaw_max": 1,
+  "range_error_lines": [
+    {
+      "type": "min_peak",
+      "value": 105.62,
+      "label": "Корпус выше",
+      "color": "#22c55e"
+    }
+  ]
 }

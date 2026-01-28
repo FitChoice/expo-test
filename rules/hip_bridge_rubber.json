@@ -1,25 +1,21 @@
 {
-  "exercise": "hip_bridge_rubber",
-  "axis": "hip_extension_angle",
-  "states": [
-    "Top",
-    "Down",
-    "Bottom",
-    "Up"
-  ],
+  "exercise": "hip_bridge_rubber_0010",
+  "axis": "quadruped_hip_extension_progress_r",
   "thresholds": {
-    "down_enter": 145,
-    "bottom_enter": 130,
-    "up_enter": 172,
-    "top_enter": 179,
-    "min_dwell_ms": 350
+    "down_enter": 13.28,
+    "bottom_enter": 7.03,
+    "up_enter": 33.98,
+    "top_enter": 47.38,
+    "min_dwell_ms": 100
   },
-  "rep_on_transition": "Up->Top",
-  "hysteresis": 4.0,
-  "anti_yaw_max": 1.0,
-  "partial_rom_threshold_up": 0.2,
-  "quality": {
-    "rom_angle_min": 30,
-    "torso_lean_max": 20
-  }
+  "hysteresis": 1.32,
+  "anti_yaw_max": 1,
+  "range_error_lines": [
+    {
+      "type": "min_valley",
+      "value": 20.78,
+      "label": "Таз выше",
+      "color": "#3b82f6"
+    }
+  ]
 }
