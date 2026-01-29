@@ -76,7 +76,7 @@ export function RestScreen({
 
 	return (
 		<View className={`flex-1 justify-between relative pt-[100px] pb-${IS_ANDROID ? 10 : 2}`}>
-			<View>
+			<View className="items-center">
 			<TrainingExerciseProgress
 				totalExercises={totalExercises}
 				currentExerciseIndex={currentExerciseIndex}
