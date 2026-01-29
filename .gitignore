@@ -20,8 +20,6 @@ expo-env.d.ts
 # Metro
 .metro-health-check*
 
-/ios
-/android
 
 # debug
 npm-debug.*

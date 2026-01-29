@@ -1,119 +1,130 @@
 {
-	"expo": {
-		"name": "Fitchoice",
-		"slug": "Fitchoice",
-		"scheme": "acme",
-		"userInterfaceStyle": "automatic",
-		"orientation": "portrait",
-		"icon": "assets/images/logo_purple.png",
-		"runtimeVersion": "1.0.0",
-		"assetBundlePatterns": ["assets/fonts/*", "assets/images/**/*", "src/assets/**/*"],
-		"ios": {
-			"bundleIdentifier": "com.yzned.Fitchoice",
-			"supportsTablet": true,
-			"infoPlist": {
-				"NSCameraUsageDescription": "Нужно для сканирования QR-кодов и загрузки фото",
-				"NSMicrophoneUsageDescription": "Для записи голосовых сообщений в чате с ИИ-тренером",
-				"NSPhotoLibraryUsageDescription": "Для отправки фото и видео в чат с ИИ-тренером",
-				"NSMotionUsageDescription": "Нужно для определения положения телефона во время тренировки",
-				"NSUserNotificationsUsageDescription": "Мы будем напоминать о тренировках, чтобы вы ничего не пропустили",
-				"UILaunchStoryboardName": "SplashScreen"
-			}
-		},
-		"android": {
-			"package": "com.yzned.Fitchoice",
-			"adaptiveIcon": {
-				"backgroundColor": "#C5F680",
-				"foregroundImage": "src/assets/images/logo.png",
-				"monochromeImage": "src/assets/images/logo.png"
-			},
-			"permissions": [
-				"READ_EXTERNAL_STORAGE",
-				"WRITE_EXTERNAL_STORAGE",
-				"RECORD_AUDIO",
-				"android.permission.MODIFY_AUDIO_SETTINGS"
-			],
-			"edgeToEdgeEnabled": true,
-			"predictiveBackGestureEnabled": false
-		},
-		"web": {
-			"output": "static"
-		},
-		"plugins": [
-			"expo-router",
-			"expo-screen-orientation",
-			[
-				"expo-build-properties",
-				{
-					"android": {
-						"compileSdkVersion": 35,
-						"targetSdkVersion": 35,
-						"buildToolsVersion": "35.0.0",
-						"minSdkVersion": 24,
-						"enableProguardInReleaseBuilds": true,
-						"enableShrinkResourcesInReleaseBuilds": true,
-						"enableMinifyInReleaseBuilds": true
-					},
-					"ios": {
-						"deploymentTarget": "15.1",
-						"useFrameworks": "static"
-					}
-				}
-			],
-			[
-				"expo-splash-screen",
-				{
-					"image": "assets/images/logo_purple.png",
-					"imageWidth": 200,
-					"resizeMode": "contain",
-					"backgroundColor": "#C5F680",
-					"dark": {
-						"backgroundColor": "#BA9BF7"
-					}
-				}
-			],
-			[
-				"expo-av",
-				{
-					"microphonePermission": "Для записи голосовых сообщений в чате с ИИ-тренером"
-				}
-			],
-			[
-				"expo-image-picker",
-				{
-					"photosPermission": "Для отправки фото и видео в чат с ИИ-тренером"
-				}
-			],
-			[
-				"expo-document-picker",
-				{
-					"iCloudContainerEnvironment": "Production"
-				}
-			],
-			"expo-audio",
-			"expo-video",
-			[
-				"expo-notifications",
-				{
-					"icon": "src/assets/images/logo.png",
-					"color": "#C5F680"
-				}
-			]
-		],
-		"experiments": {
-			"tsconfigPaths": true
-		},
-		"extra": {
-			"router": {},
-			"eas": {
-				"projectId": "ba4720b8-6036-40ec-b386-49bc24d82e77"
-			}
-		},
-		"updates": {
-			"url": "https://u.expo.dev/ba4720b8-6036-40ec-b386-49bc24d82e77",
-			"fallbackToCacheTimeout": 0,
-			"checkAutomatically": "ON_LOAD",
-			"enabled": true
-		}
-	}
+  "expo": {
+    "name": "Fitchoice",
+    "slug": "Fitchoice",
+    "scheme": "acme",
+    "userInterfaceStyle": "automatic",
+    "orientation": "portrait",
+    "icon": "assets/images/logo_purple.png",
+    "runtimeVersion": "1.0.0",
+    "assetBundlePatterns": [
+      "assets/fonts/*",
+      "assets/images/**/*",
+      "src/assets/**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.yzned.Fitchoice",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Нужно для сканирования QR-кодов и загрузки фото",
+        "NSMicrophoneUsageDescription": "Для записи голосовых сообщений в чате с ИИ-тренером",
+        "NSPhotoLibraryUsageDescription": "Для отправки фото и видео в чат с ИИ-тренером",
+        "NSMotionUsageDescription": "Нужно для определения положения телефона во время тренировки",
+        "NSUserNotificationsUsageDescription": "Мы будем напоминать о тренировках, чтобы вы ничего не пропустили",
+        "UILaunchStoryboardName": "SplashScreen"
+      }
+    },
+    "android": {
+      "package": "com.yzned.Fitchoice",
+      "adaptiveIcon": {
+        "backgroundColor": "#C5F680",
+        "foregroundImage": "assets/images/logo_purple.png",
+        "monochromeImage": "assets/images/logo_purple.png"
+      },
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-screen-orientation",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0",
+            "minSdkVersion": 24,
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+          "enableMinifyInReleaseBuilds": true,
+          "extraProguardRules": "-dontwarn javax.lang.model.**\n-dontwarn com.google.auto.value.**\n-dontwarn autovalue.shaded.**",
+          "gradleProps": {
+            "org.gradle.jvmargs": "-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+          }
+        },
+          "ios": {
+            "deploymentTarget": "15.1",
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "assets/images/logo_purple.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#C5F680",
+          "dark": {
+            "backgroundColor": "#BA9BF7"
+          }
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Для записи голосовых сообщений в чате с ИИ-тренером"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Для отправки фото и видео в чат с ИИ-тренером"
+        }
+      ],
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
+      ],
+      "expo-audio",
+      "expo-video",
+      [
+        "expo-notifications",
+        {
+          "icon": "src/assets/images/logo.png",
+          "color": "#C5F680"
+        }
+      ],
+      "expo-asset",
+      "expo-font",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ba4720b8-6036-40ec-b386-49bc24d82e77"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ba4720b8-6036-40ec-b386-49bc24d82e77",
+      "fallbackToCacheTimeout": 0,
+      "checkAutomatically": "ON_LOAD",
+      "enabled": true
+    }
+  }
 }
