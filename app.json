@@ -5,7 +5,7 @@
     "scheme": "acme",
     "userInterfaceStyle": "automatic",
     "orientation": "portrait",
-    "icon": "assets/images/logo_purple.png",
+    "icon": "assets/images/logo_main.png",
     "runtimeVersion": "1.0.0",
     "assetBundlePatterns": [
       "assets/fonts/*",
@@ -28,8 +28,8 @@
       "package": "com.yzned.Fitchoice",
       "adaptiveIcon": {
         "backgroundColor": "#C5F680",
-        "foregroundImage": "assets/images/logo_purple.png",
-        "monochromeImage": "assets/images/logo_purple.png"
+        "foregroundImage": "assets/images/logo_main.png",
+        "monochromeImage": "assets/images/logo_main.png"
       },
       "permissions": [
         "READ_EXTERNAL_STORAGE",
