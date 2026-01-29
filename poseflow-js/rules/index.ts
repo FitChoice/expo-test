@@ -102,11 +102,17 @@ export const exerciseOptions: ExerciseOption[] = Object.keys(RULES).map((id) => 
     label: toLabel(id),
 }))
 
-export const getExerciseRule = (id: string): ExerciseRule => {
-    if (id in RULES) {
-        return RULES[id as keyof typeof RULES]
-    }
-    return RULES.squat
+export const getExerciseRule = (id: string, currentSide?: 'left'| 'right'): ExerciseRule => {
+    // if (id in RULES) {
+    //     return RULES[id as keyof typeof RULES]
+    // }
+
+	if (id.includes('присед')) {
+		return RULES.squat
+	}
+	return currentSide == 'left' ? RULES.hip_extension_floor_l : RULES.hip_extension_floor_r
+
+
 }
 
 function toLabel(value: string): string {

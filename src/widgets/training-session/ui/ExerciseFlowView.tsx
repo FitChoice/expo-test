@@ -63,6 +63,7 @@ export function ExerciseFlowView({
 	onRestTheoryComplete,
 }: ExerciseFlowViewProps) {
 
+
 	return (
 		<ExerciseWithCounterWrapper>
 			<View className="flex-1">
@@ -109,6 +110,7 @@ export function ExerciseFlowView({
 					<ExerciseExecutionScreen
 						key={executionKey}
 						model={model}
+						currentSide={currentSide}
 						orientation={orientation}
 						onComplete={onExecutionComplete}
 						exercise={exercise}

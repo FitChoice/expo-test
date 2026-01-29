@@ -18,6 +18,7 @@ import {
 } from '../../../../poseflow-js'
 import { getExerciseRule } from '../../../../poseflow-js/rules'
 import { useBeepSound } from '@/shared/lib'
+import { range } from '@tensorflow/tfjs'
 
 // Polyfill for Camera.Constants which was removed in expo-camera v17
 // @tensorflow/tfjs-react-native still expects this API
@@ -93,6 +94,7 @@ type PoseCameraProps = {
 	exerciseId?: string | number
 	onTelemetry?: (telemetry: EngineTelemetry) => void
 	onAllKeypointsDetected?: (allDetected: boolean) => void
+	currentSide?: 'left' | 'right'
 }
 
 export const PoseCamera: React.FC<PoseCameraProps> = ({
@@ -101,6 +103,7 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({
 	exerciseId,
 	onTelemetry,
 	onAllKeypointsDetected,
+																												currentSide
 }) => {
 	const cameraRef = useRef(null)
 	const engineRef = useRef<ExerciseEngine | null>(null)
@@ -132,7 +135,11 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({
 	useEffect(() => {
 		// if (!exerciseId) return
 		// Recreate FSM stack whenever the user picks another exercise.
-		const rule = getExerciseRule(String(exerciseId))
+		const rule = getExerciseRule(String(exerciseId), currentSide) /////temp its name not id!!!!!!!!! //getExerciseRule(String(exerciseId))
+
+
+		console.log('rule')
+		console.log(rule)
 		if (!engineRef.current) {
 			engineRef.current = new ExerciseEngine(rule)
 		} else {

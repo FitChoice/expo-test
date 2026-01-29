@@ -17,6 +17,8 @@ export type FeatureMap = Record<string, number>
 export interface ExerciseRule {
     exercise: string
     axis: string
+	states?: string[],
+	rep_on_transition?: string
     thresholds: {
         down_enter: number
         bottom_enter: number
@@ -123,8 +125,6 @@ export type RangeErrorType = 'min_valley' | 'max_valley' | 'min_peak' | 'max_pea
 export interface RangeErrorLine {
     // Unique identifier used by the UI (for editing/deleting lines).
     // Optional because saved JSON configs may omit it (we generate IDs on load).
-    id?: string
-    // Threshold value on the axis
     value: number
     // Type of check (what should be above/below this line)
     type: RangeErrorType

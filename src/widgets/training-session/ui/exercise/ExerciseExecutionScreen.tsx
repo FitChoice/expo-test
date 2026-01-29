@@ -59,6 +59,7 @@ interface TimerExerciseScreenProps {
 	currentExerciseIndex: number
 	totalExercises: number
 	exerciseProgressRatio: number
+	currentSide?: 'left' | 'right'
 }
 
 export function ExerciseExecutionScreen({
@@ -71,6 +72,7 @@ export function ExerciseExecutionScreen({
 	currentExerciseIndex,
 	totalExercises,
 	exerciseProgressRatio,
+																					currentSide
 }: TimerExerciseScreenProps) {
 	const player = useVideoPlayer(
 		practiceVideoUrl || exercise.video_practice || '',
@@ -149,9 +151,10 @@ export function ExerciseExecutionScreen({
 				<View className="rounded-3xl">
 					<PoseCamera
 						model={model}
+						currentSide={currentSide}
 						orientation={orientation}
 						onTelemetry={handleTelemetry}
-						exerciseId={exercise.id}
+						exerciseId={exercise.name}
 					/>
 				</View>
 
