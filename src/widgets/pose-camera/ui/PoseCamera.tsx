@@ -137,9 +137,6 @@ export const PoseCamera: React.FC<PoseCameraProps> = ({
 		// Recreate FSM stack whenever the user picks another exercise.
 		const rule = getExerciseRule(String(exerciseId), currentSide) /////temp its name not id!!!!!!!!! //getExerciseRule(String(exerciseId))
 
-
-		console.log('rule')
-		console.log(rule)
 		if (!engineRef.current) {
 			engineRef.current = new ExerciseEngine(rule)
 		} else {

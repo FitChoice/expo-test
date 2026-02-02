@@ -1,38 +1,7 @@
 import { useEffect, useState } from 'react'
-import * as tf from '@tensorflow/tfjs'
-import * as posedetection from '@tensorflow-models/pose-detection'
+import type * as posedetection from '@tensorflow-models/pose-detection'
 import * as ScreenOrientation from 'expo-screen-orientation'
-
-const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number) => {
-	return new Promise<T>((resolve, reject) => {
-		const timerId = setTimeout(() => {
-			reject(new Error('TensorFlow initialization timed out'))
-		}, timeoutMs)
-
-		promise
-			.then((result) => {
-				clearTimeout(timerId)
-				resolve(result)
-			})
-			.catch((error) => {
-				clearTimeout(timerId)
-				reject(error)
-			})
-	})
-}
-
-const waitForTfReady = async (retries = 3, timeoutMs = 8000) => {
-	let lastError: unknown
-	for (let attempt = 1; attempt <= retries; attempt += 1) {
-		try {
-			await withTimeout(tf.ready(), timeoutMs)
-			return
-		} catch (error) {
-			lastError = error
-		}
-	}
-	throw (lastError as Error) || new Error('TensorFlow initialization failed')
-}
+import { getPoseDetector } from '@/shared/lib'
 
 export const usePoseCameraSetup = (options?: { enabled?: boolean; blockedError?: string }) => {
 	const [tfReady, setTfReady] = useState(false)
@@ -69,19 +38,7 @@ export const usePoseCameraSetup = (options?: { enabled?: boolean; blockedError?:
 					return
 				}
 
-				// Wait for tfjs to initialize the backend
-				await waitForTfReady()
-				if (cancelled) return
-
-				const movenetModelConfig: posedetection.MoveNetModelConfig = {
-					modelType: posedetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
-					enableSmoothing: true,
-				}
-
-				const poseModel = await posedetection.createDetector(
-					posedetection.SupportedModels.MoveNet,
-					movenetModelConfig
-				)
+				const poseModel = await getPoseDetector()
 				if (cancelled) return
 				setModel(poseModel)
 
