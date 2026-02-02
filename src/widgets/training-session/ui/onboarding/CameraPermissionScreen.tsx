@@ -3,13 +3,15 @@
  * Второй шаг onboarding - запрос разрешения на использование камеры
  */
 
-import { View, Text } from 'react-native'
+import { Alert, View, Text } from 'react-native'
 import { Button } from '@/shared/ui'
 import { DotsProgress } from '@/shared/ui/DotsProgress'
 import CameraIcon from '@/assets/icons/large/camera.svg'
 import { useCameraPermissions } from 'expo-camera'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
+import { useCameraDecision } from '@/shared/lib'
+import { useEffect } from 'react'
 
 interface CameraPermissionScreenProps {
 	onNext: () => void
@@ -17,19 +19,56 @@ interface CameraPermissionScreenProps {
 
 export function CameraPermissionScreen({ onNext }: CameraPermissionScreenProps) {
 	const [permission, requestPermission] = useCameraPermissions()
+	const { decision, setDecision } = useCameraDecision()
+
+	useEffect(() => {
+		if (permission?.granted) {
+			void setDecision('granted')
+		}
+	}, [permission?.granted, setDecision])
 
 	const handleStop = () => {
 		router.back()
 	}
 
+	const showCameraRequiredAlert = () => {
+		Alert.alert(
+			'Доступ к камере',
+			'Дальнейшее использование приложения невозможно без использования камеры',
+			[
+				{
+					text: 'Разрешить',
+					onPress: () => {
+						void requestAndHandle()
+					},
+				},
+			],
+			{ cancelable: false }
+		)
+	}
+
+	const requestAndHandle = async () => {
+		const res = await requestPermission()
+		const nextDecision = res.granted ? 'granted' : 'denied'
+		await setDecision(nextDecision)
+		if (res.granted) {
+			onNext()
+			return
+		}
+		showCameraRequiredAlert()
+	}
+
 	const handleNext = async () => {
-		if (permission?.granted) {
+		const isGranted = permission?.granted ?? decision === 'granted'
+		if (isGranted) {
 			onNext()
 			return
 		}
 
-		await requestPermission()
+		await requestAndHandle()
 	}
+
+	const isGranted = permission?.granted ?? decision === 'granted'
 
 	return (
 		<View className="flex-1">
@@ -68,7 +107,7 @@ export function CameraPermissionScreen({ onNext }: CameraPermissionScreenProps) 
 					//disabled={!permission?.granted} // блокируем, пока не запрашивали и нет разрешения
 					className="w-full"
 				>
-					{permission?.granted ? 'Далее' : 'Разрешить доступ'}
+					{isGranted ? 'Далее' : 'Разрешить доступ'}
 				</Button>
 			</View>
 		</View>

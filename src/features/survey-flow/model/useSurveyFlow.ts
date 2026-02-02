@@ -19,6 +19,7 @@ import {
 	masksToNumber,
 } from '@/entities/survey'
 import { userApi } from '@/features/user'
+import type { UpdateProfileInput } from '@/features/user/api'
 
 // Конвертация AgeGroup строки в число (среднее арифметическое)
 function ageGroupToNumber(ageGroup: AgeGroup): number {
@@ -120,7 +121,7 @@ const initialSurveyData: SurveyData = {
 export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 	surveyData: initialSurveyData,
 	currentStep: 1,
-	totalSteps: 14,
+	totalSteps: 15,
 	isSubmitting: false,
 	submitError: null,
 
@@ -278,13 +279,20 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 			const trainDaysMasks = (surveyData.train_days as unknown as number[]) || []
 			const trainGoalsMasks = (surveyData.train_goals as unknown as number[]) || []
 
-			const dataToSend = {
-				...surveyData,
+			const dataToSend: UpdateProfileInput = {
+				name: surveyData.name,
+				gender: surveyData.gender ?? undefined,
+				age: typeof surveyData.age === 'number' ? surveyData.age : undefined,
+				height: surveyData.height ?? undefined,
+				weight: surveyData.weight ?? undefined,
+				train_frequency: surveyData.train_frequency ?? undefined,
+				main_direction: surveyData.main_direction ?? undefined,
+				secondary_direction: surveyData.secondary_direction ?? null,
 				train_days: masksToNumber(trainDaysMasks) as any,
 				train_goals: masksToNumber(trainGoalsMasks) as any,
 			}
 
-			const result = await userApi.updateUser(userId, dataToSend as SurveyData)
+			const result = await userApi.updateUser(userId, dataToSend)
 
 			if (!result.success) {
 				return { success: false, error: result.error }

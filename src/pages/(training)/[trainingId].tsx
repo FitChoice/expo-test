@@ -14,6 +14,7 @@ import { ExerciseSuccess } from '@/widgets/training-session/ui/ExerciseSuccess'
 import TrainingReportScreen from '@/pages/(training)/report'
 import { TrainingAnalytics } from '@/widgets/training-session/ui/TrainingAnalytics'
 import { useEffect, useState } from 'react'
+import { useCameraDecision } from '@/shared/lib'
 import { trainingApi, trainingKeys } from '@/features/training/api'
 import { useQuery } from '@tanstack/react-query'
 import { type ExerciseInfoResponse, useTrainingStore } from '@/entities/training'
@@ -50,7 +51,14 @@ export default function TrainingEntryScreen() {
 	// const setExerciseLoading = useTrainingStore((state) => state.setExerciseLoading)
 
 	const status = useTrainingStore((state) => state.status)
-	const { tfReady, model, orientation, error } = usePoseCameraSetup()
+	const { decision: cameraDecision } = useCameraDecision()
+	const { tfReady, model, orientation, error } = usePoseCameraSetup({
+		enabled: cameraDecision === 'granted',
+		blockedError:
+			cameraDecision === 'denied'
+				? 'Доступ к камере не выдан. Продолжение невозможно.'
+				: undefined,
+	})
 	const executeExercise = useExecuteExerciseMutation()
 	const completeTraining = useCompleteTrainingMutation()
 
@@ -131,13 +139,12 @@ export default function TrainingEntryScreen() {
 		}
 	}, [setExerciseDetail, setExerciseDetails, training?.exercises, training?.id])
 
-	// If training data is not loaded or camera is not ready, show loading
-	if (isLoading || !training || !tfReady || !model || !orientation || exerciseIsLoading) {
+	// If training data is not loaded, show loading
+	if (isLoading || !training || exerciseIsLoading) {
 		return (
 			<>
-				{error ? <Text>{error.message}</Text> : null}
 				{isError ? <Text>Error loading training: {queryError?.message}</Text> : null}
-				{!error && !isError && <Loader text="Загрузка тренировки..." />}
+				{!isError && <Loader text="Загрузка тренировки..." />}
 			</>
 		)
 	}
@@ -176,6 +183,23 @@ export default function TrainingEntryScreen() {
 				)
 
 			default:
+				if (!tfReady || !model || !orientation) {
+					if (!error) {
+						return <Loader text="Инициализация камеры..." />
+					}
+
+					return (
+						<BackgroundLayoutNoSidePadding>
+							<Text className="mb-3 text-left text-h2 font-bold text-light-text-100">
+								Ошибка инициализации камеры
+							</Text>
+							<Text className="text-left text-t2 leading-6 text-light-text-500">
+								{error.message}
+							</Text>
+						</BackgroundLayoutNoSidePadding>
+					)
+				}
+
 				return (
 					<ExerciseFlow
 						model={model}

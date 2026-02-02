@@ -3,7 +3,7 @@
  * Третий шаг onboarding - проверка положения телефона (вертикально)
  */
 
-import { View, Text } from 'react-native'
+import { Alert, View, Text } from 'react-native'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 
 import { useState, useEffect } from 'react'
@@ -11,13 +11,15 @@ import { Button } from '@/shared/ui'
 import { DotsProgress } from '@/shared/ui/DotsProgress'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
+import { useCameraDecision } from '@/shared/lib'
 
 interface PhonePositionScreenProps {
 	onNext: () => void
 }
 
 export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
-	const [permission] = useCameraPermissions()
+	const [permission, requestPermission] = useCameraPermissions()
+	const { decision, setDecision } = useCameraDecision()
 	const [isCorrectPosition, setIsCorrectPosition] = useState(false)
 
 	useEffect(() => {
@@ -29,11 +31,44 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
 		return () => clearTimeout(timer)
 	}, [])
 
+	useEffect(() => {
+		if (permission?.granted) {
+			void setDecision('granted')
+		}
+	}, [permission?.granted, setDecision])
+
+	const showCameraRequiredAlert = () => {
+		Alert.alert(
+			'Доступ к камере',
+			'Дальнейшее использование приложения невозможно без использования камеры',
+			[
+				{
+					text: 'Разрешить',
+					onPress: () => {
+						void requestAndHandle()
+					},
+				},
+			],
+			{ cancelable: false }
+		)
+	}
+
+	const requestAndHandle = async () => {
+		const res = await requestPermission()
+		const nextDecision = res.granted ? 'granted' : 'denied'
+		await setDecision(nextDecision)
+		if (!res.granted) {
+			showCameraRequiredAlert()
+		}
+	}
+
 	const handleStop = () => {
 		router.back()
 	}
 
-	if (!permission?.granted) {
+	const isGranted = permission?.granted ?? decision === 'granted'
+
+	if (!isGranted) {
 		return (
 			<View className="bg-background-primary flex-1 items-center justify-center px-6">
 				<Text className="mb-4 text-center text-h2 font-bold text-light-text-100">
@@ -42,7 +77,7 @@ export function PhonePositionScreen({ onNext }: PhonePositionScreenProps) {
 				<Text className="mb-6 text-center text-t2 text-light-text-500">
 					Чтобы продолжить, разрешите доступ к камере
 				</Text>
-				<Button variant="primary" onPress={permission?.request} className="w-full">
+				<Button variant="primary" onPress={requestAndHandle} className="w-full">
 					Разрешить доступ
 				</Button>
 			</View>

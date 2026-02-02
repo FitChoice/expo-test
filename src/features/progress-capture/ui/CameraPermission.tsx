@@ -2,7 +2,9 @@ import {
 	Button,
 	DotsProgress,
 } from '@/shared/ui'
-import { Text, View } from 'react-native'
+import { Alert, Text, View } from 'react-native'
+import { useEffect } from 'react'
+import type { SetStateAction } from 'react'
 
 import CameraIcon from '@/assets/icons/large/camera.svg'
 import { useCameraPermissions } from 'expo-camera'
@@ -11,32 +13,80 @@ import {
 } from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
 import { CloseBtn } from '@/shared/ui/CloseBtn'
 import { router } from 'expo-router'
-import {
-	type ProgressCaptureFlowState
-} from '@/features/progress-capture/ui/PhonePosition'
+import { type CameraDecision, useCameraDecision } from '@/shared/lib'
 
 
 
 
-export const CameraPermission =  ({ setStep }: ProgressCaptureFlowState) => {
+type CameraPermissionStep =
+	| 'loading'
+	| 'permission'
+	| 'phone'
+	| 'position'
+	| 'capture'
+	| 'preview'
+	| 'final'
+
+type CameraPermissionProps = {
+	setStep: (value: SetStateAction<CameraPermissionStep>) => void
+	onDecision?: (decision: CameraDecision) => void
+}
+
+export const CameraPermission = ({ setStep, onDecision }: CameraPermissionProps) => {
 	const [permission, requestPermission] = useCameraPermissions()
+	const { decision, setDecision } = useCameraDecision()
+
+	useEffect(() => {
+		if (permission?.granted) {
+			void setDecision('granted')
+			onDecision?.('granted')
+		}
+	}, [permission?.granted, onDecision, setDecision])
+
+	const showCameraRequiredAlert = () => {
+		Alert.alert(
+			'Доступ к камере',
+			'Дальнейшее использование приложения невозможно без использования камеры',
+			[
+				{
+					text: 'Разрешить',
+					onPress: () => {
+						void requestAndHandle()
+					},
+				},
+			],
+			{ cancelable: false }
+		)
+	}
+
+	const requestAndHandle = async () => {
+		const res = await requestPermission()
+		const nextDecision = res.granted ? 'granted' : 'denied'
+		await setDecision(nextDecision)
+		onDecision?.(nextDecision)
+		if (res.granted) {
+			setStep('phone')
+			return
+		}
+		showCameraRequiredAlert()
+	}
 
 	const handleNext = async () => {
 		// если уже выданы — идём дальше без повторного запроса
-		if (permission?.granted) {
+		const isGranted = permission?.granted ?? decision === 'granted'
+		if (isGranted) {
 			setStep('phone')
 			return
 		}
 
-		const res = await requestPermission()
-		if (res.granted) {
-			setStep('phone')
-		}
+		await requestAndHandle()
 	}
 
 	const handleStop = () => {
 		router.push('/stats')
 	}
+
+	const isGranted = permission?.granted ?? decision === 'granted'
 
 	return 	<BackgroundLayoutSafeArea>
 		<View className="flex-1">
@@ -78,10 +128,9 @@ export const CameraPermission =  ({ setStep }: ProgressCaptureFlowState) => {
 				<Button
 					variant="primary"
 					onPress={handleNext}
-					disabled={!permission?.granted} // блокируем, пока не запрашивали и нет разрешения
 					className="w-full"
 				>
-					 Далее
+					{isGranted ? 'Далее' : 'Разрешить доступ'}
 				</Button>
 			</View>
 		</View>

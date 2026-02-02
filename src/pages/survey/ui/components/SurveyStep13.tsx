@@ -6,7 +6,7 @@ import MaskedView from '@react-native-masked-view/masked-view'
 import { sharedStyles } from '@/shared/ui/styles/shared-styles'
 
 /**
- * Шаг 13: Предложение включить уведомления
+ * Шаг: Предложение включить уведомления
  */
 export const SurveyStep13: React.FC = () => {
 	// const [hasRequested, setHasRequested] = useState(false)

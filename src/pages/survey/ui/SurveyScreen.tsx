@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { View, Animated, Platform } from 'react-native'
+import { Alert, View, Animated, Platform } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as Notifications from 'expo-notifications'
 import { Button, BackButton, Icon, BackgroundLayout } from '@/shared/ui'
-import { useOrientation, useKeyboardAnimation, getUserId } from '@/shared/lib'
+import { useOrientation, useKeyboardAnimation, getUserId, useCameraDecision } from '@/shared/lib'
 import { useRouter } from 'expo-router'
 import { useSurveyFlow } from '@/features/survey-flow'
+import { useCameraPermissions } from 'expo-camera'
 import {
 	SurveyStep1,
 	SurveyStep2,
@@ -21,6 +22,7 @@ import {
 	SurveyStep12,
 	SurveyStep13,
 	SurveyStep14,
+	SurveyStepCameraPermission,
 	SurveyStepLoading,
 	SurveyStepError,
 } from './components'
@@ -65,6 +67,8 @@ export const SurveyScreen = () => {
 
 	const [hasRequested, setHasRequested] = useState(false)
 	const [isSubmittingData, setIsSubmittingData] = useState(false)
+	const [cameraPermission, requestCameraPermission] = useCameraPermissions()
+	const { decision: cameraDecision, setDecision: setCameraDecision } = useCameraDecision()
 
 	const insets = useSafeAreaInsets()
 
@@ -75,6 +79,12 @@ export const SurveyScreen = () => {
 
 	// Блокируем поворот экрана в портретную ориентацию
 	useOrientation(ScreenOrientation.OrientationLock.PORTRAIT_UP)
+
+	useEffect(() => {
+		if (cameraPermission?.granted) {
+			void setCameraDecision('granted')
+		}
+	}, [cameraPermission?.granted, setCameraDecision])
 
 	// Автоматический расчет ИМТ при переходе на экран загрузки
 	useEffect(() => {
@@ -169,6 +179,39 @@ export const SurveyScreen = () => {
 		}
 	}
 
+	const showCameraRequiredAlert = () => {
+		Alert.alert(
+			'Доступ к камере',
+			'Дальнейшее использование приложения невозможно без использования камеры',
+			[
+				{
+					text: 'Разрешить',
+					onPress: () => {
+						void handleCameraPermission()
+					},
+				},
+			],
+			{ cancelable: false }
+		)
+	}
+
+	const handleCameraPermission = async () => {
+		const isGranted = cameraPermission?.granted ?? cameraDecision === 'granted'
+		if (isGranted) {
+			nextStep()
+			return
+		}
+
+		const res = await requestCameraPermission()
+		const nextDecision = res.granted ? 'granted' : 'denied'
+		await setCameraDecision(nextDecision)
+		if (res.granted) {
+			nextStep()
+			return
+		}
+		showCameraRequiredAlert()
+	}
+
 	const handleEnableNotifications = async () => {
 		if (!hasRequested) {
 			try {
@@ -181,14 +224,14 @@ export const SurveyScreen = () => {
 				}
 
 				if (finalStatus === 'granted') {
-					const token = await Notifications.getExpoPushTokenAsync()
+					await Notifications.getExpoPushTokenAsync()
 					updateNotificationsEnabled(true)
 				}
 
 				setHasRequested(true)
 			} catch (error) {
 				// Игнорируем ошибку в Expo Go
-				console.log('Notifications unavailable:', error)
+				console.warn('Notifications unavailable:', error)
 			}
 		}
 
@@ -198,11 +241,11 @@ export const SurveyScreen = () => {
 	}
 
 	const handleNext = async () => {
-		if (currentStep === 13) {
-			// Для шага 13 "Не сейчас" - просто переходим дальше без запроса разрешений
+		if (currentStep === 14) {
+			// Для шага 14 "Не сейчас" - просто переходим дальше без запроса разрешений
 			nextStep()
 			submitData()
-		} else if (currentStep === 14) {
+		} else if (currentStep === 15) {
 			// Финальный экран - переход на home
 			router.push('/home')
 		} else {
@@ -216,7 +259,9 @@ export const SurveyScreen = () => {
 	}
 
 	const getProgressWidth = () => {
-		const progressSteps = [28, 56, 84, 112, 140, 168, 196, 224, 252, 280, 308, 336, 364]
+		const progressSteps = [
+			28, 56, 84, 112, 140, 168, 196, 224, 252, 280, 308, 336, 364, 392, 420,
+		]
 		return progressSteps[currentStep - 1] || 28
 	}
 
@@ -304,9 +349,12 @@ export const SurveyScreen = () => {
 				)
 
 			case 13:
-				return <SurveyStep13 />
+				return <SurveyStepCameraPermission />
 
 			case 14:
+				return <SurveyStep13 />
+
+			case 15:
 				// Показываем экран загрузки, ошибки или финальный экран
 				if (isSubmitting) {
 					return <SurveyStepLoading />
@@ -365,8 +413,10 @@ export const SurveyScreen = () => {
 			case 12:
 				return true // Опциональный вопрос
 			case 13:
-				return true // Уведомления - свои кнопки внутри компонента
+				return true // Камера обязательна, кнопка внутри нижнего блока
 			case 14:
+				return true // Уведомления - свои кнопки внутри компонента
+			case 15:
 				return false // На финальном экране кнопка отдельная
 			default:
 				return false
@@ -374,14 +424,14 @@ export const SurveyScreen = () => {
 	}
 
 	const notShowProgress = useMemo(
-		() => currentStep == 13 || currentStep == 14,
+		() => currentStep == 14 || currentStep == 15,
 		[currentStep]
 	)
 
 	// Конфигурация лэйаута для разных шагов
 	const layoutConfig = useMemo(() => {
 		// Шаги, использующие градиентный фон BackgroundLayout
-		const gradientSteps = [5, 6, 8,13, 14]
+		const gradientSteps = [5, 6, 8, 14, 15]
 		const isGradient = gradientSteps.includes(currentStep)
 		const isNoPadding = currentStep === 6
 
@@ -396,7 +446,7 @@ export const SurveyScreen = () => {
 	}, [currentStep])
 
 	// Для экрана загрузки и ошибки используем flex-1 для центрирования
-	const isFullHeightContent = currentStep === 14 && (isSubmitting || submitError)
+	const isFullHeightContent = currentStep === 15 && (isSubmitting || submitError)
 
 	const { WrapperComponent, wrapperProps, contentPadding } = layoutConfig
 
@@ -459,14 +509,20 @@ export const SurveyScreen = () => {
 						<Button
 							variant="primary"
 							fullWidth
-							onPress={currentStep === 13 ? handleEnableNotifications : handleNext}
+							onPress={
+								currentStep === 13
+									? handleCameraPermission
+									: currentStep === 14
+										? handleEnableNotifications
+										: handleNext
+							}
 							className="h-[56px]"
 						>
-							{currentStep == 13 ? 'Включить' : 'Далее'}
+							{currentStep == 13 ? 'Разрешить' : currentStep == 14 ? 'Включить' : 'Далее'}
 						</Button>
 					)}
 
-					{currentStep == 13 || currentStep == 12 ? (
+					{currentStep == 14 || currentStep == 12 ? (
 						<Button
 							variant="tertiary"
 							fullWidth
@@ -492,7 +548,7 @@ export const SurveyScreen = () => {
 						</Button>
 					)}
 
-					{currentStep == 14 && !isSubmitting && !submitError && (
+					{currentStep == 15 && !isSubmitting && !submitError && (
 						<Button
 							iconLeft={<Icon name="dumbbell" />}
 							variant={'secondary'}

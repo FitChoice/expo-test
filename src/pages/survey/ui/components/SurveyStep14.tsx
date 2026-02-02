@@ -11,7 +11,7 @@ interface SurveyStep14Props {
 }
 
 /**
- * Шаг 14: Финальный экран приветствия
+ * Шаг: Финальный экран приветствия
  */
 export const SurveyStep14: React.FC<SurveyStep14Props> = ({ userName, gender }) => {
 	const router = useRouter()

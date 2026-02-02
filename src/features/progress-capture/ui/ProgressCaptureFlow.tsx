@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react'
-import { useCameraPermissions } from 'expo-camera'
+import React, { useMemo, useState, useEffect } from 'react'
+import { Text, View } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as MediaLibrary from 'expo-media-library'
 import {
@@ -7,8 +7,9 @@ import {
 	type TempCapturedPhoto,
 	type ProgressSide,
 } from '@/entities/progress'
-import { Loader } from '@/shared/ui'
+import { BackgroundLayoutNoSidePadding, Loader } from '@/shared/ui'
 import { useOrientation } from '@/shared/lib/useOrientation'
+import { useCameraDecision } from '@/shared/lib'
 import {
 	CameraPermission
 } from '@/features/progress-capture/ui/CameraPermission'
@@ -40,8 +41,10 @@ const sideIndexMap: Record<ProgressSide, number> = sidesOrder.reduce(
 
 
 export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlowProps) => {
-	const [permission] = useCameraPermissions()
-	const { tfReady, model } = usePoseCameraSetup()
+	const { decision: cameraDecision, setDecision } = useCameraDecision()
+	const { tfReady, model, error } = usePoseCameraSetup({
+		enabled: cameraDecision === 'granted',
+	})
 	const [step, setStep] = useState<'loading' | 'permission' | 'phone' | 'position' | 'capture' | 'preview' | 'final'>('permission')
 	const [currentSideIndex, setCurrentSideIndex] = useState(0)
 	const [currentPhoto, setCurrentPhoto] = useState<TempCapturedPhoto | null>(null)
@@ -50,6 +53,12 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 	const [saveToGallery, setSaveToGallery] = useState(false)
 
 	useOrientation(ScreenOrientation.OrientationLock.PORTRAIT_UP, true)
+
+	useEffect(() => {
+		if (cameraDecision === 'granted' && step === 'permission') {
+			setStep('phone')
+		}
+	}, [cameraDecision, step])
 
 
 	const {
@@ -74,8 +83,8 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 
 	const sideLabel = useMemo(() => sideTitle[side], [side])
 
-	if (!permission || !permission.granted || step === 'permission' ) {
-		return <CameraPermission setStep={setStep} />
+	if (cameraDecision !== 'granted' || step === 'permission') {
+		return <CameraPermission setStep={setStep} onDecision={setDecision} />
 	}
 
 	if (step === 'phone') {
@@ -164,6 +173,21 @@ export const ProgressCaptureFlow = ({ onFinished, onCancel }: ProgressCaptureFlo
 					startCaptureForSide(side, true)
 				}}
 			/>)
+	}
+
+	if (error) {
+		return (
+			<BackgroundLayoutNoSidePadding>
+			<View className="flex-1 items-center justify-center px-6">
+				<Text className="mb-3 text-center text-h2 font-bold text-light-text-100">
+					Ошибка инициализации камеры
+				</Text>
+				<Text className="text-center text-t2 leading-6 text-light-text-500">
+					{error.message}
+				</Text>
+			</View>
+				</BackgroundLayoutNoSidePadding>
+		)
 	}
 
 	if (step === 'loading' || !tfReady) {
