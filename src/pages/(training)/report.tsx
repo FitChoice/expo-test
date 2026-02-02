@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 import type { ApiResult } from '@/shared/api'
 import { trainingApi } from '@/features/training/api'
 import { type TrainingReport } from '@/features/training/api/trainingApi'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { showToast } from '@/shared/lib'
 
 export default function TrainingReportScreen() {

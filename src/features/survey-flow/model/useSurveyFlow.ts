@@ -273,7 +273,7 @@ export const useSurveyFlow = create<SurveyFlowStore>((set, get) => ({
 	// Submit survey
 	submitSurvey: async (userId: number) => {
 		try {
-			const { bmi, notif_main, ...surveyData } = get().surveyData
+			const { bmi: _bmi, notif_main: _notif_main, ...surveyData } = get().surveyData
 
 			// Преобразуем массивы битовых масок в числа
 			const trainDaysMasks = (surveyData.train_days as unknown as number[]) || []

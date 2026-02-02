@@ -7,7 +7,7 @@ import {
 	View,
 } from 'react-native'
 import Feather from '@expo/vector-icons/Feather'
-import { router, useLocalSearchParams, useRouter } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 
 import MorningExercise from '@/assets/images/morning_ex.svg'
 import Stretching from '@/assets/images/stretching.svg'
@@ -139,7 +139,6 @@ const TaskCard = ({ task }: { task: DayTask }) => {
 }
 
 export const DayDetailsScreen = () => {
-	const router = useRouter()
 	const params = useLocalSearchParams<{
 		id?: string
 		date?: string

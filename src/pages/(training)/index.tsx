@@ -158,12 +158,6 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, index, onPress })
 		month: 'long',
 	})
 
-	// Рассчитываем общий прогресс
-	const totalProgress = training.activities.reduce((acc, activity) => {
-		const activityProgress = activity.progress.reduce((sum, p) => sum + p, 0)
-		return acc + activityProgress
-	}, 0)
-
 	const totalActivities = training.activities.length
 	const completedActivities = training.activities.filter((activity) =>
 		activity.progress.every((p) => p === 1)

@@ -15,43 +15,6 @@ import type {
 	ApiResult,
 } from '@/shared/api/types'
 
-// Use mocks only in development if explicitly enabled
-const MOCK_MODE = __DEV__ && process.env.EXPO_PUBLIC_USE_MOCKS === 'true'
-
-/**
- * Mock function to simulate registration
- */
-async function mockRegistration(
-	_data: RegistrationInput
-): Promise<ApiResult<TokenResponse>> {
-	await new Promise((resolve) => setTimeout(resolve, 1000))
-	return {
-		success: true,
-		data: {
-			access_token: 'mock_access_token',
-			refresh_token: 'mock_refresh_token',
-			expires_at: new Date(Date.now() + 3600000).toISOString(),
-			id: 1, // Mock user ID
-		},
-	}
-}
-
-/**
- * Mock function to simulate login
- */
-async function mockLogin(_data: LoginRequest): Promise<ApiResult<TokenResponse>> {
-	await new Promise((resolve) => setTimeout(resolve, 1000))
-	return {
-		success: true,
-		data: {
-			access_token: 'mock_access_token',
-			refresh_token: 'mock_refresh_token',
-			expires_at: new Date(Date.now() + 3600000).toISOString(),
-			id: 1, // Mock user ID
-		},
-	}
-}
-
 export const authApi = {
 	/**
 	 * Send verification code to email

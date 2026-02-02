@@ -83,7 +83,7 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
 							hasShownAlertRef.current = true
 							Alert.alert('Пожалуйста, разблокируйте поворот экрана')
 						}
-					} catch (err) {
+					} catch {
 						// Игнорируем ошибки при проверке
 					}
 					if (subscription) {
@@ -91,7 +91,7 @@ export function RotatePhoneScreen({ onNext }: RotatePhoneScreenProps) {
 						subscription = null
 					}
 				}, 3000)
-			} catch (err) {
+			} catch {
 				if (!hasShownAlertRef.current) {
 					hasShownAlertRef.current = true
 					Alert.alert('Пожалуйста, разблокируйте поворот экрана')

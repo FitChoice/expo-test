@@ -87,7 +87,6 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
 
 	const stopRecording = useCallback(async (): Promise<RecordingResult | null> => {
 		if (!recordingRef.current) {
-			console.log('No recording to stop')
 			return null
 		}
 
@@ -115,8 +114,6 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
 			setIsRecording(false)
 			setRecordingDuration(0)
 
-			console.log('Recording stopped, uri:', uri, 'duration:', finalDuration)
-
 			// Return result only if recording is long enough (> 300ms)
 			if (uri && finalDuration > 300) {
 				return {
@@ -125,7 +122,6 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
 				}
 			}
 
-			console.log('Recording too short or no URI')
 			return null
 		} catch (error) {
 			console.error('Failed to stop recording:', error)

@@ -24,7 +24,7 @@ export const useBeepSound = () => {
 				})
 				soundRef.current = sound
 			} catch (error) {
-				console.log('Error loading sound:', error)
+				console.warn('Error loading sound:', error)
 			}
 		}
 		loadSound()
@@ -39,7 +39,7 @@ export const useBeepSound = () => {
 	const playBeep = () => {
 		if (soundRef.current) {
 			soundRef.current.replayAsync().catch((error) => {
-				console.log('Error playing sound:', error)
+				console.warn('Error playing sound:', error)
 			})
 		}
 	}

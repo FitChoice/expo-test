@@ -56,9 +56,9 @@
             "minSdkVersion": 24,
             "enableProguardInReleaseBuilds": true,
             "enableShrinkResourcesInReleaseBuilds": true,
-          "enableMinifyInReleaseBuilds": true,
-          "extraProguardRules": "-dontwarn javax.lang.model.**\n-dontwarn com.google.auto.value.**\n-dontwarn autovalue.shaded.**",
-          "gradleProps": {
+            "enableMinifyInReleaseBuilds": true,
+            "extraProguardRules": "-dontwarn javax.lang.model.**\n-dontwarn com.google.auto.value.**\n-dontwarn autovalue.shaded.**\n-keep class org.tensorflow.** { *; }\n-keep class expo.modules.gl.** { *; }",
+            "gradleProps": {
             "org.gradle.jvmargs": "-Xmx4096m -XX:MaxMetaspaceSize=1024m"
           }
         },

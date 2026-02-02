@@ -39,6 +39,13 @@ const waitForTfReady = async (retries = 3, timeoutMs = 8000) => {
 }
 
 const ensureBackend = async () => {
+	const backendNames = tf.engine().backendNames()
+	if (!backendNames.includes('rn-webgl')) {
+		throw new Error(
+			"TensorFlow backend 'rn-webgl' not registered. Likely missing expo-gl-cpp or release minify/shrink/proguard removed required native pieces."
+		)
+	}
+
 	const backend = tf.getBackend()
 	if (backend && backend !== 'rn-webgl') {
 		await tf.setBackend('rn-webgl')

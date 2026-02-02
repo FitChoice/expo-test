@@ -260,7 +260,6 @@ class ApiClient {
 		endpoint: string,
 		options?: { skipAuthHandler?: boolean }
 	): Promise<ApiResult<TResponse>> {
-		console.log('Making GET request to:', `${this.baseUrl}${endpoint}`)
 		return this.request<TResponse>('GET', endpoint, undefined, options)
 	}
 }

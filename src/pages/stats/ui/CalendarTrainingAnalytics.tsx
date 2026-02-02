@@ -13,7 +13,8 @@ const trainingInfoBanner = require('@/assets/images/training_info_banner.png')
 
 
 export const CalendarTrainingAnalytics = () => {
-		const { trainingId, name, date, xr } = useLocalSearchParams()
+		const { trainingId: _trainingId, name: _name, date: _date, xr: _xr } =
+			useLocalSearchParams()
 
 		const handleFinish = () => {
 			// Navigate back to day details

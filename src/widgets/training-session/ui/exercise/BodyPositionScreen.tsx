@@ -1,6 +1,6 @@
 import { PoseCamera } from '@/widgets/pose-camera'
 import {
-	View, Text, Dimensions, useWindowDimensions, Platform,
+	View, Text, Dimensions, useWindowDimensions,
 } from 'react-native'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type * as posedetection from '@tensorflow-models/pose-detection'
@@ -9,8 +9,6 @@ import Svg, { Circle } from 'react-native-svg'
 import BodySilhouetteDefault from '@/assets/images/body_silhouette_default.svg'
 import BodySilhouetteSideVertical from '@/assets/images/body_silhouette_side.svg'
 import { BackgroundLayoutNoSidePadding } from '@/shared/ui'
-
-const IS_ANDROID = Platform.OS === 'android'
 
 type BodyPositionScreenProps = {
 	isVertical?: boolean

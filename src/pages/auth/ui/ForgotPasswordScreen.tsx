@@ -6,7 +6,6 @@ import {
 	Alert,
 	TouchableWithoutFeedback,
 	Keyboard,
-	useWindowDimensions,
 	KeyboardAvoidingView,
 	Platform,
 } from 'react-native'
@@ -38,8 +37,6 @@ type StepContent = {
 }
 export const ForgotPasswordScreen = () => {
 	const router = useRouter()
-
-	const { height: SCREEN_HEIGHT } = useWindowDimensions()
 
 	const [isLoading, setIsLoading] = useState(false)
 	const [email, setEmail] = useState('')

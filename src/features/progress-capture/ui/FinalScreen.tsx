@@ -18,8 +18,8 @@ export const FinalScreen = ({
 	items,
 	onSave,
 	onRestart,
-	saveToGallery,
-	onToggleSaveToGallery,
+	saveToGallery: _saveToGallery,
+	onToggleSaveToGallery: _onToggleSaveToGallery,
 	isSaving,
 }: {
 	items: TempCapturedPhoto[]

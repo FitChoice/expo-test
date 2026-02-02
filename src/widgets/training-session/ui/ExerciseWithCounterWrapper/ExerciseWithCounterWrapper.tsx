@@ -63,7 +63,7 @@ export const ExerciseWithCounterWrapper = ({
 		videoPlayersRef.current.forEach((player) => {
 			try {
 				player.play()
-			} catch (e) {
+			} catch {
 				// ignore errors if player is already destroyed
 			}
 		})
