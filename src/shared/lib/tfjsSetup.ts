@@ -1,69 +1,70 @@
 import * as tf from '@tensorflow/tfjs'
 import '@tensorflow/tfjs-backend-cpu'
 import '@tensorflow/tfjs-backend-webgl'
-import '@tensorflow/tfjs-react-native'
+import { bundleResourceIO, decodeJpeg, fetch as tfjsFetch } from '@tensorflow/tfjs-react-native'
+import { GLView } from 'expo-gl'
+import { Platform } from 'react-native'
+
 import * as posedetection from '@tensorflow-models/pose-detection'
+
+const BACKENDS_PRIORITY = ['rn-webgl', 'webgl', 'cpu'] as const
 
 let initPromise: Promise<void> | null = null
 let detectorPromise: Promise<posedetection.PoseDetector> | null = null
+let activeBackend: string | null = null
 
-const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number) => {
-	return new Promise<T>((resolve, reject) => {
-		const timerId = setTimeout(() => {
-			reject(new Error('TensorFlow initialization timed out'))
-		}, timeoutMs)
+// Keep a reference to prevent tree-shaking of side-effectful imports.
+const tfjsReactNativeUtils = { bundleResourceIO, decodeJpeg, tfjsFetch }
 
-		promise
-			.then((result) => {
-				clearTimeout(timerId)
-				resolve(result)
-			})
-			.catch((error) => {
-				clearTimeout(timerId)
-				reject(error)
-			})
-	})
+const ensureGLContext = async (): Promise<void> => {
+	if (Platform.OS === 'web') return
+
+	try {
+		const ctx = await GLView.createContextAsync()
+		if (ctx && typeof (ctx as any).endFrameEXP === 'function') {
+			;(ctx as any).endFrameEXP()
+		}
+	} catch (error) {
+		console.warn('[TensorFlow] GLView warmup failed:', error)
+	}
 }
 
-const waitForTfReady = async (retries = 3, timeoutMs = 8000) => {
-	let lastError: unknown
-	for (let attempt = 1; attempt <= retries; attempt += 1) {
-		try {
-			await withTimeout(tf.ready(), timeoutMs)
-			return
-		} catch (error) {
-			lastError = error
+const trySetBackend = async (backendName: string): Promise<boolean> => {
+	try {
+		const result = await tf.setBackend(backendName)
+		if (result) {
+			await tf.ready()
+			return true
+		}
+	} catch (error) {
+		console.warn(`[TensorFlow] Backend ${backendName} failed:`, error)
+	}
+	return false
+}
+
+const initializeBackend = async (): Promise<string> => {
+	await ensureGLContext()
+
+	for (const backend of BACKENDS_PRIORITY) {
+		if (await trySetBackend(backend)) {
+			console.log(`[TensorFlow] Initialized with backend: ${backend}`)
+			return backend
 		}
 	}
-	throw (lastError as Error) || new Error('TensorFlow initialization failed')
-}
 
-const ensureBackend = async () => {
-	const backendNames = tf.engine().backendNames()
-	if (!backendNames.includes('rn-webgl')) {
-		throw new Error(
-			"TensorFlow backend 'rn-webgl' not registered. Likely missing expo-gl-cpp or release minify/shrink/proguard removed required native pieces."
-		)
-	}
-
-	const backend = tf.getBackend()
-	if (backend && backend !== 'rn-webgl') {
-		await tf.setBackend('rn-webgl')
-	}
-	if (!backend) {
-		await tf.setBackend('rn-webgl')
-	}
+	throw new Error('[TensorFlow] No available backend')
 }
 
 export const initTfjs = async (): Promise<void> => {
 	if (!initPromise) {
 		initPromise = (async () => {
-			await ensureBackend()
-			await waitForTfReady()
+			activeBackend = await initializeBackend()
 		})()
 	}
 	return initPromise
 }
+
+export const getActiveBackend = (): string | null => activeBackend
 
 export const getPoseDetector = async (): Promise<posedetection.PoseDetector> => {
 	if (!detectorPromise) {
@@ -81,3 +82,5 @@ export const getPoseDetector = async (): Promise<posedetection.PoseDetector> => 
 	}
 	return detectorPromise
 }
+
+export { tfjsReactNativeUtils }
