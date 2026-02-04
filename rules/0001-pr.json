@@ -1,0 +1,34 @@
+{
+  "exercise": "0001-pr",
+  "axis": "squat_knee_angle",
+  "thresholds": {
+    "down_enter": 96.99,
+    "bottom_enter": 86.99,
+    "up_enter": 128.99,
+    "top_enter": 146.99,
+    "min_dwell_ms": 100
+  },
+  "hysteresis": 2.09,
+  "anti_yaw_max": 1,
+  "range_error_lines": [
+    {
+      "type": "min_valley",
+      "value": 85.99,
+      "label": "Не досел",
+      "color": "#3b82f6"
+    },
+    {
+      "type": "max_valley",
+      "value": 64.99,
+      "label": "Слишком глубоко!",
+      "color": "#ef4444"
+    }
+  ],
+  "avg_rep_ms": 5637,
+  "timing_error": {
+    "slow_threshold_pct": 30,
+    "slow_message": "Слишком медленно! Держите темп",
+    "fast_threshold_pct": 85,
+    "fast_message": "Слишком быстро! Контролируйте движение"
+  }
+}

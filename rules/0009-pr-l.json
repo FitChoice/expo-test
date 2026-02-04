@@ -1,0 +1,28 @@
+{
+  "exercise": "0009-pr-l",
+  "axis": "knee_to_hip_vertical_l",
+  "thresholds": {
+    "down_enter": -0.66,
+    "bottom_enter": -0.78,
+    "up_enter": -0.26,
+    "top_enter": 0.13,
+    "min_dwell_ms": 100
+  },
+  "hysteresis": 0.03,
+  "anti_yaw_max": 1,
+  "range_error_lines": [
+    {
+      "type": "min_valley",
+      "value": -0.4,
+      "label": "Ногу выше",
+      "color": "#3b82f6"
+    }
+  ],
+  "avg_rep_ms": 4922,
+  "timing_error": {
+    "slow_threshold_pct": 50,
+    "slow_message": "Слишком медленно",
+    "fast_threshold_pct": 70,
+    "fast_message": "Слишком быстро"
+  }
+}

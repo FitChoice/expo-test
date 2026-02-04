@@ -1,0 +1,29 @@
+{
+  "exercise": "0012-pr",
+  "axis": "hip_extension_angle",
+  "posture": "lying",
+  "thresholds": {
+    "down_enter": 162.1,
+    "bottom_enter": 158.8,
+    "up_enter": 169.3,
+    "top_enter": 174.5,
+    "min_dwell_ms": 100
+  },
+  "hysteresis": 0.29,
+  "anti_yaw_max": 1,
+  "range_error_lines": [
+    {
+      "type": "min_valley",
+      "value": 166.3,
+      "label": "Прогиб больше!",
+      "color": "#3b82f6"
+    }
+  ],
+  "avg_rep_ms": 6926,
+  "timing_error": {
+    "slow_threshold_pct": 50,
+    "slow_message": "Слишком медленно",
+    "fast_threshold_pct": 70,
+    "fast_message": "Слишком быстро"
+  }
+}

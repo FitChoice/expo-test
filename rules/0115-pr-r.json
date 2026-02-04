@@ -1,0 +1,29 @@
+{
+  "exercise": "0115-pr-r",
+  "axis": "hip_extension_angle",
+  "posture": "standing",
+  "thresholds": {
+    "down_enter": 125.77,
+    "bottom_enter": 121.03,
+    "up_enter": 133.47,
+    "top_enter": 144.17,
+    "min_dwell_ms": 100
+  },
+  "hysteresis": 0.84,
+  "anti_yaw_max": 1,
+  "range_error_lines": [
+    {
+      "type": "min_peak",
+      "value": 133.97,
+      "label": "Ногу выше!",
+      "color": "#22c55e"
+    }
+  ],
+  "avg_rep_ms": 3611,
+  "timing_error": {
+    "slow_threshold_pct": 50,
+    "slow_message": "Слишком медленно",
+    "fast_threshold_pct": 70,
+    "fast_message": "Слишком быстро"
+  }
+}

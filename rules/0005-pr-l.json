@@ -1,0 +1,29 @@
+{
+  "exercise": "0005-pr-l",
+  "axis": "hip_extension_angle_l",
+  "posture": "standing",
+  "thresholds": {
+    "down_enter": 86.59,
+    "bottom_enter": 71.98,
+    "up_enter": 123.59,
+    "top_enter": 149.59,
+    "min_dwell_ms": 100
+  },
+  "hysteresis": 2.54,
+  "anti_yaw_max": 1,
+  "range_error_lines": [
+    {
+      "type": "min_valley",
+      "value": 107.59,
+      "label": "Присед глубже!",
+      "color": "#3b82f6"
+    }
+  ],
+  "avg_rep_ms": 4507,
+  "timing_error": {
+    "slow_threshold_pct": 50,
+    "slow_message": "Слишком медленно",
+    "fast_threshold_pct": 70,
+    "fast_message": "Слишком быстро"
+  }
+}

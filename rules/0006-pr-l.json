@@ -1,0 +1,29 @@
+{
+  "exercise": "0006-pr-l",
+  "axis": "ankle_spread_norm",
+  "posture": "side_lying",
+  "thresholds": {
+    "down_enter": 2.64,
+    "bottom_enter": 2.14,
+    "up_enter": 3.57,
+    "top_enter": 4.54,
+    "min_dwell_ms": 100
+  },
+  "hysteresis": 0.03,
+  "anti_yaw_max": 1,
+  "range_error_lines": [
+    {
+      "type": "min_peak",
+      "value": 3.89,
+      "label": "Ногу выше",
+      "color": "#22c55e"
+    }
+  ],
+  "avg_rep_ms": 6589,
+  "timing_error": {
+    "slow_threshold_pct": 50,
+    "slow_message": "Слишком медленно",
+    "fast_threshold_pct": 75,
+    "fast_message": "Слишком быстро"
+  }
+}

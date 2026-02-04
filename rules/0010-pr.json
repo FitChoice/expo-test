@@ -1,0 +1,29 @@
+{
+  "exercise": "0010-pr",
+  "axis": "crunch_angle",
+  "posture": "lying",
+  "thresholds": {
+    "down_enter": 116.43,
+    "bottom_enter": 109.9,
+    "up_enter": 127.44,
+    "top_enter": 136.88,
+    "min_dwell_ms": 100
+  },
+  "hysteresis": 0.81,
+  "anti_yaw_max": 1,
+  "range_error_lines": [
+    {
+      "type": "min_valley",
+      "value": 122.43,
+      "label": "Таз выше",
+      "color": "#3b82f6"
+    }
+  ],
+  "avg_rep_ms": 5515,
+  "timing_error": {
+    "slow_threshold_pct": 50,
+    "slow_message": "Слишком медленно",
+    "fast_threshold_pct": 70,
+    "fast_message": "Слишком быстро"
+  }
+}

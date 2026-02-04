@@ -1,0 +1,21 @@
+{
+  "exercise": "0113-pr",
+  "axis": "leg_abduction_distance_l",
+  "posture": "sitting",
+  "thresholds": {
+    "down_enter": 0.82,
+    "bottom_enter": 0.81,
+    "up_enter": 0.84,
+    "top_enter": 0.86,
+    "min_dwell_ms": 100
+  },
+  "hysteresis": 0,
+  "anti_yaw_max": 1,
+  "avg_rep_ms": 640,
+  "timing_error": {
+    "slow_threshold_pct": 50,
+    "slow_message": "Слишком медленно",
+    "fast_threshold_pct": 70,
+    "fast_message": "Слишком быстро"
+  }
+}
