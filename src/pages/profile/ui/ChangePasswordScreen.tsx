@@ -139,6 +139,9 @@ export const ChangePasswordScreen = () => {
 								setNewPassword(text)
 								clearError('newPassword')
 							}}
+							autoComplete="off"
+							importantForAutofill="no"
+							autoCorrect={false}
 							placeholder="Минимум 8 символов"
 							error={errors.newPassword}
 						/>
@@ -147,10 +150,13 @@ export const ChangePasswordScreen = () => {
 							variant="password"
 							label="Подтвердите пароль"
 							value={confirmPassword}
+							autoComplete="off"
 							onChangeText={(text) => {
 								setConfirmPassword(text)
 								clearError('confirmPassword')
 							}}
+							importantForAutofill="no"
+							autoCorrect={false}
 							placeholder="Повторите новый пароль"
 							error={errors.confirmPassword}
 						/>

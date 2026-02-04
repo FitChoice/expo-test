@@ -328,8 +328,10 @@ export const ForgotPasswordScreen = () => {
 									value={emailCode}
 									onChangeText={setEmailCode}
 									keyboardType="number-pad"
+									autoComplete="off"
 									variant="text"
 									size="default"
+									importantForAutofill="no"
 									error={emailError}
 								/>
 							</Animated.View>

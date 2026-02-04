@@ -141,7 +141,10 @@ export const VerificationScreen = () => {
 										placeholder="123456"
 										value={code}
 										onChangeText={setCode}
+										importantForAutofill="no"
 										keyboardType="numeric"
+										autoCorrect={false}
+										autoComplete="off"
 										variant="text"
 										size="default"
 										maxLength={6}
