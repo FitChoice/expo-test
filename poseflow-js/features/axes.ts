@@ -1,7 +1,177 @@
-import type { FeatureMap, NormalizedKeypoints } from '../types'
+import type { FeatureMap, NormalizedKeypoints, PostureType, PostureResult } from '../types'
 import { COCO_17_INDICES } from '../cocoIndices'
 
 const mean = (values: number[]): number => values.reduce((acc, v) => acc + v, 0) / values.length
+
+// ========== Posture Detection (Posture Guard) ==========
+// Detects the body position: standing, lying, side_lying, quadruped, sitting.
+// This helps reject frames where the user is in wrong position for the exercise.
+
+/**
+ * Compute the detected posture from normalized keypoints.
+ *
+ * Posture types:
+ * - standing: Hips below shoulders, torso mostly vertical
+ * - lying: Shoulders and hips at similar Y level, body horizontal
+ * - side_lying: Shoulders stacked vertically (one above the other)
+ * - quadruped: On all fours (hands and knees)
+ * - sitting: Hips near knee height, torso vertical
+ * - unknown: Cannot determine (insufficient keypoints or ambiguous)
+ *
+ * @param nkpts Normalized keypoints (17-point COCO format)
+ * @param minConf Minimum confidence threshold for keypoints
+ * @returns Detected posture type and confidence score
+ */
+export const computePosture = (
+    nkpts: NormalizedKeypoints,
+    minConf: number
+): PostureResult => {
+    const idx = COCO_17_INDICES
+
+    // Check if we have the essential keypoints for posture detection
+    const leftShoulderOk = nkpts[idx.left_shoulder][2] >= minConf
+    const rightShoulderOk = nkpts[idx.right_shoulder][2] >= minConf
+    const leftHipOk = nkpts[idx.left_hip][2] >= minConf
+    const rightHipOk = nkpts[idx.right_hip][2] >= minConf
+    const leftKneeOk = nkpts[idx.left_knee][2] >= minConf
+    const rightKneeOk = nkpts[idx.right_knee][2] >= minConf
+    const leftAnkleOk = nkpts[idx.left_ankle][2] >= minConf
+    const rightAnkleOk = nkpts[idx.right_ankle][2] >= minConf
+
+    // Need at least shoulders and hips to determine basic posture
+    const hasShoulders = leftShoulderOk || rightShoulderOk
+    const hasHips = leftHipOk || rightHipOk
+
+    if (!hasShoulders || !hasHips) {
+        return { posture: 'unknown', confidence: 0 }
+    }
+
+    // Compute mid-points
+    const midShoulder = computeMidpoint(
+        nkpts[idx.left_shoulder], nkpts[idx.right_shoulder],
+        leftShoulderOk, rightShoulderOk
+    )
+    const midHip = computeMidpoint(
+        nkpts[idx.left_hip], nkpts[idx.right_hip],
+        leftHipOk, rightHipOk
+    )
+
+    // Compute torso vector (from hip to shoulder)
+    const torsoX = midShoulder.x - midHip.x
+    const torsoY = midShoulder.y - midHip.y
+    const torsoLength = Math.hypot(torsoX, torsoY)
+
+    if (torsoLength < 1e-6) {
+        return { posture: 'unknown', confidence: 0 }
+    }
+
+    // Torso angle from vertical (0° = vertical standing, 90° = horizontal lying)
+    // In normalized coords, Y increases downward, so vertical is (0, -1)
+    const torsoAngleFromVertical = (Math.acos(Math.abs(torsoY) / torsoLength) * 180) / Math.PI
+
+    // Shoulder width (horizontal distance between shoulders)
+    const shoulderWidth = leftShoulderOk && rightShoulderOk
+        ? Math.abs(nkpts[idx.left_shoulder][0] - nkpts[idx.right_shoulder][0])
+        : 0
+
+    // Shoulder vertical stacking (for side_lying detection)
+    const shoulderVerticalDist = leftShoulderOk && rightShoulderOk
+        ? Math.abs(nkpts[idx.left_shoulder][1] - nkpts[idx.right_shoulder][1])
+        : 0
+
+    // Hip width (horizontal distance between hips)
+    const hipWidth = leftHipOk && rightHipOk
+        ? Math.abs(nkpts[idx.left_hip][0] - nkpts[idx.right_hip][0])
+        : 0
+
+    // Compute average knee Y position if available
+    let kneeY: number | null = null
+    if (leftKneeOk && rightKneeOk) {
+        kneeY = (nkpts[idx.left_knee][1] + nkpts[idx.right_knee][1]) / 2
+    } else if (leftKneeOk) {
+        kneeY = nkpts[idx.left_knee][1]
+    } else if (rightKneeOk) {
+        kneeY = nkpts[idx.right_knee][1]
+    }
+
+    // === Posture Classification Logic ===
+
+    // Side-lying: shoulders stacked vertically (one above the other)
+    // Shoulder vertical distance > shoulder horizontal distance
+    if (shoulderWidth > 0 && shoulderVerticalDist > shoulderWidth * 1.5) {
+        // High confidence if torso is also horizontal
+        const sideConf = torsoAngleFromVertical > 60 ? 0.9 : 0.7
+        return { posture: 'side_lying', confidence: sideConf }
+    }
+
+    // Lying: torso mostly horizontal (angle from vertical > 70°)
+    // Also check that body is somewhat extended (not curled up)
+    if (torsoAngleFromVertical > 70) {
+        // Check if hips are above shoulders (inverted lying) - still lying
+        const lyingConf = torsoAngleFromVertical > 80 ? 0.95 : 0.8
+        return { posture: 'lying', confidence: lyingConf }
+    }
+
+    // Quadruped: torso horizontal, but hips at similar height as shoulders
+    // AND knees are below hips (person is on hands and knees)
+    if (torsoAngleFromVertical > 50 && torsoAngleFromVertical < 80) {
+        // Torso is roughly horizontal
+        // Check if knees are lower than hips (quadruped position)
+        if (kneeY !== null) {
+            const hipKneeDiff = kneeY - midHip.y // positive if knees below hips
+            if (hipKneeDiff > torsoLength * 0.2) {
+                return { posture: 'quadruped', confidence: 0.8 }
+            }
+        }
+    }
+
+    // Standing: torso mostly vertical (angle from vertical < 40°)
+    // Hips below shoulders (normal upright position)
+    if (torsoAngleFromVertical < 40) {
+        // Check that shoulders are above hips (normal standing)
+        // In normalized coords, Y increases downward, so shoulder Y < hip Y means standing
+        if (midShoulder.y < midHip.y) {
+            const standConf = torsoAngleFromVertical < 25 ? 0.95 : 0.8
+            return { posture: 'standing', confidence: standConf }
+        }
+    }
+
+    // Sitting: torso vertical, but hips near knee level
+    // (person is sitting with legs extended forward or bent)
+    if (torsoAngleFromVertical < 45 && kneeY !== null) {
+        const hipKneeDiff = Math.abs(midHip.y - kneeY)
+        // If hips and knees are at similar Y level, likely sitting
+        if (hipKneeDiff < torsoLength * 0.3) {
+            return { posture: 'sitting', confidence: 0.7 }
+        }
+    }
+
+    // Default: if torso is somewhat vertical, classify as standing
+    if (torsoAngleFromVertical < 50) {
+        return { posture: 'standing', confidence: 0.6 }
+    }
+
+    // Otherwise, classify as lying (horizontal-ish torso)
+    return { posture: 'lying', confidence: 0.5 }
+}
+
+/**
+ * Helper: compute midpoint of two keypoints, handling single visibility
+ */
+const computeMidpoint = (
+    p1: [number, number, number],
+    p2: [number, number, number],
+    p1Ok: boolean,
+    p2Ok: boolean
+): { x: number; y: number } => {
+    if (p1Ok && p2Ok) {
+        return { x: (p1[0] + p2[0]) / 2, y: (p1[1] + p2[1]) / 2 }
+    } else if (p1Ok) {
+        return { x: p1[0], y: p1[1] }
+    } else {
+        return { x: p2[0], y: p2[1] }
+    }
+}
 
 // Converts normalized geometry into the axes consumed by the FSM thresholds.
 export const computeProgressAxes = (
@@ -682,4 +852,3 @@ const computeSideLyingLegLift = (
 
     return feats
 }
-
