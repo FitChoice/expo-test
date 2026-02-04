@@ -1,4 +1,4 @@
-import type { AxisExtremumEvent, FeatureMap, PartialROMEvent } from '../types'
+import type { AxisExtremumEvent, FeatureMap, PartialROMEvent, PostureType, TimingErrorConfig, TimingErrorEvent } from '../types'
 
 export interface FSMParams {
     down_enter: number
@@ -11,6 +11,12 @@ export interface FSMParams {
     // Number of complete phases (Top->Top) required to count one rep
     phases_per_rep?: number
 
+    // === Posture Guard (Level 1 Robustness) ===
+    // Required posture for this exercise. If set, posture must match.
+    required_posture?: PostureType
+    // Minimum confidence for posture detection. Default: 0.6
+    posture_tolerance?: number
+
     // === Partial ROM thresholds (0-1) ===
     // Set to null/undefined to disable detection for that transition.
     // Down->Up: returned up without reaching Bottom
@@ -21,7 +27,18 @@ export interface FSMParams {
     partial_rom_threshold_down_bottom?: number | null
     // Up->Top: reached Top, check extension quality
     partial_rom_threshold_up_top?: number | null
+
+    // === Timing Error Detection ===
+    // Average rep duration from calibration (ms). Required for timing checks.
+    avg_rep_ms?: number
+    // Configuration for timing error thresholds and messages.
+    timing_error?: TimingErrorConfig
 }
+
+// Minimum interval between reps in milliseconds.
+// Prevents false positives from axis jitter during skeleton initialization.
+// Even very fast exercises (jumping jacks) take at least 300ms per rep.
+const MIN_REP_INTERVAL_MS = 300
 
 // Port of the Python rep-counting FSM with interpolation helpers for dropped frames.
 export class RepCounterFSM {
@@ -52,6 +69,13 @@ export class RepCounterFSM {
     // This is intentionally edge-triggered, same idea as pendingPartialRom.
     private pendingExtremum: AxisExtremumEvent | null = null
 
+    // --- Timing Error Detection ---
+    // Track when rep started (first transition out of Top).
+    // This allows us to measure total rep duration (Top -> ... -> Top).
+    private repStartTimeMs: number | null = null
+    // Pending timing error event (edge-triggered, reset after reading).
+    private pendingTimingError: TimingErrorEvent | null = null
+
     // --- Anti-spam extremum emission helpers ---
     // We emit peak/valley not only on explicit FSM transitions, but also on a
     // "direction reversal" inside Down/Up phases. This fixes cases where the
@@ -62,6 +86,12 @@ export class RepCounterFSM {
     private downValleyEmitted = false
     private upPeakEmitted = false
     private lastAxisForReversal: number | null = null
+
+    // --- Rep cooldown: prevent rapid-fire rep counting ---
+    // Tracks frame time (ms) when last rep was counted.
+    // New reps are ignored if they come too quickly (skeleton jitter protection).
+    private frameTimeMs = 0
+    private lastRepTimeMs: number | null = null
 
     constructor(axisName: string, params: FSMParams, fps: number) {
         this.axisName = axisName
@@ -89,6 +119,12 @@ export class RepCounterFSM {
         this.downValleyEmitted = false
         this.upPeakEmitted = false
         this.lastAxisForReversal = null
+        // Reset rep cooldown tracking
+        this.frameTimeMs = 0
+        this.lastRepTimeMs = null
+        // Reset timing error tracking
+        this.repStartTimeMs = null
+        this.pendingTimingError = null
     }
 
     /**
@@ -103,6 +139,19 @@ export class RepCounterFSM {
     private reversalEpsilon(): number {
         const span = Math.abs(this.params.top_enter - this.params.bottom_enter)
         return Math.max(this.params.hysteresis * 2, span * 0.01, 1e-6)
+    }
+
+    /**
+     * Check if enough time has passed since last rep to count a new one.
+     * Prevents rapid-fire rep counting from skeleton jitter during initialization.
+     * Returns true if rep can be counted, false if in cooldown period.
+     */
+    private canCountRep(): boolean {
+        if (this.lastRepTimeMs === null) {
+            return true // First rep is always allowed
+        }
+        const elapsed = this.frameTimeMs - this.lastRepTimeMs
+        return elapsed >= MIN_REP_INTERVAL_MS
     }
 
     /**
@@ -122,6 +171,9 @@ export class RepCounterFSM {
     }
 
     step(feats: FeatureMap) {
+        // Advance frame time for cooldown tracking
+        this.frameTimeMs += 1000 / this.fps
+
         const frameDropped = !(this.axisName in feats)
         const axis = this.interpolateAxis(feats)
 
@@ -147,7 +199,11 @@ export class RepCounterFSM {
             // Only increment rep counter after completing required phases
             let repIncr = 0
             if (this.phaseCount >= this.phasesPerRep) {
-                repIncr = 1
+                // Apply rep cooldown: prevent rapid-fire counting from skeleton jitter
+                if (this.canCountRep()) {
+                    repIncr = 1
+                    this.lastRepTimeMs = this.frameTimeMs
+                }
                 this.phaseCount = 0
             }
             this.reps += repIncr
@@ -169,6 +225,11 @@ export class RepCounterFSM {
         const [phase, incr] = this.transition(axis)
         this.reps += incr
 
+        // Track last rep time for cooldown
+        if (incr > 0) {
+            this.lastRepTimeMs = this.frameTimeMs
+        }
+
         // Get pending partial ROM event and reset it
         const partialRom = this.pendingPartialRom
         this.pendingPartialRom = null
@@ -179,11 +240,23 @@ export class RepCounterFSM {
         const extremum = this.pendingExtremum
         this.pendingExtremum = null
 
+        // Get pending timing error and reset it (edge-triggered).
+        const timingError = this.pendingTimingError
+        this.pendingTimingError = null
+
         // Debug logging for partial ROM detection
         if (partialRom) {
-            console.log('[PartialROM] DETECTED:', partialRom.phase_type, 
+            console.log('[PartialROM] DETECTED:', partialRom.phase_type,
                 'depth:', (partialRom.depth_achieved * 100).toFixed(1) + '%',
                 'transition:', prevState, '->', phase)
+        }
+
+        // Debug logging for timing error
+        if (timingError) {
+            console.log('[TimingError] DETECTED:', timingError.type,
+                'actual:', timingError.actual_ms + 'ms',
+                'expected:', timingError.expected_ms + 'ms',
+                'deviation:', timingError.deviation_pct.toFixed(1) + '%')
         }
 
         return {
@@ -196,6 +269,7 @@ export class RepCounterFSM {
             transition_recovered: false,
             partial_rom: partialRom,
             extremum,
+            timing_error: timingError,
         }
     }
 
@@ -265,11 +339,15 @@ export class RepCounterFSM {
                 this.bottomMinAxis = axis
                 this.downValleyEmitted = false
                 next = 'Bottom'
+                // Start timing when leaving Top (beginning of rep)
+                this.repStartTimeMs = this.frameTimeMs
             } else if (axis < this.params.down_enter - h) {
                 next = 'Down'
                 // Reset tracking when entering Down state
                 this.downMinAxis = axis
                 this.downValleyEmitted = false
+                // Start timing when leaving Top (beginning of rep)
+                this.repStartTimeMs = this.frameTimeMs
             }
         } else if (prev === 'Down') {
             if (axis > this.params.up_enter + h) {
@@ -353,9 +431,16 @@ export class RepCounterFSM {
                 // Increment phase count for compound exercises
                 this.phaseCount += 1
                 if (this.phaseCount >= this.phasesPerRep) {
-                    increment = 1
+                    // Apply rep cooldown: prevent rapid-fire counting from skeleton jitter
+                    if (this.canCountRep()) {
+                        increment = 1
+                        // Check timing error when rep is counted
+                        this.checkTimingError()
+                    }
                     this.phaseCount = 0
                 }
+                // Reset rep start time after completing the cycle
+                this.repStartTimeMs = null
             } else if (axis < this.params.down_enter - h) {
                 // Up->Down: returned down without reaching Top
                 // Check partial ROM for incomplete ascent
@@ -450,6 +535,65 @@ export class RepCounterFSM {
         }
     }
 
+    // ========== Timing Error Detection ==========
+    // Checks if rep duration deviates from reference timing.
+
+    /**
+     * Check if the just-completed rep was too fast or too slow.
+     * Called when a rep is counted (transition to Top with increment=1).
+     *
+     * Compares actual rep duration to avg_rep_ms from config.
+     * Emits a TimingErrorEvent if deviation exceeds threshold.
+     */
+    private checkTimingError(): void {
+        const avgRepMs = this.params.avg_rep_ms
+        const timingConfig = this.params.timing_error
+
+        // Skip if no reference timing or timing config
+        if (avgRepMs == null || avgRepMs <= 0) {
+            return
+        }
+        if (!timingConfig) {
+            return
+        }
+
+        // Calculate actual rep duration
+        if (this.repStartTimeMs === null) {
+            // No start time recorded (shouldn't happen)
+            return
+        }
+
+        const actualMs = this.frameTimeMs - this.repStartTimeMs
+        const deviationMs = actualMs - avgRepMs
+        const deviationPct = (deviationMs / avgRepMs) * 100
+
+        // Check "too slow" threshold
+        const slowThreshold = timingConfig.slow_threshold_pct
+        if (slowThreshold != null && deviationPct > slowThreshold) {
+            this.pendingTimingError = {
+                type: 'too_slow',
+                message: timingConfig.slow_message ?? 'Слишком медленно',
+                actual_ms: Math.round(actualMs),
+                expected_ms: Math.round(avgRepMs),
+                deviation_pct: Math.round(deviationPct),
+            }
+            return
+        }
+
+        // Check "too fast" threshold (negative deviation)
+        const fastThreshold = timingConfig.fast_threshold_pct
+        if (fastThreshold != null && -deviationPct > fastThreshold) {
+            this.pendingTimingError = {
+                type: 'too_fast',
+                message: timingConfig.fast_message ?? 'Слишком быстро',
+                actual_ms: Math.round(actualMs),
+                expected_ms: Math.round(avgRepMs),
+                deviation_pct: Math.round(deviationPct),
+            }
+            return
+        }
+    }
+
     // ========== Partial ROM Detection Methods ==========
     // Each method checks one specific transition for incomplete range of motion.
     // Threshold meaning: minimum % of range that must be achieved to trigger a partial ROM warning.
@@ -459,11 +603,11 @@ export class RepCounterFSM {
     /**
      * Down->Up: returned up without reaching Bottom (incomplete descent)
      * Uses partial_rom_threshold_down_up
-     * 
+     *
      * Triggers when:
      * - User achieved >= threshold% of depth (started the movement)
      * - But didn't reach 100% (didn't complete to Bottom)
-     * 
+     *
      * Example: threshold=0.2 means partial ROM is flagged if user went 20-99% deep
      */
     private checkPartialRomDownUp(minAxis: number): PartialROMEvent | null {
@@ -512,7 +656,7 @@ export class RepCounterFSM {
     /**
      * Up->Down: returned down without reaching Top (incomplete ascent)
      * Uses partial_rom_threshold_up_down
-     * 
+     *
      * Triggers when:
      * - User achieved >= threshold% of height (started the movement)
      * - But didn't reach 100% (didn't complete to Top)
@@ -545,7 +689,7 @@ export class RepCounterFSM {
     /**
      * Down->Bottom: reached Bottom, check depth quality
      * Uses partial_rom_threshold_down_bottom
-     * 
+     *
      * This checks quality even when Bottom is reached.
      * Triggers when depth achieved >= threshold but we want to flag it as partial.
      */
@@ -577,12 +721,12 @@ export class RepCounterFSM {
     /**
      * Up->Top: reached Top, check extension quality
      * Uses partial_rom_threshold_up_top
-     * 
+     *
      * NOTE: This check triggers when transitioning Up->Top.
      * At that moment, axis > top_enter + hysteresis, so upMaxAxis >= top_enter.
      * This means heightPct will always be ~100% (clamped to 1.0).
      * The condition "heightPct < 1.0" will NEVER be true for normal transitions!
-     * 
+     *
      * TODO: This logic needs to be rethought. Currently it cannot detect
      * "quality" issues because by definition, reaching Top means 100% extension.
      */
@@ -632,4 +776,3 @@ export class RepCounterFSM {
         return null
     }
 }
-
