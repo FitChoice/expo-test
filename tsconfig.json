@@ -2,6 +2,8 @@
 	"extends": "expo/tsconfig.base",
 	"compilerOptions": {
 		"baseUrl": ".",
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
 		"strict": true,
 		"strictNullChecks": true,
 		"noUncheckedIndexedAccess": true,
@@ -17,5 +19,5 @@
 			"@/app/*": ["./src/app/*"]
 		}
 	},
-	"include": ["global.d.ts", "**/*.ts", "**/*.tsx", "nativewind-env.d.ts"]
+	"include": ["global.d.ts", "**/*.ts", "**/*.tsx", "**/*.json", "nativewind-env.d.ts"]
 }
