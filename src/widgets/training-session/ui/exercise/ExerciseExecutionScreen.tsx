@@ -14,6 +14,7 @@ import type * as ScreenOrientation from 'expo-screen-orientation'
 import type {
 	EngineTelemetry,
 	PartialROMEvent,
+	TimingErrorEvent,
 } from '../../../../../poseflow-js'
 import { useVideoPlayer, VideoView } from 'expo-video'
 import { useVideoPlayerContext } from '@/shared/hooks/useVideoPlayerContext'
@@ -38,7 +39,22 @@ function handlePartialRomError(event: PartialROMEvent, exerciseId: string | numb
 		depthAchieved: `${Math.round(event.depth_achieved * 100)}%`,
 		deficit: event.deficit.toFixed(3),
 	})
+}
 
+/**
+ * Заглушка для обработки ошибки темпа (слишком быстро/медленно).
+ * Место для интеграции аналитики/отчетов, если потребуется.
+ */
+function handleTimingError(event: TimingErrorEvent, exerciseId: string | number): void {
+	// STUB: Логируем ошибку для отладки
+	console.warn(`[TimingError] Ошибка темпа:`, {
+		exerciseId,
+		type: event.type,
+		message: event.message,
+		actualMs: event.actual_ms,
+		expectedMs: event.expected_ms,
+		deviationPct: event.deviation_pct,
+	})
 }
 
 const ERROR_WORDS = {
@@ -46,6 +62,12 @@ const ERROR_WORDS = {
 	up_down: 'higher',      // Не довстал (Up->Down without reaching Top)
 	down_bottom: 'deeper',  // Неглубокий присед (Down->Bottom quality check)
 	up_top: 'higher',       // Неполное выпрямление (Up->Top quality check)
+} as const
+
+// Слова для ошибок темпа
+const TIMING_ERROR_WORDS = {
+	too_fast: 'slower',     // Слишком быстро
+	too_slow: 'faster',     // Слишком медленно
 } as const
 
 
@@ -86,7 +108,7 @@ export function ExerciseExecutionScreen({
 	const { speak, stop } = useSpeechFeedback()
 
 	/**
-	 * Обработка телеметрии с детекцией ошибок partial ROM
+	 * Обработка телеметрии с детекцией ошибок partial ROM и timing errors
 	 */
 	const handleTelemetry = useCallback((newTelemetry: EngineTelemetry) => {
 		setTelemetry(newTelemetry)
@@ -98,6 +120,25 @@ export function ExerciseExecutionScreen({
 
 			// Вызываем заглушку для обработки ошибки
 			handlePartialRomError(newTelemetry.partialRom, exercise.id)
+		}
+
+		// Проверяем наличие ошибки темпа (слишком быстро/медленно)
+		if (newTelemetry.timingError) {
+			const errorWord = TIMING_ERROR_WORDS[newTelemetry.timingError.type]
+			speak(errorWord)
+
+			// Вызываем заглушку для обработки ошибки
+			handleTimingError(newTelemetry.timingError, exercise.id)
+		}
+
+		// Логируем состояние body ready (для отладки)
+		if (newTelemetry.bodyReady === false) {
+			console.log('[Telemetry] Waiting for body to be fully visible...')
+		}
+
+		// Логируем отклонение позы (для отладки)
+		if (newTelemetry.postureRejected) {
+			console.log('[Telemetry] Posture rejected:', newTelemetry.detectedPosture)
 		}
 	}, [exercise.id, speak])
 
