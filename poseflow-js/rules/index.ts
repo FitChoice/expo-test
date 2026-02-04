@@ -1,124 +1,101 @@
-import squat from '../../rules/squat.json'
-import squatCalfRaise from '../../rules/squat_calf_raise.json'
-import squatAssisted from '../../rules/squat_assisted.json'
-import squatGluteus from '../../rules/squat_gluteus.json'
-import crunch from '../../rules/crunch.json'
-import hipBridge from '../../rules/hip_bridge.json'
-import hipBridgeRubber from '../../rules/hip_bridge_rubber.json'
-import hipBridgeFromHill from '../../rules/hip_bridge_from_hill.json'
-import hipBridgeFromHillOnLegL from '../../rules/hip_bridge_from_hill_on_leg_l.json'
-import hipBridgeFromHillOnLegR from '../../rules/hip_bridge_from_hill_on_leg_r.json'
-import legAbductionL from '../../rules/leg_abduction_l.json'
-import legAbductionR from '../../rules/leg_abduction_r.json'
-import quadrupedHipExtensionL from '../../rules/quadruped_hip_extension_l.json'
-import quadrupedHipExtensionR from '../../rules/quadruped_hip_extension_r.json'
-import quadrupedBackHipExtensionL from '../../rules/quadruped_back_hip_extension_l.json'
-import quadrupedBackHipExtensionR from '../../rules/quadruped_back_hip_extension_r.json'
-import quadrupedSideHipExtensionL from '../../rules/quadruped_side_hip_extension_l.json'
-import quadrupedSideHipExtensionR from '../../rules/quadruped_side_hip_extension_r.json'
-import hipExtensionFloorL from '../../rules/hip_extension_floor_l.json'
-import hipExtensionFloorR from '../../rules/hip_extension_floor_r.json'
-import reverseLundgeL from '../../rules/reverse_lundge_l.json'
-import reverseLundgeR from '../../rules/reverse_lundge_r.json'
-import bulgarianSplitSquatsL from '../../rules/bulgarian_split_squats_l.json'
-import bulgarianSplitSquatsR from '../../rules/bulgarian_split_squats_r.json'
-import bulgarianSplitSquatsRubberL from '../../rules/bulgarian_split_squats_rubber_l.json'
-import bulgarianSplitSquatsRubberR from '../../rules/bulgarian_split_squats_rubber_r.json'
-import butterfly from '../../rules/butterfly.json'
-import armsRotateOnStomach from '../../rules/arms_rotate_on_stomach.json'
-import shoulderBladeRotation from '../../rules/shoulder_blade_rotation.json'
-import breastStretch from '../../rules/breast_stretch.json'
-import horizontalThrust from '../../rules/horizontal_thrust.json'
-import hipSwingsL from '../../rules/hip_swings_l.json'
-// Pigeon pose exercises
-import pigeonPoseHold from '../../rules/pigeon_pose_hold.json'
-import pigeonPoseHoldL from '../../rules/pigeon_pose_hold_l.json'
-import pigeonPoseBendsToLegL from '../../rules/pigeon_pose_bends_to_leg_l.json'
-import pigeonPoseBendsToLegR from '../../rules/pigeon_pose_bends_to_leg_r.json'
-import pigeonPoseBendBodyThroughWaveL from '../../rules/pigeon_pose_bend_body_through_wave_l.json'
-import pigeonPoseBendBodyThroughWaveR from '../../rules/pigeon_pose_bend_body_through_wave_r.json'
-import pigeonPoseLeanOnElbowsL from '../../rules/pigeon_pose_lean_on_elbows_l.json'
-import pigeonPoseLeanOnElbowsR from '../../rules/pigeon_pose_lean_on_elbows_r.json'
-import pigeonPoseStretchFrontThigh from '../../rules/pigeon_pose_stretch_front_thigh.json'
-import pigeonPoseStretchBackThigh from '../../rules/pigeon_pose_stretch_back_thigh.json'
-import pigeonPoseHipMobility from '../../rules/pigeon_pose_hip_mobility.json'
+/**
+ * Exercise rules loader.
+ * 
+ * Uses new rule configs with support for:
+ * - Multi-axis FSM
+ * - Posture Guard
+ * - Timing error detection
+ * - Body ready state
+ */
 import type { ExerciseRule } from '../types'
+import { getRule, getRuleOptions, ruleIds, type RuleOption } from './rulesNew'
 
-// Preload static JSON assets so Metro can bundle them deterministically.
-const RULES = {
-    squat,
-    squat_calf_raise: squatCalfRaise,
-    squat_assisted: squatAssisted,
-    squat_gluteus: squatGluteus,
-    crunch,
-    hip_bridge: hipBridge,
-    hip_bridge_rubber: hipBridgeRubber,
-    hip_bridge_from_hill: hipBridgeFromHill,
-    hip_bridge_from_hill_on_leg_l: hipBridgeFromHillOnLegL,
-    hip_bridge_from_hill_on_leg_r: hipBridgeFromHillOnLegR,
-    leg_abduction_l: legAbductionL,
-    leg_abduction_r: legAbductionR,
-    quadruped_hip_extension_l: quadrupedHipExtensionL,
-    quadruped_hip_extension_r: quadrupedHipExtensionR,
-    quadruped_back_hip_extension_l: quadrupedBackHipExtensionL,
-    quadruped_back_hip_extension_r: quadrupedBackHipExtensionR,
-    quadruped_side_hip_extension_l: quadrupedSideHipExtensionL,
-    quadruped_side_hip_extension_r: quadrupedSideHipExtensionR,
-    hip_extension_floor_l: hipExtensionFloorL,
-    hip_extension_floor_r: hipExtensionFloorR,
-    reverse_lundge_l: reverseLundgeL,
-    reverse_lundge_r: reverseLundgeR,
-    bulgarian_split_squats_l: bulgarianSplitSquatsL,
-    bulgarian_split_squats_r: bulgarianSplitSquatsR,
-    bulgarian_split_squats_rubber_l: bulgarianSplitSquatsRubberL,
-    bulgarian_split_squats_rubber_r: bulgarianSplitSquatsRubberR,
-    butterfly,
-    arms_rotate_on_stomach: armsRotateOnStomach,
-    shoulder_blade_rotation: shoulderBladeRotation,
-    breast_stretch: breastStretch,
-    horizontal_thrust: horizontalThrust,
-    hip_swings_l: hipSwingsL,
-    // Pigeon pose exercises
-    pigeon_pose_hold: pigeonPoseHold,
-    pigeon_pose_hold_l: pigeonPoseHoldL,
-    pigeon_pose_bends_to_leg_l: pigeonPoseBendsToLegL,
-    pigeon_pose_bends_to_leg_r: pigeonPoseBendsToLegR,
-    pigeon_pose_bend_body_through_wave_l: pigeonPoseBendBodyThroughWaveL,
-    pigeon_pose_bend_body_through_wave_r: pigeonPoseBendBodyThroughWaveR,
-    pigeon_pose_lean_on_elbows_l: pigeonPoseLeanOnElbowsL,
-    pigeon_pose_lean_on_elbows_r: pigeonPoseLeanOnElbowsR,
-    pigeon_pose_stretch_front_thigh: pigeonPoseStretchFrontThigh,
-    pigeon_pose_stretch_back_thigh: pigeonPoseStretchBackThigh,
-    pigeon_pose_hip_mobility: pigeonPoseHipMobility,
-} satisfies Record<string, ExerciseRule>
+// Re-export everything from rulesNew
+export { getRule, getRuleOptions, hasRules, ruleIds } from './rulesNew'
+export type { RuleOption } from './rulesNew'
 
-export type ExerciseOption = {
-    id: string
-    label: string
+// Legacy exports for backward compatibility
+export { getRulesNewOptions, getRulesNewRule, hasRulesNew, rulesNewIds } from './rulesNew'
+export type { RulesNewOption } from './rulesNew'
+
+export type ExerciseOption = RuleOption
+
+/**
+ * Get all available exercise options for UI selection.
+ */
+export const exerciseOptions: ExerciseOption[] = getRuleOptions()
+
+/**
+ * Get exercise rule by ID or exercise name.
+ * Falls back to default rule if not found.
+ * 
+ * @param id Exercise ID or name
+ * @param currentSide Optional side for bilateral exercises
+ */
+export const getExerciseRule = (id: string, currentSide?: 'left' | 'right'): ExerciseRule => {
+    // Try to find exact match first
+    const exactMatch = getRule(id)
+    if (exactMatch) {
+        return exactMatch
+    }
+
+    // Try to find by exercise name (partial match)
+    for (const ruleId of ruleIds) {
+        if (id.includes(ruleId) || ruleId.includes(id)) {
+            const rule = getRule(ruleId)
+            if (rule) return rule
+        }
+    }
+
+    // Default fallback based on exercise type
+    if (id.includes('присед') || id.toLowerCase().includes('squat')) {
+        // Classic squat
+        return getRule('0001-pr') || getDefaultRule('squat')
+    }
+
+    if (id.includes('мост') || id.toLowerCase().includes('bridge')) {
+        // Hip bridge
+        return getRule('0010-pr') || getDefaultRule('hip_bridge')
+    }
+
+    if (id.includes('выпад') || id.toLowerCase().includes('lunge')) {
+        // Lunges - use side-specific rules
+        const suffix = currentSide === 'left' ? '-l' : '-r'
+        return getRule(`0005-pr${suffix}`) || getDefaultRule('lunge')
+    }
+
+    if (id.includes('отведение') || id.toLowerCase().includes('abduction')) {
+        // Leg abduction - use side-specific rules
+        const suffix = currentSide === 'left' ? '-l' : '-r'
+        return getRule(`0006-pr${suffix}`) || getDefaultRule('abduction')
+    }
+
+    // Final fallback - first available rule
+    const firstRule = getRule(ruleIds[0])
+    if (firstRule) {
+        console.warn(`[rules] No rule found for "${id}", using fallback: ${ruleIds[0]}`)
+        return firstRule
+    }
+
+    // Emergency fallback - return minimal valid rule
+    console.error(`[rules] No rules available! Using emergency fallback for "${id}"`)
+    return getDefaultRule('fallback')
 }
 
-export const exerciseOptions: ExerciseOption[] = Object.keys(RULES).map((id) => ({
-    id,
-    label: toLabel(id),
-}))
-
-export const getExerciseRule = (id: string, currentSide?: 'left'| 'right'): ExerciseRule => {
-    // if (id in RULES) {
-    //     return RULES[id as keyof typeof RULES]
-    // }
-
-	if (id.includes('присед')) {
-		return RULES.squat
-	}
-	return currentSide == 'left' ? RULES.hip_extension_floor_l : RULES.hip_extension_floor_r
-
-
+/**
+ * Create a default rule for fallback scenarios.
+ */
+function getDefaultRule(type: string): ExerciseRule {
+    return {
+        exercise: `default_${type}`,
+        axis: 'squat_knee_angle',
+        thresholds: {
+            down_enter: 120,
+            bottom_enter: 90,
+            up_enter: 140,
+            top_enter: 160,
+            min_dwell_ms: 100,
+        },
+        hysteresis: 2,
+    }
 }
-
-function toLabel(value: string): string {
-    return value
-        .split('_')
-        .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
-        .join(' ')
-}
-
