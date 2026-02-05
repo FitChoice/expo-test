@@ -34,37 +34,37 @@ export const exerciseOptions: ExerciseOption[] = getRuleOptions()
  */
 export const getExerciseRule = (id: string, currentSide?: 'left' | 'right'): ExerciseRule => {
     // Try to find exact match first
-    const exactMatch = getRule(id)
-    if (exactMatch) {
-        return exactMatch
-    }
-
-    // Try to find by exercise name (partial match)
-    for (const ruleId of ruleIds) {
-        if (id.includes(ruleId) || ruleId.includes(id)) {
-            const rule = getRule(ruleId)
-            if (rule) return rule
-        }
-    }
+    // const exactMatch = getRule(id)
+    // if (exactMatch) {
+    //     return exactMatch
+    // }
+		//
+    // // Try to find by exercise name (partial match)
+    // for (const ruleId of ruleIds) {
+    //     if (id.includes(ruleId) || ruleId.includes(id)) {
+    //         const rule = getRule(ruleId)
+    //         if (rule) return rule
+    //     }
+    // }
 
     // Default fallback based on exercise type
-    if (id.includes('присед') || id.toLowerCase().includes('squat')) {
+    if (id.toLowerCase().includes('присед') || id.toLowerCase().includes('squat')) {
         // Classic squat
         return getRule('0001-pr') || getDefaultRule('squat')
     }
 
-    if (id.includes('мост') || id.toLowerCase().includes('bridge')) {
+    if (id.toLowerCase().includes('мост') || id.toLowerCase().includes('bridge')) {
         // Hip bridge
         return getRule('0010-pr') || getDefaultRule('hip_bridge')
     }
 
-    if (id.includes('выпад') || id.toLowerCase().includes('lunge')) {
+    if (id.toLowerCase().includes('выпад') || id.toLowerCase().includes('lunge')) {
         // Lunges - use side-specific rules
         const suffix = currentSide === 'left' ? '-l' : '-r'
         return getRule(`0005-pr${suffix}`) || getDefaultRule('lunge')
     }
 
-    if (id.includes('отведение') || id.toLowerCase().includes('abduction')) {
+    if (id.toLowerCase().includes('отведение') || id.toLowerCase().includes('abduction')) {
         // Leg abduction - use side-specific rules
         const suffix = currentSide === 'left' ? '-l' : '-r'
         return getRule(`0006-pr${suffix}`) || getDefaultRule('abduction')
