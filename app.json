@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Fitchoice",
-    "slug": "Fitchoice",
+    "slug": "fit-choice-dev",
     "scheme": "acme",
     "userInterfaceStyle": "automatic",
     "orientation": "portrait",
@@ -32,9 +32,13 @@
         "monochromeImage": "assets/images/logo_main.png"
       },
       "permissions": [
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "edgeToEdgeEnabled": true,
@@ -59,9 +63,9 @@
             "enableMinifyInReleaseBuilds": true,
             "extraProguardRules": "-dontwarn javax.lang.model.**\n-dontwarn com.google.auto.value.**\n-dontwarn autovalue.shaded.**\n-keep class org.tensorflow.** { *; }\n-keep class com.facebook.jni.** { *; }\n-keep class expo.modules.gl.** { *; }\n-keepclassmembers class * { @org.tensorflow.lite.annotations.UsedByReflection *; }",
             "gradleProps": {
-            "org.gradle.jvmargs": "-Xmx4096m -XX:MaxMetaspaceSize=1024m"
-          }
-        },
+              "org.gradle.jvmargs": "-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+            }
+          },
           "ios": {
             "deploymentTarget": "15.1",
             "useFrameworks": "static"
@@ -117,14 +121,15 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "ba4720b8-6036-40ec-b386-49bc24d82e77"
+        "projectId": "010725fe-f0ad-4064-9632-992ee548e781"
       }
     },
     "updates": {
-      "url": "https://u.expo.dev/ba4720b8-6036-40ec-b386-49bc24d82e77",
+      "url": "https://u.expo.dev/010725fe-f0ad-4064-9632-992ee548e781",
       "fallbackToCacheTimeout": 0,
       "checkAutomatically": "ON_LOAD",
       "enabled": true
-    }
+    },
+    "owner": "fit-organization"
   }
 }
