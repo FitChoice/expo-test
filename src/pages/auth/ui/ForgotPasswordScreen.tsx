@@ -23,6 +23,9 @@ import { userApi } from '@/features/user'
 import {
 	BackgroundLayoutSafeArea
 } from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
+import {
+	AuthBackgroundLayout
+} from '@/shared/ui/BackgroundLayout/AuthBackgroundLayout'
 
 
 
@@ -331,8 +334,9 @@ export const ForgotPasswordScreen = () => {
 									autoComplete="off"
 									variant="text"
 									size="default"
-									importantForAutofill="no"
 									error={emailError}
+									textContentType="none"
+									importantForAutofill="no"
 								/>
 							</Animated.View>
 						</View>
@@ -366,9 +370,9 @@ export const ForgotPasswordScreen = () => {
 			case 'new_password':
 				return {
 					body: (
-						<View className="flex-1 justify-start pt-40">
-							<Animated.View className="gap-20">
-								<View className="gap-3">
+						<View className="flex-1 justify-start pt-20">
+							<Animated.View className="gap-10">
+								<View>
 									<Text style={sharedStyles.titleCenter} className="uppercase">
 										Придумайте новый пароль
 									</Text>
@@ -429,15 +433,6 @@ export const ForgotPasswordScreen = () => {
 								</Button>
 							</Animated.View>
 
-							<Button
-								variant="secondary"
-								size="l"
-								fullWidth
-								onPress={() => router.back()}
-								className="h-14"
-							>
-								Назад
-							</Button>
 						</View>
 					),
 				}
@@ -447,8 +442,8 @@ export const ForgotPasswordScreen = () => {
 	const { body, footer } = renderContent()
 
 	return (
-		<BackgroundLayoutSafeArea needBg={false}>
-			<BackgroundLayout styles={{ paddingHorizontal: 16 }}>
+		<AuthBackgroundLayout >
+
 				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 					<View className="flex-1">
 						<KeyboardAvoidingView
@@ -462,7 +457,7 @@ export const ForgotPasswordScreen = () => {
 						{footer}
 					</View>
 				</TouchableWithoutFeedback>
-			</BackgroundLayout>
-		</BackgroundLayoutSafeArea>
+
+		</AuthBackgroundLayout>
 	)
 }

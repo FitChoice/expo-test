@@ -27,6 +27,9 @@ import GoogleIcon from '@/assets/social_icons/Google.svg'
 import {
 	BackgroundLayoutSafeArea
 } from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
+import {
+	AuthBackgroundLayout
+} from '@/shared/ui/BackgroundLayout/AuthBackgroundLayout'
 
 // Константы для MaskedText
 const TEXT_CONFIG = {
@@ -117,36 +120,36 @@ export const AuthScreen = () => {
 	}
 
 	return (
-		<BackgroundLayoutSafeArea needBg={false}>
+		<AuthBackgroundLayout  hasSidePadding={false}>
 			<View style={{ height: SCREEN_HEIGHT - insets.top - insets.bottom}}>
 				<View className="flex-1">
-					<BackgroundLayout>
+
 						<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 							<View className="flex-1 justify-between px-4">
 								{/* Кнопка возврата назад */}
 								{/* Мы уже добавили спейсер на высоту safe-area сверху, поэтому не дублируем insets внутри BackButton */}
-								<BackButton onPress={() => router.push('/')} style={{ top: 14, left: 10 }} />
+								<BackButton onPress={() => router.push('/')} style={{ top: 14, left: 30 }} />
 
 								{/* Основной контент */}
-								<View className="relative z-[3] flex-1">
+								<View className="relative z-[3] flex-1 px-3">
 									{/* Группа с браслетом и заголовком (центрируем, не тянем картинку слишком сильно) */}
 
 									<Animated.View
 										className="relative w-full items-center"
-										style={{ height: 260 }}
+										style={{ height: 290 }}
 									>
 										{/* Текст позади изображения */}
 										<View
 											style={{
 												position: 'absolute',
-												top: 120,
-												left: '50%',
+												top: 100,
+												left: '27%',
 												width: TEXT_CONFIG.width,
 												height: TEXT_CONFIG.height,
 												transform: [{ translateX: -TEXT_CONFIG.width / 2 }],
 											}}
 										>
-											<MaskedText text="ВХОД В АККАУНТ" {...TEXT_CONFIG} />
+											<MaskedText text="ВХОД В " {...TEXT_CONFIG} />
 										</View>
 
 										{/* Изображение браслета */}
@@ -155,7 +158,7 @@ export const AuthScreen = () => {
 											style={{
 												width: 420,
 												height: 320,
-												marginTop: 45,
+												marginTop: 26,
 											}}
 											resizeMode="contain"
 										/>
@@ -164,42 +167,43 @@ export const AuthScreen = () => {
 										<View
 											style={{
 												position: 'absolute',
-												top: 120,
-												left: '50%',
-												width: TEXT_CONFIG.width,
+												top: 100,
+												left: '58%',
+												//width: TEXT_CONFIG.width,
 												height: TEXT_CONFIG.height,
 												transform: [{ translateX: -TEXT_CONFIG.width / 2 }],
 											}}
 										>
-											<MaskedText text="ВХОД В АККАУНТ" {...TEXT_CONFIG} maskRect={MASK_RECT} />
+											<MaskedText text="      АККАУНТ" {...TEXT_CONFIG} maskRect={MASK_RECT} />
 										</View>
 									</Animated.View>
 
 									{/* Форма */}
+										<View className="gap-6">
 
-									<Input
-										label="Электронная почта"
-										placeholder="example@provider.com"
-										value={email}
-										onChangeText={setEmail}
-										onFocus={handleEmailFocus}
-										onBlur={handleEmailBlur}
-										keyboardType="email-address"
-										variant="text"
-										size="default"
-										error={emailError}
-									/>
+											<Input
+												label="Электронная почта"
+												placeholder="example@provider.com"
+												value={email}
+												onChangeText={setEmail}
+												onFocus={handleEmailFocus}
+												onBlur={handleEmailBlur}
+												keyboardType="email-address"
+												variant="text"
+												size="default"
+												error={emailError}
+											/>
 
-									<Input
-										label="Пароль"
-										placeholder="Пароль"
-										value={password}
-										onChangeText={setPassword}
-										variant="password"
-										size="default"
-									/>
+											<Input
+												label="Пароль"
+												placeholder="Пароль"
+												value={password}
+												onChangeText={setPassword}
+												variant="password"
+												size="default"
+											/>
+										</View>
 
-									{/* Отступ как в макете: 8px */}
 									<View className="flex-row justify-end">
 										<Pressable onPress={() => router.push('/forgot-password')} className="mt-2">
 											<Text className="text-t3-regular text-light-text-200">Забыли пароль?</Text>
@@ -222,48 +226,47 @@ export const AuthScreen = () => {
 								</View>
 							</View>
 						</TouchableWithoutFeedback>
-					</BackgroundLayout>
 				</View>
 
 				{/* Социальный вход */}
-				<View className="flex-row justify-between pb-4 pt-5">
-					<Pressable
-						onPress={() => Alert.alert('Скоро', 'Авторизация через VK будет добавлена позже')}
-						className="items-center justify-center rounded-full bg-white p-6"
-						accessibilityRole="button"
-						accessibilityLabel="Continue with VK"
-					>
-						<VkIcon width={44} height={44} />
-					</Pressable>
+				{/*<View className="flex-row justify-between pb-4 pt-5">*/}
+				{/*	<Pressable*/}
+				{/*		onPress={() => Alert.alert('Скоро', 'Авторизация через VK будет добавлена позже')}*/}
+				{/*		className="items-center justify-center rounded-full bg-white p-6"*/}
+				{/*		accessibilityRole="button"*/}
+				{/*		accessibilityLabel="Continue with VK"*/}
+				{/*	>*/}
+				{/*		<VkIcon width={44} height={44} />*/}
+				{/*	</Pressable>*/}
 
-					<Pressable
-						onPress={() => Alert.alert('Скоро', 'Авторизация через Telegram будет добавлена позже')}
-						className="items-center justify-center rounded-full bg-white p-6"
-						accessibilityRole="button"
-						accessibilityLabel="Continue with Telegram"
-					>
-						<TelegramIcon width={44} height={44} />
-					</Pressable>
+				{/*	<Pressable*/}
+				{/*		onPress={() => Alert.alert('Скоро', 'Авторизация через Telegram будет добавлена позже')}*/}
+				{/*		className="items-center justify-center rounded-full bg-white p-6"*/}
+				{/*		accessibilityRole="button"*/}
+				{/*		accessibilityLabel="Continue with Telegram"*/}
+				{/*	>*/}
+				{/*		<TelegramIcon width={44} height={44} />*/}
+				{/*	</Pressable>*/}
 
-					<Pressable
-						onPress={() => Alert.alert('Скоро', 'Авторизация через Яндекс будет добавлена позже')}
-						className="items-center justify-center rounded-full bg-white p-6"
-						accessibilityRole="button"
-						accessibilityLabel="Continue with Yandex"
-					>
-						<YandexIcon width={44} height={44} />
-					</Pressable>
+				{/*	<Pressable*/}
+				{/*		onPress={() => Alert.alert('Скоро', 'Авторизация через Яндекс будет добавлена позже')}*/}
+				{/*		className="items-center justify-center rounded-full bg-white p-6"*/}
+				{/*		accessibilityRole="button"*/}
+				{/*		accessibilityLabel="Continue with Yandex"*/}
+				{/*	>*/}
+				{/*		<YandexIcon width={44} height={44} />*/}
+				{/*	</Pressable>*/}
 
-					<Pressable
-						onPress={() => Alert.alert('Скоро', 'Авторизация через Google будет добавлена позже')}
-						className="items-center justify-center rounded-full bg-white p-6"
-						accessibilityRole="button"
-						accessibilityLabel="Continue with Google"
-					>
-						<GoogleIcon width={44} height={44} />
-					</Pressable>
-				</View>
+				{/*	<Pressable*/}
+				{/*		onPress={() => Alert.alert('Скоро', 'Авторизация через Google будет добавлена позже')}*/}
+				{/*		className="items-center justify-center rounded-full bg-white p-6"*/}
+				{/*		accessibilityRole="button"*/}
+				{/*		accessibilityLabel="Continue with Google"*/}
+				{/*	>*/}
+				{/*		<GoogleIcon width={44} height={44} />*/}
+				{/*	</Pressable>*/}
+				{/*</View>*/}
 			</View>
-		</BackgroundLayoutSafeArea>
+		</AuthBackgroundLayout>
 	)
 }

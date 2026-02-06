@@ -131,7 +131,7 @@ export const Input = forwardRef<TextInput, InputProps>(
 							returnKeyType="default"
 							blurOnSubmit={false}
 							textAlignVertical="top"
-							className="min-h-[80px] flex-1 font-[Onest] text-sm"
+							className="h-[80px] flex-1 font-[Onest] text-sm"
 							style={{ color: textColor }}
 						/>
 						<Text className="mt-2 self-end text-xs text-light-text-200">
@@ -206,7 +206,7 @@ export const Input = forwardRef<TextInput, InputProps>(
 					{showPasswordToggle && (
 						<Pressable
 							onPress={handleTogglePassword}
-							className="ml-2 min-w-[32px] items-center justify-center rounded bg-transparent p-2"
+							className="ml-2 min-w-[32px] items-center justify-center rounded bg-transparent"
 							hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 						>
 							<Icon

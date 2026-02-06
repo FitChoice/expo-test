@@ -22,13 +22,16 @@ import {
 	BackgroundLayoutSafeArea
 } from '@/shared/ui/BackgroundLayout/BackgroundLayoutSafeArea'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import {
+	AuthBackgroundLayout
+} from '@/shared/ui/BackgroundLayout/AuthBackgroundLayout'
 
 // Константы для MaskedText
 const TEXT_CONFIG = {
 	width: 400,
-	height: 40,
-	y: 20,
-	fontSize: 29.64,
+	height: 50,
+	y: 25,
+	fontSize: 36,
 	fill: '#FFFFFF',
 	letterSpacing: '-0.03',
 	textAlign: 'middle' as const,
@@ -274,14 +277,14 @@ export const RegisterScreen = () => {
 	}
 
 	return (
-		<BackgroundLayoutSafeArea needBg={false}>
+		<AuthBackgroundLayout  hasSidePadding={false}>
 			<View style={{ height: SCREEN_HEIGHT - insets.top - insets.bottom}}>
 				<View className="flex-1">
-					<BackgroundLayout>
+
 						<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 							<View className="flex-1 justify-between px-4">
 						{/* Кнопка возврата назад */}
-						<BackButton style={{ top: 14, left: 10 }} onPress={() => router.push('/')} />
+						<BackButton style={{ top: 14, left: 30 }} onPress={() => router.push('/')} />
 
 						{/* Основной контент */}
 						<View className="relative z-[3] flex-1 bg-transparent">
@@ -291,7 +294,7 @@ export const RegisterScreen = () => {
 								style={{
 									position: 'absolute',
 									top: '-35%',
-									left: '42%',
+									left: '50%',
 									height: '120%',
 									width: '110%',
 									transform: [{ translateX: '-50%' }],
@@ -299,14 +302,16 @@ export const RegisterScreen = () => {
 									justifyContent: 'flex-start',
 									zIndex: 1,
 									opacity: braceletOpacity,
+
 								}}
 							>
 								{/* Текст позади изображения */}
 								<View
 									style={{
+
 										position: 'absolute',
 										top: '45%',
-										left: '5%',
+										left: '3%',
 										right: 0,
 										height: TEXT_CONFIG.height,
 										alignItems: 'center',
@@ -322,27 +327,29 @@ export const RegisterScreen = () => {
 									style={{
 										position: 'absolute',
 										top: '2%',
-										left: '8%',
+									//	left: '4%',
 										width: '100%',
 										height: '100%',
 									}}
 									resizeMode="contain"
 								/>
 
-								{/* Текст перед изображением */}
+								{/* Текст перед изображением (маска) */}
 								<View
 									style={{
 										position: 'absolute',
 										top: '45%',
-										left: '5%',
+										left: '7%',
 										right: 0,
 										height: TEXT_CONFIG.height,
 										alignItems: 'center',
 										justifyContent: 'center',
 									}}
 								>
-									<MaskedText text="регистрация" {...TEXT_CONFIG} maskRect={MASK_RECT} />
+									<MaskedText text="     трация" {...TEXT_CONFIG} maskRect={MASK_RECT} />
 								</View>
+
+
 							</Animated.View>
 
 							{/* Форма */}
@@ -439,9 +446,9 @@ export const RegisterScreen = () => {
 						</View>
 					</View>
 				</TouchableWithoutFeedback>
-			</BackgroundLayout>
+
 				</View>
 		</View>
-		</BackgroundLayoutSafeArea>
+		</AuthBackgroundLayout>
 	)
 }
