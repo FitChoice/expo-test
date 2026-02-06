@@ -1,5 +1,5 @@
 import React, { forwardRef, useState, useMemo } from 'react'
-import { View, TextInput, Text, TouchableOpacity, Pressable, Image } from 'react-native'
+import { View, TextInput, Text, TouchableOpacity, Pressable, Image, Platform } from 'react-native'
 import { type InputProps } from './types'
 import { SimpleIcon } from '../Icon/SimpleIcon'
 import { Icon } from '../Icon/Icon'
@@ -32,6 +32,8 @@ export const Input = forwardRef<TextInput, InputProps>(
 			placeholder = 'Example',
 			onFocus,
 			onBlur,
+			autoComplete,
+			textContentType,
 			...rest
 		},
 		ref
@@ -103,6 +105,10 @@ export const Input = forwardRef<TextInput, InputProps>(
 			return <SimpleIcon name={String(icon)} size={16} color={iconColor} />
 		}
 
+		const resolvedTextContentType = textContentType
+		const resolvedAutoComplete =
+			Platform.OS === 'ios' && resolvedTextContentType ? undefined : autoComplete
+
 		const renderInput = () => {
 			// Textarea variant
 			if (variant === 'textarea') {
@@ -114,6 +120,8 @@ export const Input = forwardRef<TextInput, InputProps>(
 							value={value}
 							placeholder={placeholder}
 							placeholderTextColor="#C1C1C1"
+							textContentType={resolvedTextContentType}
+							autoComplete={resolvedAutoComplete}
 							multiline
 							numberOfLines={4}
 							editable={!disabled}
@@ -187,6 +195,8 @@ export const Input = forwardRef<TextInput, InputProps>(
 						value={value}
 						placeholder={placeholder}
 						placeholderTextColor="#8F8F92"
+						textContentType={resolvedTextContentType}
+						autoComplete={resolvedAutoComplete}
 						editable={!disabled}
 						onFocus={(e) => {
 							setIsFocused(true)

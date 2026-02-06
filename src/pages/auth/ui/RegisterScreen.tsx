@@ -8,6 +8,7 @@ import {
 	Text,
 	InteractionManager,
 	TouchableWithoutFeedback,
+	Platform,
 	useWindowDimensions,
 } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
@@ -368,8 +369,8 @@ export const RegisterScreen = () => {
 									variant="text"
 									size="default"
 									error={emailError}
-									autoComplete="off"
-									textContentType="none"
+									autoComplete={Platform.select({ android: 'email' })}
+									textContentType={Platform.select({ ios: 'emailAddress' })}
 									autoCorrect={false}
 									autoCapitalize="none"
 									importantForAutofill="no"
@@ -387,8 +388,8 @@ export const RegisterScreen = () => {
 									error={passwordError}
 									helperText={passwordHelperText}
 									forceHelperText={showPasswordHelper}
-									autoComplete="off"
-									textContentType="none"
+									autoComplete={Platform.select({ android: 'new-password' })}
+									textContentType={Platform.select({ ios: 'newPassword' })}
 									importantForAutofill="no"
 									autoCorrect={false}
 									autoCapitalize="none"
@@ -404,8 +405,8 @@ export const RegisterScreen = () => {
 									variant="password"
 									size="default"
 									error={password && confirmPassword ? confirmPasswordError : ''}
-									autoComplete="off"
-									textContentType="none"
+									autoComplete={Platform.select({ android: 'new-password' })}
+									textContentType={Platform.select({ ios: 'newPassword' })}
 									importantForAutofill="no"
 									autoCorrect={false}
 									autoCapitalize="none"

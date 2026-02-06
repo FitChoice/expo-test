@@ -7,6 +7,7 @@ import {
 	Keyboard,
 	Alert,
 	TouchableWithoutFeedback,
+	Platform,
 	useWindowDimensions,
 } from 'react-native'
 import * as ScreenOrientation from 'expo-screen-orientation'
@@ -144,7 +145,8 @@ export const VerificationScreen = () => {
 										importantForAutofill="no"
 										keyboardType="numeric"
 										autoCorrect={false}
-										autoComplete="off"
+										autoComplete={Platform.select({ android: 'one-time-code' })}
+										textContentType={Platform.select({ ios: 'oneTimeCode' })}
 										variant="text"
 										size="default"
 										maxLength={6}
