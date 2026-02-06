@@ -1,15 +1,14 @@
 name: EAS Update
 
-# Запускаем на push в dev (для теста) и master (для прода)
+# Запускаем на push в master -> OTA-обновление на production
 on:
   push:
     branches:
-      - dev
       - master
 
 jobs:
   update:
-    name: EAS Update
+    name: EAS Update (production)
     runs-on: ubuntu-latest
 
     steps:
@@ -49,14 +48,7 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      # 7. Выбираем branch в EAS в зависимости от git-ветки
-      #    dev   -> preview
-      #    master -> production
+      # 7. Пушим OTA-обновление на production
+      #    Сообщение коммита подставляется автоматически
       - name: Publish update
-        run: |
-          if [ "${{ github.ref_name }}" = "master" ]; then
-            BRANCH="production"
-          else
-            BRANCH="preview"
-          fi
-          eas update --branch $BRANCH --message "${{ github.event.head_commit.message }}"
+        run: eas update --branch production --message "${{ github.event.head_commit.message }}"
